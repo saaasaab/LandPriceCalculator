@@ -1,0 +1,211 @@
+.dynamic-row {
+  width: 100%;
+  display: flex;
+
+  .dynamic-cell{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+ 
+  
+  &.one-cell-row {
+    .first-cell {
+      width: 100%;
+    }
+  }
+  &.two-cell-row {
+    .first-cell {
+      width: 85%;
+    }
+    .second-cell {
+      width: 15%;
+    }
+   
+  }
+  &.three-cell-row {
+    .first-cell {
+      width: 70%;
+    }
+    .second-cell {
+      width: 15%;
+    }
+    .third-cell {
+      width: 15%;
+    }
+  }
+
+  &.four-cell-row {
+    .first-cell {
+      width: 60%;
+    }
+    .second-cell {
+      width: 10%;
+    }
+    .third-cell {
+      width: 15%;
+    }
+    .fourth-cell {
+      width: 15%;
+    }
+  }
+
+  .first-cell {
+    text-align: left;
+  }
+
+  .info-cell {
+    border: none;
+    padding: 2px 10px;
+    text-align: left;
+    background-color: #f0f8ff; 
+    min-width: 10px;
+    font-size: 1em; 
+    color: #1a1a1a;
+  }
+  .description-cell {
+    color: #1a1a1a;
+    background-color:  #f0f8ff; 
+
+    font-size: 0.8em; 
+    padding-top: 0; 
+    padding-bottom: 10px;
+  }
+
+  
+  .input-cell {
+    padding: 0;
+    background-color: #ffebcd; 
+    padding: 2px 2px;
+    input {
+      color: #1a1a1a;
+      font-size: 1em;
+      background: transparent;
+      width: 100%; 
+      height: 100%;
+      border: none; 
+      box-sizing: border-box; 
+    }
+  }
+
+  &.output-row {
+    *{
+      background-color: #000; 
+      color: #fff; 
+    }
+  }
+
+  &.title-row {
+    background: #70986f;
+    color: #1a1a1a;
+    padding: 10px 0px;
+    
+    text-align: left;
+    .description-cell{
+      display: none;
+    }
+    .first-cell{
+      font-size: 1.3em;
+    }
+    *{
+      background: transparent;
+      // 
+    }
+  }
+
+  .output-cell {
+    font-size: 1.1em;
+
+    background-color: #000; // Black background for output cells
+    color: #fff; // White text for output cells
+  }
+
+  .centered {
+    text-align: center;
+  }
+}
+
+
+$breakpoint-tablet: 768px;
+@media (max-width: $breakpoint-tablet) {
+ .dynamic-row{
+  .dynamic-cell{
+    font-size: .8em !important;
+    padding-left: 0;
+    padding-right: 0;
+    input{
+      padding: 0;
+    }
+    *{
+      
+      padding: 0;
+    }
+  } 
+  
+
+  &.one-cell-row {
+    .first-cell {
+      width: 100%;
+    }
+  }
+  &.two-cell-row {
+    .first-cell {
+      width: 75%;
+    }
+    .second-cell {
+      width: 25%;
+    }
+   
+  }
+  &.three-cell-row {
+    .first-cell {
+      width: 60%;
+    }
+    .second-cell {
+      width: 20%;
+    }
+    .third-cell {
+      width: 20%;
+    }
+  }
+
+  &.four-cell-row {
+    .first-cell {
+      width: 50%;
+    }
+    .second-cell {
+      width: 10%;
+    }
+    .third-cell {
+      width: 20%;
+    }
+    .fourth-cell {
+      width: 20%;
+    }
+  }
+
+
+  
+
+ }
+ 
+}
+
+.copy-url-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #487e4a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #45a049;
+  }
+
+  &.copied {
+    background-color: #2196f3;
+  }
+}

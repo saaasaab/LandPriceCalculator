@@ -1,0 +1,53 @@
+.land-calculator-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.land-calculator {
+  padding: 20px;
+  max-width: 800px;
+
+  .app-header {
+    text-align: center;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-bottom: 2px solid #ccc;
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #333;
+    }
+  }
+
+  .centered {
+    text-align: center;
+  }
+ 
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.copy-url-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #487e4a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #45a049;
+  }
+
+  &.copied {
+    background-color: #2196f3;
+  }
+}
