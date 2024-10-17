@@ -9,7 +9,7 @@ import IndustrialDevelopmentCalculator from './pages/IndustrialDevelopmentCalcul
 
 import './App.css'
 import Navbar from './components/Navbar';
-import MultiFamilyDevelopmentCalculator from './pages/MultiFamilyDevelopmentCalculator';
+// import MultiFamilyDevelopmentCalculator from './pages/MultiFamilyDevelopmentCalculator';
 
 
 function App() {
@@ -36,7 +36,7 @@ function App() {
             <Routes>
                 <Route path="/" element={ <LandCalculator isMobile={isMobile} />} />
                 <Route path="/industrial-development" element={< IndustrialDevelopmentCalculator  isMobile={isMobile}/>} />
-                <Route path="/multifamily-development" element={<MultiFamilyDevelopmentCalculator  isMobile={isMobile}/>} />                
+                {/* <Route path="/multifamily-development" element={<MultiFamilyDevelopmentCalculator  isMobile={isMobile}/>} />                 */}
                 <Route path="/multifamily-analysis" element={<ResidentialCashFlowCalculator  isMobile={isMobile}/>} />                
                 <Route path="*" element={<NotFound />} />
                 {/* <Route path="/contact" element={<Contact />} /> */}

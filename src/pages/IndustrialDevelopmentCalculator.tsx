@@ -1,52 +1,56 @@
 import { useState } from 'react';
-import { calculateBuildingSqft, copyToClipboard, roundAndLocalString } from '../utils';
+import { calculateBuildingSqft, copyToClipboard, getQueryParamNumber, roundAndLocalString } from '../utils';
 
 import DynamicRow from '../components/DynamicRow';
 
 import './LandCalculator.scss';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 
+
+const page = "INDUSTRIAL_DEVELOPMENT"
 
 const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) => {
     const queryParams = new URLSearchParams(window.location.search)
 
-    const ga = Number(queryParams.get("grossAcres"));
-    const uba = Number(queryParams.get("unbuildableAcres"));
-    const nof = Number(queryParams.get("numberOfFloors"));
-    const misr = Number(queryParams.get("maxImperviousSurfaceRatio"));
-    const csp = Number(queryParams.get("commonSpacePercentage"));
-    const pr = Number(queryParams.get("parkingRatio"));
-    const ca =  Number(queryParams.get("catchAll"));
+    const ga = getQueryParamNumber("grossAcres", queryParams);
+    const uba =getQueryParamNumber("unbuildableAcres", queryParams);
+    const nof =getQueryParamNumber("numberOfFloors", queryParams);
+    const misr =getQueryParamNumber("maxImperviousSurfaceRatio", queryParams);
+    const csp =getQueryParamNumber("commonSpacePercentage", queryParams);
+    const pr =getQueryParamNumber("parkingRatio", queryParams);
+    const ca =getQueryParamNumber("catchAll", queryParams);
 
-    const bppsqft = Number(queryParams.get("housePricePerSqFt"));
-    const hcpsqft = Number(queryParams.get("hardCostPerSqFt"));
-    const p = Number(queryParams.get("permits"));
-    const mc = Number(queryParams.get("miscCosts"));
-    const hbpp = Number(queryParams.get("homeBuilderProfitPercentage"));
-    const recp = Number(queryParams.get("realEstateCommissionPercentage"));
-    const ldpp = Number(queryParams.get("landDeveloperProfitPercentage"));
-    const ctd = Number(queryParams.get("costToDevelopPerLot"));
-    const olc = Number(queryParams.get("ownedLandCost"));
+    const bppsqft =getQueryParamNumber("buildingPricePerSqFt", queryParams);
+    const hcpsqft =getQueryParamNumber("hardCostPerSqFt", queryParams);
+    const p =getQueryParamNumber("permits", queryParams);
+    const mc =getQueryParamNumber("miscCosts", queryParams);
+    const hbpp =getQueryParamNumber("homeBuilderProfitPercentage", queryParams);
+    const recp =getQueryParamNumber("realEstateCommissionPercentage", queryParams);
+    const ldpp =getQueryParamNumber("landDeveloperProfitPercentage", queryParams);
+    const ctd =getQueryParamNumber("costToDevelop", queryParams);
+    const sdc =getQueryParamNumber("SDCFees", queryParams);
+    const olc =getQueryParamNumber("ownedLandCost", queryParams);
 
 
+    const [grossAcres, setGrossAcres] = usePersistedState(page, 'grossAcres', 0.3, ga);
+    const [unbuildableAcres, setUnbuildableAcres] = usePersistedState(page, 'unbuildableAcres', 0, uba);
+    const [numberOfFloors, setNumberOfFloors] = usePersistedState(page, 'numberOfFloors', 2, nof);
+    const [maxImperviousSurfaceRatio, setMaxImperviousSurfaceRatio] = usePersistedState(page, 'maxImperviousSurfaceRatio', 60, misr);
+    const [commonSpacePercentage, setCommonSpacePercentage] = usePersistedState(page, 'commonSpacePercentage', 40, csp);
+    const [parkingRatio, setParkingRatio] = usePersistedState(page, 'parkingRatio', 2, pr);
+    const [catchAll, setCatchAll] = usePersistedState(page, 'catchAll', 1.8, ca);
 
-    const [grossAcres, setGrossAcres] = useState(ga ? ga : .3); // Initial value for gross acres
-    const [unbuildableAcres, setUnbuildableAcres] = useState(uba ? uba : 0); // Initial value for unbuildable acres
-    const [numberOfFloors, setNumberOfFloors] = useState(nof ? nof : 2);
-    const [maxImperviousSurfaceRatio, setMaxImperviousSurfaceRatio] = useState(misr ? misr : 60);
-    const [commonSpacePercentage, setCommonSpacePercentage] = useState(csp ? csp : 40);
-    const [parkingRatio, setParkingRatio] = useState(pr ? pr : 2);
-    const [catchAll, setCatchAll] = useState(ca ? ca : 1.8);
-
-    const [buildingPricePerSqFt, setBuildingPricePerSqFt] = useState(bppsqft ? bppsqft : 240);
-    const [hardCostPerSqFt, setHardCostPerSqFt] = useState(hcpsqft ? hcpsqft : 175);
-    const [permits, setPermits] = useState(p ? p : 12000); // Permit cost
-    const [miscCosts, setMiscCosts] = useState(mc ? mc : 7500); // Miscellaneous costs
-    const [homeBuilderProfitPercentage, setHomeBuilderProfitPercentage] = useState(hbpp ? hbpp : 20); // Builder profit percentage
-    const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = useState(recp ? recp : 3); // RE commission percentage
-    const [landDeveloperProfitPercentage, setLandDeveloperProfitPercentage] = useState(ldpp ? ldpp : 15); // Land developer profit percentage
-    const [costToDevelopPerLot, setCostToDevelopPerLot] = useState(ctd ? ctd : 40000); // Cost to develop land per lot
-    const [ownedLandCost, setOwnedLandCost] = useState(olc ? olc : 0); // Cost to develop land per lot
+    const [buildingPricePerSqFt, setBuildingPricePerSqFt] = usePersistedState(page, 'housePricePerSqFt', 300, bppsqft);
+    const [hardCostPerSqFt, setHardCostPerSqFt] = usePersistedState(page, 'hardCostPerSqFt', 185, hcpsqft);
+    const [permits, setPermits] = usePersistedState(page, 'permits', 12000, p);
+    const [miscCosts, setMiscCosts] = usePersistedState(page, 'miscCosts', 7500, mc);
+    const [homeBuilderProfitPercentage, setHomeBuilderProfitPercentage] = usePersistedState(page, 'homeBuilderProfitPercentage', 20, hbpp);
+    const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState(page, 'realEstateCommissionPercentage', 3, recp);
+    const [landDeveloperProfitPercentage, setLandDeveloperProfitPercentage] = usePersistedState(page, 'landDeveloperProfitPercentage', 15, ldpp);
+    const [costToDevelop, setCostToDevelop] = usePersistedState(page, 'costToDevelop', 40000, ctd);
+    const [SDCFees, setSDCFees] = usePersistedState(page, 'SDCFees', 20000, sdc);
+    const [ownedLandCost, setOwnedLandCost] = usePersistedState(page, 'ownedLandCost', 0, olc);
 
 
     const params: {
@@ -63,7 +67,7 @@ const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) =>
         homeBuilderProfitPercentage: number;
         realEstateCommissionPercentage: number;
         landDeveloperProfitPercentage: number;
-        costToDevelopPerLot: number;
+        costToDevelop: number;
         ownedLandCost: number;
     } = {
         grossAcres,
@@ -79,7 +83,7 @@ const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) =>
         homeBuilderProfitPercentage,
         realEstateCommissionPercentage,
         landDeveloperProfitPercentage,
-        costToDevelopPerLot,
+        costToDevelop,
         ownedLandCost
     };
 
@@ -104,8 +108,8 @@ const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) =>
     const finishedLotValue = buildingSalePrice - totalHardCosts - reAgentCommission;
     const landPercentage = finishedLotValue / buildingSalePrice;
     const landDeveloperProfit = (landDeveloperProfitPercentage / 100) * finishedLotValue;
-    const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelopPerLot - landDeveloperProfit;
-    const totalCosts = totalOfferToLandOwner + costToDevelopPerLot + landDeveloperProfit + totalHardCosts
+    const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelop - landDeveloperProfit;
+    const totalCosts = totalOfferToLandOwner + costToDevelop + landDeveloperProfit + totalHardCosts
     return (
         <div className="land-calculator">
             <header className="app-header">
@@ -182,8 +186,16 @@ const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) =>
                     inputCellIndex={1}
                 />
                 <DynamicRow
+                    setInput={(e) => setCatchAll(Number(e.target.value))}
+                    cellValues={["Approach Catch All (X)", catchAll]}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    inputCellIndex={1}
+                    description="A catchall amount for extra approaches, garbage, utilities, and other miscellaneous items. This is added to the Calculated Driveway Area"
+                />
+                <DynamicRow
                     setInput={(e) => setNumberOfFloors(Number(e.target.value))}
-                    cellValues={["Number of floors", numberOfFloors]}
+                    cellValues={["Number of floors (#)", numberOfFloors]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -196,15 +208,7 @@ const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) =>
                     inputCellIndex={1}
                     description="The parking ratio per 1,000 sqft of rentable space"
                 />
-                <DynamicRow
-                    setInput={(e) => setCatchAll(Number(e.target.value))}
-                    cellValues={["Approach Catch All", catchAll]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                    description="A catchall amount for extra approaches, garbage, utilities, and other miscellaneous items. This is added to the Calculated Driveway Area"
 
-                />
 
                 <DynamicRow
                     cellValues={['Calculated Driveway Area', result.drivewayArea.toLocaleString()]}
@@ -375,9 +379,17 @@ const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) =>
                 />
 
                 <DynamicRow
-                    setInput={(e) => setCostToDevelopPerLot(Number(e.target.value))}
-                    description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
-                    cellValues={["Cost to Develop the Land ($)", costToDevelopPerLot]}
+                    setInput={(e) => setCostToDevelop(Number(e.target.value))}
+                    description="Costs for engineering, architecture, demolition, clearing, street improvements, utilities, etc."
+                    cellValues={["Costs to Develop the land ($)", costToDevelop]}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    inputCellIndex={1}
+                />
+                <DynamicRow
+                    setInput={(e) => setSDCFees(Number(e.target.value))}
+                    description="Fees to the city to connect to the city. Normally this is required for all new developments."
+                    cellValues={["SDC Fees ($)", SDCFees]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -415,7 +427,7 @@ const IndustrialDevelopmentCalculator = ({ isMobile }: { isMobile: boolean }) =>
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={["Soft Costs", Math.round(costToDevelopPerLot + landDeveloperProfit).toLocaleString()]}
+                    cellValues={["Soft Costs", Math.round(costToDevelop + landDeveloperProfit + SDCFees).toLocaleString()]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />

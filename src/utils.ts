@@ -2,6 +2,15 @@ export const roundAndLocalString = (value: number) => {
   return Math.round(value).toLocaleString();
 };
 
+
+export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchParams): number | undefined => { 
+  const param = queryParams.get(queryParam)
+  if(!param) return;
+
+  return  Number(param) ?? undefined
+};
+
+
 export function monthlyPayment(p: number, n: number, i: number) {
   // var M; //monthly mortgage payment
   // var P = 400000; //principle / initial amount borrowed
@@ -161,7 +170,7 @@ export const copyToClipboard = (
       .filter((qs) => qs)
       .join("&");
 
-  const url = new URL(queryString, window.location.origin);
+  const url = new URL(queryString, window.location.href);
   navigator.clipboard
     .writeText(url.href)
     .then(() => {
