@@ -11,6 +11,12 @@ export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchPa
 };
 
 
+export const getQueryParamBoolean = (queryParam: string, queryParams: URLSearchParams): boolean | undefined => { 
+  const param = queryParams.get(queryParam)
+  return  !!param
+};
+
+
 export function monthlyPayment(p: number, n: number, i: number) {
   // var M; //monthly mortgage payment
   // var P = 400000; //principle / initial amount borrowed
@@ -46,7 +52,7 @@ const accessibleParkingRequirements = {
   },
 };
 
-const getHandicappedPrkingRequirements = (totalSpots: number) => {
+const getHandicappedParkingRequirements = (totalSpots: number) => {
   if (totalSpots <= 25) {
     return accessibleParkingRequirements[1];
   } else if (totalSpots <= 50) {
@@ -102,7 +108,7 @@ export function calculateBuildingSqft(
 
 
     const parkingSpots = Math.round(leaseableBuildingSpace * parkingRatio);
-    const handicappedParking = getHandicappedPrkingRequirements(parkingSpots);
+    const handicappedParking = getHandicappedParkingRequirements(parkingSpots);
 
     const sidewalkArea = buildingFootprint * 0.2; //Sidewalks are 20% the building size;
     const drivewayArea = (approachW * parkingSpotW * parkingSpots / 2) * catchAll; //1.3 for a fudge amount for approaches, garbage, utilities, and other 
@@ -153,6 +159,89 @@ export function calculateBuildingSqft(
     count,
   );
 }
+
+export function calculateBuildingSqftResidential(
+  lotSize: number,
+  floors: number,
+  parkingSpots: number,
+  imperviousSurfaceRatio: number,
+  catchAll: number,
+  requiresHandicappedParking = false
+) {
+  const approachW = 24;
+  const parkingSpotW = 8;
+  const parkingSpotL = 17;
+  const handicappedParkingSpotW = 16;
+  
+
+  // Initial calculations
+  const maxImperviousSurface = lotSize * imperviousSurfaceRatio; // Max impervious surface allowed
+  const initialBuildingFootprint = maxImperviousSurface;
+  let count = 0;
+  // Call the recursive helper function
+  // Recursive helper function
+  function helper(
+    maxImperviousSurface: number,
+    buildingFootprint: number,
+    count: number
+  ) {
+
+
+    const buildingSize = buildingFootprint * floors;
+
+    // const parkingSpots = Math.round(buildingSize * parkingPerUnit);
+    const handicappedParking = requiresHandicappedParking ? getHandicappedParkingRequirements(parkingSpots) : 0;
+
+    const sidewalkArea = buildingFootprint * 0.2; //Sidewalks are 20% the building size;
+    const drivewayArea = (approachW * parkingSpotW * parkingSpots / 2) * catchAll; // for a fudge amount for approaches, garbage, utilities, and other 
+    const normalParkingArea = parkingSpotW * parkingSpotL * (parkingSpots - handicappedParking)
+    const handicappedParkingArea = handicappedParkingSpotW * parkingSpotL * handicappedParking;
+    const parkingArea = normalParkingArea + handicappedParkingArea;
+
+    const totalImperviousArea = buildingFootprint + parkingArea + drivewayArea + sidewalkArea;
+    const acceptableBuilding = totalImperviousArea <=  maxImperviousSurface;// && Math.round(buildingSize * parkingRatio) === parkingSpots
+
+    if (!acceptableBuilding && count < 20000) {
+      // Total impervious surface used (parking area + building footprint)
+      return helper(
+        maxImperviousSurface,
+        buildingFootprint - 100,
+        count + 1
+      );
+    } else {
+      const footprintSideLength = Math.sqrt(buildingFootprint); // Assuming a square footprint
+
+      return {
+        buildingSize,
+        totalBuildingSqft: buildingSize,
+        parkingSpotsRequired: Math.ceil(parkingSpots),
+        buildingFootprint: {
+          area: buildingFootprint,
+          dimensions: {
+            length: footprintSideLength.toFixed(1), // Approximate length of one side
+            width: footprintSideLength.toFixed(1), // Approximate width of one side
+          },
+        },
+        parkingArea,
+        drivewayArea,
+        imperviousSurfaceRatio:
+          (parkingArea + drivewayArea + buildingFootprint + sidewalkArea) /
+          lotSize,
+        lotSize,
+        handicappedParking,
+        sidewalkArea,
+      };
+    }
+  }
+
+
+  return helper(
+    maxImperviousSurface,
+    initialBuildingFootprint,
+    count,
+  );
+}
+
 
 export const copyToClipboard = (
   params: Record<string, any>,

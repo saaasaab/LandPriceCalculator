@@ -15,7 +15,7 @@ const Navbar = () => {
       <ul className="navbar-links">
         <li><Link to="/">Residential Development</Link> </li>
         <li><Link to="/industrial-development">Industrial Development</Link></li>
-        {/* <li><Link to="/multifamily-development">Multi-Family Development</Link></li> */}
+        <li><Link to="/multifamily-development">Multi-Family Development</Link></li>
         <li><Link to="/multifamily-analysis">Multi-Family Analysis</Link></li>
 
       </ul>
