@@ -1,3 +1,4 @@
 [ ] Graphs to show sqft of building vs price (OR compare any two variables as one changes, how it affects the other)
 [ ] Monte carlo simulation on assumptions
 [ ] Reports development that can be paid
+[ ] Add in a break-even calculator that generates the number that creates a breakeven (0 profit) scenario

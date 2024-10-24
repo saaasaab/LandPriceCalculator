@@ -1,16 +1,6 @@
 import { useState } from 'react';
 import './DynamicRow.scss';
 
-// Utility function to format number with commas
-const formatWithCommas = (number: string) => {
-    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
-
-// Utility function to remove non-numeric characters
-const removeNonNumeric = (value: string) => {
-    return value.replace(/[^0-9]/g, "");
-};
-
 
 const DynamicRow = ({
     description,
@@ -85,13 +75,13 @@ const DynamicRow = ({
 
     const constructRow = () => {
         const cells = []
-        console.log(`booleanInputIndex`, booleanInputIndex)
         for (let i = 1; i < numberOfCells; i++) { // Start at 1 because 0th index is always the cell title.
             if (inputCellIndex && i === inputCellIndex && setInput) {
                 const cellValue = cellValues[inputCellIndex] as (string | number | readonly string[] | undefined)
                 cells.push(
                     <div key={i} className={`dynamic-cell input-cell centered ${getCellClass(i)}`}>
                         <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}>
+                            
                             <input
                                 id={(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}
                                 className="centered"
@@ -106,7 +96,6 @@ const DynamicRow = ({
                 )
             }
             else if (booleanInputIndex && i === booleanInputIndex && setBooleanInput) {
-                console.log(`cellValues[inputCellIndex]`, cellValues[booleanInputIndex])
                 cells.push(
                     <div key={i} className={`dynamic-cell input-cell centered ${getCellClass(i)}`}>
                         <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}>

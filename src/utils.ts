@@ -212,7 +212,6 @@ export function calculateBuildingSqftResidential(
       const footprintSideLength = Math.sqrt(buildingFootprint); // Assuming a square footprint
 
       return {
-        buildingSize,
         totalBuildingSqft: buildingSize,
         parkingSpotsRequired: Math.ceil(parkingSpots),
         buildingFootprint: {

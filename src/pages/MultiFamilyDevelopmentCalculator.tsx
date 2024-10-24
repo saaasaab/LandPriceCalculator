@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { calculateBuildingSqft, calculateBuildingSqftResidential, copyToClipboard, getQueryParamBoolean, getQueryParamNumber, roundAndLocalString } from '../utils';
+import { calculateBuildingSqftResidential, copyToClipboard, getQueryParamBoolean, getQueryParamNumber, roundAndLocalString } from '../utils';
 import DynamicRow from '../components/DynamicRow';
 
 import './LandCalculator.scss';
 import { usePersistedState } from '../hooks/usePersistedState';
 
 
-const PAGE = "RESIDENTIAL_DEVELOPMENT"
+const PAGE = "MULTIFAMILY_DEVELOPMENT"
 const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
     const queryParams = new URLSearchParams(window.location.search)
     const ga = getQueryParamNumber("grossAcres", queryParams);
@@ -20,30 +20,27 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
     const rhp = getQueryParamBoolean("requiresHandicappedParking", queryParams);
     const ca = getQueryParamNumber("catchAll", queryParams);
 
-    const sqftpl = getQueryParamNumber("sqFtPerLot", queryParams);
-    const sqftpu = getQueryParamNumber("sqFtPerUnit", queryParams);
-    const upa = getQueryParamNumber("unitsPerAcre", queryParams);
+    // const sqftpl = getQueryParamNumber("sqFtPerUnit", queryParams);
     const hspsqft = getQueryParamNumber("multifamilyPricePerSqFt", queryParams);
     const hcpsqft = getQueryParamNumber("hardCostPerSqFt", queryParams);
     const p = getQueryParamNumber("permits", queryParams);
     const mc = getQueryParamNumber("miscCosts", queryParams);
-    const hbpp = getQueryParamNumber("homeBuilderProfitPercentage", queryParams);
+    const hbpp = getQueryParamNumber("builderProfitPercentage", queryParams);
     const recp = getQueryParamNumber("realEstateCommissionPercentage", queryParams);
     const ldpp = getQueryParamNumber("landDeveloperProfitPercentage", queryParams);
-    const ctdpl = getQueryParamNumber("costToDevelopPerLot", queryParams);
+    const ctdpl = getQueryParamNumber("costToDevelopPerUnit", queryParams);
     const olc = getQueryParamNumber("ownedLandCost", queryParams);
 
-    const [grossAcres, setGrossAcres] = usePersistedState(PAGE, 'grossAcres', 1.65, ga);
+    const [grossAcres, setGrossAcres] = usePersistedState(PAGE, 'grossAcres', .25, ga);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState(PAGE, 'unbuildableAcres', 0, uba);
-    const [numberOfUnits, setNumberOfUnits] = usePersistedState(PAGE, 'numberOfUnits', 0, nou);
+    const [numberOfUnits, setNumberOfUnits] = usePersistedState(PAGE, 'numberOfUnits', 4, nou);
 
-    const [sqFtPerLot, setSqFtPerLot] = usePersistedState(PAGE, 'sqFtPerLot', 1500, sqftpl);
-    const [unitsPerAcre, setUnitsPerAcre] = usePersistedState(PAGE, 'unitsPerAcre', 0, upa);
+    // const [sqFtPerUnit, setSqFtPerUnit] = usePersistedState(PAGE, 'sqFtPerUnit', 1500, sqftpl);
     const [numberOfFloors, setNumberOfFloors] = usePersistedState(PAGE, 'numberOfFloors', 2, nof);
     const [maxImperviousSurfaceRatio, setMaxImperviousSurfaceRatio] = usePersistedState(PAGE, 'maxImperviousSurfaceRatio', 60, misr);
     const [commonSpacePercentage, setCommonSpacePercentage] = usePersistedState(PAGE, 'commonSpacePercentage', 0, csp);
-    const [parkingSpotsPerUnit, setParkingSpotsPerUnit] = usePersistedState(PAGE, 'parkingSpotsPerUnit', 2, pr);
-    const [requiresHandicappedParking, setRequiresHandicappedParking] = usePersistedState(PAGE, 'parkingSpotsPerUnit', true, rhp);
+    const [parkingSpotsPerUnit, setParkingSpotsPerUnit] = usePersistedState(PAGE, 'parkingSpotsPerUnit', 1.5, pr);
+    const [requiresHandicappedParking, setRequiresHandicappedParking] = usePersistedState(PAGE, 'requiresHandicappedParking', true, rhp);
     const [catchAll, setCatchAll] = usePersistedState(PAGE, 'catchAll', 1.8, ca);
 
 
@@ -51,10 +48,10 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
     const [hardCostPerSqFt, setHardCostPerSqFt] = usePersistedState(PAGE, 'hardCostPerSqFt', 185, hcpsqft);
     const [permits, setPermits] = usePersistedState(PAGE, 'permits', 12000, p);
     const [miscCosts, setMiscCosts] = usePersistedState(PAGE, 'miscCosts', 7500, mc);
-    const [homeBuilderProfitPercentage, setHomeBuilderProfitPercentage] = usePersistedState(PAGE, 'homeBuilderProfitPercentage', 20, hbpp);
+    const [builderProfitPercentage, setBuilderProfitPercentage] = usePersistedState(PAGE, 'builderProfitPercentage', 20, hbpp);
     const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState(PAGE, 'realEstateCommissionPercentage', 3, recp);
     const [landDeveloperProfitPercentage, setLandDeveloperProfitPercentage] = usePersistedState(PAGE, 'landDeveloperProfitPercentage', 15, ldpp);
-    const [costToDevelopPerLot, setCostToDevelopPerLot] = usePersistedState(PAGE, 'costToDevelopPerLot', 40000, ctdpl);
+    const [costToDevelopPerUnit, setCostToDevelopPerUnit] = usePersistedState(PAGE, 'costToDevelopPerUnit', 40000, ctdpl);
     const [ownedLandCost, setOwnedLandCost] = usePersistedState(PAGE, 'ownedLandCost', 0, olc);
 
     const [copied, setCopied] = useState(false);
@@ -62,51 +59,47 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
     const params: {
         grossAcres: number;
         unbuildableAcres: number;
-        sqFtPerLot: number;
-        unitsPerAcre: number | undefined;
+        // sqFtPerUnit: number;
         multifamilyPricePerSqFt: number;
         hardCostPerSqFt: number;
         permits: number;
         miscCosts: number;
-        homeBuilderProfitPercentage: number;
+        builderProfitPercentage: number;
         realEstateCommissionPercentage: number;
         landDeveloperProfitPercentage: number;
-        costToDevelopPerLot: number;
+        costToDevelopPerUnit: number;
         ownedLandCost: number;
         numberOfFloors: number;
         maxImperviousSurfaceRatio: number;
         commonSpacePercentage: number;
         parkingSpotsPerUnit: number;
         numberOfUnits: number;
+        requiresHandicappedParking: boolean;
+
     } = {
         grossAcres: grossAcres,
         unbuildableAcres,
-        sqFtPerLot,
-        unitsPerAcre,
+        // sqFtPerUnit,
         multifamilyPricePerSqFt,
         hardCostPerSqFt,
         permits,
         miscCosts,
-        homeBuilderProfitPercentage,
+        builderProfitPercentage,
         realEstateCommissionPercentage,
         landDeveloperProfitPercentage,
-        costToDevelopPerLot,
+        costToDevelopPerUnit,
         ownedLandCost,
         numberOfFloors,
         maxImperviousSurfaceRatio,
         commonSpacePercentage,
         parkingSpotsPerUnit,
         numberOfUnits,
+        requiresHandicappedParking,
     };
-
-
-
-
 
 
     // Constants
     const SQ_FT_PER_ACRE = 43560;
-    const infrastructurePercentage = 70;
 
     // Calculate net buildable acres
     const netBuildableAcres = grossAcres - unbuildableAcres;
@@ -115,47 +108,69 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
     const totalBuildableSqFt = netBuildableAcres * SQ_FT_PER_ACRE;
 
 
-    const yieldBySQFT = Math.floor(totalBuildableSqFt / sqFtPerLot);
-    const yieldByUnitsPerAcre = unitsPerAcre ? Math.floor(unitsPerAcre * netBuildableAcres) : Infinity;
-    // Calculate total lot yield based on zoning (sq ft per lot)
-    const totalLotYield = Math.min(yieldBySQFT, yieldByUnitsPerAcre)
+    // const yieldBySQFT = Math.floor(totalBuildableSqFt / sqFtPerUnit);
+    // Calculate total unit yield based on zoning (sq ft per unit)
+    // const totalUnitYield = Math.min(yieldBySQFT, yieldByUnitsPerAcre)
 
-    const totalParkingSpots = parkingSpotsPerUnit * (numberOfUnits ? numberOfUnits : totalLotYield)
+    const totalParkingSpots = parkingSpotsPerUnit * numberOfUnits;
 
     const result = calculateBuildingSqftResidential(totalBuildableSqFt, numberOfFloors, totalParkingSpots, maxImperviousSurfaceRatio / 100, catchAll,
         requiresHandicappedParking);
 
-    const buildingSize = result.buildingSize;
+    const totalBuildingSqft = result.totalBuildingSqft;
     // Calculations
-    const multifamilySalePrice = buildingSize * multifamilyPricePerSqFt;
-    const hardCostLessProfit = buildingSize * hardCostPerSqFt + permits + miscCosts;
-    const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostLessProfit;
-    const totalHardCostsPerUnit = hardCostLessProfit + homeBuilderProfit;
-    const reAgentCommission = (realEstateCommissionPercentage / 100) * multifamilySalePrice;
-    const finishedLotValue = multifamilySalePrice - totalHardCostsPerUnit - reAgentCommission;
-    const landPercentage = finishedLotValue / multifamilySalePrice;
+
+    const totalMultifamilySalePrice = totalBuildingSqft * multifamilyPricePerSqFt;
+    const perUnitSalePrice = totalMultifamilySalePrice / numberOfUnits;
+
+
+    const totalHardCosts = totalBuildingSqft * hardCostPerSqFt;
+    const perUnitHardCosts = totalHardCosts / numberOfUnits;
 
 
 
-
-    const landDeveloperProfitPerLot = (landDeveloperProfitPercentage / 100) * finishedLotValue;
-    const landDeveloperProfit = landDeveloperProfitPerLot * totalLotYield
-    const perLotOfferToLandOwner = finishedLotValue - costToDevelopPerLot - landDeveloperProfitPerLot;
-    const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : perLotOfferToLandOwner * totalLotYield;
+    const totalPermitsCost = permits * numberOfUnits;
+    const totalMiscCosts = miscCosts * numberOfUnits;
 
 
-    const totalHardCosts = totalHardCostsPerUnit * totalLotYield
-    const totalSoftCosts = costToDevelopPerLot * totalLotYield + landDeveloperProfit
-    const totalCosts = totalOfferToLandOwner + costToDevelopPerLot * totalLotYield + landDeveloperProfit + totalHardCostsPerUnit * totalLotYield
+    const totalBuildingCosts = totalHardCosts + totalPermitsCost + totalMiscCosts;
 
-    // {console.log(`requiresHandicappedParking`, requiresHandicappedParking)}
 
-    const totalProfits = multifamilySalePrice * totalLotYield - totalCosts
+    const totalBuilderProfit = (builderProfitPercentage / 100) * totalBuildingCosts;
+    const perUnitBuilderProfit = totalBuilderProfit / numberOfUnits;
+
+
+    const perUnitREAgentCommission = (realEstateCommissionPercentage / 100) * perUnitSalePrice;
+    const totalREAgentCommission = (realEstateCommissionPercentage / 100) * totalMultifamilySalePrice;
+
+
+    const totalFinishedUnitValue = totalMultifamilySalePrice - totalBuildingCosts - totalBuilderProfit - totalREAgentCommission;
+
+    const perUnitFinishedUnitValue = totalFinishedUnitValue / numberOfUnits;
+
+    const landPercentage = totalFinishedUnitValue / totalMultifamilySalePrice;
+
+    const perUnitlandDeveloperProfit = (landDeveloperProfitPercentage / 100) * perUnitFinishedUnitValue;
+    const totalLandDeveloperProfit = perUnitlandDeveloperProfit * numberOfUnits;
+
+    const perUnitOfferToLandOwner = perUnitFinishedUnitValue - costToDevelopPerUnit - perUnitlandDeveloperProfit;
+    const totalOfferToLandOwner = perUnitOfferToLandOwner * numberOfUnits;
+
+
+    const totalActualToLandOwner = (ownedLandCost ? ownedLandCost : perUnitOfferToLandOwner * numberOfUnits);
+    const perUnitActualToLandOwner = totalActualToLandOwner / numberOfUnits;
+
+
+
+    const totalSoftCosts = costToDevelopPerUnit * numberOfUnits + totalLandDeveloperProfit
+    const totalCosts = totalActualToLandOwner + costToDevelopPerUnit * numberOfUnits + totalLandDeveloperProfit + totalHardCosts
+
+    const totalProfits = totalMultifamilySalePrice - totalCosts
 
     return (
         <div className="land-calculator">
             <header className="app-header">
-                <h1>Residential Land Development Calculator</h1>
+                <h1>Multi-Family Development Calculator</h1>
             </header>
 
             <div className="table-container">
@@ -201,12 +216,7 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                     header={true}
                 />
 
-                <DynamicRow
-                    cellValues={["Adjusted for Infrastructure (%)", infrastructurePercentage.toLocaleString() + "%"]}
-                    description="Every lot requires infrastructure like streets, which reduces the buildable area."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
+
 
                 <DynamicRow
                     cellValues={['Total Buildable Sq Ft', Math.round(totalBuildableSqFt).toLocaleString()]}
@@ -214,30 +224,14 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
-                <DynamicRow
-                    setInput={event => setSqFtPerLot(Number(event.target.value))}
-                    cellValues={["Zoning - Sq Ft per Lot (SQFT)", sqFtPerLot]}
-                    description="The jurisdiction gives a zoning requirement or desired lot size (e.g., R-5 = 5,000 sq ft per lot)."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
 
-                <DynamicRow
-                    setInput={(e) => setUnitsPerAcre(Number(e.target.value))}
-                    cellValues={["Zoning - Maximum units per acre", unitsPerAcre === 0 ? undefined : unitsPerAcre]}
-                    description="The jurisdiction gives a zoning requirement for the maximum number of units per acre."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
 
                 <DynamicRow
                     setInput={(e) => setNumberOfUnits(Number(e.target.value))}
-                    cellValues={['Number of Units OR Total Lot Yield', numberOfUnits, totalLotYield.toLocaleString()]}
-                    description='The total number of buildable lots for multifamilys or if there are special circumstances like being able to develop a 4 plex on a single family lot, the number of units that can be built '
+                    cellValues={['Number of Units', numberOfUnits]}
+                    description='Number of units buildible in the multo-family building'
                     isMobile={isMobile}
-                    numberOfCells={3}
+                    numberOfCells={2}
                     inputCellIndex={1}
                 />
 
@@ -250,7 +244,7 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                     numberOfCells={2}
                     inputCellIndex={1}
                 />
-                
+
                 <DynamicRow
                     setInput={(e) => setMaxImperviousSurfaceRatio(Number(e.target.value))}
                     cellValues={["Max Impervious Surface (%)", maxImperviousSurfaceRatio]}
@@ -285,7 +279,7 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                 />
 
                 <DynamicRow
-                    setBooleanInput={(e) => setRequiresHandicappedParking(prev=>!prev)}
+                    setBooleanInput={() => setRequiresHandicappedParking(prev => !prev)}
                     booleanInputIndex={1}
                     cellValues={['Total handicapped parking spots', requiresHandicappedParking, result.handicappedParking.toLocaleString()]}
                     isMobile={isMobile}
@@ -332,7 +326,7 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                 />
 
                 <DynamicRow
-                    cellValues={['Unit sqft', roundAndLocalString(result.totalBuildingSqft / (numberOfUnits ? numberOfUnits : totalLotYield))]}
+                    cellValues={['Unit sqft', roundAndLocalString(result.totalBuildingSqft / numberOfUnits)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -350,49 +344,53 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
 
             <div className="table-container">
                 <DynamicRow
-                    cellValues={["Financial Assumptions"]}
+                    cellValues={["Financial Assumptions", "Per Unit","Total"]}
                     isMobile={isMobile}
-                    numberOfCells={1}
-                    inputCellIndex={-1}
+                    numberOfCells={3}
                     header={true}
                 />
 
 
-                {/* Multifamily Price Per Sq Ft */}
+                {/* Multifamily Sale Price */}
                 <DynamicRow
                     setInput={(e) => setMultifamilyPricePerSqFt(Number(e.target.value))}
-                    cellValues={["Multifamily Price - per Sq Ft", multifamilyPricePerSqFt]}
-                    description="The average price per square foot for multifamilys in this area, determined by local research."
+                    cellValues={["Multifamily Sale Price ($/SQFT)", multifamilyPricePerSqFt, roundAndLocalString(perUnitSalePrice), totalMultifamilySalePrice.toLocaleString()]}
+                    description="The total sale price of the multifamily based on the size and price per square foot. Inputing in the average price per square foot for multifamilys in this area, determined by local research."
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    inputCellIndex={1}
+                    numberOfCells={4}
+                />
+
+
+                {/* Real Estate Agent Commission */}
+                <DynamicRow
+                    setInput={(e) => setRealEstateCommissionPercentage(Number(e.target.value))}
+                    cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage, roundAndLocalString(perUnitREAgentCommission), roundAndLocalString(totalREAgentCommission)]}
+                    description="The real estate agent commission, calculated as a percentage of the multifamily sale price."
+                    isMobile={isMobile}
+                    numberOfCells={4}
                     inputCellIndex={1}
                 />
 
-                {/* Multifamily Sale Price */}
+                {/* Home Builder Profit */}
                 <DynamicRow
-                    cellValues={["Per Unit Sale Price", (multifamilySalePrice / (numberOfUnits ? numberOfUnits : totalLotYield)).toLocaleString()]}
-                    description="The total sale price of the multifamily based on the size and price per square foot."
+                    setInput={(e) => setBuilderProfitPercentage(Number(e.target.value))}
+                    cellValues={["Builder Profit (%)", builderProfitPercentage, roundAndLocalString(perUnitBuilderProfit), roundAndLocalString(totalBuilderProfit)]}
+                    description="The builder's profit based on a percentage of the hard costs, permits and misc costs."
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={4}
+                    inputCellIndex={1}
                 />
 
-
-                {/* Multifamily Sale Price */}
-                <DynamicRow
-                    cellValues={["Multifamily Sale Price", multifamilySalePrice.toLocaleString()]}
-                    description="The total sale price of the multifamily based on the size and price per square foot."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
 
 
                 {/* Hard Cost Per Sq Ft */}
                 <DynamicRow
                     setInput={(e) => setHardCostPerSqFt(Number(e.target.value))}
-                    cellValues={["Hard Cost per Sq Ft for Multifamily Build ($)", hardCostPerSqFt, (hardCostPerSqFt * buildingSize).toLocaleString()]}
-                    description="The hard costs for building the multifamily per square foot."
+                    cellValues={["Hard Cost Multifamily Build ($/SQFT)", hardCostPerSqFt, roundAndLocalString(perUnitHardCosts), roundAndLocalString(totalHardCosts)]}
+                    description="The total hard costs, including construction costs, and miscellaneous costs. Inputing the hard costs for building the multifamily per square foot."
                     isMobile={isMobile}
-                    numberOfCells={3}
+                    numberOfCells={4}
                     inputCellIndex={1}
                 />
 
@@ -401,10 +399,10 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                 {/* Permits */}
                 <DynamicRow
                     setInput={(e) => setPermits(Number(e.target.value))}
-                    cellValues={["Permits per unit ($)", permits]}
+                    cellValues={["Permits per unit ($/unit)", permits, roundAndLocalString(totalPermitsCost)]}
                     description="The total cost of permits required for the multifamily build."
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     inputCellIndex={1}
                 />
 
@@ -412,39 +410,8 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                 {/* Misc Costs */}
                 <DynamicRow
                     setInput={(e) => setMiscCosts(Number(e.target.value))}
-                    cellValues={["Misc Costs per unit ($)", miscCosts]}
+                    cellValues={["Misc Costs per unit ($/unit)", miscCosts, roundAndLocalString(totalMiscCosts)]}
                     description="Miscellaneous costs involved in the multifamily build."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-                {/* Home Builder Profit */}
-                <DynamicRow
-                    setInput={(e) => setHomeBuilderProfitPercentage(Number(e.target.value))}
-                    cellValues={["Home Builder Profit per unit (%)", homeBuilderProfitPercentage, homeBuilderProfit.toLocaleString()]}
-                    description="The builder's profit based on a percentage of the hard costs."
-                    isMobile={isMobile}
-                    numberOfCells={3}
-                    inputCellIndex={1}
-                />
-
-
-
-                {/* Total Hard Costs */}
-                <DynamicRow
-                    cellValues={["Total Hard Costs per unit", totalHardCostsPerUnit.toLocaleString()]}
-                    description="The total hard costs, including construction costs, permits, and miscellaneous costs."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-
-                {/* Real Estate Agent Commission */}
-                <DynamicRow
-                    setInput={(e) => setRealEstateCommissionPercentage(Number(e.target.value))}
-                    cellValues={["RE Agent Commission per unit (%)", realEstateCommissionPercentage, Math.round(reAgentCommission).toLocaleString()]}
-                    description="The real estate agent commission, calculated as a percentage of the multifamily sale price."
                     isMobile={isMobile}
                     numberOfCells={3}
                     inputCellIndex={1}
@@ -458,12 +425,12 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                     numberOfCells={2}
                 />
 
-                {/* Finished Lot Value */}
+                {/* Finished Unit Value */}
                 <DynamicRow
-                    cellValues={["Finished Lot Value", Math.round(finishedLotValue).toLocaleString()]}
+                    cellValues={["Finished Lot Value", roundAndLocalString(perUnitFinishedUnitValue), roundAndLocalString(totalFinishedUnitValue)]}
                     description="The value of the finished lot without the multifamily."
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     inputCellIndex={1}
                     output={true}
                 />
@@ -472,47 +439,38 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
 
             <div className="table-container">
                 <DynamicRow
-                    cellValues={["Raw Land Calculations"]}
+                    cellValues={["Raw Land Calculations", "Per Unit","Total"]}
                     isMobile={isMobile}
-                    numberOfCells={1}
-                    inputCellIndex={-1}
+                    numberOfCells={3}
                     header={true}
                 />
 
-                {/* Land Developer Profit Per Lot */}
+                {/* Land Developer Profit Per Unit */}
                 <DynamicRow
                     setInput={(e) => setLandDeveloperProfitPercentage(Number(e.target.value))}
-                    cellValues={["Land Developer Profit Per Lot (%)", landDeveloperProfitPercentage, landDeveloperProfitPerLot.toLocaleString()]}
+                    cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage, roundAndLocalString(perUnitlandDeveloperProfit), roundAndLocalString(totalLandDeveloperProfit)]}
                     description="Percentage profit made by the developer per lot."
+                    isMobile={isMobile}
+                    numberOfCells={4}
+                    inputCellIndex={1}
+                />
+
+                {/* Cost to Develop Land Per Unit */}
+                <DynamicRow
+                    setInput={(e) => setCostToDevelopPerUnit(Number(e.target.value))}
+                    cellValues={["Cost to Develop the Land Per unit ($)", costToDevelopPerUnit, roundAndLocalString(costToDevelopPerUnit * numberOfUnits)]}
+                    description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
                     isMobile={isMobile}
                     numberOfCells={3}
                     inputCellIndex={1}
                 />
 
-                {/* Land Developer's Total Profit */}
+                {/* Value Per Unit to Land Owner/Seller */}
                 <DynamicRow
-                    cellValues={["Land Developer's Profit", landDeveloperProfit.toLocaleString()]}
-                    description="Total profit made by the land developer from the entire project."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-                {/* Cost to Develop Land Per Lot */}
-                <DynamicRow
-                    setInput={(e) => setCostToDevelopPerLot(Number(e.target.value))}
-                    cellValues={["Cost to Develop the Land Per Lot ($)", costToDevelopPerLot]}
-                    description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-                {/* Value Per Lot to Land Owner/Seller */}
-                <DynamicRow
-                    cellValues={["Value Per Lot to Land Owner/Seller", perLotOfferToLandOwner.toLocaleString()]}
+                    cellValues={["Calculated value to Land Owner/Seller", roundAndLocalString(perUnitOfferToLandOwner), roundAndLocalString(totalOfferToLandOwner)]}
                     description="The value of each lot after development, as perceived by the landowner or seller."
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     inputCellIndex={1}
                 />
 
@@ -528,10 +486,10 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
 
                 {/* Buyer Offer to Land Owner/Seller */}
                 <DynamicRow
-                    cellValues={["Offer to Land Owner/Seller", Math.round(totalOfferToLandOwner).toLocaleString()]}
+                    cellValues={["Offer to Land Owner/Seller", roundAndLocalString(perUnitActualToLandOwner), roundAndLocalString(totalActualToLandOwner)]}
                     description="Total offer from the buyer to the land owner or seller."
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     output={true}
                 />
             </div>
@@ -546,7 +504,7 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                 />
 
                 <DynamicRow
-                    cellValues={["Land Costs", roundAndLocalString(totalOfferToLandOwner)]}
+                    cellValues={["Land Costs", roundAndLocalString(totalActualToLandOwner)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />

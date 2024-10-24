@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logo from '../../public/LandCalculatorLogo.svg'
+import logo from '../assets/LandCalculatorLogo.svg'
 import './Navbar.scss';
 
 const Navbar = () => {
@@ -13,9 +13,9 @@ const Navbar = () => {
         </Link>
       </div>
       <ul className="navbar-links">
-        <li><Link to="/">Residential Development</Link> </li>
+        <li><Link to="/">Multi-Family Development</Link></li>
         <li><Link to="/industrial-development">Industrial Development</Link></li>
-        <li><Link to="/multifamily-development">Multi-Family Development</Link></li>
+        <li><Link to="/residential-development">Residential Development</Link> </li>
         <li><Link to="/multifamily-analysis">Multi-Family Analysis</Link></li>
 
       </ul>
