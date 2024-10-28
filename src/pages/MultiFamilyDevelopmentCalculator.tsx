@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { calculateBuildingSqftResidential, copyToClipboard, getQueryParamBoolean, getQueryParamNumber, roundAndLocalString } from '../utils';
 import DynamicRow from '../components/DynamicRow';
-
-import './LandCalculator.scss';
 import { usePersistedState } from '../hooks/usePersistedState';
-
+import './LandCalculator.scss';
 
 const PAGE = "MULTIFAMILY_DEVELOPMENT"
 const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
@@ -56,6 +54,10 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
 
     const [copied, setCopied] = useState(false);
 
+
+    const monteCarloSimulation = ()=>{
+        
+    }
     const params: {
         grossAcres: number;
         unbuildableAcres: number;
@@ -172,6 +174,7 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
             <header className="app-header">
                 <h1>Multi-Family Development Calculator</h1>
             </header>
+
 
             <div className="table-container">
                 <DynamicRow

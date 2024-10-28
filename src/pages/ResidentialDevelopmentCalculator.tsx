@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { copyToClipboard, getQueryParamNumber, roundAndLocalString } from '../utils';
 import DynamicRow from '../components/DynamicRow';
 
 import './LandCalculator.scss';
 import { usePersistedState } from '../hooks/usePersistedState';
+import MonteCarloSimulator from '../components/MonteCarloSimulator';
+import residentialDevelopmentCalculations from '../utils/residentialDevelopmentCalculations';
+import { infrastructurePercentage, SQ_FT_PER_ACRE } from '../utils/constants';
 
 
 const PAGE = "RESIDENTIAL_DEVELOPMENT"
@@ -39,7 +42,89 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
     const [costToDevelopPerLot, setCostToDevelopPerLot] = usePersistedState(PAGE, 'costToDevelopPerLot', 40000, ctdpl);
     const [ownedLandCost, setOwnedLandCost] = usePersistedState(PAGE, 'ownedLandCost', 0, olc);
 
+
+
+
+
+
+    // const [constructionLoanInterestRate, setConstructionLoanInterestRate] = useState(5); // Example interest rate
+    // const [conventionalLoanInterestRate, setConventionalLoanInterestRate] = useState(3.5);
+    // const [allCash, setAllCash] = useState(false);
+    // const [constructionToConventional, setConstructionToConventional] = useState(false);
+    // const [loanDuration, setLoanDuration] = useState(30);
+    // const [totalFinancingCosts, setTotalFinancingCosts] = useState(0);
+
     const [copied, setCopied] = useState(false);
+
+    // Example function to calculate total financing costs
+    // const calculateFinancingCosts = () => {
+    //     if (allCash) {
+    //         return 0; // No financing costs for an all-cash purchase
+    //     }
+
+    //     let financingCost = 0;
+
+    //     if (constructionToConventional) {
+    //         // Calculate costs for a construction loan that converts to a conventional loan
+    //         financingCost = (constructionLoanInterestRate / 100) * totalCosts * (loanDuration / 2); // Adjust calculation as needed
+    //         financingCost += (conventionalLoanInterestRate / 100) * totalCosts * (loanDuration / 2);
+    //     } else if (constructionLoanInterestRate) {
+    //         // Calculate costs for a construction loan
+    //         financingCost = (constructionLoanInterestRate / 100) * totalCosts * loanDuration;
+    //     } else if (conventionalLoanInterestRate) {
+    //         // Calculate costs for a conventional loan
+    //         financingCost = (conventionalLoanInterestRate / 100) * totalCosts * loanDuration;
+    //     }
+
+    //     setTotalFinancingCosts(financingCost);
+    // };
+
+    // Use this calculation function whenever inputs change
+    // useEffect(() => {
+
+    // }, [constructionLoanInterestRate, conventionalLoanInterestRate, loanDuration, allCash, constructionToConventional, totalCosts]);
+
+    const inputs = {
+        grossAcres,
+        unbuildableAcres,
+        sqFtPerLot,
+        unitsPerAcre,
+        houseSize,
+        housePricePerSqFt,
+        hardCostPerSqFt,
+        permits,
+        miscCosts,
+        homeBuilderProfitPercentage,
+        realEstateCommissionPercentage,
+        landDeveloperProfitPercentage,
+        costToDevelopPerLot,
+        ownedLandCost
+    };
+
+    const {
+        houseSalePrice,
+        homeBuilderProfit,
+        totalHardCostsPerUnit,
+        reAgentCommission,
+        finishedLotValue,
+        landPercentage,
+        netBuildableAcres,
+        totalBuildableSqFt,
+        totalLotYield,
+        landDeveloperProfitPerLot,
+        landDeveloperProfit,
+        perLotOfferToLandOwner,
+        totalOfferToLandOwner,
+        totalHardCosts,
+        totalSoftCosts,
+        totalCosts,
+        totalProfits
+    } = residentialDevelopmentCalculations(inputs)
+    // Use this calculation function whenever inputs change
+    // useEffect(() => {
+    //     calculateFinancingCosts();
+    // }, [constructionLoanInterestRate, conventionalLoanInterestRate, loanDuration, allCash, constructionToConventional, totalCosts]);
+
 
     const params: {
         grossAcres: number;
@@ -74,50 +159,13 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
     };
 
 
-    // Calculations
-    const houseSalePrice = houseSize * housePricePerSqFt;
-    const hardCostLessProfit = houseSize * hardCostPerSqFt + permits + miscCosts;
-    const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostLessProfit;
-    const totalHardCostsPerUnit = hardCostLessProfit + homeBuilderProfit;
-    const reAgentCommission = (realEstateCommissionPercentage / 100) * houseSalePrice;
-    const finishedLotValue = houseSalePrice - totalHardCostsPerUnit - reAgentCommission;
-    const landPercentage = finishedLotValue / houseSalePrice;
-
-    // Constants
-    const SQ_FT_PER_ACRE = 43560;
-    const infrastructurePercentage = 70;
-
-    // Calculate net buildable acres
-    const netBuildableAcres = grossAcres - unbuildableAcres;
-
-    // Calculate total buildable square feet, adjusted for infrastructure
-    const totalBuildableSqFt = netBuildableAcres * SQ_FT_PER_ACRE * (infrastructurePercentage / 100);
-
-    const yieldBySQFT = Math.floor(totalBuildableSqFt / sqFtPerLot);
-    const yieldByUnitsPerAcre = unitsPerAcre ? Math.floor(unitsPerAcre * netBuildableAcres) : Infinity;
-    // Calculate total lot yield based on zoning (sq ft per lot)
-    const totalLotYield = Math.min(yieldBySQFT, yieldByUnitsPerAcre)
-
-
-    const landDeveloperProfitPerLot = (landDeveloperProfitPercentage / 100) * finishedLotValue;
-    const landDeveloperProfit = landDeveloperProfitPerLot * totalLotYield
-    const perLotOfferToLandOwner = finishedLotValue - costToDevelopPerLot - landDeveloperProfitPerLot;
-    const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : perLotOfferToLandOwner * totalLotYield;
-
-
-    const totalHardCosts = totalHardCostsPerUnit * totalLotYield
-    const totalSoftCosts = costToDevelopPerLot * totalLotYield + landDeveloperProfit
-    const totalCosts = totalOfferToLandOwner + costToDevelopPerLot * totalLotYield + landDeveloperProfit + totalHardCostsPerUnit * totalLotYield
-
-
-    const totalProfits = houseSalePrice * totalLotYield - totalCosts
-
     return (
         <div className="land-calculator">
             <header className="app-header">
                 <h1>Residential Land Development Calculator</h1>
             </header>
 
+            <MonteCarloSimulator {...inputs} />
             <div className="table-container">
                 <DynamicRow
                     cellValues={["Basic Land Info"]}
@@ -397,6 +445,65 @@ const LandCalculator = ({ isMobile }: { isMobile: boolean }) => {
                     output={true}
                 />
             </div>
+
+
+
+            {/* <div className="table-container">
+                <DynamicRow
+                    cellValues={["Financing Options"]}
+                    isMobile={isMobile}
+                    numberOfCells={1}
+                    header={true}
+                />
+
+                <DynamicRow
+                    cellValues={["Interest Rate (Construction Loan)", `${constructionLoanInterestRate}%`]}
+                    setInput={event => setConstructionLoanInterestRate(Number(event.target.value))}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    inputCellIndex={1}
+                />
+
+                <DynamicRow
+                    cellValues={["Interest Rate (Conventional Loan)", `${conventionalLoanInterestRate}%`]}
+                    setInput={event => setConventionalLoanInterestRate(Number(event.target.value))}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    inputCellIndex={1}
+                />
+
+                <DynamicRow
+                    cellValues={["All Cash Purchase", `${allCash ? "Yes" : "No"}`]}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    inputCellIndex={1}
+                />
+
+                <DynamicRow
+                    cellValues={["Construction to Conventional", `${constructionToConventional ? "Yes" : "No"}`]}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    inputCellIndex={1}
+                />
+
+                <DynamicRow
+                    cellValues={["Loan Duration", `${loanDuration} years`]}
+                    setInput={event => setLoanDuration(Number(event.target.value))}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    inputCellIndex={1}
+                />
+
+                <DynamicRow
+                    cellValues={["Total Financing Cost", roundAndLocalString(totalFinancingCosts)]}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    description="Total cost of financing based on the selected loan type and interest rate"
+                    output={true}
+                />
+            </div> */}
+
+
 
 
             <div className="table-container">
