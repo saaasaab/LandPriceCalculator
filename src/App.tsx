@@ -11,6 +11,8 @@ import EVERYTHING_BURGER from './pages/EVERYTHING_BURGER';
 import { EPageNames } from './utils/types';
 
 import './App.css'
+import NeighborhoodMeeting from './pages/NeighborhoodMeeting';
+import NeighborhoodMeetingConfirmationPage from './pages/NeighborhoodMeetingConfirmationPage';
 
 
 function App() {
@@ -41,6 +43,8 @@ function App() {
           <Route path="/industrial-development" element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-development" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-analysis" element={<ResidentialCashFlowCalculator isMobile={isMobile} />} />
+          <Route path="/1579-se-3rd-ct" element={<NeighborhoodMeeting  />} />
+          <Route path="/1579-se-3rd-ct-confirmation" element={<NeighborhoodMeetingConfirmationPage />} />
           <Route path="*" element={<NotFound />} />
           {/* <Route path="/contact" element={<Contact />} /> */}
         </Routes>
