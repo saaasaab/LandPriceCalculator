@@ -2,15 +2,15 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import LandCalculator from './pages/ResidentialDevelopmentCalculator'
 import NotFound from './pages/NotFound';
 import ResidentialCashFlowCalculator from './pages/ResidentialCashFlowCalculator';
-import IndustrialDevelopmentCalculator from './pages/IndustrialDevelopmentCalculator';
+
+import Navbar from './components/Navbar';
+import EVERYTHING_BURGER from './pages/EVERYTHING_BURGER';
+
+import { EPageNames } from './utils/types';
 
 import './App.css'
-import Navbar from './components/Navbar';
-import MultifamilyDevelopmentCalculator from './pages/MultifamilyDevelopmentCalculator';
-// import MultiFamilyDevelopmentCalculator from './pages/MultiFamilyDevelopmentCalculator';
 
 
 function App() {
@@ -29,34 +29,24 @@ function App() {
 
   return (
     <Router>
-        <div className="land-calculator-container">
-            {/* Navigation Links */}
-           <Navbar />
+      <div className="land-calculator-container">
+        {/* Navigation Links */}
+        <Navbar />
 
-            {/* Route Definitions */}
-            <Routes>
-                {/* <Route path="/" element={ <LandCalculator isMobile={isMobile} />} /> */}
-                <Route path="/" element={<MultifamilyDevelopmentCalculator  isMobile={isMobile}/>} />                
-
-                <Route path="/residential-development" element={ <LandCalculator isMobile={isMobile} />} />
-
-                <Route path="/industrial-development" element={< IndustrialDevelopmentCalculator  isMobile={isMobile}/>} />
-                <Route path="/multifamily-development" element={<MultifamilyDevelopmentCalculator  isMobile={isMobile}/>} />                
-                <Route path="/multifamily-analysis" element={<ResidentialCashFlowCalculator  isMobile={isMobile}/>} />                
-                <Route path="*" element={<NotFound />} />
-                {/* <Route path="/contact" element={<Contact />} /> */}
-            </Routes>
-        </div>
+        {/* Route Definitions */}
+        <Routes>
+          {/* <Route path="/" element={ <LandCalculator isMobile={isMobile} />} /> */}
+          <Route path="/" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
+          <Route path="/residential-development" element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
+          <Route path="/industrial-development" element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
+          <Route path="/multifamily-development" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
+          <Route path="/multifamily-analysis" element={<ResidentialCashFlowCalculator isMobile={isMobile} />} />
+          <Route path="*" element={<NotFound />} />
+          {/* <Route path="/contact" element={<Contact />} /> */}
+        </Routes>
+      </div>
     </Router>
-);
-
-  return (
-    <>
-      
-       
-    </>
-
-  )
+  );
 }
 
 export default App

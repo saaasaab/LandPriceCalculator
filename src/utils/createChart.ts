@@ -7,10 +7,7 @@ interface ChartMargins {
     left: number;
 }
 
-interface ChartDimensions {
-    width: number;
-    height: number;
-}
+
 
 interface ChartOptions {
     margins: ChartMargins;

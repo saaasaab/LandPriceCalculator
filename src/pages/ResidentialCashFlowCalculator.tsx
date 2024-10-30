@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { copyToClipboard, decimalToPercentage, getQueryParamNumber, monthlyPayment, roundAndLocalString } from '../utils';
+import { copyToClipboard, decimalToPercentage, getQueryParamNumber, monthlyPayment, roundAndLocalString } from '../utils/utils';
 
 import './DynamicTable.scss';
 import { usePersistedState } from '../hooks/usePersistedState';

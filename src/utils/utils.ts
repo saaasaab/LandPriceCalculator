@@ -1,19 +1,47 @@
+import { BuildingCalculationResult, EPageNames } from "./types";
+
+export const getDefault = (
+  page: EPageNames,
+  key: string,
+  initialValue: number | string | boolean | undefined,
+  queryParams: URLSearchParams,
+
+) => {
+  const queryParamValue = getQueryParamNumber(key, queryParams);
+  const combinedKey = `${page}_${key}`;
+  const fromLocal = localStorage.getItem(combinedKey);
+  const storedValue = fromLocal ? fromLocal : null;
+
+  const initial = queryParamValue !== undefined ? queryParamValue
+      : storedValue ? JSON.parse(storedValue)
+          : initialValue;
+
+  return initial;
+
+}
+
+export const setInLocalStorage = (value: number | boolean | undefined, key: string) =>{
+  if (value !== undefined) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+}
+
 export const roundAndLocalString = (value: number) => {
   return Math.round(value).toLocaleString();
 };
 
 
-export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchParams): number | undefined => { 
+export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchParams): number | undefined => {
   const param = queryParams.get(queryParam)
-  if(!param) return;
+  if (!param) return;
 
-  return  Number(param) ?? undefined
+  return Number(param) ?? undefined
 };
 
 
-export const getQueryParamBoolean = (queryParam: string, queryParams: URLSearchParams): boolean | undefined => { 
+export const getQueryParamBoolean = (queryParam: string, queryParams: URLSearchParams): boolean | undefined => {
   const param = queryParams.get(queryParam)
-  return  !!param
+  return !!param
 };
 
 
@@ -85,7 +113,9 @@ export function calculateBuildingSqft(
   imperviousSurfaceRatio: number,
   commonSpacePercentage: number,
   catchAll: number
-) {
+): BuildingCalculationResult & {
+  leaseableBuildingSpace: number
+} {
   const approachW = 24;
   const parkingSpotW = 8;
   const parkingSpotL = 17;
@@ -117,7 +147,7 @@ export function calculateBuildingSqft(
     const parkingArea = normalParkingArea + handicappedParkingArea;
 
     const totalImperviousArea = buildingFootprint + parkingArea + drivewayArea + sidewalkArea;
-    const acceptableBuilding = totalImperviousArea <=  maxImperviousSurface;// && Math.round(leaseableBuildingSpace * parkingRatio) === parkingSpots
+    const acceptableBuilding = totalImperviousArea <= maxImperviousSurface;// && Math.round(leaseableBuildingSpace * parkingRatio) === parkingSpots
 
     if (!acceptableBuilding && count < 20000) {
       // Total impervious surface used (parking area + building footprint)
@@ -167,12 +197,12 @@ export function calculateBuildingSqftResidential(
   imperviousSurfaceRatio: number,
   catchAll: number,
   requiresHandicappedParking = false
-) {
+): BuildingCalculationResult {
   const approachW = 24;
   const parkingSpotW = 8;
   const parkingSpotL = 17;
   const handicappedParkingSpotW = 16;
-  
+
 
   // Initial calculations
   const maxImperviousSurface = lotSize * imperviousSurfaceRatio; // Max impervious surface allowed
@@ -199,7 +229,7 @@ export function calculateBuildingSqftResidential(
     const parkingArea = normalParkingArea + handicappedParkingArea;
 
     const totalImperviousArea = buildingFootprint + parkingArea + drivewayArea + sidewalkArea;
-    const acceptableBuilding = totalImperviousArea <=  maxImperviousSurface;// && Math.round(buildingSize * parkingRatio) === parkingSpots
+    const acceptableBuilding = totalImperviousArea <= maxImperviousSurface;// && Math.round(buildingSize * parkingRatio) === parkingSpots
 
     if (!acceptableBuilding && count < 20000) {
       // Total impervious surface used (parking area + building footprint)
