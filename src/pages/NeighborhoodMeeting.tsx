@@ -19,10 +19,11 @@ const NeighborhoodMeeting = () => {
 
     try {
       const res = await fetch(url, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({email, name})
       }
       );
       return await res.json();
@@ -34,7 +35,7 @@ const NeighborhoodMeeting = () => {
 
   const getData = async () => {
     const contacted = await contactAPI();
-    console.log(`contacted `, contacted)
+    console.log(`contacted `, contacted);
 
     if (contacted) {
       navigate('/1579-se-3rd-ct-confirmation');

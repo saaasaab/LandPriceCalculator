@@ -17,6 +17,7 @@ const Navbar = () => {
         <li><Link to="/industrial-development">Industrial Development</Link></li>
         <li><Link to="/residential-development">Residential Development</Link> </li>
         <li><Link to="/multifamily-analysis">Multi-Family Analysis</Link></li>
+        <li><Link to="/multifamily-price-calculator">Multi-Family Price Calculator</Link></li>
 
       </ul>
     </nav>
