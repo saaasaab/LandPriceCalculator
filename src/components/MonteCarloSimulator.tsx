@@ -125,7 +125,7 @@ const MonteCarloSimulator: React.FC<MonteCarloSimulatorProps> = (props) => {
                 <input
                     type="number"
                     value={iterations}
-                    onChange={(e) => setIterations(Number(e.target.value))}
+                    onChange={(value) => setIterations(Number(value))}
                 />
             </label>
             <div>

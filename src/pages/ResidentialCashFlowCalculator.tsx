@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { copyToClipboard, decimalToPercentage, getQueryParamNumber, monthlyPayment, roundAndLocalString } from '../utils/utils';
+import { copyToClipboard, decimalToPercentage, getQueryParamNumber, monthlyPayment, removeCommas, roundAndLocalString } from '../utils/utils';
 
 import './DynamicTable.scss';
 import { usePersistedState } from '../hooks/usePersistedState';
 
 const PAGE = "RESIDENTIAL_CASH_FLOW"
-const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
+const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
 
   const queryParams = new URLSearchParams(window.location.search)
 
@@ -182,7 +182,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           header={true}
         />
         <DynamicRow
-          setInput={event => setPurchasePrice(Number(event.target.value))}
+          setInput={value=> setPurchasePrice(Number(removeCommas(value)))}
           cellValues={["Purchase Price ($)", purchasePrice]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -190,7 +190,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
         />
 
         <DynamicRow
-          setInput={event => setUnits(Number(event.target.value))}
+          setInput={value=> setUnits(Number(removeCommas(value)))}
           cellValues={["Total Number of Units (#)", units]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -198,7 +198,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
         />
 
         <DynamicRow
-          setInput={event => setRentPerUnit(Number(event.target.value))}
+          setInput={value=> setRentPerUnit(Number(removeCommas(value)))}
           cellValues={["Rent per Unit per month ($)", rentPerUnit]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -206,7 +206,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
         />
 
         <DynamicRow
-          setInput={event => setRepairPerUnit(Number(event.target.value))}
+          setInput={value=> setRepairPerUnit(Number(removeCommas(value)))}
           cellValues={["Repairs per unit ($)", repairPerUnit]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -228,7 +228,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={event => setDownPayment(Number(event.target.value))}
+          setInput={value=> setDownPayment(Number(removeCommas(value)))}
           cellValues={["Down Payment (%)", downPayment]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -237,7 +237,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
 
 
         <DynamicRow
-          setInput={event => setInterestRate(Number(event.target.value))}
+          setInput={value=> setInterestRate(Number(removeCommas(value)))}
           cellValues={["Interest Rate (%)", interestRate]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -245,7 +245,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
         />
 
         <DynamicRow
-          setInput={event => setDuration(Number(event.target.value))}
+          setInput={value=> setDuration(Number(removeCommas(value)))}
           cellValues={["Duration of loan (years)", duration]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -253,7 +253,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
         />
 
         <DynamicRow
-          setInput={event => setTaxRate(Number(event.target.value))}
+          setInput={value=> setTaxRate(Number(removeCommas(value)))}
           cellValues={["Tax rate (%)", taxRate]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -261,7 +261,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
         />
         {/* 
         <DynamicRow
-          setInput={event => setYearsHeld(Number(event.target.value))}
+          setInput={value=> setYearsHeld(Number(removeCommas(value)))}
           cellValues={["Years Held (years)", yearsHeld]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -269,7 +269,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
         />
 
         <DynamicRow
-          setInput={event => setFutureSalePrice(Number(event.target.value))}
+          setInput={value=> setFutureSalePrice(Number(removeCommas(value)))}
           cellValues={["Expected Sale price ($)", futureSalePrice]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -297,7 +297,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
             inputCellIndex={-1}
           />
           <DynamicRow
-            setInput={event => setLaundryIncome(Number(event.target.value))}
+            setInput={value=> setLaundryIncome(Number(removeCommas(value)))}
             cellValues={["Laundry Income($)", decimalToPercentage(laundryIncome / totalMonthlyIncome), roundAndLocalString(laundryIncome), roundAndLocalString(laundryIncome * 12)]}
             description="Total laundry income from onsite laundry facilities"
             isMobile={isMobile}
@@ -306,7 +306,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setStorageIncome(Number(event.target.value))}
+            setInput={value=> setStorageIncome(Number(removeCommas(value)))}
             cellValues={["Storage Income($)", decimalToPercentage(storageIncome / totalMonthlyIncome), roundAndLocalString(storageIncome), roundAndLocalString(storageIncome * 12)]}
             description="Total income from onsite storage facilities"
             isMobile={isMobile}
@@ -314,7 +314,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
             inputCellIndex={2}
           />
           <DynamicRow
-            setInput={event => setParkingIncome(Number(event.target.value))}
+            setInput={value=> setParkingIncome(Number(removeCommas(value)))}
             cellValues={["Parking Income($)", decimalToPercentage(parkingIncome / totalMonthlyIncome), roundAndLocalString(parkingIncome), roundAndLocalString(parkingIncome * 12)]}
             description="Total income from onsite parking"
             isMobile={isMobile}
@@ -322,7 +322,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
             inputCellIndex={2}
           />
           <DynamicRow
-            setInput={event => setOtherIncome(Number(event.target.value))}
+            setInput={value=> setOtherIncome(Number(removeCommas(value)))}
             cellValues={["Other Income($)", decimalToPercentage(otherIncome / totalMonthlyIncome), roundAndLocalString(otherIncome), roundAndLocalString(otherIncome * 12)]}
             description="Total other income sources for this property"
             isMobile={isMobile}
@@ -331,7 +331,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setOtherIncome(Number(event.target.value))}
+            setInput={value=> setOtherIncome(Number(removeCommas(value)))}
             cellValues={["Total Income", Math.round(totalMonthlyIncome).toLocaleString(), Math.round(totalMonthlyIncome * 12).toLocaleString()]}
             description="Total other income sources for this property"
             isMobile={isMobile}
@@ -349,7 +349,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
             header={true}
           />
           <DynamicRow
-            setInput={event => setPropertyTax(Number(event.target.value))}
+            setInput={value=> setPropertyTax(Number(removeCommas(value)))}
             cellValues={
               [
                 "Property Tax (%)",
@@ -364,14 +364,14 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
 
           />
           <DynamicRow
-            setInput={event => setInsurance(Number(event.target.value))}
+            setInput={value=> setInsurance(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Insurance (%)", insurance, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={1}
           />
           <DynamicRow
-            setInput={event => setWaterSewer(Number(event.target.value))}
+            setInput={value=> setWaterSewer(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Utilities: Water/Sewer (%)", waterSewer, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -379,7 +379,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setGarbage(Number(event.target.value))}
+            setInput={value=> setGarbage(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Utilities: Garbage (%)", garbage, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -387,7 +387,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setElectric(Number(event.target.value))}
+            setInput={value=> setElectric(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Utilities: Electric (%)", electric, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -395,7 +395,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setGas(Number(event.target.value))}
+            setInput={value=> setGas(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Utilities: Gas (%)", gas, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -403,7 +403,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setHOAFees(Number(event.target.value))}
+            setInput={value=> setHOAFees(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("HOA Fees (%)", HOAFees, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -411,7 +411,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setLawnSnow(Number(event.target.value))}
+            setInput={value=> setLawnSnow(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Lawn and Snow (%)", lawnSnow, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -419,7 +419,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setVacancy(Number(event.target.value))}
+            setInput={value=> setVacancy(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Vacancy (%)", vacancy, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -427,7 +427,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setRepairs(Number(event.target.value))}
+            setInput={value=> setRepairs(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("repairs (%)", repairs, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -435,7 +435,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setCapEx(Number(event.target.value))}
+            setInput={value=> setCapEx(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Capital Expenditures (%)", capEx, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -443,7 +443,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setPropertyManagement(Number(event.target.value))}
+            setInput={value=> setPropertyManagement(Number(removeCommas(value)))}
             cellValues={calculate4CellPercentageInput("Property Management", propertyManagement, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -488,7 +488,7 @@ const RealEstateTable = ({ isMobile }: { isMobile: boolean }) => {
           />
 
           <DynamicRow
-            setInput={event => setOtherIncome(Number(event.target.value))}
+            setInput={value=> setOtherIncome(Number(removeCommas(value)))}
             cellValues={
               ["Total Monthly Expenses", Math.round(totalExpenses).toLocaleString(), Math.round(totalExpenses * 12).toLocaleString()]}
             description="Total expenses needed to run this property"

@@ -34,6 +34,12 @@ export const DEFAULT_VALUES = {
         parkingSpotsPerUnit: 0,
         requiresHandicappedParking: true,
         SDCFees: 0,
+        rents: 0,
+        interestRate: 0,
+        numberOfYears:0,
+        cashOnCashReturn: 0,
+        expensePercentage:0,
+        downPayment:0
 
     },
     [EPageNames.MULTIFAMILY_DEVELOPMENT]: {
@@ -66,6 +72,12 @@ export const DEFAULT_VALUES = {
         SDCFees: 0,
         sqFtPerLot: 0,
         unitsPerAcre: 0,
+        rents: 0,
+        interestRate: 0,
+        numberOfYears:0,
+        cashOnCashReturn: 0,
+        expensePercentage:0,
+        downPayment:0
     },
     [EPageNames.INDUSTRIAL_DEVELOPMENT]: {
         grossAcres: 0.3,
@@ -97,6 +109,50 @@ export const DEFAULT_VALUES = {
         requiresHandicappedParking: true,
         sqFtPerLot: 0,
         unitsPerAcre: 0,
+        rents: 0,
+        interestRate: 0,
+        numberOfYears:0,
+        cashOnCashReturn: 0,
+        expensePercentage:0,
+        downPayment:0
+    },
+    [EPageNames.MULTI_FAMILY_PRICE]: {
+        // NOT USED ON THIS PAGE
+        grossAcres: 0,
+        unbuildableAcres: 0,
+        numberOfFloors: 0,
+        maxImperviousSurfaceRatio: 0,
+        commonSpacePercentage: 0,
+        parkingRatio: 0,
+        catchAll: 0,
+        buildingPricePerSqFt: 0,
+        hardCostPerSqFt: 0,
+        permits: 0,
+        miscCosts: 0,
+        homeBuilderProfitPercentage: 0,
+        realEstateCommissionPercentage: 0,
+        landDeveloperProfitPercentage: 0,
+        costToDevelop: 0,
+        SDCFees: 0,
+        ownedLandCost: 0,
+        builderProfitPercentage: 0,
+        costToDevelopPerLot: 0,
+        costToDevelopPerUnit: 0,
+        housePricePerSqFt: 0,
+        houseSize: 0,
+        multifamilyPricePerSqFt: 0,
+        numberOfUnits: 0,
+        parkingSpotsPerUnit: 0,
+        requiresHandicappedParking: true,
+        sqFtPerLot: 0,
+        unitsPerAcre: 0,
+
+        rents: 1600,
+        interestRate: 8,
+        numberOfYears: 25,
+        cashOnCashReturn: 8,
+        expensePercentage: 50,
+        downPayment: 30
     }
 }
 

@@ -1,4 +1,4 @@
-import { roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/DynamicRow';
 
 import './LandCalculator.scss';
@@ -90,7 +90,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                 />
                 <DynamicRow
                     cellValues={["Gross Acres", grossAcres]}
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.grossAcres}`); setGrossAcres(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.grossAcres}`); setGrossAcres(Number(removeCommas(value))) }}
                     description="The total area of the land in acres before any deductions for unbuildable areas."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -98,7 +98,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                 />
                 <DynamicRow
                     cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unbuildableAcres}`); setUnbuildableAcres(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unbuildableAcres}`); setUnbuildableAcres(Number(removeCommas(value))) }}
                     description="The total area in acres that cannot be built upon due to environmental or geographical features."
 
                     isMobile={isMobile}
@@ -142,7 +142,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.sqFtPerLot}`); setSqFtPerLot(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.sqFtPerLot}`); setSqFtPerLot(Number(removeCommas(value))) }}
                     cellValues={["Zoning - Sq Ft per Lot (SQFT)", sqFtPerLot]}
                     description="The jurisdiction gives a zoning requirement or desired lot size (e.g., R-5 = 5,000 sq ft per lot)."
                     isMobile={isMobile}
@@ -151,7 +151,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unitsPerAcre}`); setUnitsPerAcre(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unitsPerAcre}`); setUnitsPerAcre(Number(removeCommas(value))) }}
                     cellValues={["Zoning - Maximum units per acre", unitsPerAcre === 0 ? undefined : unitsPerAcre]}
                     description="The jurisdiction gives a zoning requirement for the maximum number of units per acre."
                     isMobile={isMobile}
@@ -182,7 +182,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* House Size */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.houseSize}`); setHouseSize(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.houseSize}`); setHouseSize(Number(removeCommas(value))) }}
                     cellValues={["House Size - Sq Ft", houseSize]}
                     description="The average size of houses in this area, determined by local research."
                     isMobile={isMobile}
@@ -192,7 +192,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* House Price Per Sq Ft */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.housePricePerSqFt}`); setHousePricePerSqFt(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.housePricePerSqFt}`); setHousePricePerSqFt(Number(removeCommas(value))) }}
                     cellValues={["House Price - per Sq Ft", housePricePerSqFt]}
                     description="The average price per square foot for houses in this area, determined by local research."
                     isMobile={isMobile}
@@ -212,7 +212,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Hard Cost Per Sq Ft */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.hardCostPerSqFt}`); setHardCostPerSqFt(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.hardCostPerSqFt}`); setHardCostPerSqFt(Number(removeCommas(value))) }}
                     cellValues={["Hard Cost per Sq Ft for House Build ($)", hardCostPerSqFt, (hardCostPerSqFt * houseSize).toLocaleString()]}
                     description="The hard costs for building the house per square foot."
                     isMobile={isMobile}
@@ -224,7 +224,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Permits */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.permits}`); setPermits(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.permits}`); setPermits(Number(removeCommas(value))) }}
                     cellValues={["Permits per unit ($)", permits]}
                     description="The total cost of permits required for the house build."
                     isMobile={isMobile}
@@ -235,7 +235,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Misc Costs */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.miscCosts}`); setMiscCosts(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.miscCosts}`); setMiscCosts(Number(removeCommas(value))) }}
                     cellValues={["Misc Costs per unit ($)", miscCosts]}
                     description="Miscellaneous costs involved in the house build."
                     isMobile={isMobile}
@@ -245,7 +245,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Home Builder Profit */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.homeBuilderProfitPercentage}`); setHomeBuilderProfitPercentage(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.homeBuilderProfitPercentage}`); setHomeBuilderProfitPercentage(Number(removeCommas(value))) }}
                     cellValues={["Home Builder Profit per unit (%)", homeBuilderProfitPercentage, homeBuilderProfit.toLocaleString()]}
                     description="The builder's profit based on a percentage of the hard costs."
                     isMobile={isMobile}
@@ -266,7 +266,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Real Estate Agent Commission */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.realEstateCommissionPercentage}`); setRealEstateCommissionPercentage(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.realEstateCommissionPercentage}`); setRealEstateCommissionPercentage(Number(removeCommas(value))) }}
                     cellValues={["RE Agent Commission per unit (%)", realEstateCommissionPercentage, Math.round(reAgentCommission).toLocaleString()]}
                     description="The real estate agent commission, calculated as a percentage of the house sale price."
                     isMobile={isMobile}
@@ -305,7 +305,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Land Developer Profit Per Lot */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.landDeveloperProfitPercentage}`); setLandDeveloperProfitPercentage(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.landDeveloperProfitPercentage}`); setLandDeveloperProfitPercentage(Number(removeCommas(value))) }}
                     cellValues={["Land Developer Profit Per Lot (%)", landDeveloperProfitPercentage, landDeveloperProfitPerLot.toLocaleString()]}
                     description="Percentage profit made by the developer per lot."
                     isMobile={isMobile}
@@ -323,7 +323,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Cost to Develop Land Per Lot */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.costToDevelopPerLot}`); setCostToDevelopPerLot(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.costToDevelopPerLot}`); setCostToDevelopPerLot(Number(removeCommas(value))) }}
                     cellValues={["Cost to Develop the Land Per Lot ($)", costToDevelopPerLot]}
                     description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
                     isMobile={isMobile}
@@ -341,7 +341,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(Number(removeCommas(value))) }}
                     description="If you own the property already, enter in the price of the property here"
                     cellValues={["Property Value", ownedLandCost === 0 ? undefined : ownedLandCost]}
                     isMobile={isMobile}
@@ -372,7 +372,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 <DynamicRow
                     cellValues={["Interest Rate (Construction Loan)", `${constructionLoanInterestRate}%`]}
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setConstructionLoanInterestRate(Number(e.target.value))}}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setConstructionLoanInterestRate(Number(value))}}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -380,7 +380,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 <DynamicRow
                     cellValues={["Interest Rate (Conventional Loan)", `${conventionalLoanInterestRate}%`]}
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setConventionalLoanInterestRate(Number(e.target.value))}}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setConventionalLoanInterestRate(Number(value))}}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -402,7 +402,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 <DynamicRow
                     cellValues={["Loan Duration", `${loanDuration} years`]}
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setLoanDuration(Number(e.target.value))}}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setLoanDuration(Number(value))}}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}

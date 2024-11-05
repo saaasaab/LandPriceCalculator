@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './NeighborhoodMeeting.scss'; // Import the CSS
 
 const NeighborhoodMeeting = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, ] = useState('');
+  const [email, ] = useState('');
   const [errors, setErrors] = useState({ name: '', email: '' });
   const navigate = useNavigate();
 
@@ -71,12 +71,12 @@ const NeighborhoodMeeting = () => {
   };
 
   const sendEmail = (name: string, email: string) => {
-    // const emailBody = `New registration for the meeting:
-    //   Name: ${name}
-    //   Email: ${email}`;
+    const emailBody = `New registration for the meeting:
+      Name: ${name}
+      Email: ${email}`;
 
-    // console.log(`Email sent to ExpanseInvestments@gmail.com with the following content:`);
-    // console.log(emailBody);
+    console.log(`Email sent to ExpanseInvestments@gmail.com with the following content:`);
+    console.log(emailBody);
   };
 
   return (
@@ -91,23 +91,23 @@ const NeighborhoodMeeting = () => {
       <form onSubmit={handleSubmit}>
         <div className="registration-container">
           <label htmlFor="name">Name</label>
-          <input
+          {/* <input
             type="text"
             id="name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+            onChange={(value) => setName(value)}
+          /> */}
           {errors.name && <span>{errors.name}</span>}
         </div>
 
         <div className="registration-container">
           <label htmlFor="email">Email</label>
-          <input
+          {/* <input
             type="email"
             id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+            onChange={(value) => setEmail(value)}
+          /> */}
           {errors.email && <span>{errors.email}</span>}
         </div>
 

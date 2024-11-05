@@ -13,6 +13,7 @@ import { EPageNames } from './utils/types';
 import './App.css'
 import NeighborhoodMeeting from './pages/NeighborhoodMeeting';
 import NeighborhoodMeetingConfirmationPage from './pages/NeighborhoodMeetingConfirmationPage';
+import ResidentialPriceCalculator from './pages/ResidentialPriceCalculator';
 
 
 function App() {
@@ -43,7 +44,7 @@ function App() {
           <Route path="/industrial-development" element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-development" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-analysis" element={<ResidentialCashFlowCalculator isMobile={isMobile} />} />
-          <Route path="/multifamily-price-calculator" element={<ResidentialCashFlowCalculator isMobile={isMobile} />} />
+          <Route path="/multifamily-price-calculator" element={<ResidentialPriceCalculator isMobile={isMobile} page={EPageNames.MULTI_FAMILY_PRICE}/>} />
 
 
           

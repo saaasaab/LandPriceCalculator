@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './DynamicRow.scss';
 
 
+
 const DynamicRow = ({
     description,
     setInput,
@@ -13,12 +14,11 @@ const DynamicRow = ({
     header,
     setBooleanInput,
     booleanInputIndex,
-    // type
 }:
     {
         cellValues: (string | number | boolean | undefined)[]
         description?: string,
-        setInput?: (event: React.ChangeEvent<HTMLInputElement>) => void,
+        setInput?: (value: string) => void
         setBooleanInput?: (event: React.ChangeEvent<HTMLInputElement>) => void,
         isMobile: boolean;
         numberOfCells: number;
@@ -31,14 +31,8 @@ const DynamicRow = ({
 
     }) => {
 
-        
-
+    
     const [isClicked, setIsClicked] = useState(false);
-
-
-    // Construct the rows based on the cellValues and which cell is the input
-
-
     const getCellClass = (cellIndex: number) => {
         switch (cellIndex) {
             case 0:
@@ -73,23 +67,40 @@ const DynamicRow = ({
     }
 
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // const rawValue = e.target.value.replace(/[^0-9]/g, ''); // Ensure only numbers
+       
+        // let newValue=value.replace(/,/g, "");
+        // let abc = newValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+       
+        // const formattedValue = formatNumberWithCommas(rawValue);
+        // console.log(`rawValue`, rawValue,formattedValue)
+
+        setInput&& setInput(e.target.value);
+      };
+
+
     const constructRow = () => {
         const cells = []
         for (let i = 1; i < numberOfCells; i++) { // Start at 1 because 0th index is always the cell title.
             if (inputCellIndex && i === inputCellIndex && setInput) {
                 const cellValue = cellValues[inputCellIndex] as (string | number | readonly string[] | undefined)
+                
                 cells.push(
                     <div key={i} className={`dynamic-cell input-cell centered ${getCellClass(i)}`}>
                         <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}>
                             
+                       
+
                             <input
                                 id={(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}
                                 className="centered"
                                 type="number"
                                 defaultValue={cellValue}
-                                onChange={setInput}
-                                onWheel={(e) => (e.target as HTMLElement).blur()}
-                                onFocus={(e) => e.target.select()} // Select the input text on focus
+                                onChange={handleChange}
+                                onWheel={(value) => (value.target as HTMLElement).blur()}
+                                onFocus={(value) => value.target.select()} // Select the input text on focus
                             />
                         </label>
                     </div>
@@ -105,8 +116,8 @@ const DynamicRow = ({
                                 type="checkbox"
                                 checked={Boolean(cellValues[booleanInputIndex])}
                                 onChange={setBooleanInput}
-                                onWheel={(e) => (e.target as HTMLElement).blur()}
-                                onFocus={(e) => e.target.select()} // Select the input text on focus
+                                onWheel={(value) => (value.target as HTMLElement).blur()}
+                                onFocus={(value) => value.target.select()} // Select the input text on focus
                             />
                         </label>
                     </div>

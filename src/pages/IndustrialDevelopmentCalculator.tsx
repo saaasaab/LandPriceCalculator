@@ -1,4 +1,4 @@
-import { roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/DynamicRow';
 import industrialDevelopmentCalculations from '../utils/industrialDevelopmentCalculations';
 import { DEFAULT_VALUES, SQ_FT_PER_ACRE } from '../utils/constants';
@@ -124,7 +124,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     header={true}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.grossAcres}`); setGrossAcres(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.grossAcres}`); setGrossAcres(Number(removeCommas(value))) }}
                     cellValues={["Gross Acres", grossAcres]}
                     description="The total area of the land in acres before any deductions for unbuildable areas."
                     isMobile={isMobile}
@@ -132,7 +132,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     inputCellIndex={1}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.unbuildableAcres}`); setUnbuildableAcres(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.unbuildableAcres}`); setUnbuildableAcres(Number(removeCommas(value))) }}
                     cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
                     description="The total area in acres that cannot be built upon due to environmental or geographical features."
                     isMobile={isMobile}
@@ -169,7 +169,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.commonSpacePercentage}`); setCommonSpacePercentage(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.commonSpacePercentage}`); setCommonSpacePercentage(Number(removeCommas(value))) }}
                     cellValues={["Percentage used for common space(%)", commonSpacePercentage]}
                     description="Every building requires common space that cannot be leased and should be excluded from parking calculations. This includes halls, elevators, stairs, foyers, bathrooms, kitchen areas, etc."
                     isMobile={isMobile}
@@ -177,7 +177,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     inputCellIndex={1}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.maxImperviousSurfaceRatio}`); setMaxImperviousSurfaceRatio(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.maxImperviousSurfaceRatio}`); setMaxImperviousSurfaceRatio(Number(removeCommas(value))) }}
                     cellValues={["Max Impervious Surface (%)", maxImperviousSurfaceRatio]}
                     description="In certain zonings, the municipality limits the total impervious surface (Default 100%)"
                     isMobile={isMobile}
@@ -185,7 +185,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     inputCellIndex={1}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.catchAll}`); setCatchAll(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.catchAll}`); setCatchAll(Number(removeCommas(value))) }}
                     cellValues={["Approach Catch All (X)", catchAll]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -193,14 +193,14 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     description="A catchall amount for extra approaches, garbage, utilities, and other miscellaneous items. This is added to the Calculated Driveway Area"
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.numberOfFloors}`); setNumberOfFloors(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.numberOfFloors}`); setNumberOfFloors(Number(removeCommas(value))) }}
                     cellValues={["Number of floors (#)", numberOfFloors]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.parkingRatio}`); setParkingRatio(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.parkingRatio}`); setParkingRatio(Number(removeCommas(value))) }}
                     cellValues={["Parking Ratio per 1,000 sqft", parkingRatio]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -277,7 +277,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
                 {/* House Price Per Sq Ft */}
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.buildingPricePerSqFt}`); setBuildingPricePerSqFt(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.buildingPricePerSqFt}`); setBuildingPricePerSqFt(Number(removeCommas(value))) }}
                     cellValues={["Building Price - per Sq Ft ($)", buildingPricePerSqFt]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -293,7 +293,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.hardCostPerSqFt}`); setHardCostPerSqFt(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.hardCostPerSqFt}`); setHardCostPerSqFt(Number(removeCommas(value))) }}
                     cellValues={["Hard Cost per Sq Ft for Building Build ($)", hardCostPerSqFt, (hardCostPerSqFt * resultCalculateBuildingSqftIndustrial.totalBuildingSqft).toLocaleString()]}
                     isMobile={isMobile}
                     description="The hard costs for building the structure per square foot."
@@ -302,7 +302,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.permits}`); setPermits(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.permits}`); setPermits(Number(removeCommas(value))) }}
                     cellValues={["Permit Costs ($)", permits]}
                     description="The total cost of permits required for the structure build."
                     isMobile={isMobile}
@@ -311,7 +311,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.miscCosts}`); setMiscCosts(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.miscCosts}`); setMiscCosts(Number(removeCommas(value))) }}
                     cellValues={["Misc Costs ($)", miscCosts]}
                     description="Miscellaneous costs involved in the structure."
                     isMobile={isMobile}
@@ -320,7 +320,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.homeBuilderProfitPercentage}`); setHomeBuilderProfitPercentage(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.homeBuilderProfitPercentage}`); setHomeBuilderProfitPercentage(Number(removeCommas(value))) }}
                     cellValues={["General Contractor Profit (%)", homeBuilderProfitPercentage, homeBuilderProfit.toLocaleString()]}
                     description="The builder's profit based on a percentage of the hard costs."
                     isMobile={isMobile}
@@ -337,7 +337,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.realEstateCommissionPercentage}`); setRealEstateCommissionPercentage(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.realEstateCommissionPercentage}`); setRealEstateCommissionPercentage(Number(removeCommas(value))) }}
                     cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage, Math.round(reAgentCommission).toLocaleString()]}
                     description="The real estate agent commission, calculated as a percentage of the building sale price."
                     isMobile={isMobile}
@@ -369,7 +369,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.landDeveloperProfitPercentage}`); setLandDeveloperProfitPercentage(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.landDeveloperProfitPercentage}`); setLandDeveloperProfitPercentage(Number(removeCommas(value))) }}
                     cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage, Math.round(landDeveloperProfit).toLocaleString()]}
                     description="Percentage profit made by the developer per lot."
                     isMobile={isMobile}
@@ -378,7 +378,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.costToDevelop}`); setCostToDevelop(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.costToDevelop}`); setCostToDevelop(Number(removeCommas(value))) }}
                     description="Costs for engineering, architecture, demolition, clearing, street improvements, utilities, etc."
                     cellValues={["Costs to Develop the land ($)", costToDevelop]}
                     isMobile={isMobile}
@@ -386,7 +386,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     inputCellIndex={1}
                 />
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.SDCFees}`); setSDCFees(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.SDCFees}`); setSDCFees(Number(removeCommas(value))) }}
                     description="Fees to the city to connect to the city. Normally this is required for all new developments."
                     cellValues={["SDC Fees ($)", SDCFees]}
                     isMobile={isMobile}
@@ -395,7 +395,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(e) => { setInLocalStorage(Number(e.target.value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(Number(e.target.value)) }}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(Number(removeCommas(value))) }}
                     description="If you own the property already, enter in the price of the property here"
                     cellValues={["Property Value", ownedLandCost === 0 ? undefined : ownedLandCost]}
                     isMobile={isMobile}

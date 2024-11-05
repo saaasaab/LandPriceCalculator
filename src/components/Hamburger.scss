@@ -1,0 +1,53 @@
+/* Responsive Design */
+
+.hamburger {
+  $width: 1.5rem;
+  position: absolute;
+  top: 1em;
+  right: 10px;
+  width: $width;
+  height:$width;
+  display: flex;
+  justify-content: space-around;
+  flex-flow: column nowrap;
+  z-index: 10;
+
+  .burger {
+    width: $width;
+    height: calc($width/8);
+    border-radius: 10px;
+    background-color: black;
+    transform-origin: 1px;
+    transition: all 0.3s linear;
+    .burger1 {
+      transform: rotate(0);
+    }
+    .burger2 {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    .burger3 {
+      transform: rotate(0);
+    }
+  }
+
+  &.is-open {
+    .burger1 {
+      transform: rotate(45deg);
+    }
+    .burger2 {
+      // transform: translateX(100%);
+      opacity: 0;
+    }
+    .burger3 {
+      transform: rotate(-45deg);
+    }
+  }
+}
+
+@media (min-width: 769px) {
+  .hamburger {
+    display: none;
+  }
+
+}

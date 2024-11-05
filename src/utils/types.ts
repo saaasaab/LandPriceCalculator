@@ -23,13 +23,15 @@ export interface BuildingCalculationResult {
 export enum EPageNames {
     MULTIFAMILY_DEVELOPMENT =  "MULTIFAMILY_DEVELOPMENT",
     INDUSTRIAL_DEVELOPMENT = "INDUSTRIAL_DEVELOPMENT",
-    RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT"
+    RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
+    MULTI_FAMILY_PRICE="MULTI_FAMILY_PRICE"
 }
 
 export enum EPageTitles {
     MULTIFAMILY_DEVELOPMENT =  "Multi-Family Development Calculator",
     INDUSTRIAL_DEVELOPMENT = "Industrial / Commercial Land Development Calculator",
-    RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator"
+    RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
+    MULTI_FAMILY_PRICE="Multi-family price calculator"
 }
 
 export enum EAllStates {
@@ -60,5 +62,15 @@ export enum EAllStates {
     SDCFees = "SDCFees",
     sqFtPerLot = "sqFtPerLot",
     unbuildableAcres = "unbuildableAcres",
-    unitsPerAcre = "unitsPerAcre"
+    unitsPerAcre = "unitsPerAcre",
+
+  rents="rents",
+  interestRate="interestRate",
+  numberOfPayments="numberOfPayments",
+  cashOnCashReturn="cashOnCashReturn",
+  expensePercentage="expensePercentage",
+  downPayment="downPayment"
+
+
+    // FOR THE PRICE CALCULATOR
 }

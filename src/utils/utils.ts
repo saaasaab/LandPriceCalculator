@@ -35,7 +35,7 @@ export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchPa
   const param = queryParams.get(queryParam)
   if (!param) return;
 
-  return Number(param) ?? undefined
+  return Number(removeCommas(param)) ?? undefined
 };
 
 
@@ -298,4 +298,15 @@ export const copyToClipboard = (
     .catch((err) => {
       console.error("Failed to copy: ", err);
     });
+};
+
+
+export const removeCommas = (str:string)=>{
+  return Number(str.replace(/,/g, ''));
+}
+
+// Helper function to format numbers with commas
+export const formatNumberWithCommas = (value: string | number) => {
+  const numValue = value.toString().replace(/,/g, ''); // Remove existing commas
+  return numValue.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Add commas
 };
