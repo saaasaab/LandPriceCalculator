@@ -87,43 +87,6 @@
       border: none;
       box-sizing: border-box;
     }
-
-    // input[type="checkbox"] {
-    //   -webkit-appearance: initial;
-    //   appearance: initial;
-
-    //   width: 40px;
-    //   height: 40px;
-    //   border: none;
-    //   position: relative;
-    //   border: 1px solid #1a1a1a;
-    //   border-radius: 6px;
-    // }
-
-    // input[type="checkbox"]:checked:after {
-    //   /* Heres your symbol replacement */
-    //   content: "X";
-
-    //   /* The following positions my tick in the center,
-    //    * but you could just overlay the entire box
-    //    * with a full after element with a background if you want to */
-    //   position: absolute;
-    //   left: 50%;
-    //   top: 50%;
-    //   -webkit-transform: translate(-50%, -50%);
-    //   -moz-transform: translate(-50%, -50%);
-    //   -ms-transform: translate(-50%, -50%);
-    //   transform: translate(-50%, -50%);
-    //   /*
-    //    * If you want to fully change the check appearance, use the following:
-    //    * content: " ";
-    //    * width: 100%;
-    //    * height: 100%;
-    //    * background: blue;
-    //    * top: 0;
-    //    * left: 0;
-    //    */
-    // }
   }
 
   &.output-row {
@@ -166,6 +129,11 @@ $breakpoint-tablet: 768px;
 @media (max-width: $breakpoint-tablet) {
   .dynamic-row {
     border-bottom: 1px solid  rgb(187, 168, 168);
+    .info-cell{
+      h4{
+      font-size: .85em;
+      }
+    }
     .dynamic-cell {
       font-size: 0.8em;
       padding-left: 0;

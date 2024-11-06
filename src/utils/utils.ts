@@ -121,6 +121,8 @@ export function calculateBuildingSqft(
   const parkingSpotL = 17;
   const handicappedParkingSpotW = 16;
 
+  const interval =  lotSize === 0 ? 100 : lotSize * .01;
+
   // Initial calculations
   const maxImperviousSurface = lotSize * imperviousSurfaceRatio; // Max impervious surface allowed
   const initialBuildingFootprint = maxImperviousSurface;
@@ -153,7 +155,7 @@ export function calculateBuildingSqft(
       // Total impervious surface used (parking area + building footprint)
       return helper(
         maxImperviousSurface,
-        buildingFootprint - 100,
+        buildingFootprint - interval,
         count + 1
       );
     } else {
@@ -203,6 +205,7 @@ export function calculateBuildingSqftResidential(
   const parkingSpotL = 17;
   const handicappedParkingSpotW = 16;
 
+  const interval = lotSize === 0 ? 100 : lotSize * .01;
 
   // Initial calculations
   const maxImperviousSurface = lotSize * imperviousSurfaceRatio; // Max impervious surface allowed
@@ -232,10 +235,11 @@ export function calculateBuildingSqftResidential(
     const acceptableBuilding = totalImperviousArea <= maxImperviousSurface;// && Math.round(buildingSize * parkingRatio) === parkingSpots
 
     if (!acceptableBuilding && count < 20000) {
+      if (count % 100) console.log(`count`, count)
       // Total impervious surface used (parking area + building footprint)
       return helper(
         maxImperviousSurface,
-        buildingFootprint - 100,
+        buildingFootprint - interval,
         count + 1
       );
     } else {
@@ -302,6 +306,7 @@ export const copyToClipboard = (
 
 
 export const removeCommas = (str: string) => {
+  if(!str) return 0
   return Number(str.toString().replace(/,/g, ''));
 }
 
@@ -323,7 +328,6 @@ export const convertInputsToNumbers = (inputs: Record<string, string | number>):
         return [key, isNaN(numericValue) ? 0 : numericValue]; // Ensure a valid number, fallback to 0
       }
       else {
-        console.log(`key,value`, key, value)
         return [key, value]; // Keep original if it's already a number
       }
     })

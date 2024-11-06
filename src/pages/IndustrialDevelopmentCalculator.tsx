@@ -112,7 +112,6 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         resultCalculateBuildingSqftIndustrial
     } = industrialDevelopmentCalculations(inputs)
 
-
     return (
         <>
             <div className="table-container">
@@ -156,12 +155,6 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     inputCellIndex={-1}
                     header={true}
                 />
-                {/* <DynamicRow
-                    cellValues={['Sq Ft per Acre', SQ_FT_PER_ACRE.toLocaleString()]}
-                    description='Constant: There are 43,560 square feet in one acre of land.'
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                /> */}
                 <DynamicRow
                     cellValues={['Lot Size', (SQ_FT_PER_ACRE * removeCommas(grossAcres)).toLocaleString()]}
                     description='Total size of the lot in sqft'
