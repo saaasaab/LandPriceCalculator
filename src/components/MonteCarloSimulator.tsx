@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import residentialDevelopmentCalculations from '../utils/residentialDevelopmentCalculations';
 import createChart from '../utils/createChart';
 import { calculateMedian, calculateMode, calculateStandardDeviation } from '../utils/statistics';
 
 
 // Function to generate random values within a range
-const getRandomValue = (value: number) => {
-    const deviation = value * 0.2; // Calculate 20% of the value
-    return value + (Math.random() * 2 - 1) * deviation; // Randomly adjust value by ±20%
-};
+// const getRandomValue = (value: number) => {
+//     const deviation = value * 0.2; // Calculate 20% of the value
+//     return value + (Math.random() * 2 - 1) * deviation; // Randomly adjust value by ±20%
+// };
 
 interface MonteCarloSimulatorProps {
     grossAcres: number;
@@ -26,35 +25,35 @@ interface MonteCarloSimulatorProps {
     landDeveloperProfitPercentage: number;
     costToDevelopPerLot: number;
 }
-const runMonteCarloSimulation = (inputs: MonteCarloSimulatorProps, iterations: number) => {
-    const results: { profit: number; cost: number }[] = [];
+// const runMonteCarloSimulation = (inputs: MonteCarloSimulatorProps, iterations: number) => {
+//     const results: { profit: number; cost: number }[] = [];
 
-    for (let i = 0; i < iterations; i++) {
-        const adjustedInputs = {
-            grossAcres: inputs.grossAcres,
-            unbuildableAcres: inputs.unbuildableAcres,
-            sqFtPerLot: inputs.sqFtPerLot,
-            unitsPerAcre: inputs.unitsPerAcre,
-            houseSize: getRandomValue(inputs.houseSize),
-            housePricePerSqFt: getRandomValue(inputs.housePricePerSqFt),
-            hardCostPerSqFt: getRandomValue(inputs.hardCostPerSqFt),
-            permits: getRandomValue(inputs.permits),
-            miscCosts: getRandomValue(inputs.miscCosts),
-            homeBuilderProfitPercentage: getRandomValue(inputs.homeBuilderProfitPercentage),
-            realEstateCommissionPercentage: getRandomValue(inputs.realEstateCommissionPercentage),
-            landDeveloperProfitPercentage: getRandomValue(inputs.landDeveloperProfitPercentage),
-            costToDevelopPerLot: getRandomValue(inputs.costToDevelopPerLot)
-        };
+//     for (let i = 0; i < iterations; i++) {
+//         const adjustedInputs = {
+//             grossAcres: inputs.grossAcres,
+//             unbuildableAcres: inputs.unbuildableAcres,
+//             sqFtPerLot: inputs.sqFtPerLot,
+//             unitsPerAcre: inputs.unitsPerAcre,
+//             houseSize: getRandomValue(inputs.houseSize),
+//             housePricePerSqFt: getRandomValue(inputs.housePricePerSqFt),
+//             hardCostPerSqFt: getRandomValue(inputs.hardCostPerSqFt),
+//             permits: getRandomValue(inputs.permits),
+//             miscCosts: getRandomValue(inputs.miscCosts),
+//             homeBuilderProfitPercentage: getRandomValue(inputs.homeBuilderProfitPercentage),
+//             realEstateCommissionPercentage: getRandomValue(inputs.realEstateCommissionPercentage),
+//             landDeveloperProfitPercentage: getRandomValue(inputs.landDeveloperProfitPercentage),
+//             costToDevelopPerLot: getRandomValue(inputs.costToDevelopPerLot)
+//         };
 
-        const result = residentialDevelopmentCalculations(adjustedInputs)
-        results.push({ profit: result.totalProfits, cost: result.totalCosts });
-    }
-    return results;
-};
+//         const result = residentialDevelopmentCalculations(adjustedInputs)
+//         results.push({ profit: result.totalProfits, cost: result.totalCosts });
+//     }
+//     return results;
+// };
 
 const MonteCarloSimulator: React.FC<MonteCarloSimulatorProps> = (props) => {
     const [iterations, setIterations] = useState(1000);
-    const [results, setResults] = useState<{ profit: number; cost: number }[]>([]);
+    const [results, _setResults] = useState<{ profit: number; cost: number }[]>([]);
     const [metrics, setMetrics] = useState({
         min: 0,
         max: 0,
@@ -68,8 +67,8 @@ const MonteCarloSimulator: React.FC<MonteCarloSimulatorProps> = (props) => {
     const chartCostsRef = useRef<SVGSVGElement>(null);
 
     useEffect(() => {
-        const simulationResults = runMonteCarloSimulation(props, iterations);
-        setResults(simulationResults);
+        // const simulationResults = runMonteCarloSimulation(props, iterations);
+        // setResults(simulationResults);
     }, [props, iterations]);
 
 

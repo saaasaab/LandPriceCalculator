@@ -55,11 +55,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
   return (
 
-    <div className="land-calculator">
-      <header className="app-header">
-        <h1>Multifamily Unit Price Calculator</h1>
-      </header>
-
+    <>
       <div className="table-container">
         <DynamicRow
           cellValues={["Unit Levers"]}
@@ -69,7 +65,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           header={true}
         />
         <DynamicRow
-          setInput={value=> setRents(value)}
+          setInput={value => setRents(value)}
           cellValues={["Rental Income for one Unit ($)", rents]}
           description="The current rental income from one unit"
           isMobile={isMobile}
@@ -77,7 +73,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setInterestRate(value)}
+          setInput={value => setInterestRate(value)}
           cellValues={["Interest Rate for financing (%)", interestRate]}
           description="The interest rate your bank is willing to lend on"
           isMobile={isMobile}
@@ -85,7 +81,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setNumberOfYears(value)}
+          setInput={value => setNumberOfYears(value)}
           cellValues={["Total number of years for financing (#)", numberOfYears]}
           description="How many years are you amortizing"
           isMobile={isMobile}
@@ -93,7 +89,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setDownPayment(value)}
+          setInput={value => setDownPayment(value)}
           cellValues={["Down Payment (%)", downPayment]}
           description="The down payment needed from the bank for the loan."
           isMobile={isMobile}
@@ -101,7 +97,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setExpensePercentage(value)}
+          setInput={value => setExpensePercentage(value)}
           cellValues={["Expense Percentages (%)", expensePercentage]}
           description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
           isMobile={isMobile}
@@ -109,14 +105,13 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setCashOnCashReturn(value)}
+          setInput={value => setCashOnCashReturn(value)}
           cellValues={["Required cash on cash return (%)", cashOnCashReturn]}
           description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
           isMobile={isMobile}
           numberOfCells={2}
           inputCellIndex={1}
         />
-
       </div>
 
       <div className="table-container">
@@ -168,7 +163,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         {copied ? 'Copied your work! Now share the link' : 'Share your work'}
       </button>
 
-    </div >
+    </>
 
   );
 };

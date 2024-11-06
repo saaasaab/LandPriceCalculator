@@ -9,7 +9,7 @@ import { DEFAULT_VALUES } from '../utils/constants';
 import residentialCashFlowCalculations from '../utils/residentialCashFlowCalculations';
 
 
-const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; page: EPageNames; }) => {
+const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
 
   const queryParams = new URLSearchParams(window.location.search)
 
@@ -37,7 +37,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
   const [repairs, setRepairs] = usePersistedState2(page, EAllStates.repairs, DEFAULT_VALUES[page].repairs, queryParams);
   const [capEx, setCapEx] = usePersistedState2(page, EAllStates.capEx, DEFAULT_VALUES[page].capEx, queryParams);
   const [propertyManagement, setPropertyManagement] = usePersistedState2(page, EAllStates.propertyManagement, DEFAULT_VALUES[page].propertyManagement, queryParams);
-  
+
 
   const [copied, setCopied] = useState(false);
 
@@ -93,7 +93,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
     propertyManagement: propertyManagement
   };
 
-  const { 
+  const {
     rentalIncome,
     allInCosts,
     pricePerDoor,
@@ -130,10 +130,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
 
   return (
 
-    <div className="land-calculator">
-      <header className="app-header">
-        <h1>Multifamily Cashflow Calculator</h1>
-      </header>
+    <>
 
       <div className="table-container">
         <DynamicRow
@@ -144,7 +141,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           header={true}
         />
         <DynamicRow
-          setInput={value=> setPurchasePrice(value)}
+          setInput={value => setPurchasePrice(value)}
           cellValues={["Purchase Price ($)", purchasePrice]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -152,7 +149,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
         />
 
         <DynamicRow
-          setInput={value=> setUnits(value)}
+          setInput={value => setUnits(value)}
           cellValues={["Total Number of Units (#)", units]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -160,7 +157,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
         />
 
         <DynamicRow
-          setInput={value=> setRentPerUnit(value)}
+          setInput={value => setRentPerUnit(value)}
           cellValues={["Rent per Unit per month ($)", rentPerUnit]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -168,7 +165,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
         />
 
         <DynamicRow
-          setInput={value=> setRepairPerUnit(value)}
+          setInput={value => setRepairPerUnit(value)}
           cellValues={["Repairs per unit ($)", repairPerUnit]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -190,7 +187,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setDownPayment(value)}
+          setInput={value => setDownPayment(value)}
           cellValues={["Down Payment (%)", downPayment]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -199,7 +196,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
 
 
         <DynamicRow
-          setInput={value=> setInterestRate(value)}
+          setInput={value => setInterestRate(value)}
           cellValues={["Interest Rate (%)", interestRate]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -207,7 +204,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
         />
 
         <DynamicRow
-          setInput={value=> setDuration(value)}
+          setInput={value => setDuration(value)}
           cellValues={["Duration of loan (years)", duration]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -215,7 +212,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
         />
 
         <DynamicRow
-          setInput={value=> setTaxRate(value)}
+          setInput={value => setTaxRate(value)}
           cellValues={["Tax rate (%)", taxRate]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -259,8 +256,8 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
             inputCellIndex={-1}
           />
           <DynamicRow
-            setInput={value=> setLaundryIncome(value)}
-            cellValues={["Laundry Income($)", decimalToPercentage(removeCommas(laundryIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(laundryIncome)), roundAndLocalString(removeCommas(laundryIncome)* 12)]}
+            setInput={value => setLaundryIncome(value)}
+            cellValues={["Laundry Income($)", decimalToPercentage(removeCommas(laundryIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(laundryIncome)), roundAndLocalString(removeCommas(laundryIncome) * 12)]}
             description="Total laundry income from onsite laundry facilities"
             isMobile={isMobile}
             numberOfCells={4}
@@ -268,7 +265,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setStorageIncome(value)}
+            setInput={value => setStorageIncome(value)}
             cellValues={["Storage Income($)", decimalToPercentage(removeCommas(storageIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(storageIncome)), roundAndLocalString(removeCommas(storageIncome) * 12)]}
             description="Total income from onsite storage facilities"
             isMobile={isMobile}
@@ -276,7 +273,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
             inputCellIndex={2}
           />
           <DynamicRow
-            setInput={value=> setParkingIncome(value)}
+            setInput={value => setParkingIncome(value)}
             cellValues={["Parking Income($)", decimalToPercentage(removeCommas(parkingIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(parkingIncome)), roundAndLocalString(removeCommas(parkingIncome) * 12)]}
             description="Total income from onsite parking"
             isMobile={isMobile}
@@ -284,7 +281,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
             inputCellIndex={2}
           />
           <DynamicRow
-            setInput={value=> setOtherIncome(value)}
+            setInput={value => setOtherIncome(value)}
             cellValues={["Other Income($)", decimalToPercentage(removeCommas(otherIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(otherIncome)), roundAndLocalString(removeCommas(otherIncome) * 12)]}
             description="Total other income sources for this property"
             isMobile={isMobile}
@@ -293,7 +290,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setOtherIncome(value)}
+            setInput={value => setOtherIncome(value)}
             cellValues={["Total Income", Math.round(totalMonthlyIncome).toLocaleString(), Math.round(totalMonthlyIncome * 12).toLocaleString()]}
             description="Total other income sources for this property"
             isMobile={isMobile}
@@ -311,7 +308,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
             header={true}
           />
           <DynamicRow
-            setInput={value=> setPropertyTax(value)}
+            setInput={value => setPropertyTax(value)}
             cellValues={
               [
                 "Property Tax (%)",
@@ -326,14 +323,14 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
 
           />
           <DynamicRow
-            setInput={value=> setInsurance(value)}
+            setInput={value => setInsurance(value)}
             cellValues={calculate4CellPercentageInput("Insurance (%)", insurance, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={1}
           />
           <DynamicRow
-            setInput={value=> setWaterSewer(value)}
+            setInput={value => setWaterSewer(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Water/Sewer (%)", waterSewer, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -341,7 +338,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setGarbage(value)}
+            setInput={value => setGarbage(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Garbage (%)", garbage, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -349,7 +346,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setElectric(value)}
+            setInput={value => setElectric(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Electric (%)", electric, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -357,7 +354,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setGas(value)}
+            setInput={value => setGas(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Gas (%)", gas, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -365,7 +362,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setHOAFees(value)}
+            setInput={value => setHOAFees(value)}
             cellValues={calculate4CellPercentageInput("HOA Fees (%)", HOAFees, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -373,7 +370,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setLawnSnow(value)}
+            setInput={value => setLawnSnow(value)}
             cellValues={calculate4CellPercentageInput("Lawn and Snow (%)", lawnSnow, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -381,7 +378,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setVacancy(value)}
+            setInput={value => setVacancy(value)}
             cellValues={calculate4CellPercentageInput("Vacancy (%)", vacancy, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -389,7 +386,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setRepairs(value)}
+            setInput={value => setRepairs(value)}
             cellValues={calculate4CellPercentageInput("repairs (%)", repairs, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -397,7 +394,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setCapEx(value)}
+            setInput={value => setCapEx(value)}
             cellValues={calculate4CellPercentageInput("Capital Expenditures (%)", capEx, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -405,7 +402,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setPropertyManagement(value)}
+            setInput={value => setPropertyManagement(value)}
             cellValues={calculate4CellPercentageInput("Property Management", propertyManagement, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -450,7 +447,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
           />
 
           <DynamicRow
-            setInput={value=> setOtherIncome(value)}
+            setInput={value => setOtherIncome(value)}
             cellValues={
               ["Total Monthly Expenses", Math.round(totalExpenses).toLocaleString(), Math.round(totalExpenses * 12).toLocaleString()]}
             description="Total expenses needed to run this property"
@@ -600,8 +597,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
         {copied ? 'Copied your work! Now share the link' : 'Share your work'}
       </button>
 
-    </div >
-
+    </>
   );
 };
 

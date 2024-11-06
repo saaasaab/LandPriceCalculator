@@ -33,7 +33,8 @@ export enum EPageTitles {
     MULTIFAMILY_DEVELOPMENT =  "Multi-Family Development Calculator",
     INDUSTRIAL_DEVELOPMENT = "Industrial / Commercial Land Development Calculator",
     RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
-    MULTI_FAMILY_PRICE="Multi-family price calculator"
+    MULTI_FAMILY_PRICE="Multi-family price calculator",
+    MULTIFAMILY_ANALYSIS="Multi-Family Price Calculator",
 }
 
 export enum EAllStates {

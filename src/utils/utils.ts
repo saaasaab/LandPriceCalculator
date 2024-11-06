@@ -26,7 +26,7 @@ export const setInLocalStorage = (value: number | boolean | undefined, key: stri
   }
 }
 
-export const roundAndLocalString = (value: number ) => {
+export const roundAndLocalString = (value: number) => {
   return Math.round(removeCommas(value.toString())).toLocaleString();
 };
 
@@ -307,20 +307,23 @@ export const removeCommas = (str: string) => {
 
 // Helper function to format numbers with commas
 export const formatNumberWithCommas = (value: string | number) => {
+  // if (value.toString().includes('.')) {
+  //   return value.toString();
+  // }
   const numValue = value.toString().replace(/,/g, ''); // Remove existing commas
   return numValue.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Add commas
 };
 
 export const convertInputsToNumbers = (inputs: Record<string, string | number>): Record<string, number> => {
-  const  ents = Object.fromEntries(
+  const ents = Object.fromEntries(
     Object.entries(inputs).map(([key, value]) => {
       if (typeof value === 'string') {
         // Remove commas and convert to number
         const numericValue = Number(value.replace(/,/g, ''));
         return [key, isNaN(numericValue) ? 0 : numericValue]; // Ensure a valid number, fallback to 0
       }
-      else{
-        console.log(`key,value`, key,value)
+      else {
+        console.log(`key,value`, key, value)
         return [key, value]; // Keep original if it's already a number
       }
     })

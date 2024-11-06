@@ -67,18 +67,28 @@ const DynamicRow = ({
         }
     }
 
+    function removeNonNumeric(input: string): string {
+        // Remove all non-numeric characters except for the first period
+        const cleanedInput = input.replace(/[^0-9.]/g, '');
+      
+        // Check if there's more than one period
+        const firstPeriodIndex = cleanedInput.indexOf('.');
+        if (firstPeriodIndex !== -1) {
+          // Allow only the first period and remove any subsequent periods
+          return (
+            cleanedInput.slice(0, firstPeriodIndex + 1) +
+            cleanedInput.slice(firstPeriodIndex + 1).replace(/\./g, '')
+          );
+        }
+      
+        return cleanedInput;
+      }
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = e.target.value.replace(/[^0-9]/g, ''); // Ensure only numbers
-       
-        // console.log(`rawValue`, rawValue)
-        // let newValue=value.replace(/,/g, "");
-        // let abc = newValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const rawValue =removeNonNumeric(e.target.value); // Ensure only numbers
 
-       
         const formattedValue = formatNumberWithCommas(rawValue);
-        console.log(`rawValue`, rawValue,formattedValue)
-
         setCell(formattedValue);
         setInput&& setInput(formattedValue);
       };
@@ -87,9 +97,7 @@ const DynamicRow = ({
     const constructRow = () => {
         const cells = []
         for (let i = 1; i < numberOfCells; i++) { // Start at 1 because 0th index is always the cell title.
-            if (inputCellIndex && i === inputCellIndex && setInput) {
-                // const cellValue = cellValues[inputCellIndex] as (string | number | readonly string[] | undefined)
-                
+            if (inputCellIndex && i === inputCellIndex && setInput) {                
                 cells.push(
                     <div key={i} className={`dynamic-cell input-cell centered ${getCellClass(i)}`}>
                         <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}>
