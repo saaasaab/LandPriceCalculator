@@ -1,24 +1,24 @@
-import { calculateBuildingSqft } from "./utils";
+import { calculateBuildingSqft,convertInputsToNumbers } from "./utils";
 import { SQ_FT_PER_ACRE } from "./constants";
 import { BuildingCalculationResult } from "./types";
 
 type TIndustrialDevelopmentCalculationsInputs = {
-    grossAcres: number;
-    unbuildableAcres: number;
-    numberOfFloors: number;
-    parkingRatio: number;
-    maxImperviousSurfaceRatio: number;
-    commonSpacePercentage: number;
-    catchAll: number;
-    buildingPricePerSqFt: number;
-    hardCostPerSqFt: number;
-    permits: number;
-    miscCosts: number;
-    homeBuilderProfitPercentage: number;
-    realEstateCommissionPercentage: number;
-    landDeveloperProfitPercentage: number;
-    ownedLandCost: number;
-    costToDevelop: number;
+    grossAcres: string;
+    unbuildableAcres: string;
+    numberOfFloors: string;
+    parkingRatio: string;
+    maxImperviousSurfaceRatio: string;
+    commonSpacePercentage: string;
+    catchAll: string;
+    buildingPricePerSqFt: string;
+    hardCostPerSqFt: string;
+    permits: string;
+    miscCosts: string;
+    homeBuilderProfitPercentage: string;
+    realEstateCommissionPercentage: string;
+    landDeveloperProfitPercentage: string;
+    ownedLandCost: string;
+    costToDevelop: string;
 };
 
 type TIndustrialDevelopmentCalculationsOutputs = {
@@ -57,7 +57,9 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
         landDeveloperProfitPercentage,
         ownedLandCost,
         costToDevelop,
-    } = inputs;
+    } = convertInputsToNumbers(inputs);
+
+    
 
     // Constants
 

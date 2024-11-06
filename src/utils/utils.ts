@@ -13,21 +13,21 @@ export const getDefault = (
   const storedValue = fromLocal ? fromLocal : null;
 
   const initial = queryParamValue !== undefined ? queryParamValue
-      : storedValue ? JSON.parse(storedValue)
-          : initialValue;
+    : storedValue ? JSON.parse(storedValue)
+      : initialValue;
 
   return initial;
 
 }
 
-export const setInLocalStorage = (value: number | boolean | undefined, key: string) =>{
+export const setInLocalStorage = (value: number | boolean | undefined, key: string) => {
   if (value !== undefined) {
     localStorage.setItem(key, JSON.stringify(value));
   }
 }
 
-export const roundAndLocalString = (value: number) => {
-  return Math.round(value).toLocaleString();
+export const roundAndLocalString = (value: number ) => {
+  return Math.round(removeCommas(value.toString())).toLocaleString();
 };
 
 
@@ -301,12 +301,29 @@ export const copyToClipboard = (
 };
 
 
-export const removeCommas = (str:string)=>{
-  return Number(str.replace(/,/g, ''));
+export const removeCommas = (str: string) => {
+  return Number(str.toString().replace(/,/g, ''));
 }
 
 // Helper function to format numbers with commas
 export const formatNumberWithCommas = (value: string | number) => {
   const numValue = value.toString().replace(/,/g, ''); // Remove existing commas
   return numValue.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Add commas
+};
+
+export const convertInputsToNumbers = (inputs: Record<string, string | number>): Record<string, number> => {
+  const  ents = Object.fromEntries(
+    Object.entries(inputs).map(([key, value]) => {
+      if (typeof value === 'string') {
+        // Remove commas and convert to number
+        const numericValue = Number(value.replace(/,/g, ''));
+        return [key, isNaN(numericValue) ? 0 : numericValue]; // Ensure a valid number, fallback to 0
+      }
+      else{
+        console.log(`key,value`, key,value)
+        return [key, value]; // Keep original if it's already a number
+      }
+    })
+  );
+  return ents
 };

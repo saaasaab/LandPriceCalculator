@@ -22,12 +22,12 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
   const [copied, setCopied] = useState(false);
 
   const params: {
-    rents: number;
-    downPayment: number;
-    interestRate: number;
-    numberOfYears: number;
-    expensePercentage: number;
-    cashOnCashReturn: number;
+    rents: string;
+    downPayment: string;
+    interestRate: string;
+    numberOfYears: string;
+    expensePercentage: string;
+    cashOnCashReturn: string;
   } = {
     rents: rents,
     downPayment: downPayment,
@@ -37,17 +37,19 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     cashOnCashReturn: cashOnCashReturn,
   };
 
-  const interestRateMonthly = interestRate / 100 / 12;
-  const cashOnCashReturnMonthly = cashOnCashReturn / 100 / 12;
-  const numberOfPayments = numberOfYears * 12;
+
+
+  const interestRateMonthly = removeCommas(interestRate) / 100 / 12;
+  const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
+  const numberOfPayments = removeCommas(numberOfYears) * 12;
   const mortTop = interestRateMonthly * Math.pow((1 + interestRateMonthly), numberOfPayments);
   const mortBottom = Math.pow(1 + interestRateMonthly, numberOfPayments) - 1;
 
   const mort = mortTop / mortBottom;
 
-  const pricePerUnit = (rents * (1 - (expensePercentage / 100))) / ((downPayment / 100) * cashOnCashReturnMonthly + ((1 - (downPayment / 100)) * mort));
-  const operatingIncome = rents * (1 - expensePercentage / 100);
-  const DSCR = operatingIncome / (mort * pricePerUnit * (1 - downPayment / 100));
+  const pricePerUnit = (removeCommas(rents) * (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
+  const operatingIncome = removeCommas(rents) * (1 - removeCommas(expensePercentage) / 100);
+  const DSCR = operatingIncome / (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
   const capRate = operatingIncome * 12 / pricePerUnit;
 
 
@@ -67,7 +69,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           header={true}
         />
         <DynamicRow
-          setInput={value=> setRents(Number(removeCommas(value)))}
+          setInput={value=> setRents(value)}
           cellValues={["Rental Income for one Unit ($)", rents]}
           description="The current rental income from one unit"
           isMobile={isMobile}
@@ -75,7 +77,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setInterestRate(Number(removeCommas(value)))}
+          setInput={value=> setInterestRate(value)}
           cellValues={["Interest Rate for financing (%)", interestRate]}
           description="The interest rate your bank is willing to lend on"
           isMobile={isMobile}
@@ -83,7 +85,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setNumberOfYears(Number(removeCommas(value)))}
+          setInput={value=> setNumberOfYears(value)}
           cellValues={["Total number of years for financing (#)", numberOfYears]}
           description="How many years are you amortizing"
           isMobile={isMobile}
@@ -91,7 +93,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setDownPayment(Number(removeCommas(value)))}
+          setInput={value=> setDownPayment(value)}
           cellValues={["Down Payment (%)", downPayment]}
           description="The down payment needed from the bank for the loan."
           isMobile={isMobile}
@@ -99,7 +101,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setExpensePercentage(Number(removeCommas(value)))}
+          setInput={value=> setExpensePercentage(value)}
           cellValues={["Expense Percentages (%)", expensePercentage]}
           description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
           isMobile={isMobile}
@@ -107,7 +109,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setCashOnCashReturn(Number(removeCommas(value)))}
+          setInput={value=> setCashOnCashReturn(value)}
           cellValues={["Required cash on cash return (%)", cashOnCashReturn]}
           description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
           isMobile={isMobile}

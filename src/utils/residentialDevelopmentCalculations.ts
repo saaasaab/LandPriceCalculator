@@ -1,20 +1,21 @@
 import { infrastructurePercentage, SQ_FT_PER_ACRE } from "./constants";
+import { convertInputsToNumbers } from "./utils";
 
 type TResidentialDevelopmentCalculationsInputs = {
-    grossAcres: number;
-    unbuildableAcres: number;
-    sqFtPerLot: number;
-    unitsPerAcre: number;
-    houseSize: number;
-    housePricePerSqFt: number;
-    hardCostPerSqFt: number;
-    permits: number;
-    miscCosts: number;
-    homeBuilderProfitPercentage: number;
-    realEstateCommissionPercentage: number;
-    landDeveloperProfitPercentage: number;
-    costToDevelopPerLot: number;
-    ownedLandCost?: number; // Optional
+    grossAcres: string;
+    unbuildableAcres: string;
+    sqFtPerLot: string;
+    unitsPerAcre: string;
+    houseSize: string;
+    housePricePerSqFt: string;
+    hardCostPerSqFt: string;
+    permits: string;
+    miscCosts: string;
+    homeBuilderProfitPercentage: string;
+    realEstateCommissionPercentage: string;
+    landDeveloperProfitPercentage: string;
+    costToDevelopPerLot: string;
+    ownedLandCost?: string; // Optional
 };
 
 type TResidentialDevelopmentCalculationsOutputs = {
@@ -56,7 +57,7 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         landDeveloperProfitPercentage,
         costToDevelopPerLot,
         ownedLandCost
-    } = inputs;
+    } = convertInputsToNumbers(inputs);
 
     // Calculations
     const houseSalePrice = houseSize * housePricePerSqFt;

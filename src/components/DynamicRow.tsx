@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './DynamicRow.scss';
+import { formatNumberWithCommas } from '../utils/utils';
 
 
 
@@ -31,7 +32,7 @@ const DynamicRow = ({
 
     }) => {
 
-    
+    const [cell,setCell]=useState(cellValues[inputCellIndex||-1]  as (string | number | readonly string[] | undefined));
     const [isClicked, setIsClicked] = useState(false);
     const getCellClass = (cellIndex: number) => {
         switch (cellIndex) {
@@ -68,16 +69,18 @@ const DynamicRow = ({
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // const rawValue = e.target.value.replace(/[^0-9]/g, ''); // Ensure only numbers
+        const rawValue = e.target.value.replace(/[^0-9]/g, ''); // Ensure only numbers
        
+        // console.log(`rawValue`, rawValue)
         // let newValue=value.replace(/,/g, "");
         // let abc = newValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
        
-        // const formattedValue = formatNumberWithCommas(rawValue);
-        // console.log(`rawValue`, rawValue,formattedValue)
+        const formattedValue = formatNumberWithCommas(rawValue);
+        console.log(`rawValue`, rawValue,formattedValue)
 
-        setInput&& setInput(e.target.value);
+        setCell(formattedValue);
+        setInput&& setInput(formattedValue);
       };
 
 
@@ -85,19 +88,16 @@ const DynamicRow = ({
         const cells = []
         for (let i = 1; i < numberOfCells; i++) { // Start at 1 because 0th index is always the cell title.
             if (inputCellIndex && i === inputCellIndex && setInput) {
-                const cellValue = cellValues[inputCellIndex] as (string | number | readonly string[] | undefined)
+                // const cellValue = cellValues[inputCellIndex] as (string | number | readonly string[] | undefined)
                 
                 cells.push(
                     <div key={i} className={`dynamic-cell input-cell centered ${getCellClass(i)}`}>
                         <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}>
-                            
-                       
-
                             <input
                                 id={(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}
                                 className="centered"
-                                type="number"
-                                defaultValue={cellValue}
+                                type="text"
+                                value={cell}
                                 onChange={handleChange}
                                 onWheel={(value) => (value.target as HTMLElement).blur()}
                                 onFocus={(value) => value.target.select()} // Select the input text on focus

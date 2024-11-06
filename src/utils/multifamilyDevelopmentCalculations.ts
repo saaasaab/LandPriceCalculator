@@ -1,25 +1,24 @@
-import { calculateBuildingSqftResidential } from "./utils";
+import { calculateBuildingSqftResidential, convertInputsToNumbers } from "./utils";
 import { SQ_FT_PER_ACRE } from "./constants";
 import { BuildingCalculationResult } from "./types";
 
 type TMultifamilyDevelopmentCalculationsInputs = {
-    grossAcres: number;
-    unbuildableAcres: number;
-    hardCostPerSqFt: number;
-    permits: number;
-    miscCosts: number;
-    realEstateCommissionPercentage: number;
-    landDeveloperProfitPercentage: number;
-    ownedLandCost: number;
-    parkingSpotsPerUnit: number;
-    numberOfUnits: number;
-    numberOfFloors: number;
-    maxImperviousSurfaceRatio: number;
-    catchAll: number;
-    requiresHandicappedParking: boolean
-    multifamilyPricePerSqFt: number;
-    builderProfitPercentage: number;
-    costToDevelopPerUnit: number;
+    grossAcres: string;
+    unbuildableAcres: string;
+    hardCostPerSqFt: string;
+    permits: string;
+    miscCosts: string;
+    realEstateCommissionPercentage: string;
+    landDeveloperProfitPercentage: string;
+    ownedLandCost: string;
+    parkingSpotsPerUnit: string;
+    numberOfUnits: string;
+    numberOfFloors: string;
+    maxImperviousSurfaceRatio: string;
+    catchAll: string;
+    multifamilyPricePerSqFt: string;
+    builderProfitPercentage: string;
+    costToDevelopPerUnit: string;
 };
 
 interface IMultifamilyDevelopmentCalculationsOutputs {
@@ -54,7 +53,7 @@ interface IMultifamilyDevelopmentCalculationsOutputs {
 }
 
 
-const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalculationsInputs): IMultifamilyDevelopmentCalculationsOutputs => {
+const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalculationsInputs,requiresHandicappedParking:boolean): IMultifamilyDevelopmentCalculationsOutputs => {
     const {
         grossAcres,
         unbuildableAcres,
@@ -69,11 +68,12 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
         numberOfFloors,
         maxImperviousSurfaceRatio,
         catchAll,
-        requiresHandicappedParking,
         multifamilyPricePerSqFt,
         builderProfitPercentage,
         costToDevelopPerUnit
-    } = inputs;
+    } = convertInputsToNumbers(inputs);
+    
+    
 
 
     // Calculate net buildable acres

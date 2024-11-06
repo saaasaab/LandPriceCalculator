@@ -24,7 +24,9 @@ export enum EPageNames {
     MULTIFAMILY_DEVELOPMENT =  "MULTIFAMILY_DEVELOPMENT",
     INDUSTRIAL_DEVELOPMENT = "INDUSTRIAL_DEVELOPMENT",
     RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
-    MULTI_FAMILY_PRICE="MULTI_FAMILY_PRICE"
+    MULTI_FAMILY_PRICE="MULTI_FAMILY_PRICE",
+    MULTIFAMILY_ANALYSIS="MULTIFAMILY_ANALYSIS",
+    
 }
 
 export enum EPageTitles {
@@ -63,14 +65,40 @@ export enum EAllStates {
     sqFtPerLot = "sqFtPerLot",
     unbuildableAcres = "unbuildableAcres",
     unitsPerAcre = "unitsPerAcre",
-
+    
+    
+    // FOR THE PRICE CALCULATOR
   rents="rents",
   interestRate="interestRate",
   numberOfPayments="numberOfPayments",
   cashOnCashReturn="cashOnCashReturn",
   expensePercentage="expensePercentage",
-  downPayment="downPayment"
+  downPayment="downPayment",
 
 
-    // FOR THE PRICE CALCULATOR
+//   FOR THE MULTI FAMILY ANALYSIS
+    purchasePrice="purchasePrice",
+    units="units",
+    rentPerUnit="rentPerUnit",
+    repairPerUnit="repairPerUnit",
+    duration="duration",
+    taxRate="taxRate",
+    laundryIncome="laundryIncome",
+    storageIncome="storageIncome",
+    parkingIncome="parkingIncome",
+    otherIncome="otherIncome",
+    propertyTax="propertyTax",
+    insurance="insurance",
+    waterSewer="waterSewer",
+    garbage="garbage",
+    electric="electric",
+    gas="gas",
+    HOAFees="HOAFees",
+    lawnSnow="lawnSnow",
+    vacancy="vacancy",
+    repairs="repairs",
+    capEx="capEx",
+    propertyManagement="propertyManagement",
+
+
 }

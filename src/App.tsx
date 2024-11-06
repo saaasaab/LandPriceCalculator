@@ -43,7 +43,7 @@ function App() {
           <Route path="/residential-development" element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/industrial-development" element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-development" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
-          <Route path="/multifamily-analysis" element={<ResidentialCashFlowCalculator isMobile={isMobile} />} />
+          <Route path="/multifamily-analysis" element={<ResidentialCashFlowCalculator isMobile={isMobile} page={EPageNames.MULTIFAMILY_ANALYSIS}>} />
           <Route path="/multifamily-price-calculator" element={<ResidentialPriceCalculator isMobile={isMobile} page={EPageNames.MULTI_FAMILY_PRICE}/>} />
 
 

@@ -1,97 +1,72 @@
 import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { copyToClipboard, decimalToPercentage, getQueryParamNumber, monthlyPayment, removeCommas, roundAndLocalString } from '../utils/utils';
+import { copyToClipboard, decimalToPercentage, removeCommas, roundAndLocalString } from '../utils/utils';
 
 import './DynamicTable.scss';
-import { usePersistedState } from '../hooks/usePersistedState';
+import { usePersistedState2 } from '../hooks/usePersistedState';
+import { EAllStates, EPageNames } from '../utils/types';
+import { DEFAULT_VALUES } from '../utils/constants';
+import residentialCashFlowCalculations from '../utils/residentialCashFlowCalculations';
 
-const PAGE = "RESIDENTIAL_CASH_FLOW"
-const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
+
+const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; page: EPageNames; }) => {
 
   const queryParams = new URLSearchParams(window.location.search)
 
 
-  // Query param searches with underscores
-  const _purchasePrice = getQueryParamNumber("purchasePrice", queryParams);
-  const _units = getQueryParamNumber("units", queryParams);
-  const _rentPerUnit = getQueryParamNumber("rentPerUnit", queryParams);
-  const _repairPerUnit = getQueryParamNumber("repairPerUnit", queryParams);
-  const _downPayment = getQueryParamNumber("downPayment", queryParams);
-  const _interestRate = getQueryParamNumber("interestRate", queryParams);
-  const _duration = getQueryParamNumber("duration", queryParams);
-  const _taxRate = getQueryParamNumber("taxRate", queryParams);
-  const _laundryIncome = getQueryParamNumber("laundryIncome", queryParams);
-  const _storageIncome = getQueryParamNumber("storageIncome", queryParams);
-  const _parkingIncome = getQueryParamNumber("parkingIncome", queryParams);
-  const _otherIncome = getQueryParamNumber("otherIncome", queryParams);
-
-  const _propertyTax = getQueryParamNumber("propertyTax", queryParams);
-  const _insurance = getQueryParamNumber("insurance", queryParams);
-  const _waterSewer = getQueryParamNumber("waterSewer", queryParams);
-  const _garbage = getQueryParamNumber("garbage", queryParams);
-  const _electric = getQueryParamNumber("electric", queryParams);
-  const _gas = getQueryParamNumber("gas", queryParams);
-  const _HOAFees = getQueryParamNumber("HOAFees", queryParams);
-  const _lawnSnow = getQueryParamNumber("lawnSnow", queryParams);
-  const _vacancy = getQueryParamNumber("vacancy", queryParams);
-  const _repairs = getQueryParamNumber("repairs", queryParams);
-  const _capEx = getQueryParamNumber("capEx", queryParams);
-  const _propertyManagement = getQueryParamNumber("propertyManagement", queryParams);
-
-
-  const [purchasePrice, setPurchasePrice] = usePersistedState(PAGE, 'purchasePrice', 500000, _purchasePrice);
-  const [units, setUnits] = usePersistedState(PAGE, 'units', 4, _units);
-  const [rentPerUnit, setRentPerUnit] = usePersistedState(PAGE, 'rentPerUnit', 1500, _rentPerUnit);
-  const [repairPerUnit, setRepairPerUnit] = usePersistedState(PAGE, 'repairPerUnit', 0, _repairPerUnit);
-  const [downPayment, setDownPayment] = usePersistedState(PAGE, 'downPayment', 30, _downPayment);
-  const [interestRate, setInterestRate] = usePersistedState(PAGE, 'interestRate', 8.0, _interestRate);
-  const [duration, setDuration] = usePersistedState(PAGE, 'duration', 25, _duration);
-  const [taxRate, setTaxRate] = usePersistedState(PAGE, 'taxRate', 35, _taxRate);
-  const [laundryIncome, setLaundryIncome] = usePersistedState(PAGE, 'laundryIncome', 0, _laundryIncome);
-  const [storageIncome, setStorageIncome] = usePersistedState(PAGE, 'storageIncome', 0, _storageIncome);
-  const [parkingIncome, setParkingIncome] = usePersistedState(PAGE, 'parkingIncome', 0, _parkingIncome);
-  const [otherIncome, setOtherIncome] = usePersistedState(PAGE, 'otherIncome', 0, _otherIncome);
-
-  const [propertyTax, setPropertyTax] = usePersistedState(PAGE, 'propertyTax', 1.65, _propertyTax);
-  const [insurance, setInsurance] = usePersistedState(PAGE, 'insurance', 2.9, _insurance);
-  const [waterSewer, setWaterSewer] = usePersistedState(PAGE, 'waterSewer', 4.4, _waterSewer);
-  const [garbage, setGarbage] = usePersistedState(PAGE, 'garbage', 4.0, _garbage);
-  const [electric, setElectric] = usePersistedState(PAGE, 'electric', 5.3, _electric);
-  const [gas, setGas] = usePersistedState(PAGE, 'gas', 1, _gas);
-  const [HOAFees, setHOAFees] = usePersistedState(PAGE, 'HOAFees', 0, _HOAFees);
-  const [lawnSnow, setLawnSnow] = usePersistedState(PAGE, 'lawnSnow', 1.15, _lawnSnow);
-  const [vacancy, setVacancy] = usePersistedState(PAGE, 'vacancy', 5.0, _vacancy);
-  const [repairs, setRepairs] = usePersistedState(PAGE, 'repairs', 3.0, _repairs);
-  const [capEx, setCapEx] = usePersistedState(PAGE, 'capEx', 4.4, _capEx);
-  const [propertyManagement, setPropertyManagement] = usePersistedState(PAGE, 'propertyManagement', 8.0, _propertyManagement);
+  const [purchasePrice, setPurchasePrice] = usePersistedState2(page, EAllStates.purchasePrice, DEFAULT_VALUES[page].purchasePrice, queryParams);
+  const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
+  const [rentPerUnit, setRentPerUnit] = usePersistedState2(page, EAllStates.rentPerUnit, DEFAULT_VALUES[page].rentPerUnit, queryParams);
+  const [repairPerUnit, setRepairPerUnit] = usePersistedState2(page, EAllStates.repairPerUnit, DEFAULT_VALUES[page].repairPerUnit, queryParams);
+  const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
+  const [interestRate, setInterestRate] = usePersistedState2(page, EAllStates.interestRate, DEFAULT_VALUES[page].interestRate, queryParams);
+  const [duration, setDuration] = usePersistedState2(page, EAllStates.duration, DEFAULT_VALUES[page].duration, queryParams);
+  const [taxRate, setTaxRate] = usePersistedState2(page, EAllStates.taxRate, DEFAULT_VALUES[page].taxRate, queryParams);
+  const [laundryIncome, setLaundryIncome] = usePersistedState2(page, EAllStates.laundryIncome, DEFAULT_VALUES[page].laundryIncome, queryParams);
+  const [storageIncome, setStorageIncome] = usePersistedState2(page, EAllStates.storageIncome, DEFAULT_VALUES[page].storageIncome, queryParams);
+  const [parkingIncome, setParkingIncome] = usePersistedState2(page, EAllStates.parkingIncome, DEFAULT_VALUES[page].parkingIncome, queryParams);
+  const [otherIncome, setOtherIncome] = usePersistedState2(page, EAllStates.otherIncome, DEFAULT_VALUES[page].otherIncome, queryParams);
+  const [propertyTax, setPropertyTax] = usePersistedState2(page, EAllStates.propertyTax, DEFAULT_VALUES[page].propertyTax, queryParams);
+  const [insurance, setInsurance] = usePersistedState2(page, EAllStates.insurance, DEFAULT_VALUES[page].insurance, queryParams);
+  const [waterSewer, setWaterSewer] = usePersistedState2(page, EAllStates.waterSewer, DEFAULT_VALUES[page].waterSewer, queryParams);
+  const [garbage, setGarbage] = usePersistedState2(page, EAllStates.garbage, DEFAULT_VALUES[page].garbage, queryParams);
+  const [electric, setElectric] = usePersistedState2(page, EAllStates.electric, DEFAULT_VALUES[page].electric, queryParams);
+  const [gas, setGas] = usePersistedState2(page, EAllStates.gas, DEFAULT_VALUES[page].gas, queryParams);
+  const [HOAFees, setHOAFees] = usePersistedState2(page, EAllStates.HOAFees, DEFAULT_VALUES[page].HOAFees, queryParams);
+  const [lawnSnow, setLawnSnow] = usePersistedState2(page, EAllStates.lawnSnow, DEFAULT_VALUES[page].lawnSnow, queryParams);
+  const [vacancy, setVacancy] = usePersistedState2(page, EAllStates.vacancy, DEFAULT_VALUES[page].vacancy, queryParams);
+  const [repairs, setRepairs] = usePersistedState2(page, EAllStates.repairs, DEFAULT_VALUES[page].repairs, queryParams);
+  const [capEx, setCapEx] = usePersistedState2(page, EAllStates.capEx, DEFAULT_VALUES[page].capEx, queryParams);
+  const [propertyManagement, setPropertyManagement] = usePersistedState2(page, EAllStates.propertyManagement, DEFAULT_VALUES[page].propertyManagement, queryParams);
+  
 
   const [copied, setCopied] = useState(false);
 
   const params: {
-    purchasePrice: number;
-    units: number;
-    rentPerUnit: number;
-    repairPerUnit: number;
-    downPayment: number;
-    interestRate: number;
-    duration: number;
-    taxRate: number;
-    laundryIncome: number;
-    storageIncome: number;
-    parkingIncome: number;
-    otherIncome: number;
-    propertyTax: number;
-    insurance: number;
-    waterSewer: number;
-    garbage: number;
-    electric: number;
-    gas: number;
-    HOAFees: number;
-    lawnSnow: number;
-    vacancy: number;
-    repairs: number;
-    capEx: number;
-    propertyManagement: number;
+    purchasePrice: string;
+    units: string;
+    rentPerUnit: string;
+    repairPerUnit: string;
+    downPayment: string;
+    interestRate: string;
+    duration: string;
+    taxRate: string;
+    laundryIncome: string;
+    storageIncome: string;
+    parkingIncome: string;
+    otherIncome: string;
+    propertyTax: string;
+    insurance: string;
+    waterSewer: string;
+    garbage: string;
+    electric: string;
+    gas: string;
+    HOAFees: string;
+    lawnSnow: string;
+    vacancy: string;
+    repairs: string;
+    capEx: string;
+    propertyManagement: string;
   } = {
     purchasePrice: purchasePrice,
     units: units,
@@ -119,49 +94,37 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
     propertyManagement: propertyManagement
   };
 
+  const { 
+    rentalIncome,
+    allInCosts,
+    pricePerDoor,
+    totalMonthlyIncome,
+    operatingExpenses,
+    netOperatingIncome,
+    monthlyMorgagePayment,
+    totalExpenses,
+    totalMonthlyCashflowBeforeTaxes,
+    taxesOwned,
+    totalMonthlyCashflow,
+    capRate,
+    cashOnCashReturn,
+    DSCR,
+    grossRentMultiplier,
+    totalEquity,
+    loanConstant,
+    loanAmount,
+    breakevenLoanAmount
+  } = residentialCashFlowCalculations(params)
 
 
-  // Calculations can be added based on user inputs
-  const rentalIncome = rentPerUnit * units;
-  const pricePerDoor = purchasePrice / units + repairPerUnit;
-  const allInCosts = purchasePrice + repairPerUnit * units;
-
-  const totalMonthlyIncome = rentalIncome + laundryIncome + storageIncome + parkingIncome + otherIncome;
-
-  const operatingExpenses =
-    (propertyTax / 12 / 100 * allInCosts) +
-    (insurance + waterSewer + garbage + electric + gas + HOAFees + lawnSnow + vacancy + repairs + capEx + propertyManagement) / 100 * totalMonthlyIncome;
-
-  const netOperatingIncome = totalMonthlyIncome - operatingExpenses
-  const totalBorrowed = allInCosts * (1 - downPayment / 100);
-  const monthlyMorgagePayment = monthlyPayment(totalBorrowed, duration * 12, interestRate / 100 / 12)
-  const totalExpenses = operatingExpenses + monthlyMorgagePayment;
-  const DSCR = netOperatingIncome / monthlyMorgagePayment;
-
-  const totalMonthlyCashflowBeforeTaxes = totalMonthlyIncome - operatingExpenses - monthlyMorgagePayment;
-  const taxesOwned = totalMonthlyCashflowBeforeTaxes * taxRate / 100;
-  const totalMonthlyCashflow = totalMonthlyCashflowBeforeTaxes - taxesOwned;
 
 
-
-  const cashOnCashReturn = (totalMonthlyCashflow * 12) / (downPayment / 100 * allInCosts)
-  const grossRentMultiplier = allInCosts / (totalMonthlyIncome * 12);
-
-
-  const loanAmount = (1 - downPayment / 100) * allInCosts;
-  const totalEquity = allInCosts - loanAmount
-
-  const capRate = netOperatingIncome * 12 / allInCosts * 100;
-  const loanConstant = monthlyMorgagePayment * 12 / loanAmount;
-  const breakevenLoanAmount = (netOperatingIncome * 12) / loanConstant;
-
-
-  const calculate4CellPercentageInput = (title: string, value: number, denometer: number) => {
+  const calculate4CellPercentageInput = (title: string, value: string, denometer: string | number) => {
     return [
       title,
       value,
-      Math.round(value / 100 * denometer).toLocaleString(),
-      Math.round(value / 100 * denometer * 12).toLocaleString()]
+      Math.round(removeCommas(value) / 100 * removeCommas(denometer.toString())).toLocaleString(),
+      Math.round(removeCommas(value) / 100 * removeCommas(denometer.toString()) * 12).toLocaleString()]
   }
 
 
@@ -182,7 +145,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           header={true}
         />
         <DynamicRow
-          setInput={value=> setPurchasePrice(Number(removeCommas(value)))}
+          setInput={value=> setPurchasePrice(value)}
           cellValues={["Purchase Price ($)", purchasePrice]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -190,7 +153,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
         />
 
         <DynamicRow
-          setInput={value=> setUnits(Number(removeCommas(value)))}
+          setInput={value=> setUnits(value)}
           cellValues={["Total Number of Units (#)", units]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -198,7 +161,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
         />
 
         <DynamicRow
-          setInput={value=> setRentPerUnit(Number(removeCommas(value)))}
+          setInput={value=> setRentPerUnit(value)}
           cellValues={["Rent per Unit per month ($)", rentPerUnit]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -206,7 +169,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
         />
 
         <DynamicRow
-          setInput={value=> setRepairPerUnit(Number(removeCommas(value)))}
+          setInput={value=> setRepairPerUnit(value)}
           cellValues={["Repairs per unit ($)", repairPerUnit]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -228,7 +191,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           inputCellIndex={1}
         />
         <DynamicRow
-          setInput={value=> setDownPayment(Number(removeCommas(value)))}
+          setInput={value=> setDownPayment(value)}
           cellValues={["Down Payment (%)", downPayment]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -237,7 +200,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
 
 
         <DynamicRow
-          setInput={value=> setInterestRate(Number(removeCommas(value)))}
+          setInput={value=> setInterestRate(value)}
           cellValues={["Interest Rate (%)", interestRate]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -245,7 +208,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
         />
 
         <DynamicRow
-          setInput={value=> setDuration(Number(removeCommas(value)))}
+          setInput={value=> setDuration(value)}
           cellValues={["Duration of loan (years)", duration]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -253,7 +216,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
         />
 
         <DynamicRow
-          setInput={value=> setTaxRate(Number(removeCommas(value)))}
+          setInput={value=> setTaxRate(value)}
           cellValues={["Tax rate (%)", taxRate]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -261,7 +224,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
         />
         {/* 
         <DynamicRow
-          setInput={value=> setYearsHeld(Number(removeCommas(value)))}
+          setInput={value=> setYearsHeld(value)}
           cellValues={["Years Held (years)", yearsHeld]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -269,7 +232,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
         />
 
         <DynamicRow
-          setInput={value=> setFutureSalePrice(Number(removeCommas(value)))}
+          setInput={value=> setFutureSalePrice(value)}
           cellValues={["Expected Sale price ($)", futureSalePrice]}
           isMobile={isMobile}
           numberOfCells={2}
@@ -297,8 +260,8 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
             inputCellIndex={-1}
           />
           <DynamicRow
-            setInput={value=> setLaundryIncome(Number(removeCommas(value)))}
-            cellValues={["Laundry Income($)", decimalToPercentage(laundryIncome / totalMonthlyIncome), roundAndLocalString(laundryIncome), roundAndLocalString(laundryIncome * 12)]}
+            setInput={value=> setLaundryIncome(value)}
+            cellValues={["Laundry Income($)", decimalToPercentage(removeCommas(laundryIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(laundryIncome)), roundAndLocalString(removeCommas(laundryIncome)* 12)]}
             description="Total laundry income from onsite laundry facilities"
             isMobile={isMobile}
             numberOfCells={4}
@@ -306,24 +269,24 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setStorageIncome(Number(removeCommas(value)))}
-            cellValues={["Storage Income($)", decimalToPercentage(storageIncome / totalMonthlyIncome), roundAndLocalString(storageIncome), roundAndLocalString(storageIncome * 12)]}
+            setInput={value=> setStorageIncome(value)}
+            cellValues={["Storage Income($)", decimalToPercentage(removeCommas(storageIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(storageIncome)), roundAndLocalString(removeCommas(storageIncome) * 12)]}
             description="Total income from onsite storage facilities"
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={2}
           />
           <DynamicRow
-            setInput={value=> setParkingIncome(Number(removeCommas(value)))}
-            cellValues={["Parking Income($)", decimalToPercentage(parkingIncome / totalMonthlyIncome), roundAndLocalString(parkingIncome), roundAndLocalString(parkingIncome * 12)]}
+            setInput={value=> setParkingIncome(value)}
+            cellValues={["Parking Income($)", decimalToPercentage(removeCommas(parkingIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(parkingIncome)), roundAndLocalString(removeCommas(parkingIncome) * 12)]}
             description="Total income from onsite parking"
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={2}
           />
           <DynamicRow
-            setInput={value=> setOtherIncome(Number(removeCommas(value)))}
-            cellValues={["Other Income($)", decimalToPercentage(otherIncome / totalMonthlyIncome), roundAndLocalString(otherIncome), roundAndLocalString(otherIncome * 12)]}
+            setInput={value=> setOtherIncome(value)}
+            cellValues={["Other Income($)", decimalToPercentage(removeCommas(otherIncome) / totalMonthlyIncome), roundAndLocalString(removeCommas(otherIncome)), roundAndLocalString(removeCommas(otherIncome) * 12)]}
             description="Total other income sources for this property"
             isMobile={isMobile}
             numberOfCells={4}
@@ -331,7 +294,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setOtherIncome(Number(removeCommas(value)))}
+            setInput={value=> setOtherIncome(value)}
             cellValues={["Total Income", Math.round(totalMonthlyIncome).toLocaleString(), Math.round(totalMonthlyIncome * 12).toLocaleString()]}
             description="Total other income sources for this property"
             isMobile={isMobile}
@@ -349,13 +312,13 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
             header={true}
           />
           <DynamicRow
-            setInput={value=> setPropertyTax(Number(removeCommas(value)))}
+            setInput={value=> setPropertyTax(value)}
             cellValues={
               [
                 "Property Tax (%)",
                 propertyTax,
-                Math.round(propertyTax / 12 / 100 * allInCosts).toLocaleString(),
-                Math.round(propertyTax / 12 / 100 * allInCosts * 12).toLocaleString()
+                Math.round(removeCommas(propertyTax) / 12 / 100 * allInCosts).toLocaleString(),
+                Math.round(removeCommas(propertyTax) / 12 / 100 * allInCosts * 12).toLocaleString()
               ]}
             isMobile={isMobile}
             numberOfCells={4}
@@ -364,14 +327,14 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
 
           />
           <DynamicRow
-            setInput={value=> setInsurance(Number(removeCommas(value)))}
+            setInput={value=> setInsurance(value)}
             cellValues={calculate4CellPercentageInput("Insurance (%)", insurance, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={1}
           />
           <DynamicRow
-            setInput={value=> setWaterSewer(Number(removeCommas(value)))}
+            setInput={value=> setWaterSewer(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Water/Sewer (%)", waterSewer, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -379,7 +342,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setGarbage(Number(removeCommas(value)))}
+            setInput={value=> setGarbage(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Garbage (%)", garbage, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -387,7 +350,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setElectric(Number(removeCommas(value)))}
+            setInput={value=> setElectric(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Electric (%)", electric, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -395,7 +358,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setGas(Number(removeCommas(value)))}
+            setInput={value=> setGas(value)}
             cellValues={calculate4CellPercentageInput("Utilities: Gas (%)", gas, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -403,7 +366,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setHOAFees(Number(removeCommas(value)))}
+            setInput={value=> setHOAFees(value)}
             cellValues={calculate4CellPercentageInput("HOA Fees (%)", HOAFees, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -411,7 +374,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setLawnSnow(Number(removeCommas(value)))}
+            setInput={value=> setLawnSnow(value)}
             cellValues={calculate4CellPercentageInput("Lawn and Snow (%)", lawnSnow, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -419,7 +382,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setVacancy(Number(removeCommas(value)))}
+            setInput={value=> setVacancy(value)}
             cellValues={calculate4CellPercentageInput("Vacancy (%)", vacancy, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -427,7 +390,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setRepairs(Number(removeCommas(value)))}
+            setInput={value=> setRepairs(value)}
             cellValues={calculate4CellPercentageInput("repairs (%)", repairs, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -435,7 +398,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setCapEx(Number(removeCommas(value)))}
+            setInput={value=> setCapEx(value)}
             cellValues={calculate4CellPercentageInput("Capital Expenditures (%)", capEx, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -443,7 +406,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setPropertyManagement(Number(removeCommas(value)))}
+            setInput={value=> setPropertyManagement(value)}
             cellValues={calculate4CellPercentageInput("Property Management", propertyManagement, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
@@ -488,7 +451,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
           />
 
           <DynamicRow
-            setInput={value=> setOtherIncome(Number(removeCommas(value)))}
+            setInput={value=> setOtherIncome(value)}
             cellValues={
               ["Total Monthly Expenses", Math.round(totalExpenses).toLocaleString(), Math.round(totalExpenses * 12).toLocaleString()]}
             description="Total expenses needed to run this property"
@@ -597,7 +560,7 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
 
 
           <DynamicRow
-            cellValues={["Loan to value (LTV)	", (loanAmount / purchasePrice * 100).toFixed(2) + "%"]}
+            cellValues={["Loan to value (LTV)	", (loanAmount / removeCommas(purchasePrice) * 100).toFixed(2) + "%"]}
             isMobile={isMobile}
             numberOfCells={2}
           />
@@ -646,4 +609,4 @@ const RealEstateTable = ({ isMobile}: { isMobile: boolean; }) => {
   );
 };
 
-export default RealEstateTable;
+export default ResidentialCashFlowCalculator;

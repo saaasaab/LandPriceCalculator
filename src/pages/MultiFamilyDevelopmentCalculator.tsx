@@ -55,7 +55,6 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         numberOfFloors,
         maxImperviousSurfaceRatio,
         catchAll,
-        requiresHandicappedParking,
         multifamilyPricePerSqFt,
         builderProfitPercentage,
         costToDevelopPerUnit
@@ -87,7 +86,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         totalCosts,
         totalProfits,
         resultCalculateBuildingSqftResidential
-    } = multifamilyDevelopmentCalculations(inputs)
+    } = multifamilyDevelopmentCalculations(inputs,requiresHandicappedParking)
 
 
     return (
@@ -103,7 +102,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 <DynamicRow
                     cellValues={["Gross Acres", grossAcres]}
-                    setInput={value => setGrossAcres(Number(removeCommas(value)))}
+                    setInput={value => setGrossAcres(value)}
                     description="The total area of the land in acres before any deductions for unbuildable areas."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -111,7 +110,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 />
                 <DynamicRow
                     cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
-                    setInput={value => setUnbuildableAcres(Number(removeCommas(value)))}
+                    setInput={value => setUnbuildableAcres(value)}
                     description="The total area in acres that cannot be built upon due to environmental or geographical features."
 
                     isMobile={isMobile}
@@ -145,7 +144,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
 
                 <DynamicRow
-                    setInput={(value) => setNumberOfUnits(Number(removeCommas(value)))}
+                    setInput={(value) => setNumberOfUnits(value)}
                     cellValues={['Number of Units', numberOfUnits]}
                     description='Number of units buildible in the multo-family building'
                     isMobile={isMobile}
@@ -155,7 +154,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
 
                 <DynamicRow
-                    setInput={(value) => setCommonSpacePercentage(Number(removeCommas(value)))}
+                    setInput={(value) => setCommonSpacePercentage(value)}
                     cellValues={["Percentage used for common space(%)", commonSpacePercentage]}
                     description="Every building requires common space that cannot be leased and should be excluded from parking calculations. This includes halls, elevators, stairs, foyers, etc."
                     isMobile={isMobile}
@@ -164,7 +163,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 />
 
                 <DynamicRow
-                    setInput={(value) => setMaxImperviousSurfaceRatio(Number(removeCommas(value)))}
+                    setInput={(value) => setMaxImperviousSurfaceRatio(value)}
                     cellValues={["Max Impervious Surface (%)", maxImperviousSurfaceRatio]}
                     description="In certain zonings, the municipality limits the total impervious surface (Default 100%)"
                     isMobile={isMobile}
@@ -173,7 +172,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 />
 
                 <DynamicRow
-                    setInput={(value) => setCatchAll(Number(removeCommas(value)))}
+                    setInput={(value) => setCatchAll(value)}
                     cellValues={["Driveway Catch All (X)", catchAll]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -181,14 +180,14 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     description="A catchall amount to capture all extra driveway sqft. This will include extra sqft for approaches, garbage, utilities, and other miscellaneous hardscape excluding sidewalk. This is added to the Calculated Driveway Area"
                 />
                 <DynamicRow
-                    setInput={(value) => setNumberOfFloors(Number(removeCommas(value)))}
+                    setInput={(value) => setNumberOfFloors(value)}
                     cellValues={["Number of floors (#)", numberOfFloors]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
                 />
                 <DynamicRow
-                    setInput={(value) => setParkingSpotsPerUnit(Number(removeCommas(value)))}
+                    setInput={(value) => setParkingSpotsPerUnit(value)}
                     cellValues={["Parking spots per unit", parkingSpotsPerUnit]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -244,7 +243,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 />
 
                 <DynamicRow
-                    cellValues={['Unit sqft', roundAndLocalString(resultCalculateBuildingSqftResidential.totalBuildingSqft / numberOfUnits)]}
+                    cellValues={['Unit sqft', roundAndLocalString(resultCalculateBuildingSqftResidential.totalBuildingSqft / removeCommas(numberOfUnits))]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -271,7 +270,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Multifamily Sale Price */}
                 <DynamicRow
-                    setInput={(value) => setMultifamilyPricePerSqFt(Number(removeCommas(value)))}
+                    setInput={(value) => setMultifamilyPricePerSqFt(value)}
                     cellValues={["Multifamily Sale Price ($/SQFT)", multifamilyPricePerSqFt, roundAndLocalString(perUnitSalePrice), totalMultifamilySalePrice.toLocaleString()]}
                     description="The total sale price of the multifamily based on the size and price per square foot. Inputing in the average price per square foot for multifamilys in this area, determined by local research."
                     isMobile={isMobile}
@@ -282,7 +281,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Real Estate Agent Commission */}
                 <DynamicRow
-                    setInput={(value) => setRealEstateCommissionPercentage(Number(removeCommas(value)))}
+                    setInput={(value) => setRealEstateCommissionPercentage(value)}
                     cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage, roundAndLocalString(perUnitREAgentCommission), roundAndLocalString(totalREAgentCommission)]}
                     description="The real estate agent commission, calculated as a percentage of the multifamily sale price."
                     isMobile={isMobile}
@@ -292,7 +291,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Home Builder Profit */}
                 <DynamicRow
-                    setInput={(value) => setBuilderProfitPercentage(Number(removeCommas(value)))}
+                    setInput={(value) => setBuilderProfitPercentage(value)}
                     cellValues={["Builder Profit (%)", builderProfitPercentage, roundAndLocalString(perUnitBuilderProfit), roundAndLocalString(totalBuilderProfit)]}
                     description="The builder's profit based on a percentage of the hard costs, permits and misc costs."
                     isMobile={isMobile}
@@ -304,7 +303,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Hard Cost Per Sq Ft */}
                 <DynamicRow
-                    setInput={(value) => setHardCostPerSqFt(Number(removeCommas(value)))}
+                    setInput={(value) => setHardCostPerSqFt(value)}
                     cellValues={["Hard Cost Multifamily Build ($/SQFT)", hardCostPerSqFt, roundAndLocalString(perUnitHardCosts), roundAndLocalString(totalHardCosts)]}
                     description="The total hard costs, including construction costs, and miscellaneous costs. Inputing the hard costs for building the multifamily per square foot."
                     isMobile={isMobile}
@@ -316,7 +315,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Permits */}
                 <DynamicRow
-                    setInput={(value) => setPermits(Number(removeCommas(value)))}
+                    setInput={(value) => setPermits(value)}
                     cellValues={["Permits per unit ($/unit)", permits, roundAndLocalString(totalPermitsCost)]}
                     description="The total cost of permits required for the multifamily build."
                     isMobile={isMobile}
@@ -327,7 +326,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Misc Costs */}
                 <DynamicRow
-                    setInput={(value) => setMiscCosts(Number(removeCommas(value)))}
+                    setInput={(value) => setMiscCosts(value)}
                     cellValues={["Misc Costs per unit ($/unit)", miscCosts, roundAndLocalString(totalMiscCosts)]}
                     description="Miscellaneous costs involved in the multifamily build."
                     isMobile={isMobile}
@@ -365,7 +364,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Land Developer Profit Per Unit */}
                 <DynamicRow
-                    setInput={(value) => setLandDeveloperProfitPercentage(Number(removeCommas(value)))}
+                    setInput={(value) => setLandDeveloperProfitPercentage(value)}
                     cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage, roundAndLocalString(perUnitlandDeveloperProfit), roundAndLocalString(totalLandDeveloperProfit)]}
                     description="Percentage profit made by the developer per lot."
                     isMobile={isMobile}
@@ -375,8 +374,8 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Cost to Develop Land Per Unit */}
                 <DynamicRow
-                    setInput={(value) => setCostToDevelopPerUnit(Number(removeCommas(value)))}
-                    cellValues={["Cost to Develop the Land Per unit ($)", costToDevelopPerUnit, roundAndLocalString(costToDevelopPerUnit * numberOfUnits)]}
+                    setInput={(value) => setCostToDevelopPerUnit(value)}
+                    cellValues={["Cost to Develop the Land Per unit ($)", costToDevelopPerUnit, roundAndLocalString(removeCommas(costToDevelopPerUnit) * removeCommas(numberOfUnits))]}
                     description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
                     isMobile={isMobile}
                     numberOfCells={3}
@@ -393,9 +392,9 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 />
 
                 <DynamicRow
-                    setInput={(value) => setOwnedLandCost(Number(removeCommas(value)))}
+                    setInput={(value) => setOwnedLandCost(value)}
                     description="If you own the property already, enter in the price of the property here"
-                    cellValues={["Property Value", ownedLandCost === 0 ? undefined : ownedLandCost]}
+                    cellValues={["Property Value", removeCommas(ownedLandCost) === 0 ? undefined : ownedLandCost]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
