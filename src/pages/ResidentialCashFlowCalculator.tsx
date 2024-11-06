@@ -13,7 +13,6 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
 
   const queryParams = new URLSearchParams(window.location.search)
 
-
   const [purchasePrice, setPurchasePrice] = usePersistedState2(page, EAllStates.purchasePrice, DEFAULT_VALUES[page].purchasePrice, queryParams);
   const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
   const [rentPerUnit, setRentPerUnit] = usePersistedState2(page, EAllStates.rentPerUnit, DEFAULT_VALUES[page].rentPerUnit, queryParams);
@@ -590,11 +589,8 @@ const ResidentialCashFlowCalculator = ({ isMobile, page}: { isMobile: boolean; p
             numberOfCells={2}
           />
 
-
         </div>
-
       </div>
-
 
 
       <button

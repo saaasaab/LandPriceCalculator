@@ -135,12 +135,12 @@ export const DEFAULT_VALUES = {
     },
     [EPageNames.MULTIFAMILY_ANALYSIS]:{
         ... DEFAULT_VALUES_ZEROS,
-        purchasePrice: "50000",
+        purchasePrice: "50,000",
         units: "4",
-        rentPerUnit: "1500",
+        rentPerUnit: "1,500",
         repairPerUnit: "0",
         interestRate: "8.0",
-
+        downPayment: "25",
         duration: "25",
         taxRate: "35",
         laundryIncome: "0",
