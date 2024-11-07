@@ -1,7 +1,7 @@
 .dynamic-row {
   width: 100%;
   display: flex;
-
+  border-bottom: 1px solid  rgb(187, 168, 168);
   .dynamic-cell {
     display: flex;
     align-items: center;
@@ -50,6 +50,7 @@
 
   .first-cell {
     text-align: left;
+    cursor: pointer;
   }
 
   .info-cell {
@@ -135,7 +136,7 @@ $breakpoint-tablet: 768px;
       }
     }
     .dynamic-cell {
-      font-size: 0.8em;
+      font-size: 11px;
       padding-left: 0;
       padding-right: 0;
       input {

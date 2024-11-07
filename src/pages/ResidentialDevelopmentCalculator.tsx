@@ -343,7 +343,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                 <DynamicRow
                     setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(value) }}
                     description="If you own the property already, enter in the price of the property here"
-                    cellValues={["Property Value", removeCommas(ownedLandCost) === 0 ? undefined : ownedLandCost]}
+                    cellValues={["Land value if already own ($)", removeCommas(ownedLandCost) === 0 ? undefined : ownedLandCost]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}

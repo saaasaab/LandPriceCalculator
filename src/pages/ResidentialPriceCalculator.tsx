@@ -59,7 +59,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
       <div className="table-container">
         <DynamicRow
           cellValues={["Unit Levers"]}
-          description={'These are the levers investors can pull that are responsible for determining how much a property is worth'}
+          // description={'These are the levers investors can pull that are responsible for determining how much a property is worth'}
           isMobile={isMobile}
           numberOfCells={1}
           header={true}

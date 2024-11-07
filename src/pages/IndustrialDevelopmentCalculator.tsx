@@ -179,7 +179,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
                 <DynamicRow
                     setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.catchAll}`); setCatchAll(value) }}
-                    cellValues={["Approach Catch All (X)", catchAll]}
+                    cellValues={["Extra Pavement Multiple (X)", catchAll]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -391,7 +391,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     setInput={(value) => { 
                         setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(value) }}
                     description="If you own the property already, enter in the price of the property here"
-                    cellValues={["Property Value", Number(ownedLandCost) === 0 ? undefined : ownedLandCost]}
+                    cellValues={["Land value if already own ($)", Number(ownedLandCost) === 0 ? undefined : ownedLandCost]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
