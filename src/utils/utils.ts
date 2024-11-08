@@ -235,7 +235,6 @@ export function calculateBuildingSqftResidential(
     const acceptableBuilding = totalImperviousArea <= maxImperviousSurface;// && Math.round(buildingSize * parkingRatio) === parkingSpots
 
     if (!acceptableBuilding && count < 20000) {
-      if (count % 100) console.log(`count`, count)
       // Total impervious surface used (parking area + building footprint)
       return helper(
         maxImperviousSurface,

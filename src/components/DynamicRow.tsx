@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import './DynamicRow.scss';
 import { formatNumberWithCommas } from '../utils/utils';
 
@@ -15,6 +15,7 @@ const DynamicRow = ({
     header,
     setBooleanInput,
     booleanInputIndex,
+    // inputUnits
 }:
     {
         cellValues: (string | number | boolean | undefined)[]
@@ -27,13 +28,27 @@ const DynamicRow = ({
         booleanInputIndex?: number;
         output?: boolean;
         header?: boolean;
+        inputUnits?: string
         // type?: 'currency' | 'percentage' | 'number';
 
 
     }) => {
+        //  ${inputUnits?inputUnits:""}
 
-    const [cell,setCell]=useState(cellValues[inputCellIndex||-1]  as (string | number | readonly string[] | undefined));
+    const [cell, setCell] = useState((`${cellValues[inputCellIndex || -1]}`) as (string | number | readonly string[] | undefined));
     const [isClicked, setIsClicked] = useState(false);
+
+    const inputRef = useRef<HTMLInputElement>(null);
+    const spanRef = useRef<HTMLSpanElement>(null);
+
+    // useEffect(() => {
+    //     if (inputRef.current) {
+    //         console.log(inputRef.current.offsetWidth);
+    //     }
+    // }, [inputRef.current]);
+
+  
+
     const getCellClass = (cellIndex: number) => {
         switch (cellIndex) {
             case 0:
@@ -70,34 +85,34 @@ const DynamicRow = ({
     function removeNonNumeric(input: string): string {
         // Remove all non-numeric characters except for the first period
         const cleanedInput = input.replace(/[^0-9.]/g, '');
-      
+
         // Check if there's more than one period
         const firstPeriodIndex = cleanedInput.indexOf('.');
         if (firstPeriodIndex !== -1) {
-          // Allow only the first period and remove any subsequent periods
-          return (
-            cleanedInput.slice(0, firstPeriodIndex + 1) +
-            cleanedInput.slice(firstPeriodIndex + 1).replace(/\./g, '')
-          );
+            // Allow only the first period and remove any subsequent periods
+            return (
+                cleanedInput.slice(0, firstPeriodIndex + 1) +
+                cleanedInput.slice(firstPeriodIndex + 1).replace(/\./g, '')
+            );
         }
-      
+
         return cleanedInput;
-      }
+    }
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue =removeNonNumeric(e.target.value); // Ensure only numbers
+        const rawValue = removeNonNumeric(e.target.value); // Ensure only numbers
 
         const formattedValue = formatNumberWithCommas(rawValue);
-        setCell(formattedValue);
-        setInput&& setInput(formattedValue);
-      };
+        setCell(`${formattedValue}`);//  ${inputUnits?inputUnits:""}
+        setInput && setInput(formattedValue);
+    };
 
 
     const constructRow = () => {
         const cells = []
         for (let i = 1; i < numberOfCells; i++) { // Start at 1 because 0th index is always the cell title.
-            if (inputCellIndex && i === inputCellIndex && setInput) {                
+            if (inputCellIndex && i === inputCellIndex && setInput) {
                 cells.push(
                     <div key={i} className={`dynamic-cell input-cell centered ${getCellClass(i)}`}>
                         <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}>
@@ -109,7 +124,22 @@ const DynamicRow = ({
                                 onChange={handleChange}
                                 onWheel={(value) => (value.target as HTMLElement).blur()}
                                 onFocus={(value) => value.target.select()} // Select the input text on focus
+                                ref={inputRef}
                             />
+                            <span
+                                ref={spanRef}
+                                style={{
+                                    position: 'absolute',
+                                    visibility: 'hidden',
+                                    whiteSpace: 'pre',
+                                    fontFamily: 'inherit',
+                                    fontSize: 'inherit',
+                                    fontWeight: 'inherit',
+                                    letterSpacing: 'inherit',
+                                }}
+                            >
+                                {cell}
+                            </span>
                         </label>
                     </div>
                 )
@@ -148,10 +178,10 @@ const DynamicRow = ({
         <div className={`dynamic-row ${getRowClass(numberOfCells)} ${output ? "output-row" : ""} ${header ? "title-row" : ""} `}>
             <div className="info-cell first-cell" onClick={() => setIsClicked(!isClicked)}>
                 <h4>{cellValues[0]}</h4>
-{/* && isMobile */}
+                {/* && isMobile */}
 
-                
-                {!description || (description  && !isClicked) ? <></> :
+
+                {!description || (description && !isClicked) ? <></> :
                     <div className="description-cell">
                         {description}
                     </div>

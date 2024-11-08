@@ -7,43 +7,8 @@ import { usePersistedState2 } from '../hooks/usePersistedState';
 
 
 interface MultifamilyDevelopmentCalculationProps {
-    // buildingPricePerSqFt: number;
-    // catchAll: number;
-    // commonSpacePercentage: number;
-    // costToDevelop: number;
-    // grossAcres: number;
-    // hardCostPerSqFt: number;
-    // homeBuilderProfitPercentage: number;
     isMobile: boolean;
     page: EPageNames;
-    // landDeveloperProfitPercentage: number;
-    // maxImperviousSurfaceRatio: number;
-    // miscCosts: number;
-    // numberOfFloors: number;
-    // ownedLandCost: number;
-    // parkingRatio: number;
-    // permits: number;
-    // realEstateCommissionPercentage: number;
-    // SDCFees: number;
-    // setBuildingPricePerSqFt: (value: number) => void;
-    // setCatchAll: (value: number) => void;
-    // setCommonSpacePercentage: (value: number) => void;
-    // setCostToDevelop: (value: number) => void;
-    // setGrossAcres: (value: number) => void;
-    // setHardCostPerSqFt: (value: number) => void;
-    // setHomeBuilderProfitPercentage: (value: number) => void;
-    // setLandDeveloperProfitPercentage: (value: number) => void;
-    // setMaxImperviousSurfaceRatio: (value: number) => void;
-    // setMiscCosts: (value: number) => void;
-    // setNumberOfFloors: (value: number) => void;
-    // setOwnedLandCost: (value: number) => void;
-    // setParkingRatio: (value: number) => void;
-    // setPermits: (value: number) => void;
-    // setRealEstateCommissionPercentage: (value: number) => void;
-    // setSDCFees: (value: number) => void;
-    // setUnbuildableAcres: (value: number) => void;
-    // unbuildableAcres: number;
-
 }
 
 
@@ -129,6 +94,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
+                    inputUnits="Acres"
                 />
                 <DynamicRow
                     setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.unbuildableAcres}`); setUnbuildableAcres(value) }}
@@ -391,7 +357,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     setInput={(value) => { 
                         setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(value) }}
                     description="If you own the property already, enter in the price of the property here"
-                    cellValues={["Land value if already own ($)", Number(ownedLandCost) === 0 ? undefined : ownedLandCost]}
+                    cellValues={["Land value if already own ($)",  removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}

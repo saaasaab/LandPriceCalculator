@@ -6,8 +6,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position:relative;
   }
+.input-units{
+  position: absolute;
 
+}
   &.one-cell-row {
     .first-cell {
       width: 100%;

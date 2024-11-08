@@ -79,6 +79,7 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
     const finishedLotValue = buildingSalePrice - totalHardCosts - reAgentCommission;
     const landPercentage = finishedLotValue / buildingSalePrice;
     const landDeveloperProfit = (landDeveloperProfitPercentage / 100) * finishedLotValue;
+
     const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelop - landDeveloperProfit;
     const totalCosts = totalOfferToLandOwner + costToDevelop + landDeveloperProfit + totalHardCosts;
 
