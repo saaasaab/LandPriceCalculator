@@ -7,6 +7,7 @@ import './LandCalculator.scss';
 import ContactMe from '../components/ContactMe';
 import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './ResidentialPriceCalculator';
+import IRRCalculator from './IRRCalculator';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
@@ -40,6 +41,11 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                     isMobile={isMobile}
                     page={page}
                 />
+                case EPageNames.IRR_CALCULATOR:
+                    return <IRRCalculator
+                        isMobile={isMobile}
+                        page={page}
+                    />
             default:
                 break;
         }

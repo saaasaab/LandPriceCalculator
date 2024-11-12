@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import './DynamicRow.scss';
 import { formatNumberWithCommas } from '../utils/utils';
 
@@ -15,6 +15,7 @@ const DynamicRow = ({
     header,
     setBooleanInput,
     booleanInputIndex,
+    isDatePicker,
     // inputUnits
 }:
     {
@@ -23,6 +24,7 @@ const DynamicRow = ({
         setInput?: (value: string) => void
         setBooleanInput?: (event: React.ChangeEvent<HTMLInputElement>) => void,
         isMobile: boolean;
+        isDatePicker?: boolean;
         numberOfCells: number;
         inputCellIndex?: number;
         booleanInputIndex?: number;
@@ -33,21 +35,11 @@ const DynamicRow = ({
 
 
     }) => {
-        //  ${inputUnits?inputUnits:""}
+    //  ${inputUnits?inputUnits:""}
 
     const [cell, setCell] = useState((`${cellValues[inputCellIndex || -1]}`) as (string | number | readonly string[] | undefined));
     const [isClicked, setIsClicked] = useState(false);
 
-    const inputRef = useRef<HTMLInputElement>(null);
-    const spanRef = useRef<HTMLSpanElement>(null);
-
-    // useEffect(() => {
-    //     if (inputRef.current) {
-    //         console.log(inputRef.current.offsetWidth);
-    //     }
-    // }, [inputRef.current]);
-
-  
 
     const getCellClass = (cellIndex: number) => {
         switch (cellIndex) {
@@ -101,6 +93,7 @@ const DynamicRow = ({
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
         const rawValue = removeNonNumeric(e.target.value); // Ensure only numbers
 
         const formattedValue = formatNumberWithCommas(rawValue);
@@ -108,6 +101,11 @@ const DynamicRow = ({
         setInput && setInput(formattedValue);
     };
 
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCell(`${e.target.value}`);
+        setInput && setInput(e.target.value)
+    }
 
     const constructRow = () => {
         const cells = []
@@ -119,27 +117,12 @@ const DynamicRow = ({
                             <input
                                 id={(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}
                                 className="centered"
-                                type="text"
+                                type={isDatePicker ? "date" : "text"}
                                 value={cell}
-                                onChange={handleChange}
+                                onChange={isDatePicker ? handleDateChange : handleChange}
                                 onWheel={(value) => (value.target as HTMLElement).blur()}
                                 onFocus={(value) => value.target.select()} // Select the input text on focus
-                                ref={inputRef}
                             />
-                            <span
-                                ref={spanRef}
-                                style={{
-                                    position: 'absolute',
-                                    visibility: 'hidden',
-                                    whiteSpace: 'pre',
-                                    fontFamily: 'inherit',
-                                    fontSize: 'inherit',
-                                    fontWeight: 'inherit',
-                                    letterSpacing: 'inherit',
-                                }}
-                            >
-                                {cell}
-                            </span>
                         </label>
                     </div>
                 )

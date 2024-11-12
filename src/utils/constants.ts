@@ -64,6 +64,11 @@ export const DEFAULT_VALUES_ZEROS = {
     capEx: "0",
     propertyManagement: "0",
 
+    // FOR IRR CALCULATIONS
+    originalPurchasePrice:"0",
+    originalPurchaseDate:"01-01-1970", 
+    newPurchasePrice:"0",
+
 }
 export const DEFAULT_VALUES = {
     [EPageNames.RESIDENTIAL_DEVELOPMENT]: {
@@ -159,6 +164,13 @@ export const DEFAULT_VALUES = {
         repairs: "3.0",
         capEx: "4.4",
         propertyManagement: "8",
+
+    },
+    [EPageNames.IRR_CALCULATOR]:{
+        ... DEFAULT_VALUES_ZEROS,
+        originalPurchasePrice:"240,000",
+        originalPurchaseDate:"2016-04-01", 
+        newPurchasePrice:"600,000",
 
     }
 }

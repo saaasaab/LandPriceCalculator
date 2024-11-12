@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import NotFound from './pages/NotFound';
-import Navbar from './components/Navbar';
+import Navbar, { routes } from './components/Navbar';
 import EVERYTHING_BURGER from './pages/EVERYTHING_BURGER';
 import { EPageNames } from './utils/types';
 import NeighborhoodMeeting from './pages/NeighborhoodMeeting';
@@ -11,6 +11,7 @@ import NeighborhoodMeetingConfirmationPage from './pages/NeighborhoodMeetingConf
 
 
 import './App.css'
+import BlogPost from './pages/BlogPost';
 
 
 function App() {
@@ -42,8 +43,11 @@ function App() {
           <Route path="/multifamily-development" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-analysis" element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTIFAMILY_ANALYSIS}/>} />
           <Route path="/multifamily-price-calculator" element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTI_FAMILY_PRICE}/>} />
+          <Route path={routes.IRR_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.IRR_CALCULATOR}/>} />
+          <Route path={routes.HOW_TO_LAND_FOR_MULTIFAMILY} element={<BlogPost />} />
+          
 
-
+          
   
 
           <Route path="/1579-se-3rd-ct" element={<NeighborhoodMeeting  />} />
