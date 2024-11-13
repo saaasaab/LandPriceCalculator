@@ -21,22 +21,22 @@ export interface BuildingCalculationResult {
 
 
 export enum EPageNames {
-    MULTIFAMILY_DEVELOPMENT =  "MULTIFAMILY_DEVELOPMENT",
+    MULTIFAMILY_DEVELOPMENT = "MULTIFAMILY_DEVELOPMENT",
     INDUSTRIAL_DEVELOPMENT = "INDUSTRIAL_DEVELOPMENT",
     RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
-    MULTI_FAMILY_PRICE="MULTI_FAMILY_PRICE",
-    MULTIFAMILY_ANALYSIS="MULTIFAMILY_ANALYSIS",
-    IRR_CALCULATOR="IRR_CALCULATOR"
+    MULTI_FAMILY_PRICE = "MULTI_FAMILY_PRICE",
+    MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
+    IRR_CALCULATOR = "IRR_CALCULATOR"
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
 export enum EPageTitles {
-    MULTIFAMILY_DEVELOPMENT =  "Multi-Family Development Calculator",
+    MULTIFAMILY_DEVELOPMENT = "Multi-Family Development Calculator",
     INDUSTRIAL_DEVELOPMENT = "Industrial / Commercial Land Development Calculator",
     RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
-    MULTI_FAMILY_PRICE="Price Per Door Calculator",
-    MULTIFAMILY_ANALYSIS="Multi-Family Proforma",
-    IRR_CALCULATOR="Seller's IRR Estimator"
+    MULTI_FAMILY_PRICE = "Price Per Door Calculator",
+    MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
+    IRR_CALCULATOR = "Seller's IRR Estimator"
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 
@@ -70,45 +70,45 @@ export enum EAllStates {
     sqFtPerLot = "sqFtPerLot",
     unbuildableAcres = "unbuildableAcres",
     unitsPerAcre = "unitsPerAcre",
-    
-    
+
+
     // FOR THE PRICE CALCULATOR
-  rents="rents",
-  interestRate="interestRate",
-  numberOfPayments="numberOfPayments",
-  cashOnCashReturn="cashOnCashReturn",
-  expensePercentage="expensePercentage",
-  downPayment="downPayment",
+    rents = "rents",
+    interestRate = "interestRate",
+    numberOfPayments = "numberOfPayments",
+    cashOnCashReturn = "cashOnCashReturn",
+    expensePercentage = "expensePercentage",
+    downPayment = "downPayment",
 
 
-//   FOR THE MULTI FAMILY ANALYSIS
-    purchasePrice="purchasePrice",
-    units="units",
-    rentPerUnit="rentPerUnit",
-    repairPerUnit="repairPerUnit",
-    duration="duration",
-    taxRate="taxRate",
-    laundryIncome="laundryIncome",
-    storageIncome="storageIncome",
-    parkingIncome="parkingIncome",
-    otherIncome="otherIncome",
-    propertyTax="propertyTax",
-    insurance="insurance",
-    waterSewer="waterSewer",
-    garbage="garbage",
-    electric="electric",
-    gas="gas",
-    HOAFees="HOAFees",
-    lawnSnow="lawnSnow",
-    vacancy="vacancy",
-    repairs="repairs",
-    capEx="capEx",
-    propertyManagement="propertyManagement",
+    //   FOR THE MULTI FAMILY ANALYSIS
+    purchasePrice = "purchasePrice",
+    units = "units",
+    rentPerUnit = "rentPerUnit",
+    repairPerUnit = "repairPerUnit",
+    duration = "duration",
+    taxRate = "taxRate",
+    laundryIncome = "laundryIncome",
+    storageIncome = "storageIncome",
+    parkingIncome = "parkingIncome",
+    otherIncome = "otherIncome",
+    propertyTax = "propertyTax",
+    insurance = "insurance",
+    waterSewer = "waterSewer",
+    garbage = "garbage",
+    electric = "electric",
+    gas = "gas",
+    HOAFees = "HOAFees",
+    lawnSnow = "lawnSnow",
+    vacancy = "vacancy",
+    repairs = "repairs",
+    capEx = "capEx",
+    propertyManagement = "propertyManagement",
 
 
     // FOR IRR CALCULATIONS
-    newPurchasePrice="newPurchasePrice",
-    originalPurchaseDate="originalPurchaseDate",
-    originalPurchasePrice="originalPurchasePrice",
+    newPurchasePrice = "newPurchasePrice",
+    originalPurchaseDate = "originalPurchaseDate",
+    originalPurchasePrice = "originalPurchasePrice",
 
 }

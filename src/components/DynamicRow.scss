@@ -81,8 +81,27 @@
   .input-cell {
     padding: 0;
     background-color: #ffebcd;
+    position: relative;
     // padding: 2px 10px;
+    input[type="date"] {
+      padding-inline-start: 10px;
+      cursor: default;
+      padding: 0px;
+      font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      &::-webkit-calendar-picker-indicator { 
+        position: absolute;
+        top: 50%;
+        right: 3px;
+        transform: translateY(-50%);
 
+        // background: orange; 
+        // filter: invert(100%);
+
+      }
+  }
+  
+   
     input {
       color: #1a1a1a;
       font-size: 1em;
@@ -91,6 +110,7 @@
       height: 100%;
       border: none;
       box-sizing: border-box;
+     
     }
   }
 
@@ -145,6 +165,15 @@ $breakpoint-tablet: 768px;
       padding-right: 0;
       input {
         padding: 0;
+
+        &[type="date"] {
+          font-size: .75em;
+          &::-webkit-calendar-picker-indicator { 
+            width: 150px;
+            opacity: 0;
+            // display: none;
+          }
+        }
       }
       * {
         padding: 0;

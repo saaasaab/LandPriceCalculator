@@ -136,7 +136,8 @@ export const DEFAULT_VALUES = {
         numberOfYears: "25",
         cashOnCashReturn: "8",
         expensePercentage: "50",
-        downPayment: "30"
+        downPayment: "30",
+        units: "4",
     },
     [EPageNames.MULTIFAMILY_ANALYSIS]:{
         ... DEFAULT_VALUES_ZEROS,

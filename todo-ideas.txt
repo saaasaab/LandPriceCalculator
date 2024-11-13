@@ -3,3 +3,4 @@
 [ ] Reports development that can be paid
 [ ] Add in a break-even calculator that generates the number that creates a breakeven (0 profit) scenario
 [ ] implement a rate limiting and unlock only after they've paid me.
+[ ] Add in Offer generator to make a report for an offer. 

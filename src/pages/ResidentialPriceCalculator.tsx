@@ -13,11 +13,13 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
 
   const [rents, setRents] = usePersistedState2(page, EAllStates.rents, DEFAULT_VALUES[page].rents, queryParams);
+  
   const [interestRate, setInterestRate] = usePersistedState2(page, EAllStates.interestRate, DEFAULT_VALUES[page].interestRate, queryParams);
   const [numberOfYears, setNumberOfYears] = usePersistedState2(page, EAllStates.catchAll, DEFAULT_VALUES[page].numberOfYears, queryParams);
   const [cashOnCashReturn, setCashOnCashReturn] = usePersistedState2(page, EAllStates.cashOnCashReturn, DEFAULT_VALUES[page].cashOnCashReturn, queryParams);
   const [expensePercentage, setExpensePercentage] = usePersistedState2(page, EAllStates.expensePercentage, DEFAULT_VALUES[page].expensePercentage, queryParams);
   const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
+  const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
 
   const [copied, setCopied] = useState(false);
 
@@ -52,7 +54,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
   const DSCR = operatingIncome / (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
   const capRate = operatingIncome * 12 / pricePerUnit;
 
-
+  const totalPrice = removeCommas(units) * pricePerUnit;
   return (
 
     <>
@@ -83,7 +85,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         <DynamicRow
           setInput={value => setNumberOfYears(value)}
           cellValues={["Total number of years for financing (#)", numberOfYears]}
-          description="How many years are you amortizing"
+          description="How many years is is the loan amortizing for"
           isMobile={isMobile}
           numberOfCells={2}
           inputCellIndex={1}
@@ -108,6 +110,14 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           setInput={value => setCashOnCashReturn(value)}
           cellValues={["Required cash on cash return (%)", cashOnCashReturn]}
           description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
+          isMobile={isMobile}
+          numberOfCells={2}
+          inputCellIndex={1}
+        />
+        <DynamicRow
+          setInput={value => setUnits(value)}
+          cellValues={["Total number of units (#)", units]}
+          description="How many units are in the building"
           isMobile={isMobile}
           numberOfCells={2}
           inputCellIndex={1}
@@ -151,6 +161,15 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           isMobile={isMobile}
           numberOfCells={2}
         />
+
+<DynamicRow
+          cellValues={["Total Building Value",  roundAndLocalString(totalPrice) ]}
+          description="This is the total value of the building based on the per unit price"
+          isMobile={isMobile}
+          numberOfCells={2}
+        />
+
+
       </div>
 
 
