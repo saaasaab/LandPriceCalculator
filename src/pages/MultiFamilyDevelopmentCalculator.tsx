@@ -4,6 +4,7 @@ import multifamilyDevelopmentCalculations from '../utils/multifamilyDevelopmentC
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { usePersistedState2 } from '../hooks/usePersistedState';
+import PopupBox from '../components/PopupBox';
 
 interface MultifamilyDevelopmentCalculationProps {
     isMobile: boolean;
@@ -86,7 +87,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         totalCosts,
         totalProfits,
         resultCalculateBuildingSqftResidential
-    } = multifamilyDevelopmentCalculations(inputs,requiresHandicappedParking)
+    } = multifamilyDevelopmentCalculations(inputs, requiresHandicappedParking)
 
 
     return (
@@ -230,7 +231,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Calculated Impervious Surface Ratio', (resultCalculateBuildingSqftResidential.imperviousSurfaceRatio * 100).toLocaleString() + "%"]}
+                    cellValues={['Calculated Impervious Surface Ratio', (resultCalculateBuildingSqftResidential.imperviousSurfaceRatio * 100).toFixed(1) + "%"]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -403,7 +404,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Buyer Offer to Land Owner/Seller */}
                 <DynamicRow
-                    cellValues={["Offer to Land Owner/Seller", roundAndLocalString(perUnitActualToLandOwner), roundAndLocalString(totalActualToLandOwner)]}
+                    cellValues={["Total offer for the land", roundAndLocalString(perUnitActualToLandOwner), roundAndLocalString(totalActualToLandOwner)]}
                     description="Total offer from the buyer to the land owner or seller."
                     isMobile={isMobile}
                     numberOfCells={3}
@@ -454,6 +455,11 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 />
             </div>
 
+
+            <PopupBox
+                data={"$"+roundAndLocalString(totalActualToLandOwner)}
+                title="Total offer for the land"
+            />
         </>
     );
 };

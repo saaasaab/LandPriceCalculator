@@ -26,7 +26,8 @@ export enum EPageNames {
     RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
     MULTI_FAMILY_PRICE = "MULTI_FAMILY_PRICE",
     MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
-    IRR_CALCULATOR = "IRR_CALCULATOR"
+    IRR_CALCULATOR = "IRR_CALCULATOR",
+    LENDING_COST ="LENDING_COST"
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
@@ -36,7 +37,8 @@ export enum EPageTitles {
     RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
     MULTI_FAMILY_PRICE = "Price Per Door Calculator",
     MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
-    IRR_CALCULATOR = "Seller's IRR Estimator"
+    IRR_CALCULATOR = "Seller's IRR Estimator",
+    LENDING_COST = "Lending Cost Estimator"
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 

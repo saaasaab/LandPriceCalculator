@@ -5,6 +5,8 @@ import { DEFAULT_VALUES, SQ_FT_PER_ACRE } from '../utils/constants';
 import { EAllStates, EPageNames } from '../utils/types';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 
+import PopupBox from '../components/PopupBox';
+
 
 interface MultifamilyDevelopmentCalculationProps {
     isMobile: boolean;
@@ -185,7 +187,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Calculated Impervious Surface Ratio', (resultCalculateBuildingSqftIndustrial.imperviousSurfaceRatio * 100).toLocaleString() + "%"]}
+                    cellValues={['Calculated Impervious Surface Ratio', (resultCalculateBuildingSqftIndustrial.imperviousSurfaceRatio * 100).toFixed(1) + "%"]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -354,10 +356,11 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    setInput={(value) => { 
-                        setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(value) }}
+                    setInput={(value) => {
+                        setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(value)
+                    }}
                     description="If you own the property already, enter in the price of the property here"
-                    cellValues={["Land value if already own ($)",  removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
+                    cellValues={["Land value if already own ($)", removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -409,9 +412,13 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     output={true}
 
                 />
-
             </div>
 
+
+            <PopupBox
+                data={"$" + roundAndLocalString(totalOfferToLandOwner)}
+                title="Total offer for the land"
+            />
 
 
         </>

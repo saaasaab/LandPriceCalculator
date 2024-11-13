@@ -6,6 +6,7 @@ import residentialDevelopmentCalculations from '../utils/residentialDevelopmentC
 import { DEFAULT_VALUES, infrastructurePercentage, SQ_FT_PER_ACRE } from '../utils/constants';
 import { EAllStates, EPageNames } from '../utils/types';
 import { usePersistedState2 } from '../hooks/usePersistedState';
+import PopupBox from '../components/PopupBox';
 
 
 interface ResidentialDevelopmentCalculationProps {
@@ -152,7 +153,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 <DynamicRow
                     setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unitsPerAcre}`); setUnitsPerAcre(value) }}
-                    cellValues={["Zoning - Maximum units per acre", removeCommas(unitsPerAcre) === 0 ? undefined : unitsPerAcre]}
+                    cellValues={["Zoning - Maximum units per acre", removeCommas(unitsPerAcre) === 0 ? "": unitsPerAcre]}
                     description="The jurisdiction gives a zoning requirement for the maximum number of units per acre."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -461,6 +462,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     output={true}
                 />
             </div>
+
+            <PopupBox
+                data={"$"+roundAndLocalString(totalOfferToLandOwner)}
+                title="Total offer for the land"
+            />
 
         </>
     );

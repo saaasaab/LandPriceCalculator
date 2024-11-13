@@ -38,7 +38,7 @@ function App() {
         <Routes>
           {/* <Route path="/" element={ <LandCalculator isMobile={isMobile} />} /> */}
           <Route path="/" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
-          <Route path="/residential-development" element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
+          <Route path={routes.RESIDENTIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/industrial-development" element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-development" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path="/multifamily-analysis" element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTIFAMILY_ANALYSIS}/>} />

@@ -13,7 +13,8 @@ export const routes = {
   MULTI_FAMILY_PRICE: "/multifamily-price-calculator",
   MULTIFAMILY_ANALYSIS:"/multifamily-analysis",
   HOW_TO_LAND_FOR_MULTIFAMILY:"/how-to-analyzis-land-for-multifamily",
-  IRR_CALCULATOR:"/irr-calculator"
+  IRR_CALCULATOR:"/irr-calculator",
+  LENDING_COST: "/financial-costs"
 }
 
 
@@ -39,7 +40,7 @@ const Navbar = () => {
       <ul className={`navbar-links ${isMobileMenuOpen ? 'is-open' : ''}`}>
         {/* Development Dropdown */}
         <li className="dropdown">
-          <span className="dropdown-title">Development</span>
+          <span className="dropdown-title">Development Tools</span>
           <div className="dropdown-content">
             <Link onClick={handleToggleMenu} to="/">{EPageTitles.MULTIFAMILY_DEVELOPMENT}</Link>
             <Link onClick={handleToggleMenu} to={routes.INDUSTRIAL_DEVELOPMENT}>{EPageTitles.INDUSTRIAL_DEVELOPMENT}</Link>
@@ -49,11 +50,13 @@ const Navbar = () => {
 
         {/* Analysis Dropdown */}
         <li className="dropdown">
-          <span className="dropdown-title">Analysis</span>
+          <span className="dropdown-title">Analysis Tools</span>
           <div className="dropdown-content">
             <Link onClick={handleToggleMenu} to={routes.MULTIFAMILY_ANALYSIS}>{EPageTitles.MULTIFAMILY_ANALYSIS}</Link>
             <Link onClick={handleToggleMenu} to={routes.MULTI_FAMILY_PRICE}>{EPageTitles.MULTI_FAMILY_PRICE}</Link>
             <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
+
+            <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link>
 
 
           </div>

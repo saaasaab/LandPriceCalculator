@@ -65,14 +65,14 @@ export const DEFAULT_VALUES_ZEROS = {
     propertyManagement: "0",
 
     // FOR IRR CALCULATIONS
-    originalPurchasePrice:"0",
-    originalPurchaseDate:"01-01-1970", 
-    newPurchasePrice:"0",
+    originalPurchasePrice: "0",
+    originalPurchaseDate: "01-01-1970",
+    newPurchasePrice: "0",
 
 }
 export const DEFAULT_VALUES = {
     [EPageNames.RESIDENTIAL_DEVELOPMENT]: {
-        ... DEFAULT_VALUES_ZEROS,
+        ...DEFAULT_VALUES_ZEROS,
         grossAcres: "1.65",
         unbuildableAcres: "0",
         sqFtPerLot: "1,500",
@@ -86,11 +86,11 @@ export const DEFAULT_VALUES = {
         realEstateCommissionPercentage: "3",
         landDeveloperProfitPercentage: "15",
         costToDevelopPerLot: "40,000",
-        
+
 
     },
     [EPageNames.MULTIFAMILY_DEVELOPMENT]: {
-        ... DEFAULT_VALUES_ZEROS,
+        ...DEFAULT_VALUES_ZEROS,
         grossAcres: "0.25",
         unbuildableAcres: "0",
         numberOfUnits: "4",
@@ -110,7 +110,7 @@ export const DEFAULT_VALUES = {
         costToDevelopPerUnit: "40,000",
     },
     [EPageNames.INDUSTRIAL_DEVELOPMENT]: {
-        ... DEFAULT_VALUES_ZEROS,
+        ...DEFAULT_VALUES_ZEROS,
         grossAcres: "0.3",
         unbuildableAcres: "0",
         numberOfFloors: "2",
@@ -130,7 +130,7 @@ export const DEFAULT_VALUES = {
         ownedLandCost: "0",
     },
     [EPageNames.MULTI_FAMILY_PRICE]: {
-        ... DEFAULT_VALUES_ZEROS,
+        ...DEFAULT_VALUES_ZEROS,
         rents: "1,600",
         interestRate: "8",
         numberOfYears: "25",
@@ -139,8 +139,8 @@ export const DEFAULT_VALUES = {
         downPayment: "30",
         units: "4",
     },
-    [EPageNames.MULTIFAMILY_ANALYSIS]:{
-        ... DEFAULT_VALUES_ZEROS,
+    [EPageNames.MULTIFAMILY_ANALYSIS]: {
+        ...DEFAULT_VALUES_ZEROS,
         purchasePrice: "50,000",
         units: "4",
         rentPerUnit: "1,500",
@@ -167,13 +167,16 @@ export const DEFAULT_VALUES = {
         propertyManagement: "8",
 
     },
-    [EPageNames.IRR_CALCULATOR]:{
-        ... DEFAULT_VALUES_ZEROS,
-        originalPurchasePrice:"240,000",
-        originalPurchaseDate:"2016-04-01", 
-        newPurchasePrice:"600,000",
+    [EPageNames.IRR_CALCULATOR]: {
+        ...DEFAULT_VALUES_ZEROS,
+        originalPurchasePrice: "240,000",
+        originalPurchaseDate: "2016-04-01",
+        newPurchasePrice: "600,000",
 
-    }
+    },
+    [EPageNames.LENDING_COST]: {
+        ...DEFAULT_VALUES_ZEROS,
+    },
 }
 
 

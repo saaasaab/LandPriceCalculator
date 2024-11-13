@@ -1,0 +1,28 @@
+.popup-box {
+  position: fixed;
+  bottom: 30px;
+  right: 20px;
+  width: 200px;
+  height: 150px;
+  background: #70986f;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  .box-data {
+    font-size: 2em;
+  }
+}
+
+@media (max-width: 768px) {
+  .popup-box {
+    display: none;
+    height: 75px;
+
+    .box-data {
+      font-size: 1.25em;
+    }
+  }
+}
