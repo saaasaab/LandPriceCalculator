@@ -1,4 +1,4 @@
-import { removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/DynamicRow';
 import industrialDevelopmentCalculations from '../utils/industrialDevelopmentCalculations';
 import { DEFAULT_VALUES, SQ_FT_PER_ACRE } from '../utils/constants';
@@ -187,7 +187,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Calculated Impervious Surface Ratio', (resultCalculateBuildingSqftIndustrial.imperviousSurfaceRatio * 100).toFixed(1) + "%"]}
+                    cellValues={['Calculated Impervious Surface Ratio', convertToPercent(resultCalculateBuildingSqftIndustrial.imperviousSurfaceRatio ,1)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -307,7 +307,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    cellValues={["Land Percentage of Total Value", (landPercentage * 100).toFixed(1) + "%"]}
+                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage,1)]}
                     description="The percentage of the total building value attributed to the land."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -417,7 +417,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
             <PopupBox
                 data={"$" + roundAndLocalString(totalOfferToLandOwner)}
-                title="Total offer for the land"
+                title="How much you should pay for the land"
             />
 
 

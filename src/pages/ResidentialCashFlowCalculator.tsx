@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { copyToClipboard, decimalToPercentage, removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, copyToClipboard, decimalToPercentage, removeCommas, roundAndLocalString } from '../utils/utils';
 
 import './DynamicTable.scss';
 import { usePersistedState2 } from '../hooks/usePersistedState';
@@ -513,26 +513,26 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
           />
 
           <DynamicRow
-            cellValues={["Cap Rate", capRate.toFixed(2) + "%"]}
+            cellValues={["Cap Rate", convertToPercent(capRate)]}
             isMobile={isMobile}
             numberOfCells={2}
           />
 
           <DynamicRow
-            cellValues={["Cash On Cash Return (COC)", (cashOnCashReturn * 100).toFixed(2) + "%"]}
+            cellValues={["Cash On Cash Return (COC)", (cashOnCashReturn * 100).toFixed(1) + "%"]}
             isMobile={isMobile}
             numberOfCells={2}
           />
 
 
           <DynamicRow
-            cellValues={["Debt Service Coverage Ratio (DSCR)", DSCR.toFixed(2) + "X"]}
+            cellValues={["Debt Service Coverage Ratio (DSCR)", DSCR.toFixed(1) + "X"]}
             isMobile={isMobile}
             numberOfCells={2}
           />
 
           <DynamicRow
-            cellValues={["Gross Rent Multiplier (GRM)", (grossRentMultiplier).toFixed(2) + "X"]}
+            cellValues={["Gross Rent Multiplier (GRM)", (grossRentMultiplier).toFixed(1) + "X"]}
             isMobile={isMobile}
             numberOfCells={2}
           />
@@ -549,21 +549,21 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
             numberOfCells={2}
           />
           <DynamicRow
-            cellValues={["Loan Constant", (loanConstant * 100).toFixed(2) + "%"]}
+            cellValues={["Loan Constant", (loanConstant * 100).toFixed(1) + "%"]}
             isMobile={isMobile}
             numberOfCells={2}
           />
 
 
           <DynamicRow
-            cellValues={["Loan to value (LTV)	", (loanAmount / removeCommas(purchasePrice) * 100).toFixed(2) + "%"]}
+            cellValues={["Loan to value (LTV)	", (loanAmount / removeCommas(purchasePrice) * 100).toFixed(1) + "%"]}
             isMobile={isMobile}
             numberOfCells={2}
           />
 
 
           <DynamicRow
-            cellValues={["Loan to cost (LTC)", (loanAmount / allInCosts * 100).toFixed(2) + "%"]}
+            cellValues={["Loan to cost (LTC)", (loanAmount / allInCosts * 100).toFixed(1) + "%"]}
             isMobile={isMobile}
             numberOfCells={2}
           />
@@ -575,7 +575,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
           />
 
           <DynamicRow
-            cellValues={["Return on Equity (ROE)", ((totalMonthlyCashflow * 12) / totalEquity * 100).toFixed(2) + "%"]}
+            cellValues={["Return on Equity (ROE)", ((totalMonthlyCashflow * 12) / totalEquity * 100).toFixed(1) + "%"]}
             isMobile={isMobile}
             numberOfCells={2}
           />

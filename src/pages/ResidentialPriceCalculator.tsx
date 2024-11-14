@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { copyToClipboard, removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, copyToClipboard, removeCommas, roundAndLocalString } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import './DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
@@ -156,7 +156,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         />
 
         <DynamicRow
-          cellValues={["Cap rate (%)", (capRate * 100).toFixed(1) + "%"]}
+          cellValues={["Cap rate (%)", convertToPercent(capRate)]}
           description="The cap rate of the property based off the operating income and the value of the property."
           isMobile={isMobile}
           numberOfCells={2}

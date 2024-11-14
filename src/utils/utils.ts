@@ -30,6 +30,10 @@ export const roundAndLocalString = (value: number) => {
   return Math.round(removeCommas(value.toString())).toLocaleString();
 };
 
+export const convertToPercent = (value:number, decimals = 1) =>{
+  return (value * 100).toFixed(decimals) + "%"
+}
+
 
 export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchParams): number | undefined => {
   const param = queryParams.get(queryParam)

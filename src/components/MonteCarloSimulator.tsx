@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import createChart from '../utils/createChart';
 import { calculateMedian, calculateMode, calculateStandardDeviation } from '../utils/statistics';
+import { convertToPercent } from '../utils/utils';
 
 
 // Function to generate random values within a range
@@ -78,23 +79,23 @@ const MonteCarloSimulator: React.FC<MonteCarloSimulatorProps> = (props) => {
         // Prepare data for the histogram
         const profits = results.map(result => result.profit);
         const costs = results.map(result => result.cost);
-  // Metrics
-  const minProfit = d3.min(profits) || 0;
-  const maxProfit = d3.max(profits) || 0;
-  const meanProfit = d3.mean(profits) || 0;
-  const medianProfit = calculateMedian(profits);
-  const modeProfit = calculateMode(profits);
-  const stdDevProfit = calculateStandardDeviation(profits);
+        // Metrics
+        const minProfit = d3.min(profits) || 0;
+        const maxProfit = d3.max(profits) || 0;
+        const meanProfit = d3.mean(profits) || 0;
+        const medianProfit = calculateMedian(profits);
+        const modeProfit = calculateMode(profits);
+        const stdDevProfit = calculateStandardDeviation(profits);
 
-  setMetrics({
-      min: minProfit,
-      max: maxProfit,
-      mean: meanProfit,
-      median: medianProfit,
-      mode: modeProfit,
-      stdDev: stdDevProfit
-  });
-  
+        setMetrics({
+            min: minProfit,
+            max: maxProfit,
+            mean: meanProfit,
+            median: medianProfit,
+            mode: modeProfit,
+            stdDev: stdDevProfit
+        });
+
         createChart(profits, chartProfitsRef, {
             margins: { top: 20, right: 30, bottom: 40, left: 40 },
             width: 800,
@@ -113,7 +114,7 @@ const MonteCarloSimulator: React.FC<MonteCarloSimulatorProps> = (props) => {
     }, [results]);
 
 
-  
+
 
 
     return (
@@ -129,12 +130,12 @@ const MonteCarloSimulator: React.FC<MonteCarloSimulatorProps> = (props) => {
             </label>
             <div>
                 <h2>Simulation Results</h2>
-                <p><strong>Min Profit:</strong> {metrics.min.toFixed(2)}</p>
-                <p><strong>Max Profit:</strong> {metrics.max.toFixed(2)}</p>
-                <p><strong>Mean Profit:</strong> {metrics.mean.toFixed(2)}</p>
-                <p><strong>Median Profit:</strong> {metrics.median.toFixed(2)}</p>
-                <p><strong>Mode Profit:</strong> {metrics.mode?.toFixed(2) || "No Mode"}</p>
-                <p><strong>Standard Deviation:</strong> {metrics.stdDev.toFixed(2)}</p>
+                <p><strong>Min Profit:</strong> {convertToPercent(metrics.min,2)}</p>
+                <p><strong>Max Profit:</strong> {convertToPercent(metrics.max,2)}</p>
+                <p><strong>Mean Profit:</strong> {convertToPercent(metrics.mean,2)}</p>
+                <p><strong>Median Profit:</strong> {convertToPercent(metrics.median,2)}</p>
+                <p><strong>Mode Profit:</strong> {convertToPercent(metrics.mode,2) || "No Mode"}</p>
+                <p><strong>Standard Deviation:</strong> {convertToPercent(metrics.stdDev,2)}</p>
             </div>
             <div>
                 <h2>Results</h2>

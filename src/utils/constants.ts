@@ -68,6 +68,23 @@ export const DEFAULT_VALUES_ZEROS = {
     originalPurchasePrice: "0",
     originalPurchaseDate: "01-01-1970",
     newPurchasePrice: "0",
+    loanOriginationFee: "0",
+    loanTerm: "0",
+    drawFee: "0",
+    underwritingFee: "0",
+    inspectionFee: "0",
+    appraisalFee: "0",
+    titleInsurance: "0",
+    recordingFee: "0",
+    legalFee: "0",
+    interestReserve: "0",
+    prepaymentPenalty: "0",
+    loanExtensionFee: "0",
+    discountPoints: "0",
+    propertyValue: "0",
+    loanToValue: "0",
+    constructionToLongTermLoan: "0",
+    isInterestOnly: false,                  
 
 }
 export const DEFAULT_VALUES = {
@@ -176,7 +193,26 @@ export const DEFAULT_VALUES = {
     },
     [EPageNames.LENDING_COST]: {
         ...DEFAULT_VALUES_ZEROS,
-    },
+        loanOriginationFee: "1.0",           // 1% of loan amount
+        interestRate: "5.0",                 // 5% annual interest rate
+        loanTerm: "360",                      // 12-month term for short-term loan or construction loan
+        drawFee: "0.25",                     // 0.25% per draw
+        underwritingFee: "0.5",              // 0.5% of loan amount
+        inspectionFee: "300",                // Flat fee per inspection
+        appraisalFee: "500",                 // Flat fee for appraisal
+        titleInsurance: "0.5",               // 0.5% of loan amount
+        recordingFee: "150",                 // Flat recording fee
+        legalFee: "0.75",                    // 0.75% of loan amount for legal fees
+        interestReserve: "10.0",             // 10% of loan amount reserved for interest payments
+        prepaymentPenalty: "2.0",            // 2% of outstanding loan balance if applicable
+        loanExtensionFee: "1.0",             // 1% of loan amount for extension
+        discountPoints: "1.0",               // 1 point equals 1% of loan amount
+        propertyValue: "1,000,000",                // Default property value for loan amount ($)
+        loanToValue: "80",              // Default construction loan percentage (%)
+        constructionToLongTermLoan: "75",    // Default conversion to long-term loan percentage (%)
+        isInterestOnly: false,                  // Default interest-only option (unchecked)
+
+    }
 }
 
 

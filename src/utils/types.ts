@@ -113,4 +113,24 @@ export enum EAllStates {
     originalPurchaseDate = "originalPurchaseDate",
     originalPurchasePrice = "originalPurchasePrice",
 
+    // FOR LOAN CALCULATION FEES
+    loanOriginationFee = "loanOriginationFee",
+   
+    loanTerm = "loanTerm",
+    drawFee = "drawFee",
+    underwritingFee = "underwritingFee",
+    inspectionFee = "inspectionFee",
+    appraisalFee = "appraisalFee",
+    titleInsurance = "titleInsurance",
+    recordingFee = "recordingFee",
+    legalFee = "legalFee",
+    interestReserve = "interestReserve",
+    prepaymentPenalty = "prepaymentPenalty",
+    loanExtensionFee = "loanExtensionFee",
+    discountPoints = "discountPoints",
+    propertyValue="propertyValue",
+    loanToValue="loanToValue",
+    constructionToLongTermLoan="constructionToLongTermLoan",
+    isInterestOnly="isInterestOnly",
+
 }

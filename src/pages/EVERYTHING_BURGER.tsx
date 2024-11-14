@@ -8,6 +8,7 @@ import ContactMe from '../components/ContactMe';
 import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './ResidentialPriceCalculator';
 import IRRCalculator from './IRRCalculator';
+import LendingCosts from './LendingCosts';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
@@ -37,15 +38,20 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                     page={page}
                 />
             case EPageNames.MULTI_FAMILY_PRICE:
-                return <ResidentialPriceCalculator 
+                return <ResidentialPriceCalculator
                     isMobile={isMobile}
                     page={page}
                 />
-                case EPageNames.IRR_CALCULATOR:
-                    return <IRRCalculator
-                        isMobile={isMobile}
-                        page={page}
-                    />
+            case EPageNames.IRR_CALCULATOR:
+                return <IRRCalculator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.LENDING_COST:
+                return <LendingCosts
+                    isMobile={isMobile}
+                    page={page}
+                />
             default:
                 break;
         }

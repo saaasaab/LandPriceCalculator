@@ -5,11 +5,13 @@
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-VB283QYJX6"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+    if (window.location.hostname !== 'localhost') {
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
 
-    gtag('config', 'G-VB283QYJX6');
+      gtag('config', 'G-VB283QYJX6');
+    }
   </script>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/LandCalculatorLogo.svg" />

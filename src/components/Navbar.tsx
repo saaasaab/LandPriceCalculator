@@ -14,13 +14,12 @@ export const routes = {
   MULTIFAMILY_ANALYSIS:"/multifamily-analysis",
   HOW_TO_LAND_FOR_MULTIFAMILY:"/how-to-analyzis-land-for-multifamily",
   IRR_CALCULATOR:"/irr-calculator",
-  LENDING_COST: "/financial-costs"
+  LENDING_COST: "/lending-costs",
 }
 
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const handleToggleMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
   };
@@ -55,7 +54,6 @@ const Navbar = () => {
             <Link onClick={handleToggleMenu} to={routes.MULTIFAMILY_ANALYSIS}>{EPageTitles.MULTIFAMILY_ANALYSIS}</Link>
             <Link onClick={handleToggleMenu} to={routes.MULTI_FAMILY_PRICE}>{EPageTitles.MULTI_FAMILY_PRICE}</Link>
             <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
-
             <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link>
 
 

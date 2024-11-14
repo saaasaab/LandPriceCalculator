@@ -1,5 +1,5 @@
 import DynamicRow from '../components/DynamicRow';
-import { removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString } from '../utils/utils';
 import multifamilyDevelopmentCalculations from '../utils/multifamilyDevelopmentCalculations';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
@@ -231,7 +231,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Calculated Impervious Surface Ratio', (resultCalculateBuildingSqftResidential.imperviousSurfaceRatio * 100).toFixed(1) + "%"]}
+                    cellValues={['Calculated Impervious Surface Ratio', convertToPercent(resultCalculateBuildingSqftResidential.imperviousSurfaceRatio ,1)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -337,7 +337,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Land Percentage */}
                 <DynamicRow
-                    cellValues={["Land Percentage of Total Value", (landPercentage * 100).toFixed(1) + "%"]}
+                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage )]}
                     description="The percentage of the total multifamily value attributed to the finished lot."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -458,7 +458,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
             <PopupBox
                 data={"$"+roundAndLocalString(totalActualToLandOwner)}
-                title="Total offer for the land"
+                title="How much you should pay for the land"
             />
         </>
     );

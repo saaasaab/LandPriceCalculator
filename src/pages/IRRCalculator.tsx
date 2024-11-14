@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { copyToClipboard, removeCommas } from '../utils/utils';
+import { convertToPercent, copyToClipboard, removeCommas } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import './DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
@@ -89,7 +89,7 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
                 />
 
                 <DynamicRow
-                    cellValues={["Calculted IRR for the property", (XIRRCalculation * 100).toFixed(1) + "%"]}
+                    cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation ,1)]}
                     description="At the price you're offerine, the owner is recieving an equivalent return of this rate."
                     isMobile={isMobile}
                     numberOfCells={2}

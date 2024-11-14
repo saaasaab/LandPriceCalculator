@@ -1,4 +1,4 @@
-import { removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/DynamicRow';
 
 import './LandCalculator.scss';
@@ -277,7 +277,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Land Percentage */}
                 <DynamicRow
-                    cellValues={["Land Percentage of Total Value", (landPercentage * 100).toFixed(1) + "%"]}
+                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage)]}
                     description="The percentage of the total house value attributed to the finished lot."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -372,8 +372,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                 />
 
                 <DynamicRow
-                    cellValues={["Interest Rate (Construction Loan)", `${constructionLoanInterestRate}%`]}
-                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setConstructionLoanInterestRate(Number(value))}}
+                    cellValues={["Interest Rate (Construction Loan)", `${loanToValueInterestRate}%`]}
+                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setLoanToValueInterestRate(Number(value))}}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -465,7 +465,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
             <PopupBox
                 data={"$"+roundAndLocalString(totalOfferToLandOwner)}
-                title="Total offer for the land"
+                title="How much you should pay for the land"
             />
 
         </>

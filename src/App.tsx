@@ -39,18 +39,18 @@ function App() {
           {/* <Route path="/" element={ <LandCalculator isMobile={isMobile} />} /> */}
           <Route path="/" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
           <Route path={routes.RESIDENTIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
-          <Route path="/industrial-development" element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
-          <Route path="/multifamily-development" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
-          <Route path="/multifamily-analysis" element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTIFAMILY_ANALYSIS}/>} />
-          <Route path="/multifamily-price-calculator" element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTI_FAMILY_PRICE}/>} />
-          <Route path={routes.IRR_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.IRR_CALCULATOR}/>} />
+          <Route path={routes.INDUSTRIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
+          <Route path={routes.MULTIFAMILY_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
+          <Route path={routes.MULTIFAMILY_ANALYSIS} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTIFAMILY_ANALYSIS} />} />
+          <Route path={routes.MULTI_FAMILY_PRICE} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTI_FAMILY_PRICE} />} />
+          <Route path={routes.IRR_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.IRR_CALCULATOR} />} />
           <Route path={routes.HOW_TO_LAND_FOR_MULTIFAMILY} element={<BlogPost />} />
-          
+          <Route path={routes.LENDING_COST} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.LENDING_COST} />} />
 
-          
-  
 
-          <Route path="/1579-se-3rd-ct" element={<NeighborhoodMeeting  />} />
+
+
+          <Route path="/1579-se-3rd-ct" element={<NeighborhoodMeeting />} />
           <Route path="/1579-se-3rd-ct-confirmation" element={<NeighborhoodMeetingConfirmationPage />} />
           <Route path="*" element={<NotFound />} />
           {/* <Route path="/contact" element={<Contact />} /> */}
