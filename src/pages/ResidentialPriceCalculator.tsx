@@ -13,7 +13,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
 
   const [rents, setRents] = usePersistedState2(page, EAllStates.rents, DEFAULT_VALUES[page].rents, queryParams);
-  
+
   const [interestRate, setInterestRate] = usePersistedState2(page, EAllStates.interestRate, DEFAULT_VALUES[page].interestRate, queryParams);
   const [numberOfYears, setNumberOfYears] = usePersistedState2(page, EAllStates.catchAll, DEFAULT_VALUES[page].numberOfYears, queryParams);
   const [cashOnCashReturn, setCashOnCashReturn] = usePersistedState2(page, EAllStates.cashOnCashReturn, DEFAULT_VALUES[page].cashOnCashReturn, queryParams);
@@ -40,7 +40,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
   };
 
 
-
   const interestRateMonthly = removeCommas(interestRate) / 100 / 12;
   const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
   const numberOfPayments = removeCommas(numberOfYears) * 12;
@@ -51,10 +50,17 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
   const pricePerUnit = (removeCommas(rents) * (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
   const operatingIncome = removeCommas(rents) * (1 - removeCommas(expensePercentage) / 100);
+
+  const mortgagePayment = (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
+  const cashFlowPerUnit = operatingIncome - mortgagePayment;
   const DSCR = operatingIncome / (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
   const capRate = operatingIncome * 12 / pricePerUnit;
 
   const totalPrice = removeCommas(units) * pricePerUnit;
+
+
+
+
   return (
 
     <>
@@ -68,7 +74,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         />
         <DynamicRow
           setInput={value => setRents(value)}
-          cellValues={["Rental Income for one Unit ($)", rents]}
+          cellValues={["Average rental Income for one unit ($)", rents]}
           description="The current rental income from one unit"
           isMobile={isMobile}
           numberOfCells={2}
@@ -148,6 +154,22 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           numberOfCells={2}
         />
 
+
+        <DynamicRow
+          cellValues={["Mortgage Payment ($)", roundAndLocalString(mortgagePayment)]}
+          description="The payment for the mortgage per unit"
+          isMobile={isMobile}
+          numberOfCells={2}
+        />
+
+        <DynamicRow
+          cellValues={["Cash flow per unit ($)", roundAndLocalString(cashFlowPerUnit)]}
+          description="The cash flow per unit"
+          isMobile={isMobile}
+          numberOfCells={2}
+        />
+
+
         <DynamicRow
           cellValues={["Debt service coverage ratio DSCR (X)", Math.round(DSCR * 100) / 100 + "X"]}
           description="A bank normally is looking for 1.25 or greater"
@@ -162,8 +184,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
           numberOfCells={2}
         />
 
-<DynamicRow
-          cellValues={["Total Building Value",  roundAndLocalString(totalPrice) ]}
+        <DynamicRow
+          cellValues={["Total Building Value", roundAndLocalString(totalPrice)]}
           description="This is the total value of the building based on the per unit price"
           isMobile={isMobile}
           numberOfCells={2}

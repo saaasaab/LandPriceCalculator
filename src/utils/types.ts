@@ -24,10 +24,12 @@ export enum EPageNames {
     MULTIFAMILY_DEVELOPMENT = "MULTIFAMILY_DEVELOPMENT",
     INDUSTRIAL_DEVELOPMENT = "INDUSTRIAL_DEVELOPMENT",
     RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
-    MULTI_FAMILY_PRICE = "MULTI_FAMILY_PRICE",
+    MULTI_FAMILY_PRICE_PER_DOOR = "MULTI_FAMILY_PRICE_PER_DOOR",
     MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
     IRR_CALCULATOR = "IRR_CALCULATOR",
-    LENDING_COST ="LENDING_COST"
+    LENDING_COST ="LENDING_COST",
+    WATERFALL="WATERFALL",
+    CONSTRUCTION_BUDGET="CONSTRUCTION_BUDGET",
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
@@ -35,10 +37,12 @@ export enum EPageTitles {
     MULTIFAMILY_DEVELOPMENT = "Multi-Family Development Calculator",
     INDUSTRIAL_DEVELOPMENT = "Industrial / Commercial Land Development Calculator",
     RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
-    MULTI_FAMILY_PRICE = "Price Per Door Calculator",
+    MULTI_FAMILY_PRICE_PER_DOOR = "Price Per Door Calculator",
     MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
     IRR_CALCULATOR = "Seller's IRR Estimator",
-    LENDING_COST = "Lending Cost Estimator"
+    LENDING_COST = "Lending Cost Estimator",
+    WATERFALL="Waterfall Distribution Generator",
+    CONSTRUCTION_BUDGET="Construction Budget Generator",
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 

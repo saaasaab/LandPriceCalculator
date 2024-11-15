@@ -10,11 +10,14 @@ export const routes = {
   MULTIFAMILY_DEVELOPMENT:"/residential-development",
   INDUSTRIAL_DEVELOPMENT :"/industrial-development",
   RESIDENTIAL_DEVELOPMENT: "/multifamily-development",
-  MULTI_FAMILY_PRICE: "/multifamily-price-calculator",
+  MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
   MULTIFAMILY_ANALYSIS:"/multifamily-analysis",
   HOW_TO_LAND_FOR_MULTIFAMILY:"/how-to-analyzis-land-for-multifamily",
   IRR_CALCULATOR:"/irr-calculator",
   LENDING_COST: "/lending-costs",
+  WATERFALL: "/waterfall-generator",
+  CONSTRUCTION_BUDGET: "/construction-budget-generator",
+
 }
 
 
@@ -52,11 +55,11 @@ const Navbar = () => {
           <span className="dropdown-title">Analysis Tools</span>
           <div className="dropdown-content">
             <Link onClick={handleToggleMenu} to={routes.MULTIFAMILY_ANALYSIS}>{EPageTitles.MULTIFAMILY_ANALYSIS}</Link>
-            <Link onClick={handleToggleMenu} to={routes.MULTI_FAMILY_PRICE}>{EPageTitles.MULTI_FAMILY_PRICE}</Link>
+            <Link onClick={handleToggleMenu} to={routes.MULTI_FAMILY_PRICE_PER_DOOR}>{EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR}</Link>
             <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
-            <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link>
-
-
+            {/* <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link> */}
+            {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
+            <Link onClick={handleToggleMenu} to={routes.CONSTRUCTION_BUDGET}>{EPageTitles.CONSTRUCTION_BUDGET}</Link>
           </div>
         </li>
 

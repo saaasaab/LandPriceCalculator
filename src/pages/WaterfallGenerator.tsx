@@ -7,7 +7,7 @@ import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { XIRR } from '../utils/xirrCalculation';
 
-const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
+const WaterfallGenerator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
 
     const queryParams = new URLSearchParams(window.location.search)
 
@@ -89,7 +89,7 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
                 />
 
                 <DynamicRow
-                    cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation ,1)]}
+                    cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation, 1)]}
                     description="At the price you're offering, the owner is recieving an equivalent return of this rate."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -112,4 +112,4 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
     );
 };
 
-export default IRRCalculator;
+export default WaterfallGenerator;

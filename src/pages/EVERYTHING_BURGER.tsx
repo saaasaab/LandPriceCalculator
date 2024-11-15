@@ -9,6 +9,8 @@ import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './ResidentialPriceCalculator';
 import IRRCalculator from './IRRCalculator';
 import LendingCosts from './LendingCosts';
+import WaterfallGenerator from './WaterfallGenerator';
+import ConstructionBudget from './ConstructionBudget';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
@@ -37,7 +39,7 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                     isMobile={isMobile}
                     page={page}
                 />
-            case EPageNames.MULTI_FAMILY_PRICE:
+            case EPageNames.MULTI_FAMILY_PRICE_PER_DOOR:
                 return <ResidentialPriceCalculator
                     isMobile={isMobile}
                     page={page}
@@ -52,6 +54,19 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                     isMobile={isMobile}
                     page={page}
                 />
+            case EPageNames.WATERFALL:
+                return <WaterfallGenerator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.CONSTRUCTION_BUDGET:
+                return <ConstructionBudget
+                    isMobile={isMobile}
+                    page={page}
+                />
+
+
+
             default:
                 break;
         }

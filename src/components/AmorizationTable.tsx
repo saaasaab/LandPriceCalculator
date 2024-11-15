@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { convertToPercent } from '../utils/utils';
+// import { convertToPercent } from '../utils/utils';
 
 interface AmortizationTableProps {
     loanAmount: number;
@@ -197,10 +197,10 @@ const AmortizationTable: React.FC<AmortizationTableProps> = ({ loanAmount, inter
                     {amortizationData.map((row) => (
                         <tr key={row.month} style={{ borderBottom: "1px solid #f0f0f0" }}>
                             <td>{row.month}</td>
-                            <td>{convertToPercent(row.remainingBalance)}</td>
-                            <td>{convertToPercent(row.totalPaid)}</td>
-                            <td>{convertToPercent(row.totalInterestPaid)}</td>
-                            <td>{convertToPercent(row.totalPrincipalPaid)}</td>
+                            <td>{row.remainingBalance.toFixed(2)}</td>
+                            <td>{row.totalPaid.toFixed(2)}</td>
+                            <td>{row.totalInterestPaid.toFixed(2)}</td>
+                            <td>{row.totalPrincipalPaid.toFixed(2)}</td>
                         </tr>
                     ))}
                 </tbody>

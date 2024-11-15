@@ -5,4 +5,8 @@
 [ ] implement a rate limiting and unlock only after they've paid me.
 [ ] Add in Offer generator to make a report for an offer. 
 [ ] Waterfall Analysis for investor distributions
+[ ] 5 year distribution chart 
+[ ] Construction Budget generator
+[ ] 
+
 

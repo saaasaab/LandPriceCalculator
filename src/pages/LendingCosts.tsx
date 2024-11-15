@@ -308,7 +308,7 @@ const LendingCosts = ({ isMobile, page }: { isMobile: boolean; page: EPageNames;
 
                 {/* <DynamicRow
                     cellValues={["Calculted IRR for the property", (XIRRCalculation * 100).toFixed(1) + "%"]}
-                    description="At the price you're offerine, the owner is recieving an equivalent return of this rate."
+                    description="At the price you're offering, the owner is recieving an equivalent return of this rate."
                     isMobile={isMobile}
                     numberOfCells={2}
                 /> */}

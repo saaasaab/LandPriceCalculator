@@ -146,7 +146,7 @@ export const DEFAULT_VALUES = {
         SDCFees: "20,000",
         ownedLandCost: "0",
     },
-    [EPageNames.MULTI_FAMILY_PRICE]: {
+    [EPageNames.MULTI_FAMILY_PRICE_PER_DOOR]: {
         ...DEFAULT_VALUES_ZEROS,
         rents: "1,600",
         interestRate: "8",
@@ -212,7 +212,13 @@ export const DEFAULT_VALUES = {
         constructionToLongTermLoan: "75",    // Default conversion to long-term loan percentage (%)
         isInterestOnly: false,                  // Default interest-only option (unchecked)
 
-    }
+    },
+    [EPageNames.WATERFALL]:{
+        ...DEFAULT_VALUES_ZEROS,
+    },
+    [EPageNames.CONSTRUCTION_BUDGET]:{
+        ...DEFAULT_VALUES_ZEROS,
+    },
 }
 
 
