@@ -55,21 +55,20 @@ type TConstructionBudgetCalculationsInputs = {
 };
 
 type TConstructionBudgetCalculationsOutputs = {
-    totalBuildableSqFt: number;
-    totalBuildingSqft: number;
-    buildingSalePrice: number;
-    totalHardCosts: number;
-    homeBuilderProfit: number;
-    reAgentCommission: number;
-    finishedLotValue: number;
-    landPercentage: number;
-    landDeveloperProfit: number;
-    totalOfferToLandOwner: number;
-    totalCosts: number;
-    netBuildableAcres: number;
+    totalLandCosts: number;
+      totalDesignsEngineering: number;
+      totalCityFees: number;
+      totalSystemDevelopmentCharges: number;
+      totalLandPreparation: number;
+      totalRoughBuildout: number;
+      totalFinishings: number;
+      totalContractorFee: number;
+      totalConstructionCosts: number;
+      totalCostsToBreakGround: number;
+      totalCosts: number;
 };
 
-export const constructionBudgetCalculations = (inputs:TConstructionBudgetCalculationsInputs) => {
+export const constructionBudgetCalculations = (inputs:TConstructionBudgetCalculationsInputs): TConstructionBudgetCalculationsOutputs  => {
 
     const {
         landAcquisition,

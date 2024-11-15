@@ -14,72 +14,72 @@ const ConstructionBudget = ({ isMobile, page }: { isMobile: boolean; page: EPage
 
     console.log(`isMobile, page`, isMobile, page)
     // Land Costs
-    const [landAcquisition, setLandAcquisition] = useState<string>('62000');
-    const [closingCosts, setClosingCosts] = useState<string>('3000');
+    const [landAcquisition, setLandAcquisition] = useState<string>('62,000');
+    const [closingCosts, setClosingCosts] = useState<string>('3,000');
 
 
     // Designs and Engineering Costs
-    const [architecturalDesigns, setArchitecturalDesigns] = useState<string>('20625');
-    const [civilEngineering, setCivilEngineering] = useState<string>('10000');
-    const [surveying, setSurveying] = useState<string>('10000');
-    const [landscapeDesign, setLandscapeDesign] = useState<string>('1000');
-    const [geotechnical, setGeotechnical] = useState<string>('3000');
-    const [mepEngineering, setMepEngineering] = useState<string>('15000');
+    const [architecturalDesigns, setArchitecturalDesigns] = useState<string>('20,625');
+    const [civilEngineering, setCivilEngineering] = useState<string>('10,000');
+    const [surveying, setSurveying] = useState<string>('10,000');
+    const [landscapeDesign, setLandscapeDesign] = useState<string>('1,000');
+    const [geotechnical, setGeotechnical] = useState<string>('3,000');
+    const [mepEngineering, setMepEngineering] = useState<string>('15,000');
 
     // City application, review, and permit fees
-    const [preApplication, setPreApplication] = useState<string>('1500');
-    const [siteDesignReview, setSiteDesignReview] = useState<string>('4467');
-    const [sitePlanReview, setSitePlanReview] = useState<string>('1000');
+    const [preApplication, setPreApplication] = useState<string>('1,500');
+    const [siteDesignReview, setSiteDesignReview] = useState<string>('4,467');
+    const [sitePlanReview, setSitePlanReview] = useState<string>('1,000');
     const [buildingPermit, setBuildingPermit] = useState<string>('369');
 
     // System development charges
-    const [stormwater, setStormwater] = useState<string>('1972');
-    const [transportation, setTransportation] = useState<string>('27335');
-    const [sanitarySewer, setSanitarySewer] = useState<string>('3411');
-    const [parks, setParks] = useState<string>('5684');
-    const [water, setWater] = useState<string>('10979');
+    const [stormwater, setStormwater] = useState<string>('1,972');
+    const [transportation, setTransportation] = useState<string>('27,335');
+    const [sanitarySewer, setSanitarySewer] = useState<string>('3,411');
+    const [parks, setParks] = useState<string>('5,684');
+    const [water, setWater] = useState<string>('1,0979');
 
     // Land Preparation Costs
-    const [excavation, setExcavation] = useState<string>('15000');
-    const [waterRetention, setWaterRetention] = useState<string>('10000');
-    const [foundation, setFoundation] = useState<string>('76000');
-    const [asphalt, setAsphalt] = useState<string>('26000');
+    const [excavation, setExcavation] = useState<string>('15,000');
+    const [waterRetention, setWaterRetention] = useState<string>('10,000');
+    const [foundation, setFoundation] = useState<string>('76,000');
+    const [asphalt, setAsphalt] = useState<string>('26,000');
 
     // Rough Buildout Costs
-    const [lumber, setLumber] = useState<string>('60000');
-    const [trusses, setTrusses] = useState<string>('17000');
-    const [framingLabor, setFramingLabor] = useState<string>('58000');
-    const [windows, setWindows] = useState<string>('9000');
-    const [siding, setSiding] = useState<string>('31000');
-    const [hvac, setHvac] = useState<string>('18000');
-    const [plumbing, setPlumbing] = useState<string>('20000');
-    const [electrical, setElectrical] = useState<string>('62000');
-    const [gasPiping, setGasPiping] = useState<string>('3000');
-    const [gutters, setGutters] = useState<string>('5000');
-    const [roofing, setRoofing] = useState<string>('14000');
-    const [exteriorDoors, setExteriorDoors] = useState<string>('4000');
+    const [lumber, setLumber] = useState<string>('60,000');
+    const [trusses, setTrusses] = useState<string>('17,000');
+    const [framingLabor, setFramingLabor] = useState<string>('58,000');
+    const [windows, setWindows] = useState<string>('9,000');
+    const [siding, setSiding] = useState<string>('31,000');
+    const [hvac, setHvac] = useState<string>('18,000');
+    const [plumbing, setPlumbing] = useState<string>('20,000');
+    const [electrical, setElectrical] = useState<string>('62,000');
+    const [gasPiping, setGasPiping] = useState<string>('3,000');
+    const [gutters, setGutters] = useState<string>('5,000');
+    const [roofing, setRoofing] = useState<string>('14,000');
+    const [exteriorDoors, setExteriorDoors] = useState<string>('4,000');
 
     // Finishings Costs
-    const [insulation, setInsulation] = useState<string>('14000');
-    const [drywall, setDrywall] = useState<string>('50000');
-    const [interiorTrim, setInteriorTrim] = useState<string>('44000');
-    const [painting, setPainting] = useState<string>('45000');
-    const [cabinets, setCabinets] = useState<string>('4000');
-    const [countertops, setCountertops] = useState<string>('11000');
-    const [flooring, setFlooring] = useState<string>('11000');
-    const [carpet, setCarpet] = useState<string>('11000');
-    const [hardware, setHardware] = useState<string>('4000');
-    const [appliances, setAppliances] = useState<string>('4000');
-    const [lightFixtures, setLightFixtures] = useState<string>('5000');
-    const [windowCovering, setWindowCovering] = useState<string>('7000');
-    const [cleanup, setCleanup] = useState<string>('10000');
-    const [flatwork, setFlatwork] = useState<string>('6000');
-    const [fences, setFences] = useState<string>('1000');
-    const [landscaping, setLandscaping] = useState<string>('13000');
+    const [insulation, setInsulation] = useState<string>('14,000');
+    const [drywall, setDrywall] = useState<string>('50,000');
+    const [interiorTrim, setInteriorTrim] = useState<string>('44,000');
+    const [painting, setPainting] = useState<string>('45,000');
+    const [cabinets, setCabinets] = useState<string>('4,000');
+    const [countertops, setCountertops] = useState<string>('11,000');
+    const [flooring, setFlooring] = useState<string>('11,000');
+    const [carpet, setCarpet] = useState<string>('11,000');
+    const [hardware, setHardware] = useState<string>('4,000');
+    const [appliances, setAppliances] = useState<string>('4,000');
+    const [lightFixtures, setLightFixtures] = useState<string>('5,000');
+    const [windowCovering, setWindowCovering] = useState<string>('7,000');
+    const [cleanup, setCleanup] = useState<string>('10,000');
+    const [flatwork, setFlatwork] = useState<string>('6,000');
+    const [fences, setFences] = useState<string>('1,000');
+    const [landscaping, setLandscaping] = useState<string>('13,000');
 
     // Contractor Fee and Contingencies
-    const [generalConditions, setGeneralConditions] = useState<string>('10000');
-    const [contractorFee, setContractorFee] = useState<string>('136000');
+    const [generalConditions, setGeneralConditions] = useState<string>('10,000');
+    const [contractorFee, setContractorFee] = useState<string>('136,000');
 
     const params = {
         landAcquisition,
