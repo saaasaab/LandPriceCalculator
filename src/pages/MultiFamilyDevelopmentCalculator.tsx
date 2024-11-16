@@ -1,10 +1,11 @@
 import DynamicRow from '../components/DynamicRow';
-import { convertToPercent, removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, copyToClipboard, removeCommas, roundAndLocalString } from '../utils/utils';
 import multifamilyDevelopmentCalculations from '../utils/multifamilyDevelopmentCalculations';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import PopupBox from '../components/PopupBox';
+import { useState } from 'react';
 
 interface MultifamilyDevelopmentCalculationProps {
     isMobile: boolean;
@@ -41,7 +42,8 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
     const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState2(page, EAllStates.realEstateCommissionPercentage, DEFAULT_VALUES[page].realEstateCommissionPercentage, queryParams);
     const [requiresHandicappedParking, setRequiresHandicappedParking] = usePersistedState2(page, EAllStates.requiresHandicappedParking, DEFAULT_VALUES[page].requiresHandicappedParking, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
-
+    const [copied, setCopied] = useState(false);
+    
     const inputs = {
         grossAcres,
         unbuildableAcres,
@@ -460,6 +462,12 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 data={"$"+roundAndLocalString(totalActualToLandOwner)}
                 title="How much you should pay for the land"
             />
+            <button
+                onClick={() => copyToClipboard(inputs, setCopied)}
+                className={`copy-url-button ${copied ? 'copied' : ''}`}
+            >
+                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
+            </button>
         </>
     );
 };

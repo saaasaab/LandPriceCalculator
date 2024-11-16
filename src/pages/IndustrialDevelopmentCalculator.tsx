@@ -1,4 +1,4 @@
-import { convertToPercent, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { convertToPercent, copyToClipboard, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/DynamicRow';
 import industrialDevelopmentCalculations from '../utils/industrialDevelopmentCalculations';
 import { DEFAULT_VALUES, SQ_FT_PER_ACRE } from '../utils/constants';
@@ -6,6 +6,7 @@ import { EAllStates, EPageNames } from '../utils/types';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 
 import PopupBox from '../components/PopupBox';
+import { useState } from 'react';
 
 
 interface MultifamilyDevelopmentCalculationProps {
@@ -43,7 +44,8 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
     const [SDCFees, setSDCFees] = usePersistedState2(page, EAllStates.SDCFees, DEFAULT_VALUES[page].SDCFees, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
 
-
+    const [copied, setCopied] = useState(false);
+    
     const inputs = {
         grossAcres,
         unbuildableAcres,
@@ -187,7 +189,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Calculated Impervious Surface Ratio', convertToPercent(resultCalculateBuildingSqftIndustrial.imperviousSurfaceRatio ,1)]}
+                    cellValues={['Calculated Impervious Surface Ratio', convertToPercent(resultCalculateBuildingSqftIndustrial.imperviousSurfaceRatio, 1)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -307,7 +309,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage,1)]}
+                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage, 1)]}
                     description="The percentage of the total building value attributed to the land."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -420,6 +422,12 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 title="How much you should pay for the land"
             />
 
+            <button
+                onClick={() => copyToClipboard(inputs, setCopied)}
+                className={`copy-url-button ${copied ? 'copied' : ''}`}
+            >
+                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
+            </button>
 
         </>
     );

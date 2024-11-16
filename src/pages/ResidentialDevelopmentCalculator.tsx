@@ -1,4 +1,4 @@
-import { convertToPercent, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { convertToPercent, copyToClipboard, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/DynamicRow';
 
 import './LandCalculator.scss';
@@ -7,6 +7,7 @@ import { DEFAULT_VALUES, infrastructurePercentage, SQ_FT_PER_ACRE } from '../uti
 import { EAllStates, EPageNames } from '../utils/types';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import PopupBox from '../components/PopupBox';
+import { useState } from 'react';
 
 
 interface ResidentialDevelopmentCalculationProps {
@@ -40,7 +41,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
     const [sqFtPerLot, setSqFtPerLot] = usePersistedState2(page, EAllStates.sqFtPerLot, DEFAULT_VALUES[page].sqFtPerLot, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
     const [unitsPerAcre, setUnitsPerAcre] = usePersistedState2(page, EAllStates.unitsPerAcre, DEFAULT_VALUES[page].unitsPerAcre, queryParams);
-
+    const [copied, setCopied] = useState(false);
+    
     const inputs = {
         grossAcres,
         unbuildableAcres,
@@ -153,7 +155,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 <DynamicRow
                     setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unitsPerAcre}`); setUnitsPerAcre(value) }}
-                    cellValues={["Zoning - Maximum units per acre", removeCommas(unitsPerAcre) === 0 ? "": unitsPerAcre]}
+                    cellValues={["Zoning - Maximum units per acre", removeCommas(unitsPerAcre) === 0 ? "" : unitsPerAcre]}
                     description="The jurisdiction gives a zoning requirement for the maximum number of units per acre."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -362,65 +364,6 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
             </div>
 
 
-
-            {/* <div className="table-container">
-                <DynamicRow
-                    cellValues={["Financing Options"]}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    header={true}
-                />
-
-                <DynamicRow
-                    cellValues={["Interest Rate (Construction Loan)", `${loanToValueInterestRate}%`]}
-                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setLoanToValueInterestRate(Number(value))}}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-                <DynamicRow
-                    cellValues={["Interest Rate (Conventional Loan)", `${conventionalLoanInterestRate}%`]}
-                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setConventionalLoanInterestRate(Number(value))}}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-                <DynamicRow
-                    cellValues={["All Cash Purchase", `${allCash ? "Yes" : "No"}`]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-                <DynamicRow
-                    cellValues={["Construction to Conventional", `${constructionToConventional ? "Yes" : "No"}`]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-                <DynamicRow
-                    cellValues={["Loan Duration", `${loanDuration} years`]}
-                    setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.}`);  setLoanDuration(Number(value))}}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-                <DynamicRow
-                    cellValues={["Total Financing Cost", roundAndLocalString(totalFinancingCosts)]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    description="Total cost of financing based on the selected loan type and interest rate"
-                    output={true}
-                />
-            </div> */}
-
-
-
-
             <div className="table-container">
                 <DynamicRow
                     cellValues={["Project Overview"]}
@@ -464,10 +407,16 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
             </div>
 
             <PopupBox
-                data={"$"+roundAndLocalString(totalOfferToLandOwner)}
+                data={"$" + roundAndLocalString(totalOfferToLandOwner)}
                 title="How much you should pay for the land"
             />
 
+            <button
+                onClick={() => copyToClipboard(inputs, setCopied)}
+                className={`copy-url-button ${copied ? 'copied' : ''}`}
+            >
+                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
+            </button>
         </>
     );
 };
