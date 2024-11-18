@@ -1,4 +1,4 @@
-import DynamicRow from '../components/DynamicRow';
+import DynamicRow from '../components/RowTypes/DynamicRow';
 import { convertToPercent, removeCommas, roundAndLocalString } from '../utils/utils';
 import multifamilyDevelopmentCalculations from '../utils/multifamilyDevelopmentCalculations';
 import { EAllStates, EPageNames } from '../utils/types';
@@ -42,7 +42,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
     const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState2(page, EAllStates.realEstateCommissionPercentage, DEFAULT_VALUES[page].realEstateCommissionPercentage, queryParams);
     const [requiresHandicappedParking, setRequiresHandicappedParking] = usePersistedState2(page, EAllStates.requiresHandicappedParking, DEFAULT_VALUES[page].requiresHandicappedParking, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
-    
+
 
     const inputs = {
         grossAcres,
@@ -91,12 +91,11 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         resultCalculateBuildingSqftResidential
     } = multifamilyDevelopmentCalculations(inputs, requiresHandicappedParking)
 
-
     return (
         <>
             <div className="table-container">
                 <DynamicRow
-                    cellValues={["Basic Land Info"]}
+                    cellValues={["Basic Land Info, Land Limitations, Restrictions, and Requirements"]}
                     isMobile={isMobile}
                     numberOfCells={1}
                     inputCellIndex={-1}
@@ -120,24 +119,13 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     numberOfCells={2}
                     inputCellIndex={1}
                 />
+
                 <DynamicRow
                     cellValues={['Net Buildable Acres', netBuildableAcres.toLocaleString()]}
-                    description=' The area of land available for building after subtracting unbuildable acres from gross acres.'
+                    description='The total buildable square feet after accounting for infrastructure adjustments.'
                     isMobile={isMobile}
                     numberOfCells={2}
-                    output={true}
                 />
-            </div>
-
-            <div className="table-container">
-                <DynamicRow
-                    cellValues={["Land Limitations, Restrictions, and Requirements"]}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    inputCellIndex={-1}
-                    header={true}
-                />
-
                 <DynamicRow
                     cellValues={['Total Buildable Sq Ft', Math.round(totalBuildableSqFt).toLocaleString()]}
                     description='The total buildable square feet after accounting for infrastructure adjustments.'
@@ -462,8 +450,8 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                 data={"$" + roundAndLocalString(totalActualToLandOwner)}
                 title="How much you should pay for the land"
             />
-           
-           <ShareButton params={inputs}/>
+
+            <ShareButton params={inputs} />
         </>
     );
 };

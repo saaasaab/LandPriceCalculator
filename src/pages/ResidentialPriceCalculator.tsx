@@ -1,10 +1,13 @@
-import DynamicRow from '../components/DynamicRow';
 import { convertToPercent, removeCommas, roundAndLocalString } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
-import './DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
+import InputRow from '../components/RowTypes/InputRow';
+import OutputRow from '../components/RowTypes/OutputRow';
+
+import './DynamicTable.scss';
+
 
 
 const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
@@ -20,12 +23,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const [expensePercentage, setExpensePercentage] = usePersistedState2(page, EAllStates.expensePercentage, DEFAULT_VALUES[page].expensePercentage, queryParams);
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
     const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
-
-
-
-    
-
-    
 
     const params: {
         rents: string;
@@ -65,145 +62,106 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
 
     return (
-        <>
-           
-            <div className="table-container">
-                <DynamicRow
-                    cellValues={["Unit Levers"]}
-                    // description={'These are the levers investors can pull that are responsible for determining how much a property is worth'}
+
+        <div className="group-section">
+            <div className="input-fields-container">
+
+                <InputRow
                     isMobile={isMobile}
-                    numberOfCells={1}
-                    header={true}
-                />
-                <DynamicRow
                     setInput={value => setRents(value)}
-                    cellValues={["Average rental Income for one unit ($)", rents]}
+                    cellValues={["Rental Income one unit ", rents]}
                     description="The current rental income from one unit"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
                 />
-                <DynamicRow
+                <InputRow
+                    isMobile={isMobile}
                     setInput={value => setInterestRate(value)}
-                    cellValues={["Interest Rate for financing (%)", interestRate]}
+                    cellValues={["Interest Rate (%)", interestRate]}
                     description="The interest rate your bank is willing to lend on"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
                 />
-                <DynamicRow
+                <InputRow
+                    isMobile={isMobile}
                     setInput={value => setNumberOfYears(value)}
-                    cellValues={["Total number of years for financing (#)", numberOfYears]}
+                    cellValues={["Years for financing (#)", numberOfYears]}
                     description="How many years is is the loan amortizing for"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
                 />
-                <DynamicRow
+                <InputRow
+                    isMobile={isMobile}
                     setInput={value => setDownPayment(value)}
                     cellValues={["Down Payment (%)", downPayment]}
                     description="The down payment needed from the bank for the loan."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
                 />
-                <DynamicRow
+                <InputRow
+                    isMobile={isMobile}
                     setInput={value => setExpensePercentage(value)}
                     cellValues={["Expense Percentages (%)", expensePercentage]}
                     description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
                 />
-                <DynamicRow
+                <InputRow
+                    isMobile={isMobile}
                     setInput={value => setCashOnCashReturn(value)}
-                    cellValues={["Required cash on cash return (%)", cashOnCashReturn]}
+                    cellValues={["Cash on cash return (%)", cashOnCashReturn]}
                     description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
                 />
-                <DynamicRow
+                <InputRow
+                    isMobile={isMobile}
                     setInput={value => setUnits(value)}
-                    cellValues={["Total number of units (#)", units]}
+                    cellValues={["Number of units (#)", units]}
                     description="How many units are in the building"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
                 />
+
             </div>
 
-            <div className="table-container">
 
-                <DynamicRow
-                    cellValues={["Results"]}
+            <div className="output-fields-container">
+
+                <OutputRow
                     isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={-1}
-                    header={true}
-                />
-
-
-                <DynamicRow
-                    cellValues={["Price per unit you should pay ($)", roundAndLocalString(pricePerUnit)]}
+                    cellValues={["Price per unit you should pay ", "$" + roundAndLocalString(pricePerUnit)]}
                     description="This is the max you should pay per unit to achive the desired returns"
-                    isMobile={isMobile}
-                    numberOfCells={2}
                 />
-                <DynamicRow
-                    cellValues={["Operating income per unit ($)", roundAndLocalString(operatingIncome)]}
+                <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Operating income per unit ", "$" + roundAndLocalString(operatingIncome)]}
                     description="The operating income per unit"
-                    isMobile={isMobile}
-                    numberOfCells={2}
                 />
 
 
-                <DynamicRow
-                    cellValues={["Mortgage Payment ($)", roundAndLocalString(mortgagePayment)]}
+                <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Mortgage Payment ", "$" + roundAndLocalString(mortgagePayment)]}
                     description="The payment for the mortgage per unit"
-                    isMobile={isMobile}
-                    numberOfCells={2}
                 />
 
-                <DynamicRow
-                    cellValues={["Cash flow per unit ($)", roundAndLocalString(cashFlowPerUnit)]}
+                <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Cash flow per unit", "$" + roundAndLocalString(cashFlowPerUnit)]}
                     description="The cash flow per unit"
-                    isMobile={isMobile}
-                    numberOfCells={2}
                 />
 
 
-                <DynamicRow
-                    cellValues={["Debt service coverage ratio DSCR (X)", Math.round(DSCR * 100) / 100 + "X"]}
+                <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Debt service coverage ratio DSCR", Math.round(DSCR * 100) / 100 + "X"]}
                     description="A bank normally is looking for 1.25 or greater"
-                    isMobile={isMobile}
-                    numberOfCells={2}
                 />
 
-                <DynamicRow
+                <OutputRow
+                    isMobile={isMobile}
                     cellValues={["Cap rate (%)", convertToPercent(capRate)]}
                     description="The cap rate of the property based off the operating income and the value of the property."
-                    isMobile={isMobile}
-                    numberOfCells={2}
                 />
 
-                <DynamicRow
-                    cellValues={["Total Building Value", roundAndLocalString(totalPrice)]}
-                    description="This is the total value of the building based on the per unit price"
+                <OutputRow
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    cellValues={["Total Building Value", "$" + roundAndLocalString(totalPrice)]}
+                    description="This is the total value of the building based on the per unit price"
                 />
 
 
             </div>
 
-
-
-
-            
-            <ShareButton params={params}/>
-
-        </>
+            <ShareButton params={params} />
+        </div>
 
     );
 };

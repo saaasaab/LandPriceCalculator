@@ -1,4 +1,3 @@
-import DynamicRow from '../components/DynamicRow';
 import { convertToPercent, removeCommas } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import './DynamicTable.scss';
@@ -6,6 +5,9 @@ import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { XIRR } from '../utils/xirrCalculation';
 import ShareButton from '../components/ShareButton';
+import InputRow from '../components/RowTypes/InputRow';
+import DateInputRow from '../components/RowTypes/DateInputRow';
+import OutputRow from '../components/RowTypes/OutputRow';
 // import AssumptionsComponent from '../components/AdvancedAssumptions';
 
 const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
@@ -57,40 +59,7 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
 
         <>
             {/* <AssumptionsComponent checked={includeCashflows} setInput={setIncludeCashflows}/> */}
-            <div className="table-container">
-                <DynamicRow
-                    cellValues={["IRR Levers"]}
-                    //   description={'These are the levers investors can pull that are responsible for determining how much a property is worth'}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    header={true}
-                />
-                <DynamicRow
-                    setInput={value => setOriginalPurchaseDate(value)}
-                    cellValues={["Owner purchase date", originalPurchaseDate]}
-                    description="When did the current owner purchase the property"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                    isDatePicker={true}
-                />
-                <DynamicRow
-                    setInput={value => setOriginalPurchasePrice(value)}
-                    cellValues={["Owner purchase price", originalPurchasePrice]}
-                    description="What did the owner pay for the property"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-                <DynamicRow
-                    setInput={value => setNewPurchasePrice(value)}
-                    cellValues={["Your purchase price", newPurchasePrice]}
-                    description="How much are you wanting to pay for the property"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-                {/* {
+            {/* {
                     includeCashflows ?
                         <DynamicRow
                             setInput={value => setaCashflowMonthly(value)}
@@ -102,19 +71,48 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
                         /> : <></>
                 } */}
 
-                <DynamicRow
-                    cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation, 1)]}
-                    description="At the price you're offering, the owner is recieving an equivalent return of this rate."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    output={true}
-                />
 
+            <div className="group-section">
+                <div className="input-fields-container">
+                    <DateInputRow
+                        setInput={value => setOriginalPurchaseDate(value)}
+                        cellValues={["Owner purchase date", originalPurchaseDate]}
+                        description="When did the current owner purchase the property"
+                        isMobile={isMobile}
+                    />
+                    <InputRow
+                        setInput={value => setOriginalPurchasePrice(value)}
+                        cellValues={["Owner purchase price", originalPurchasePrice]}
+                        description="What did the owner pay for the property"
+                        isMobile={isMobile}
+                    />
+                    <InputRow
+                        setInput={value => setNewPurchasePrice(value)}
+                        cellValues={["Your purchase price", newPurchasePrice]}
+                        description="How much are you wanting to pay for the property"
+                        isMobile={isMobile}
+                    />
+
+
+                </div>
+
+
+                <div className="output-fields-container">
+                    <OutputRow
+                        cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation, 1)]}
+                        description="At the price you're offering, the owner is recieving an equivalent return of this rate."
+                        isMobile={isMobile}
+                    />
+                </div>
+
+                <ShareButton params={params} />
             </div>
 
-            <ShareButton params={params}/>
-
         </>
+
+
+
+
 
     );
 };

@@ -1,4 +1,4 @@
-import DynamicRow from '../components/DynamicRow';
+import DynamicRow from '../components/RowTypes/DynamicRow';
 import { convertToPercent, decimalToPercentage, removeCommas, roundAndLocalString } from '../utils/utils';
 
 import './DynamicTable.scss';

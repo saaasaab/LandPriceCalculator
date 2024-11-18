@@ -1,4 +1,4 @@
-import DynamicRow from '../components/DynamicRow';
+import DynamicRow from '../components/RowTypes/DynamicRow';
 import { convertToPercent, monthlyPayment, removeCommas, roundAndLocalString } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import { EAllStates, EPageNames } from '../utils/types';

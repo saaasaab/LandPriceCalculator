@@ -1,7 +1,7 @@
 
 
 import { useState } from 'react';
-import DynamicRow from '../components/DynamicRow';
+import DynamicRow from '../components/RowTypes/DynamicRow';
 import { EPageNames } from '../utils/types';
 
 import { convertToPercent, removeCommas } from '../utils/utils';

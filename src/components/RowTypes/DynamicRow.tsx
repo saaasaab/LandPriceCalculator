@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './DynamicRow.scss';
-import { formatNumberWithCommas } from '../utils/utils';
+import { formatNumberWithCommas } from '../../utils/utils';
 
 
 
@@ -161,8 +161,6 @@ const DynamicRow = ({
         <div className={`dynamic-row ${getRowClass(numberOfCells)} ${output ? "output-row" : ""} ${header ? "title-row" : ""} `}>
             <div className="info-cell first-cell" onClick={() => setIsClicked(!isClicked)}>
                 <h4>{cellValues[0]}</h4>
-                {/* && isMobile */}
-
 
                 {!description || (description && !isClicked) ? <></> :
                     <div className="description-cell">

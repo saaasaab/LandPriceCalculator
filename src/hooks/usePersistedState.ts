@@ -28,6 +28,9 @@ export function usePersistedState<T>(
   return [value, setValue];
 }
 
+const booleanStates = ["requiresHandicappedParking"]
+const dateStates = ["originalPurchaseDate"]
+
 export function usePersistedState2<T>(
   page: string,
   key: string,
@@ -36,7 +39,20 @@ export function usePersistedState2<T>(
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
   // Check if there's a query param value, use it if available
 
-  const queryParamValue = getQueryParamNumber(key, queryParams);
+  const _queryParamValue = getQueryParamNumber(key, queryParams);
+  let queryParamValue;
+  if(booleanStates.includes(key)){
+    queryParamValue =  Boolean(_queryParamValue);
+  }
+  else if(dateStates.includes(key)){
+    queryParamValue =  _queryParamValue;
+  }
+  else{
+    queryParamValue =  _queryParamValue;
+  }
+ 
+
+
   const combinedKey = `${page}_${key}`;
   const fromLocal = localStorage.getItem(combinedKey);
   const storedValue = fromLocal ? fromLocal : null;

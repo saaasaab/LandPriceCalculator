@@ -1,5 +1,5 @@
 import { convertToPercent, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
-import DynamicRow from '../components/DynamicRow';
+import DynamicRow from '../components/RowTypes/DynamicRow';
 import industrialDevelopmentCalculations from '../utils/industrialDevelopmentCalculations';
 import { DEFAULT_VALUES, SQ_FT_PER_ACRE } from '../utils/constants';
 import { EAllStates, EPageNames } from '../utils/types';
@@ -82,7 +82,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         <>
             <div className="table-container">
                 <DynamicRow
-                    cellValues={["Basic Land Info"]}
+                    cellValues={["Basic Land Info, Land Limitations, Restrictions, and Requirements"]}
                     isMobile={isMobile}
                     numberOfCells={1}
                     inputCellIndex={-1}
@@ -110,18 +110,8 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     description=' The area of land available for building after subtracting unbuildable acres from gross acres.'
                     isMobile={isMobile}
                     numberOfCells={2}
-                    output={true}
                 />
-            </div>
-
-            <div className="table-container">
-                <DynamicRow
-                    cellValues={["Land Limitations, Restrictions, and Requirements"]}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    inputCellIndex={-1}
-                    header={true}
-                />
+           
                 <DynamicRow
                     cellValues={['Lot Size', (SQ_FT_PER_ACRE * removeCommas(grossAcres)).toLocaleString()]}
                     description='Total size of the lot in sqft'

@@ -35,11 +35,11 @@ export const convertToPercent = (value:number, decimals = 1) =>{
 }
 
 
-export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchParams): number | undefined => {
+export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchParams): string | undefined => {
   const param = queryParams.get(queryParam)
   if (!param) return;
 
-  return Number(removeCommas(param)) ?? undefined
+  return param ?? undefined
 };
 
 
