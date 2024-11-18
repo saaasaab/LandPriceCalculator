@@ -1,0 +1,63 @@
+.advanced-assumptions {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+
+  .assumptions-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+      text-align: left;
+      text-decoration: underline;
+      margin: 0;
+      font-size: 1em;
+      font-weight: bold;
+      color: #333;
+      flex-grow: 1;
+    }
+
+  
+/* Style for the toggle button (chevron) */
+.toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;  // Add space between title and chevron
+  font-size: 1.5em;  // Adjust chevron size
+  color: #007bff;  // Blue color for the chevron
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+
+  .chevron {
+    display: inline-block;
+    transition: transform 0.3s ease;  // Smooth rotation animation
+    transform-origin: center; 
+  }
+
+  &.expanded .chevron {
+    transform: rotate(180deg);  // Rotate 180 degrees when expanded
+  }
+}
+  }
+
+  .assumptions-content {
+    padding-top: 10px;
+    align-items: flex-start;
+    display: flex;
+    label {
+      font-size: 13px;
+      color: #333;
+      display: block;
+    }
+
+    input {
+      margin-left: 20px;
+    }
+  }
+}

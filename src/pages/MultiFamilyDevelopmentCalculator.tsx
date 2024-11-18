@@ -43,7 +43,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
     const [requiresHandicappedParking, setRequiresHandicappedParking] = usePersistedState2(page, EAllStates.requiresHandicappedParking, DEFAULT_VALUES[page].requiresHandicappedParking, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
     const [copied, setCopied] = useState(false);
-    
+
     const inputs = {
         grossAcres,
         unbuildableAcres,
@@ -233,7 +233,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Calculated Impervious Surface Ratio', convertToPercent(resultCalculateBuildingSqftResidential.imperviousSurfaceRatio ,1)]}
+                    cellValues={['Calculated Impervious Surface Ratio', convertToPercent(resultCalculateBuildingSqftResidential.imperviousSurfaceRatio, 1)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -339,7 +339,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Land Percentage */}
                 <DynamicRow
-                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage )]}
+                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage)]}
                     description="The percentage of the total multifamily value attributed to the finished lot."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -459,7 +459,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
 
             <PopupBox
-                data={"$"+roundAndLocalString(totalActualToLandOwner)}
+                data={"$" + roundAndLocalString(totalActualToLandOwner)}
                 title="How much you should pay for the land"
             />
             <button

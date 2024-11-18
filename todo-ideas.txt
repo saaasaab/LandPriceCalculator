@@ -4,9 +4,18 @@
 [ ] Add in a break-even calculator that generates the number that creates a breakeven (0 profit) scenario
 [ ] implement a rate limiting and unlock only after they've paid me.
 [ ] Add in Offer generator to make a report for an offer. 
-[ ] Waterfall Analysis for investor distributions
-[ ] 5 year distribution chart 
-[ ] Construction Budget generator
-[ ] 
+
+[X] Construction Budget generator
+[ ] Models for real estate
+    [ ] Waterfall Analysis for investor distributions
+    [ ] 5 year distribution chart
+    [ ] Cash flow Analysis
+    [ ] Rent roll analysis and 
+    [ ] Market rent determination
+    [ ] Lease Expiry Schedule
+    [ ] Loan Amortization Schedule
+    [ ] Acquisition Cost Model
+    [ ] Tax Impact analysis
+    [ ] Depreciation Modeling
 
 

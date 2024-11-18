@@ -6,6 +6,7 @@ import './DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { XIRR } from '../utils/xirrCalculation';
+// import AssumptionsComponent from '../components/AdvancedAssumptions';
 
 const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
 
@@ -16,6 +17,10 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
     const [originalPurchaseDate, setOriginalPurchaseDate] = usePersistedState2(page, EAllStates.originalPurchaseDate, DEFAULT_VALUES[page].originalPurchaseDate, queryParams);
     const [newPurchasePrice, setNewPurchasePrice] = usePersistedState2(page, EAllStates.newPurchasePrice, DEFAULT_VALUES[page].newPurchasePrice, queryParams);
 
+
+
+    // const [includeCashflows, setIncludeCashflows] = useState(false)
+    // const [cashflowMonthly, setaCashflowMonthly] = useState("100");
     const [copied, setCopied] = useState(false);
 
     const params: {
@@ -28,19 +33,31 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
         newPurchasePrice,
     };
 
-
+   
 
 
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
 
-    const XIRRCalculation = XIRR([-removeCommas(originalPurchasePrice), removeCommas(newPurchasePrice)], [
-        originalPurchaseDate, formattedDate
-    ])
+    const cashFlowAmounts = [-removeCommas(originalPurchasePrice), removeCommas(newPurchasePrice)]
+    const cashFlowDates = [originalPurchaseDate, formattedDate]
+
+
+    // if (includeCashflows) {
+    //     const monthsArray = getMonthsBetweenDates(originalPurchaseDate, formattedDate);
+    //     const filledArray = new Array(monthsArray.length).fill(removeCommas(cashflowMonthly));
+    //     cashFlowAmounts.push(...filledArray);
+    //     cashFlowDates.push(...monthsArray);
+    // }
+
+
+    const XIRRCalculation = XIRR(cashFlowAmounts, cashFlowDates)
+
 
     return (
 
         <>
+           {/* <AssumptionsComponent checked={includeCashflows} setInput={setIncludeCashflows}/> */}
             <div className="table-container">
                 <DynamicRow
                     cellValues={["IRR Levers"]}
@@ -74,6 +91,17 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
                     numberOfCells={2}
                     inputCellIndex={1}
                 />
+                {/* {
+                    includeCashflows ?
+                        <DynamicRow
+                            setInput={value => setaCashflowMonthly(value)}
+                            cellValues={["Estimated monthly cashflows per unit ($)", cashflowMonthly]}
+                            description="To get a more acscurate, we'll take into account all the cashflows over the life of the property. This is a simple estimate assuming X dollars per month per unit coming in over the life of the property."
+                            isMobile={isMobile}
+                            numberOfCells={2}
+                            inputCellIndex={1}
+                        /> : <></>
+                } */}
 
             </div>
 
@@ -89,7 +117,7 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
                 />
 
                 <DynamicRow
-                    cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation ,1)]}
+                    cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation, 1)]}
                     description="At the price you're offering, the owner is recieving an equivalent return of this rate."
                     isMobile={isMobile}
                     numberOfCells={2}

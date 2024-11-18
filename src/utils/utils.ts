@@ -337,3 +337,22 @@ export const convertInputsToNumbers = (inputs: Record<string, string | number>):
   );
   return ents
 };
+
+export function getMonthsBetweenDates(purchaseDate: string, todayDate: string) {
+  const months = [];
+
+  // Convert string dates to Date objects
+  let currentMonth = new Date(purchaseDate);
+  const endDate = new Date(todayDate);
+
+  // Loop through each month between the purchase date and today
+  while (currentMonth <= endDate) {
+      // Format the current month as "YYYY-MM-DD"
+      months.push(currentMonth.toISOString().split('T')[0]);
+
+      // Move to the next month
+      currentMonth.setMonth(currentMonth.getMonth() + 1);
+  }
+
+  return months;
+}
