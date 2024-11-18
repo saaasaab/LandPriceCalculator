@@ -1,11 +1,13 @@
-import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { convertToPercent, copyToClipboard, monthlyPayment, removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, monthlyPayment, removeCommas, roundAndLocalString } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
-import './DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import AmortizationTable from '../components/AmorizationTable';
+import ShareButton from '../components/ShareButton';
+
+import './DynamicTable.scss';
+
 
 const LendingCosts = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
 
@@ -35,7 +37,7 @@ const LendingCosts = ({ isMobile, page }: { isMobile: boolean; page: EPageNames;
 
 
 
-    const [copied, setCopied] = useState(false);
+    
 
     const params: {
         propertyValue: string,
@@ -326,12 +328,8 @@ const LendingCosts = ({ isMobile, page }: { isMobile: boolean; page: EPageNames;
 
 
 
-            <button
-                onClick={() => copyToClipboard(params, setCopied)}
-                className={`copy-url-button ${copied ? 'copied' : ''}`}
-            >
-                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
-            </button>
+           
+            <ShareButton params={params}/>
 
         </>
 

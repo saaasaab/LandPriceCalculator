@@ -1,11 +1,11 @@
-import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { convertToPercent, copyToClipboard, removeCommas } from '../utils/utils';
+import { convertToPercent, removeCommas } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import './DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { XIRR } from '../utils/xirrCalculation';
+import ShareButton from '../components/ShareButton';
 
 const WaterfallGenerator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
 
@@ -16,7 +16,7 @@ const WaterfallGenerator = ({ isMobile, page }: { isMobile: boolean; page: EPage
     const [originalPurchaseDate, setOriginalPurchaseDate] = usePersistedState2(page, EAllStates.originalPurchaseDate, DEFAULT_VALUES[page].originalPurchaseDate, queryParams);
     const [newPurchasePrice, setNewPurchasePrice] = usePersistedState2(page, EAllStates.newPurchasePrice, DEFAULT_VALUES[page].newPurchasePrice, queryParams);
 
-    const [copied, setCopied] = useState(false);
+    
 
     const params: {
         originalPurchasePrice: string,
@@ -100,13 +100,8 @@ const WaterfallGenerator = ({ isMobile, page }: { isMobile: boolean; page: EPage
 
 
 
-            <button
-                onClick={() => copyToClipboard(params, setCopied)}
-                className={`copy-url-button ${copied ? 'copied' : ''}`}
-            >
-                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
-            </button>
-
+         
+            <ShareButton params={params}/>
         </>
 
     );

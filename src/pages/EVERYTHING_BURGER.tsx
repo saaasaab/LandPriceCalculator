@@ -79,15 +79,7 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
             </header>
             {/* <MonteCarloSimulator {...inputs} /> */}
             {PageToRender(page)}
-
-
-
-            {/* <button
-                onClick={() => copyToClipboard(params, setCopied)}
-                className={`copy-url-button ${copied ? 'copied' : ''}`}
-            >
-                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
-            </button> */}
+            
             <ContactMe />
 
         </div >

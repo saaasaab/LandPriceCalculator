@@ -1,11 +1,11 @@
-import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { convertToPercent, copyToClipboard, removeCommas } from '../utils/utils';
+import { convertToPercent, removeCommas } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import './DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { XIRR } from '../utils/xirrCalculation';
+import ShareButton from '../components/ShareButton';
 // import AssumptionsComponent from '../components/AdvancedAssumptions';
 
 const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
@@ -21,7 +21,6 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
 
     // const [includeCashflows, setIncludeCashflows] = useState(false)
     // const [cashflowMonthly, setaCashflowMonthly] = useState("100");
-    const [copied, setCopied] = useState(false);
 
     const params: {
         originalPurchasePrice: string,
@@ -33,7 +32,7 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
         newPurchasePrice,
     };
 
-   
+
 
 
     const today = new Date();
@@ -57,7 +56,7 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
     return (
 
         <>
-           {/* <AssumptionsComponent checked={includeCashflows} setInput={setIncludeCashflows}/> */}
+            {/* <AssumptionsComponent checked={includeCashflows} setInput={setIncludeCashflows}/> */}
             <div className="table-container">
                 <DynamicRow
                     cellValues={["IRR Levers"]}
@@ -103,37 +102,17 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
                         /> : <></>
                 } */}
 
-            </div>
-
-
-            <div className="table-container">
-
-                <DynamicRow
-                    cellValues={["Results"]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={-1}
-                    header={true}
-                />
-
                 <DynamicRow
                     cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation, 1)]}
                     description="At the price you're offering, the owner is recieving an equivalent return of this rate."
                     isMobile={isMobile}
                     numberOfCells={2}
+                    output={true}
                 />
 
             </div>
 
-
-
-
-            <button
-                onClick={() => copyToClipboard(params, setCopied)}
-                className={`copy-url-button ${copied ? 'copied' : ''}`}
-            >
-                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
-            </button>
+            <ShareButton params={params}/>
 
         </>
 

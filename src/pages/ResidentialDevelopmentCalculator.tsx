@@ -1,4 +1,4 @@
-import { convertToPercent, copyToClipboard, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/DynamicRow';
 
 import './LandCalculator.scss';
@@ -7,7 +7,7 @@ import { DEFAULT_VALUES, infrastructurePercentage, SQ_FT_PER_ACRE } from '../uti
 import { EAllStates, EPageNames } from '../utils/types';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import PopupBox from '../components/PopupBox';
-import { useState } from 'react';
+import ShareButton from '../components/ShareButton';
 
 
 interface ResidentialDevelopmentCalculationProps {
@@ -41,8 +41,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
     const [sqFtPerLot, setSqFtPerLot] = usePersistedState2(page, EAllStates.sqFtPerLot, DEFAULT_VALUES[page].sqFtPerLot, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
     const [unitsPerAcre, setUnitsPerAcre] = usePersistedState2(page, EAllStates.unitsPerAcre, DEFAULT_VALUES[page].unitsPerAcre, queryParams);
-    const [copied, setCopied] = useState(false);
     
+
     const inputs = {
         grossAcres,
         unbuildableAcres,
@@ -411,12 +411,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                 title="How much you should pay for the land"
             />
 
-            <button
-                onClick={() => copyToClipboard(inputs, setCopied)}
-                className={`copy-url-button ${copied ? 'copied' : ''}`}
-            >
-                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
-            </button>
+
+            <ShareButton params={inputs} />
         </>
     );
 };

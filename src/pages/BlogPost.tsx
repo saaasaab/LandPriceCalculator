@@ -14,12 +14,8 @@ const BlogPost = () => {
            
 
 
-            {/* <button
-                onClick={() => copyToClipboard(params, setCopied)}
-                className={`copy-url-button ${copied ? 'copied' : ''}`}
-            >
-                {copied ? 'Copied your work! Now share the link' : 'Share your work'}
-            </button> */}
+            
+            {/* <ShareButton params={params}/> */}
             <ContactMe />
 
         </div >

@@ -1,12 +1,12 @@
-import { useState } from 'react';
 import DynamicRow from '../components/DynamicRow';
-import { convertToPercent, copyToClipboard, decimalToPercentage, removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, decimalToPercentage, removeCommas, roundAndLocalString } from '../utils/utils';
 
 import './DynamicTable.scss';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import residentialCashFlowCalculations from '../utils/residentialCashFlowCalculations';
+import ShareButton from '../components/ShareButton';
 
 
 const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
@@ -39,7 +39,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
   const [propertyManagement, setPropertyManagement] = usePersistedState2(page, EAllStates.propertyManagement, DEFAULT_VALUES[page].propertyManagement, queryParams);
 
 
-  const [copied, setCopied] = useState(false);
+  
 
   const params: {
     purchasePrice: string;
@@ -590,12 +590,8 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
       </div>
 
 
-      <button
-        onClick={() => copyToClipboard(params, setCopied)}
-        className={`copy-url-button ${copied ? 'copied' : ''}`}
-      >
-        {copied ? 'Copied your work! Now share the link' : 'Share your work'}
-      </button>
+      
+      <ShareButton params={params}/>
 
     </>
   );
