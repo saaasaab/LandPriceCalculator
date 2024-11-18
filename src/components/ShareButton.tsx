@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { copyToClipboard } from '../utils/utils';
-import './ContactMe.scss';
+import './ShareButton.scss';
 
 const ShareButton = ({params}:{params:any}) => {
   const [copied, setCopied] = useState(false);

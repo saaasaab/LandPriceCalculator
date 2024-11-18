@@ -15,9 +15,6 @@ interface MultifamilyDevelopmentCalculationProps {
 }
 
 
-
-
-
 const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculationProps> = ({
 
     isMobile,

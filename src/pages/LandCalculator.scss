@@ -3,7 +3,9 @@
   flex-direction: column;
   align-items: center;
   height: 100vh;
+  background-color: #f4f4f4;
 }
+
 .land-calculator {
   padding: 20px;
   max-width: 800px;
@@ -11,7 +13,7 @@
 
   .app-header {
     text-align: center;
-    background-color: #f4f4f4;
+    background: white;
     padding: 20px;
     margin-bottom: 10px;
     border-bottom: 2px solid #ccc;
@@ -29,36 +31,11 @@
   }
 }
 
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.copy-url-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #487e4a;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #45a049;
-  }
-
-  &.copied {
-    background-color: #2196f3;
-  }
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .land-calculator {
     padding: 80px 10px 10px;
-
 
     .app-header {
       h1 {
@@ -67,4 +44,3 @@ input::-webkit-inner-spin-button {
     }
   }
 }
-
