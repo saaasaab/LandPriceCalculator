@@ -8,13 +8,14 @@ const InputRow = ({
     description,
     setInput,
     cellValues,
-    // isMobile,
+    isPercent,
 }:
     {
         cellValues: (string | number | boolean | undefined)[];
         description?: string;
         setInput?: (value: string) => void;
         isMobile: boolean;
+        isPercent?: boolean
 
     }) => {
     const [cell, setCell] = useState((`${cellValues[1]}`) as (string | number | readonly string[] | undefined));
@@ -40,9 +41,15 @@ const InputRow = ({
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = removeNonNumeric(e.target.value); // Ensure only numbers
+
+        if(isPercent && Number(rawValue) > 100 ){
+           return;
+        }    
+        
         const formattedValue = formatNumberWithCommas(rawValue);
         setCell(`${formattedValue}`);//  ${inputUnits?inputUnits:""}
         setInput && setInput(formattedValue);
+        
     };
 
     // ${isMobile?"is-mobile":""}
@@ -70,6 +77,7 @@ const InputRow = ({
                         onChange={handleChange}
                         onWheel={(value) => (value.target as HTMLElement).blur()}
                         onFocus={(value) => value.target.select()} // Select the input text on focus
+                        
                     />
                 </label>
             </div>

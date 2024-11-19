@@ -175,6 +175,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["Home Builder Profit per unit (%)", homeBuilderProfitPercentage, homeBuilderProfit.toLocaleString()]}
                         description="The builder's profit based on a percentage of the hard costs."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
                     {/* Real Estate Agent Commission */}
                     <InputRow
@@ -182,6 +183,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["RE Agent Commission per unit (%)", realEstateCommissionPercentage, Math.round(reAgentCommission).toLocaleString()]}
                         description="The real estate agent commission, calculated as a percentage of the house sale price."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
 
@@ -191,6 +193,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["Land Developer Profit Per Lot (%)", landDeveloperProfitPercentage, landDeveloperProfitPerLot.toLocaleString()]}
                         description="Percentage profit made by the developer per lot."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
 
@@ -342,7 +345,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                 {/* Land Developer Profit Per Lot */}
                 <DynamicRow
-                    cellValues={["Land Developer Profit Per Lot (%)", landDeveloperProfitPerLot.toLocaleString()]}
+                    cellValues={["Land Developer Profit Per Lot ($)", landDeveloperProfitPerLot.toLocaleString()]}
                     description="Percentage profit made by the developer per lot."
                     isMobile={isMobile}
                     numberOfCells={2}

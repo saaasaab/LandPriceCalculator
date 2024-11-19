@@ -13,7 +13,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const queryParams = new URLSearchParams(window.location.search)
 
     const [annualLeaseRatesPerSQFT, setAnnualLeaseRatesPerSQFT] = usePersistedState2(page, EAllStates.annualLeaseRatesPerSQFT, DEFAULT_VALUES[page].annualLeaseRatesPerSQFT, queryParams);
-    
+
     const [leasableSQFT, setLeasableSQFT] = usePersistedState2(page, EAllStates.leasableSQFT, DEFAULT_VALUES[page].leasableSQFT, queryParams);
 
     const [interestRate, setInterestRate] = usePersistedState2(page, EAllStates.interestRate, DEFAULT_VALUES[page].interestRate, queryParams);
@@ -30,7 +30,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         expensePercentage: string;
         cashOnCashReturn: string;
     } = {
-        annualLeaseRatesPerSQFT:annualLeaseRatesPerSQFT,
+        annualLeaseRatesPerSQFT: annualLeaseRatesPerSQFT,
         downPayment: downPayment,
         interestRate: interestRate,
         numberOfYears: numberOfYears,
@@ -49,12 +49,12 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
     const mort = mortTop / mortBottom;
 
-    const pricePerSQFT = (monthlyLeaseRatesPerSQFT* (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
+    const pricePerSQFT = (monthlyLeaseRatesPerSQFT * (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
     const operatingIncome = monthlyLeaseRatesPerSQFT * (1 - removeCommas(expensePercentage) / 100);
 
     const mortgagePayment = (mort * pricePerSQFT * (1 - removeCommas(downPayment) / 100));
 
-    const cashFlowPerUnit = roundToDecimal(operatingIncome - mortgagePayment,2);
+    const cashFlowPerSQFT = roundToDecimal(operatingIncome - mortgagePayment, 2);
     const DSCR = operatingIncome / (mort * pricePerSQFT * (1 - removeCommas(downPayment) / 100));
     const capRate = operatingIncome * 12 / pricePerSQFT;
 
@@ -82,6 +82,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     setInput={value => setInterestRate(value)}
                     cellValues={["Interest Rate (%)", interestRate]}
                     description="The interest rate your bank is willing to lend on"
+                    isPercent={true}
                 />
                 <InputRow
                     isMobile={isMobile}
@@ -94,18 +95,21 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     setInput={value => setDownPayment(value)}
                     cellValues={["Down Payment (%)", downPayment]}
                     description="The down payment needed from the bank for the loan."
+                    isPercent={true}
                 />
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setExpensePercentage(value)}
                     cellValues={["Expense Percentages (%)", expensePercentage]}
                     description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
+                    isPercent={true}
                 />
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setCashOnCashReturn(value)}
                     cellValues={["Cash on cash return (%)", cashOnCashReturn]}
                     description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
+                    isPercent={true}
                 />
             </div>
 
@@ -119,8 +123,8 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 />
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Operating income per SQFT", "$" + roundToDecimal(operatingIncome,2)]}
-                    description="The operating income per SQFT"
+                    cellValues={["Monthly operating income per SQFT", "$" + roundToDecimal(operatingIncome, 2)]}
+                    description="The operating income per SQFT per month"
                 />
 
 
@@ -132,7 +136,13 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Cash flow per sqft", "$" + cashFlowPerUnit]}
+                    cellValues={["Monthly Cash flow per sqft", "$" + cashFlowPerSQFT]}
+                    description="The cash flow per sqft"
+                />
+
+                <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Annual Cash flow per sqft", "$" + roundToDecimal(cashFlowPerSQFT * 12,2)]}
                     description="The cash flow per sqft"
                 />
 

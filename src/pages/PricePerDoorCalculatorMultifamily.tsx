@@ -77,6 +77,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     setInput={value => setInterestRate(value)}
                     cellValues={["Interest Rate (%)", interestRate]}
                     description="The interest rate your bank is willing to lend on"
+                    isPercent={true}
                 />
                 <InputRow
                     isMobile={isMobile}
@@ -89,18 +90,21 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     setInput={value => setDownPayment(value)}
                     cellValues={["Down Payment (%)", downPayment]}
                     description="The down payment needed from the bank for the loan."
-                />
+                    isPercent={true}
+               />
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setExpensePercentage(value)}
                     cellValues={["Expense Percentages (%)", expensePercentage]}
                     description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
+                    isPercent={true}
                 />
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setCashOnCashReturn(value)}
                     cellValues={["Cash on cash return (%)", cashOnCashReturn]}
                     description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
+                    isPercent={true}
                 />
                 <InputRow
                     isMobile={isMobile}

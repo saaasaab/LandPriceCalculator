@@ -129,6 +129,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         cellValues={["Percentage used for common space(%)", commonSpacePercentage]}
                         description="Every building requires common space that cannot be leased and should be excluded from parking calculations. This includes halls, elevators, stairs, foyers, etc."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     <InputRow
@@ -136,6 +137,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         cellValues={["Max Impervious Surface (%)", maxImperviousSurfaceRatio]}
                         description="In certain zonings, the municipality limits the total impervious surface (Default 100%)"
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     <InputRow
@@ -180,6 +182,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage]}
                         description="The real estate agent commission, calculated as a percentage of the multifamily sale price."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     {/* Home Builder Profit */}
@@ -188,6 +191,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         cellValues={["Builder Profit (%)", builderProfitPercentage]}
                         description="The builder's profit based on a percentage of the hard costs, permits and misc costs."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
 
@@ -226,6 +230,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage]}
                         description="Percentage profit made by the developer per lot."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     {/* Cost to Develop Land Per Unit */}
@@ -355,7 +360,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Real Estate Agent Commission */}
                 <DynamicRow
-                    cellValues={["RE Agent Commission (%)", roundAndLocalString(perUnitREAgentCommission), roundAndLocalString(totalREAgentCommission)]}
+                    cellValues={["RE Agent Commission", roundAndLocalString(perUnitREAgentCommission), roundAndLocalString(totalREAgentCommission)]}
                     description="The real estate agent commission, calculated as a percentage of the multifamily sale price."
                     isMobile={isMobile}
                     numberOfCells={3}
@@ -364,7 +369,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Home Builder Profit */}
                 <DynamicRow
-                    cellValues={["Builder Profit (%)", roundAndLocalString(perUnitBuilderProfit), roundAndLocalString(totalBuilderProfit)]}
+                    cellValues={["Builder Profit", roundAndLocalString(perUnitBuilderProfit), roundAndLocalString(totalBuilderProfit)]}
                     description="The builder's profit based on a percentage of the hard costs, permits and misc costs."
                     isMobile={isMobile}
                     numberOfCells={3}
@@ -433,7 +438,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Land Developer Profit Per Unit */}
                 <DynamicRow
-                    cellValues={["Land Developer Profit (%)", roundAndLocalString(perUnitlandDeveloperProfit), roundAndLocalString(totalLandDeveloperProfit)]}
+                    cellValues={["Land Developer Profit", roundAndLocalString(perUnitlandDeveloperProfit), roundAndLocalString(totalLandDeveloperProfit)]}
                     description="Percentage profit made by the developer per lot."
                     isMobile={isMobile}
                     numberOfCells={3}
@@ -442,7 +447,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                 {/* Cost to Develop Land Per Unit */}
                 <DynamicRow
-                    cellValues={["Cost to Develop the Land Per unit ($)", costToDevelopPerUnit, roundAndLocalString(removeCommas(costToDevelopPerUnit) * removeCommas(numberOfUnits))]}
+                    cellValues={["Cost to Develop the Land Per unit", costToDevelopPerUnit, roundAndLocalString(removeCommas(costToDevelopPerUnit) * removeCommas(numberOfUnits))]}
                     description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
                     isMobile={isMobile}
                     numberOfCells={3}

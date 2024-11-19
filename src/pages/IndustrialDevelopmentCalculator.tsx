@@ -123,12 +123,14 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                         cellValues={["Percentage used for common space(%)", commonSpacePercentage]}
                         description="Every building requires common space that cannot be leased and should be excluded from parking calculations. This includes halls, elevators, stairs, foyers, bathrooms, kitchen areas, etc."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.maxImperviousSurfaceRatio}`); setMaxImperviousSurfaceRatio(value) }}
                         cellValues={["Max Impervious Surface (%)", maxImperviousSurfaceRatio]}
                         description="In certain zonings, the municipality limits the total impervious surface (Default 100%)"
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     <InputRow
@@ -201,6 +203,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                         cellValues={["General Contractor Profit (%)", homeBuilderProfitPercentage]}
                         description="The builder's profit based on a percentage of the hard costs."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     <InputRow
@@ -208,6 +211,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                         cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage]}
                         description="The real estate agent commission, calculated as a percentage of the building sale price."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     <InputRow
@@ -215,6 +219,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                         cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage]}
                         description="Percentage profit made by the developer per lot."
                         isMobile={isMobile}
+                        isPercent={true}
                     />
 
                     <InputRow
@@ -413,7 +418,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    cellValues={["Land Developer Profit (%)",  roundAndLocalString((landDeveloperProfit))]}
+                    cellValues={["Land Developer Profit ($)",  roundAndLocalString((landDeveloperProfit))]}
                     description="Percentage profit made by the developer per lot."
                     isMobile={isMobile}
                     numberOfCells={2}
