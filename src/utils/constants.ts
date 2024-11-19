@@ -33,7 +33,8 @@ export const DEFAULT_VALUES_ZEROS = {
     requiresHandicappedParking: true,
     sqFtPerLot: "0",
     unitsPerAcre: "0",
-
+    leaseRatesPerSQFT: "0",
+    percentageOfIncomeToExpenses:"0",
     rents: "0",
     interestRate: "0",
     numberOfYears: "0",
@@ -147,6 +148,8 @@ export const DEFAULT_VALUES = {
         costToDevelop: "40,000",
         SDCFees: "20,000",
         ownedLandCost: "0",
+        leaseRatesPerSQFT:"18",
+        percentageOfIncomeToExpenses:"45",
     },
     [EPageNames.MULTI_FAMILY_PRICE_PER_DOOR]: {
         ...DEFAULT_VALUES_ZEROS,

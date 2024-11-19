@@ -77,6 +77,8 @@ export enum EAllStates {
     unbuildableAcres = "unbuildableAcres",
     unitsPerAcre = "unitsPerAcre",
     multifamilyPricePerUnit = "multifamilyPricePerUnit",
+    leaseRatesPerSQFT="leaseRatesPerSQFT",
+    percentageOfIncomeToExpenses="percentageOfIncomeToExpenses",
 
 
     // FOR THE PRICE CALCULATOR

@@ -17,5 +17,6 @@
     [ ] Acquisition Cost Model
     [ ] Tax Impact analysis
     [ ] Depreciation Modeling
+    [ ] Industrial Proforma
 
 

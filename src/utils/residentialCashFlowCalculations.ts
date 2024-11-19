@@ -108,7 +108,8 @@ const residentialCashFlowCalculations = (inputs: TResidentialCashFlowCalculation
     const loanAmount = (1 - downPayment / 100) * allInCosts;
     const totalEquity = allInCosts - loanAmount
 
-    const capRate = netOperatingIncome * 12 / allInCosts * 100;
+
+    const capRate = (netOperatingIncome * 12 / allInCosts);
     const loanConstant = monthlyMorgagePayment * 12 / loanAmount;
     const breakevenLoanAmount = (netOperatingIncome * 12) / loanConstant;
 

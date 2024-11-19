@@ -19,6 +19,8 @@ type TIndustrialDevelopmentCalculationsInputs = {
     landDeveloperProfitPercentage: string;
     ownedLandCost: string;
     costToDevelop: string;
+    leaseRatesPerSQFT: string;
+    percentageOfIncomeToExpenses: string;
 };
 
 type TIndustrialDevelopmentCalculationsOutputs = {
@@ -37,6 +39,9 @@ type TIndustrialDevelopmentCalculationsOutputs = {
     resultCalculateBuildingSqftIndustrial: BuildingCalculationResult  & {
         leaseableBuildingSpace: number;
     };
+    annualLeasingIncome:number;
+    propertyNOI: number;
+    propertyCapRate: number;
 };
 
 const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalculationsInputs): TIndustrialDevelopmentCalculationsOutputs => {
@@ -57,6 +62,8 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
         landDeveloperProfitPercentage,
         ownedLandCost,
         costToDevelop,
+        leaseRatesPerSQFT,
+        percentageOfIncomeToExpenses,
     } = convertInputsToNumbers(inputs);
 
     
@@ -82,9 +89,11 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
 
     const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelop - landDeveloperProfit;
     const totalCosts = totalOfferToLandOwner + costToDevelop + landDeveloperProfit + totalHardCosts;
+    const annualLeasingIncome = leaseRatesPerSQFT* resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace;
+    const propertyNOI = annualLeasingIncome*(1-percentageOfIncomeToExpenses/100)
 
+    const propertyCapRate= propertyNOI/totalCosts;
 
-    
     return {
         totalBuildableSqFt,
         totalBuildingSqft: resultCalculateBuildingSqftIndustrial.totalBuildingSqft,
@@ -98,7 +107,10 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
         totalOfferToLandOwner,
         totalCosts,
         netBuildableAcres,
-        resultCalculateBuildingSqftIndustrial
+        resultCalculateBuildingSqftIndustrial,
+        annualLeasingIncome,
+        propertyNOI,
+        propertyCapRate,
     };
 };
 

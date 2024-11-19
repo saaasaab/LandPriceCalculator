@@ -288,6 +288,56 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
             numberOfCells={4}
             inputCellIndex={2}
           />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
+           <DynamicRow
+            cellValues={["-"]}
+            isMobile={isMobile}
+            numberOfCells={4}
+          />
 
           <DynamicRow
             setInput={value => setOtherIncome(value)}
@@ -387,7 +437,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
 
           <DynamicRow
             setInput={value => setRepairs(value)}
-            cellValues={calculate4CellPercentageInput("repairs (%)", repairs, totalMonthlyIncome)}
+            cellValues={calculate4CellPercentageInput("Repairs (%)", repairs, totalMonthlyIncome)}
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={1}
