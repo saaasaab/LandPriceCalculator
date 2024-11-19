@@ -6,7 +6,7 @@ import ResidentialDevelopmentCalculator from './ResidentialDevelopmentCalculator
 import './LandCalculator.scss';
 import ContactMe from '../components/ContactMe';
 import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
-import ResidentialPriceCalculator from './PricePerDoorCalculator';
+import ResidentialPriceCalculator from './PricePerDoorCalculatorMultifamily';
 import IRRCalculator from './IRRCalculator';
 import LendingCosts from './LendingCosts';
 import WaterfallGenerator from './WaterfallGenerator';

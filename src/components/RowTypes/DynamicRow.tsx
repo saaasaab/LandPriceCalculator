@@ -169,6 +169,8 @@ const DynamicRow = ({
                 }
             </div>
             {constructRow()}
+
+            {/* <div className="hover-add-icon">+</div> */}
         </div>
     )
 }

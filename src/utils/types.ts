@@ -37,7 +37,9 @@ export enum EPageTitles {
     MULTIFAMILY_DEVELOPMENT = "Multi-Family Development Calculator",
     INDUSTRIAL_DEVELOPMENT = "Industrial / Commercial Land Development Calculator",
     RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
-    MULTI_FAMILY_PRICE_PER_DOOR = "Price Per Door Calculator",
+    MULTI_FAMILY_PRICE_PER_DOOR = "Price Per Door Calculator - Multifamily",
+    INDUSTRIAL_PRICE_PER_SQFT = "Price Per SQFT Calculator - Industrial",
+
     MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
     IRR_CALCULATOR = "Seller's IRR Estimator",
     LENDING_COST = "Lending Cost Estimator",

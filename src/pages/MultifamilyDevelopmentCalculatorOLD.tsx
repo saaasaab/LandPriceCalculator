@@ -447,8 +447,8 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
 
             <PopupBox
-                data={"$" + roundAndLocalString(totalActualToLandOwner)}
-                title="How much you should pay for the land"
+                data={["$" + roundAndLocalString(totalActualToLandOwner)]}
+                titles={["How much you should pay for the land"]}
             />
 
             <ShareButton params={inputs} />

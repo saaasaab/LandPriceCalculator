@@ -62,6 +62,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         costToDevelop,
         leaseRatesPerSQFT,
         percentageOfIncomeToExpenses,
+        SDCFees,
     }
 
     const {
@@ -270,7 +271,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
 
-<DynamicRow
+                <DynamicRow
                     cellValues={['Property NOI', roundAndLocalString(propertyNOI)]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -445,10 +446,17 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
 
             <PopupBox
-                data={"$" + roundAndLocalString(totalOfferToLandOwner)}
-                title="How much you should pay for the land"
-            />
+                data={[
+                    roundAndLocalString(propertyCapRate),
+                    "$" + roundAndLocalString(totalOfferToLandOwner),
 
+
+                ]}
+                titles={[
+                    "How much you should pay for the land",
+                    "Cap rate for the property"
+                ]}
+            />
 
             <ShareButton params={inputs} />
 

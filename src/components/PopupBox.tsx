@@ -1,27 +1,31 @@
 import './PopupBox.scss';
+// import close_icon from '../assets/closeicon--black.svg'
 // import Plus from  '../assets/plus.png'
 // import { useState } from 'react';
 
 
 const PopupBox = ({
     data,
-    title,
+    titles,
 }:
     {
-        data: string;
-        title: string;
+        data: string[];
+        titles: string[];
     }) => {
 
-        // const [boxes, setBoxes] = useState(1)
+        console.log(`data`, data)
+    // const [boxes, setBoxes] = useState(1)
     return (
 
         <div className="popup-box-container">
-            <>
-                <div className="popup-box">
-                    <div className="box-title">{title}</div>
-                    <div className="box-data">{data}</div>
-
+            {data.map((d: string, i: number) =>
+                <div key={d} className="popup-box">
+                    <div className="box-title">{titles[i]}</div>
+                    <div className="box-data">{d}</div>
                 </div>
+            )}
+            <>
+               
 
                 {/* <div className="active-grid-goal-container empty" data-modal-event="new-grid-goal" >
                     <div className="add-new-gridgoal">

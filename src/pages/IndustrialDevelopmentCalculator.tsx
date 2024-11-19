@@ -23,7 +23,23 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
 
 }) => {
-    const queryParams = new URLSearchParams(window.location.search)
+    const queryParams = new URLSearchParams(window.location.search);
+
+    // const [activeCards, setActiveCards] = useState<Set<string>>(new Set());
+    // const toggleCard = (id: string) => {
+    //     setActiveCards(prev => {
+    //       const newSet = new Set(prev);
+    //       if (newSet.has(id)) {
+    //         newSet.delete(id);
+    //       } else {
+    //         newSet.add(id);
+    //       }
+    //       return newSet;
+    //     });
+    //   };
+
+      
+
     const [grossAcres, setGrossAcres] = usePersistedState2(page, EAllStates.grossAcres, DEFAULT_VALUES[page].grossAcres, queryParams);
     const [buildingPricePerSqFt, setBuildingPricePerSqFt] = usePersistedState2(page, EAllStates.housePricePerSqFt, DEFAULT_VALUES[page].buildingPricePerSqFt, queryParams);
     const [catchAll, setCatchAll] = usePersistedState2(page, EAllStates.catchAll, DEFAULT_VALUES[page].catchAll, queryParams);
@@ -63,6 +79,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         costToDevelop,
         leaseRatesPerSQFT,
         percentageOfIncomeToExpenses,
+        SDCFees
     }
 
     const {
@@ -84,6 +101,8 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         propertyCapRate,
     } = industrialDevelopmentCalculations(inputs)
 
+
+    console.log(`propertyCapRate`, propertyCapRate)
     return (
         <>
             <div className="group-section">
@@ -467,14 +486,21 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     output={true}
-
                 />
             </div>
 
 
             <PopupBox
-                data={"$" + roundAndLocalString(totalOfferToLandOwner)}
-                title="How much you should pay for the land"
+                data={[
+                    // convertToPercent(propertyCapRate),
+                    "$" + roundAndLocalString(totalOfferToLandOwner),
+
+                
+                ]}
+                titles={[
+                    // "Cap rate for the property",
+                    "How much you should pay for the land"
+                ]}
             />
 
 

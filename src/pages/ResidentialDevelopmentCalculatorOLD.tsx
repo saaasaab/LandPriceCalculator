@@ -397,9 +397,10 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
             </div>
 
             <PopupBox
-                data={"$" + roundAndLocalString(totalOfferToLandOwner)}
-                title="How much you should pay for the land"
+                data={["$" + roundAndLocalString(totalOfferToLandOwner)]}
+                titles={["How much you should pay for the land"]}
             />
+
 
 
             <ShareButton params={inputs} />

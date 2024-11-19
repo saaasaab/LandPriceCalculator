@@ -210,21 +210,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         isMobile={isMobile}
                     />
                 </div>
-
-
-                {/* <div className="output-fields-container">
-                    <OutputRow
-                        cellValues={["Calculted IRR for the property", convertToPercent(XIRRCalculation, 1)]}
-                        description="At the price you're offering, the owner is recieving an equivalent return of this rate."
-                        isMobile={isMobile}
-                    />
-                </div> */}
-
             </div>
-
-
-
-
 
 
             <div className="table-container">
@@ -436,8 +422,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
             </div>
 
             <PopupBox
-                data={"$" + roundAndLocalString(totalOfferToLandOwner)}
-                title="How much you should pay for the land"
+                data={["$" + roundAndLocalString(totalOfferToLandOwner)]}
+                titles={["How much you should pay for the land"]}
             />
 
 
