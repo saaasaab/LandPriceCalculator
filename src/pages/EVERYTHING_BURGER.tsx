@@ -11,6 +11,7 @@ import IRRCalculator from './IRRCalculator';
 import LendingCosts from './LendingCosts';
 import WaterfallGenerator from './WaterfallGenerator';
 import ConstructionBudget from './ConstructionBudget';
+import PricePerSQFTCalculatorIndustrial from './PricePerSQFTCalculatorIndustrial';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
@@ -41,6 +42,11 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                 />
             case EPageNames.MULTI_FAMILY_PRICE_PER_DOOR:
                 return <ResidentialPriceCalculator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.INDUSTRIAL_PRICE_PER_SQFT:
+                return <PricePerSQFTCalculatorIndustrial
                     isMobile={isMobile}
                     page={page}
                 />
@@ -79,7 +85,7 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
             </header>
             {/* <MonteCarloSimulator {...inputs} /> */}
             {PageToRender(page)}
-            
+
             <ContactMe />
 
         </div >

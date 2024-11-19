@@ -19,7 +19,7 @@ type TIndustrialDevelopmentCalculationsInputs = {
     landDeveloperProfitPercentage: string;
     ownedLandCost: string;
     costToDevelop: string;
-    leaseRatesPerSQFT: string;
+    annualLeaseRatesPerSQFT: string;
     percentageOfIncomeToExpenses: string;
     SDCFees: string
 };
@@ -63,7 +63,7 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
         landDeveloperProfitPercentage,
         ownedLandCost,
         costToDevelop,
-        leaseRatesPerSQFT,
+        annualLeaseRatesPerSQFT,
         percentageOfIncomeToExpenses,
         SDCFees,
     } = convertInputsToNumbers(inputs);
@@ -91,7 +91,7 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
 
     const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelop - landDeveloperProfit - SDCFees;
     const totalCosts = totalOfferToLandOwner + costToDevelop + landDeveloperProfit + totalHardCosts;
-    const annualLeasingIncome = leaseRatesPerSQFT* resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace;
+    const annualLeasingIncome = annualLeaseRatesPerSQFT* resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace;
     const propertyNOI = annualLeasingIncome*(1-percentageOfIncomeToExpenses/100)
 
     const propertyCapRate= propertyNOI/totalCosts;

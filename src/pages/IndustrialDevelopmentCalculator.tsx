@@ -57,7 +57,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
     const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState2(page, EAllStates.realEstateCommissionPercentage, DEFAULT_VALUES[page].realEstateCommissionPercentage, queryParams);
     const [SDCFees, setSDCFees] = usePersistedState2(page, EAllStates.SDCFees, DEFAULT_VALUES[page].SDCFees, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
-    const [leaseRatesPerSQFT, setLeaseRatesPerSQFT] = usePersistedState2(page, EAllStates.leaseRatesPerSQFT, DEFAULT_VALUES[page].leaseRatesPerSQFT, queryParams);
+    const [annualLeaseRatesPerSQFT, setAnnualLeaseRatesPerSQFT] = usePersistedState2(page, EAllStates.annualLeaseRatesPerSQFT, DEFAULT_VALUES[page].annualLeaseRatesPerSQFT, queryParams);
     const [percentageOfIncomeToExpenses, setPercentageOfIncomeToExpenses] = usePersistedState2(page, EAllStates.percentageOfIncomeToExpenses, DEFAULT_VALUES[page].percentageOfIncomeToExpenses, queryParams);
 
     const inputs = {
@@ -77,7 +77,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         landDeveloperProfitPercentage,
         ownedLandCost,
         costToDevelop,
-        leaseRatesPerSQFT,
+        annualLeaseRatesPerSQFT,
         percentageOfIncomeToExpenses,
         SDCFees
     }
@@ -155,8 +155,8 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
 
                     <InputRow
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.leaseRatesPerSQFT}`); setLeaseRatesPerSQFT(value) }}
-                        cellValues={["Annual rents per sqft", leaseRatesPerSQFT]}
+                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.annualLeaseRatesPerSQFT}`); setAnnualLeaseRatesPerSQFT(value) }}
+                        cellValues={["Annual rents per sqft", annualLeaseRatesPerSQFT]}
                         isMobile={isMobile}
                         description="The annual rents per square foot this property should generate"
                     />

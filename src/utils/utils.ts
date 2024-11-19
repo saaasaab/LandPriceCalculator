@@ -34,6 +34,11 @@ export const convertToPercent = (value:number, decimals = 1) =>{
   return (value * 100).toFixed(decimals) + "%"
 }
 
+export const roundToDecimal = (value:number, decimals = 2) =>{
+  const places = Math.pow(10,decimals);
+  return Math.round(value*places)/places;
+}
+
 
 export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchParams): string | undefined => {
   const param = queryParams.get(queryParam)

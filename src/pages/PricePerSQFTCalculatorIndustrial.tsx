@@ -1,38 +1,36 @@
-import { convertToPercent, removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
-
 import './DynamicTable.scss';
 
 
 
-const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
-
+const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
     const queryParams = new URLSearchParams(window.location.search)
 
-
-    const [rents, setRents] = usePersistedState2(page, EAllStates.rents, DEFAULT_VALUES[page].rents, queryParams);
+    const [annualLeaseRatesPerSQFT, setAnnualLeaseRatesPerSQFT] = usePersistedState2(page, EAllStates.annualLeaseRatesPerSQFT, DEFAULT_VALUES[page].annualLeaseRatesPerSQFT, queryParams);
+    
+    const [leasableSQFT, setLeasableSQFT] = usePersistedState2(page, EAllStates.leasableSQFT, DEFAULT_VALUES[page].leasableSQFT, queryParams);
 
     const [interestRate, setInterestRate] = usePersistedState2(page, EAllStates.interestRate, DEFAULT_VALUES[page].interestRate, queryParams);
     const [numberOfYears, setNumberOfYears] = usePersistedState2(page, EAllStates.catchAll, DEFAULT_VALUES[page].numberOfYears, queryParams);
     const [cashOnCashReturn, setCashOnCashReturn] = usePersistedState2(page, EAllStates.cashOnCashReturn, DEFAULT_VALUES[page].cashOnCashReturn, queryParams);
     const [expensePercentage, setExpensePercentage] = usePersistedState2(page, EAllStates.expensePercentage, DEFAULT_VALUES[page].expensePercentage, queryParams);
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
-    const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
 
     const params: {
-        rents: string;
+        annualLeaseRatesPerSQFT: string;
         downPayment: string;
         interestRate: string;
         numberOfYears: string;
         expensePercentage: string;
         cashOnCashReturn: string;
     } = {
-        rents: rents,
+        annualLeaseRatesPerSQFT:annualLeaseRatesPerSQFT,
         downPayment: downPayment,
         interestRate: interestRate,
         numberOfYears: numberOfYears,
@@ -41,6 +39,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     };
 
 
+
+    const monthlyLeaseRatesPerSQFT = removeCommas(annualLeaseRatesPerSQFT) / 12
     const interestRateMonthly = removeCommas(interestRate) / 100 / 12;
     const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
     const numberOfPayments = removeCommas(numberOfYears) * 12;
@@ -49,15 +49,16 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
     const mort = mortTop / mortBottom;
 
-    const pricePerUnit = (removeCommas(rents) * (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
-    const operatingIncome = removeCommas(rents) * (1 - removeCommas(expensePercentage) / 100);
+    const pricePerSQFT = (monthlyLeaseRatesPerSQFT* (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
+    const operatingIncome = monthlyLeaseRatesPerSQFT * (1 - removeCommas(expensePercentage) / 100);
 
-    const mortgagePayment = (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
-    const cashFlowPerUnit = operatingIncome - mortgagePayment;
-    const DSCR = operatingIncome / (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
-    const capRate = operatingIncome * 12 / pricePerUnit;
+    const mortgagePayment = (mort * pricePerSQFT * (1 - removeCommas(downPayment) / 100));
 
-    const totalPrice = removeCommas(units) * pricePerUnit;
+    const cashFlowPerUnit = roundToDecimal(operatingIncome - mortgagePayment,2);
+    const DSCR = operatingIncome / (mort * pricePerSQFT * (1 - removeCommas(downPayment) / 100));
+    const capRate = operatingIncome * 12 / pricePerSQFT;
+
+    const totalPrice = removeCommas(leasableSQFT) * pricePerSQFT;
 
 
 
@@ -68,9 +69,13 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
                 <InputRow
                     isMobile={isMobile}
-                    setInput={value => setRents(value)}
-                    cellValues={["Rental Income one unit ", rents]}
-                    description="The current rental income from one unit"
+                    setInput={value => setAnnualLeaseRatesPerSQFT(value)}
+                    cellValues={["Annual lease rates per sqft", annualLeaseRatesPerSQFT]}
+                />
+                <InputRow
+                    isMobile={isMobile}
+                    setInput={value => setLeasableSQFT(value)}
+                    cellValues={["Total leasable SQFT", leasableSQFT]}
                 />
                 <InputRow
                     isMobile={isMobile}
@@ -102,13 +107,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     cellValues={["Cash on cash return (%)", cashOnCashReturn]}
                     description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
                 />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setUnits(value)}
-                    cellValues={["Number of units (#)", units]}
-                    description="How many units are in the building"
-                />
-
             </div>
 
 
@@ -116,26 +114,26 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Price per unit you should pay ", "$" + roundAndLocalString(pricePerUnit)]}
-                    description="This is the max you should pay per unit to achive the desired returns"
+                    cellValues={["Price per SQFT you should pay ", "$" + roundToDecimal(pricePerSQFT)]}
+                    description="This is the max you should pay per sqft to achive the desired returns"
                 />
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Operating income per unit ", "$" + roundAndLocalString(operatingIncome)]}
-                    description="The operating income per unit"
+                    cellValues={["Operating income per SQFT", "$" + roundToDecimal(operatingIncome,2)]}
+                    description="The operating income per SQFT"
                 />
 
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Mortgage Payment ", "$" + roundAndLocalString(mortgagePayment)]}
-                    description="The payment for the mortgage per unit"
+                    cellValues={["Mortgage Payment ", "$" + roundToDecimal(mortgagePayment)]}
+                    description="The payment for the mortgage per sqft"
                 />
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Cash flow per unit", "$" + roundAndLocalString(cashFlowPerUnit)]}
-                    description="The cash flow per unit"
+                    cellValues={["Cash flow per sqft", "$" + cashFlowPerUnit]}
+                    description="The cash flow per sqft"
                 />
 
 
@@ -154,7 +152,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Total Building Value", "$" + roundAndLocalString(totalPrice)]}
-                    description="This is the total value of the building based on the per unit price"
+                    description="This is the total value of the building based on the persqft price"
                 />
 
 
@@ -166,4 +164,4 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     );
 };
 
-export default ResidentialPriceCalculator;
+export default PricePerSQFTCalculatorIndustrial;

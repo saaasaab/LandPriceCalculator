@@ -33,7 +33,8 @@ export const DEFAULT_VALUES_ZEROS = {
     requiresHandicappedParking: true,
     sqFtPerLot: "0",
     unitsPerAcre: "0",
-    leaseRatesPerSQFT: "0",
+    annualLeaseRatesPerSQFT: "0",
+    leasableSQFT:"0",
     percentageOfIncomeToExpenses:"0",
     rents: "0",
     interestRate: "0",
@@ -105,8 +106,6 @@ export const DEFAULT_VALUES = {
         realEstateCommissionPercentage: "3",
         landDeveloperProfitPercentage: "15",
         costToDevelopPerLot: "40,000",
-
-
     },
     [EPageNames.MULTIFAMILY_DEVELOPMENT]: {
         ...DEFAULT_VALUES_ZEROS,
@@ -148,7 +147,7 @@ export const DEFAULT_VALUES = {
         costToDevelop: "40,000",
         SDCFees: "20,000",
         ownedLandCost: "0",
-        leaseRatesPerSQFT:"18",
+        annualLeaseRatesPerSQFT:"18",
         percentageOfIncomeToExpenses:"45",
     },
     [EPageNames.MULTI_FAMILY_PRICE_PER_DOOR]: {
@@ -216,7 +215,17 @@ export const DEFAULT_VALUES = {
         loanToValue: "80",              // Default construction loan percentage (%)
         constructionToLongTermLoan: "75",    // Default conversion to long-term loan percentage (%)
         isInterestOnly: false,                  // Default interest-only option (unchecked)
-
+    },
+    [EPageNames.INDUSTRIAL_PRICE_PER_SQFT]:{
+        ...DEFAULT_VALUES_ZEROS,
+        annualLeaseRatesPerSQFT: "18",
+        leasableSQFT:"5000",
+        interestRate: "8",
+        numberOfYears: "25",
+        cashOnCashReturn: "8",
+        expensePercentage: "50",
+        downPayment: "30",
+        units: "4",
     },
     [EPageNames.WATERFALL]:{
         ...DEFAULT_VALUES_ZEROS,

@@ -30,6 +30,7 @@ export enum EPageNames {
     LENDING_COST = "LENDING_COST",
     WATERFALL = "WATERFALL",
     CONSTRUCTION_BUDGET = "CONSTRUCTION_BUDGET",
+    INDUSTRIAL_PRICE_PER_SQFT="INDUSTRIAL_PRICE_PER_SQFT",
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
@@ -79,8 +80,9 @@ export enum EAllStates {
     unbuildableAcres = "unbuildableAcres",
     unitsPerAcre = "unitsPerAcre",
     multifamilyPricePerUnit = "multifamilyPricePerUnit",
-    leaseRatesPerSQFT="leaseRatesPerSQFT",
+    annualLeaseRatesPerSQFT="annualLeaseRatesPerSQFT",
     percentageOfIncomeToExpenses="percentageOfIncomeToExpenses",
+    leasableSQFT="leasableSQFT",
 
 
     // FOR THE PRICE CALCULATOR
