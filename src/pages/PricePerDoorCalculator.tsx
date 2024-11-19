@@ -64,7 +64,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     return (
 
         <div className="group-section">
-            <div className="input-fields-container">
+            <div className="input-fields-container has-bottom-border">
 
                 <InputRow
                     isMobile={isMobile}

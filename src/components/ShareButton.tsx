@@ -12,7 +12,7 @@ const ShareButton = ({params}:{params:any}) => {
       onClick={() => copyToClipboard(params, setCopied)}
       className={`copy-url-button ${copied ? 'copied' : ''}`}
     >
-      {copied ? 'Copied your work! Now share the link' : 'Share your work'}
+      {copied ? 'Copied the analysis! Now share the link' : 'Share'}
     </button>
   );
 };

@@ -73,7 +73,7 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
 
 
             <div className="group-section">
-                <div className="input-fields-container">
+                <div className="input-fields-container has-bottom-border" >
                     <DateInputRow
                         setInput={value => setOriginalPurchaseDate(value)}
                         cellValues={["Owner purchase date", originalPurchaseDate]}

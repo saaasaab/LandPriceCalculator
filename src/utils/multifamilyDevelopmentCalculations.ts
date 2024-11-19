@@ -69,6 +69,7 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
         maxImperviousSurfaceRatio,
         catchAll,
         multifamilyPricePerSqFt,
+        multifamilyPricePerUnit,
         builderProfitPercentage,
         costToDevelopPerUnit
     } = convertInputsToNumbers(inputs);
@@ -95,7 +96,7 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
     const totalBuildingSqft = resultCalculateBuildingSqftResidential.totalBuildingSqft;
     // Calculations
 
-    const totalMultifamilySalePrice = totalBuildingSqft * multifamilyPricePerSqFt;
+    const totalMultifamilySalePrice = multifamilyPricePerUnit > 0? multifamilyPricePerUnit*numberOfUnits :  totalBuildingSqft * multifamilyPricePerSqFt;
     const perUnitSalePrice = totalMultifamilySalePrice / numberOfUnits;
 
 

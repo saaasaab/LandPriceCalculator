@@ -27,9 +27,9 @@ export enum EPageNames {
     MULTI_FAMILY_PRICE_PER_DOOR = "MULTI_FAMILY_PRICE_PER_DOOR",
     MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
     IRR_CALCULATOR = "IRR_CALCULATOR",
-    LENDING_COST ="LENDING_COST",
-    WATERFALL="WATERFALL",
-    CONSTRUCTION_BUDGET="CONSTRUCTION_BUDGET",
+    LENDING_COST = "LENDING_COST",
+    WATERFALL = "WATERFALL",
+    CONSTRUCTION_BUDGET = "CONSTRUCTION_BUDGET",
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
@@ -41,8 +41,8 @@ export enum EPageTitles {
     MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
     IRR_CALCULATOR = "Seller's IRR Estimator",
     LENDING_COST = "Lending Cost Estimator",
-    WATERFALL="Waterfall Distribution Generator",
-    CONSTRUCTION_BUDGET="Construction Budget Generator",
+    WATERFALL = "Waterfall Distribution Generator",
+    CONSTRUCTION_BUDGET = "Construction Budget Generator",
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 
@@ -76,6 +76,7 @@ export enum EAllStates {
     sqFtPerLot = "sqFtPerLot",
     unbuildableAcres = "unbuildableAcres",
     unitsPerAcre = "unitsPerAcre",
+    multifamilyPricePerUnit = "multifamilyPricePerUnit",
 
 
     // FOR THE PRICE CALCULATOR
@@ -119,7 +120,7 @@ export enum EAllStates {
 
     // FOR LOAN CALCULATION FEES
     loanOriginationFee = "loanOriginationFee",
-   
+
     loanTerm = "loanTerm",
     drawFee = "drawFee",
     underwritingFee = "underwritingFee",
@@ -132,9 +133,9 @@ export enum EAllStates {
     prepaymentPenalty = "prepaymentPenalty",
     loanExtensionFee = "loanExtensionFee",
     discountPoints = "discountPoints",
-    propertyValue="propertyValue",
-    loanToValue="loanToValue",
-    constructionToLongTermLoan="constructionToLongTermLoan",
-    isInterestOnly="isInterestOnly",
+    propertyValue = "propertyValue",
+    loanToValue = "loanToValue",
+    constructionToLongTermLoan = "constructionToLongTermLoan",
+    isInterestOnly = "isInterestOnly",
 
 }
