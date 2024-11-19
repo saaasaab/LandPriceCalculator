@@ -13,7 +13,6 @@ const PopupBox = ({
         titles: string[];
     }) => {
 
-        console.log(`data`, data)
     // const [boxes, setBoxes] = useState(1)
     return (
 

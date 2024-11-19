@@ -10,9 +10,7 @@ import { constructionBudgetCalculations } from '../utils/constructionBudgetCalcu
 import './DynamicTable.scss';
 
 
-const ConstructionBudget = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
-
-    console.log(`isMobile, page`, isMobile, page)
+const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
     // Land Costs
     const [landAcquisition, setLandAcquisition] = useState<string>('62,000');
     const [closingCosts, setClosingCosts] = useState<string>('3,000');

@@ -101,8 +101,6 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         propertyCapRate,
     } = industrialDevelopmentCalculations(inputs)
 
-
-    console.log(`propertyCapRate`, propertyCapRate)
     return (
         <>
             <div className="group-section">
