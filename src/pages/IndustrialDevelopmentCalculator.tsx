@@ -234,14 +234,14 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
                
                 <DynamicRow
-                    cellValues={['Net Buildable Acres', netBuildableAcres.toLocaleString()]}
+                    cellValues={['Net Buildable Acres', roundAndLocalString(netBuildableAcres)]}
                     description=' The area of land available for building after subtracting unbuildable acres from gross acres.'
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
 
                 <DynamicRow
-                    cellValues={['Lot Size', (SQ_FT_PER_ACRE * removeCommas(grossAcres)).toLocaleString()]}
+                    cellValues={['Lot Size', roundAndLocalString((SQ_FT_PER_ACRE * removeCommas(grossAcres)))]}
                     description='Total size of the lot in sqft'
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -250,12 +250,12 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 
 
                 <DynamicRow
-                    cellValues={['Calculated Driveway Area', resultCalculateBuildingSqftIndustrial.drivewayArea.toLocaleString()]}
+                    cellValues={['Calculated Driveway Area', roundAndLocalString(resultCalculateBuildingSqftIndustrial.drivewayArea)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Calculated Parking Area', resultCalculateBuildingSqftIndustrial.parkingArea.toLocaleString()]}
+                    cellValues={['Calculated Parking Area', roundAndLocalString(resultCalculateBuildingSqftIndustrial.parkingArea)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -271,17 +271,17 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Total handicapped parking spots', resultCalculateBuildingSqftIndustrial.handicappedParking.toLocaleString()]}
+                    cellValues={['Total handicapped parking spots', roundAndLocalString(resultCalculateBuildingSqftIndustrial.handicappedParking)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Total parking spots', resultCalculateBuildingSqftIndustrial.parkingSpotsRequired.toLocaleString()]}
+                    cellValues={['Total parking spots', roundAndLocalString(resultCalculateBuildingSqftIndustrial.parkingSpotsRequired)]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Building footprint area', Math.round(resultCalculateBuildingSqftIndustrial.buildingFootprint.area).toLocaleString()]}
+                    cellValues={['Building footprint area', roundAndLocalString((resultCalculateBuildingSqftIndustrial.buildingFootprint.area))]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
@@ -291,12 +291,12 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Total leasable space', Math.round(resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace).toLocaleString()]}
+                    cellValues={['Total leasable space', roundAndLocalString((resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace))]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={['Total Building sqft', Math.round(resultCalculateBuildingSqftIndustrial.totalBuildingSqft).toLocaleString()]}
+                    cellValues={['Total Building sqft', roundAndLocalString((resultCalculateBuildingSqftIndustrial.totalBuildingSqft))]}
                     isMobile={isMobile}
                     description='The total square feet building space'
                     numberOfCells={2}
@@ -324,7 +324,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
               
                 {/* Building Sale Price */}
                 <DynamicRow
-                    cellValues={["Building Sale Price", buildingSalePrice.toLocaleString()]}
+                    cellValues={["Building Sale Price", roundAndLocalString(buildingSalePrice)]}
                     isMobile={isMobile}
                     description="The total sale price of the building based on the size and price per square foot."
                     numberOfCells={2}
@@ -342,7 +342,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    cellValues={["Hard Cost for Build ($)", (removeCommas(hardCostPerSqFt) * resultCalculateBuildingSqftIndustrial.totalBuildingSqft).toLocaleString()]}
+                    cellValues={["Hard Cost for Build ($)", roundAndLocalString((removeCommas(hardCostPerSqFt) * resultCalculateBuildingSqftIndustrial.totalBuildingSqft))]}
                     isMobile={isMobile}
                     description="The hard costs for building the structure per square foot."
                     numberOfCells={2}
@@ -351,14 +351,14 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 
 
                 <DynamicRow
-                    cellValues={["General Contractor Profit ($)",homeBuilderProfit.toLocaleString()]}
+                    cellValues={["General Contractor Profit ($)",roundAndLocalString(homeBuilderProfit)]}
                     description="The builder's profit based on a percentage of the hard costs."
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
 
                 <DynamicRow
-                    cellValues={["Total Hard Costs", totalHardCosts.toLocaleString()]}
+                    cellValues={["Total Hard Costs", roundAndLocalString(totalHardCosts)]}
                     description="The total hard costs, including construction costs, permits, and miscellaneous costs."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -366,7 +366,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    cellValues={["RE Agent Commission ($)",  Math.round(reAgentCommission).toLocaleString()]}
+                    cellValues={["RE Agent Commission ($)",  roundAndLocalString((reAgentCommission))]}
                     description="The real estate agent commission, calculated as a percentage of the building sale price."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -379,7 +379,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={["Finished Lot Value", Math.round(finishedLotValue).toLocaleString()]}
+                    cellValues={["Finished Lot Value", roundAndLocalString((finishedLotValue))]}
                     description="The value of the finished lot without the structure."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -396,7 +396,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    cellValues={["Land Developer Profit (%)",  Math.round(landDeveloperProfit).toLocaleString()]}
+                    cellValues={["Land Developer Profit (%)",  roundAndLocalString((landDeveloperProfit))]}
                     description="Percentage profit made by the developer per lot."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -424,7 +424,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
 
                 <DynamicRow
-                    cellValues={["Offer to Land Owner/Seller", Math.round(totalOfferToLandOwner).toLocaleString()]}
+                    cellValues={["Offer to Land Owner/Seller", roundAndLocalString((totalOfferToLandOwner))]}
                     description="Total offer from the buyer to the land owner or seller."
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -441,28 +441,28 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     header={true}
                 />
                 <DynamicRow
-                    cellValues={["Land Costs", Math.round(totalOfferToLandOwner).toLocaleString()]}
+                    cellValues={["Land Costs", roundAndLocalString((totalOfferToLandOwner))]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={["Soft Costs", Math.round(removeCommas(costToDevelop) + landDeveloperProfit + removeCommas(SDCFees)).toLocaleString()]}
+                    cellValues={["Soft Costs", roundAndLocalString((removeCommas(costToDevelop) + landDeveloperProfit + removeCommas(SDCFees)))]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={["Hard Costs", Math.round(totalHardCosts).toLocaleString()]}
+                    cellValues={["Hard Costs", roundAndLocalString((totalHardCosts))]}
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={["Total Costs", Math.round(totalCosts).toLocaleString()]}
+                    cellValues={["Total Costs", roundAndLocalString((totalCosts))]}
                     description="Total Costs to Build this Project"
                     isMobile={isMobile}
                     numberOfCells={2}
                 />
                 <DynamicRow
-                    cellValues={["Total Profit", Math.round(buildingSalePrice - totalCosts).toLocaleString()]}
+                    cellValues={["Total Profit", roundAndLocalString((buildingSalePrice - totalCosts))]}
                     description="Total profit if sold at the projected sell price"
                     isMobile={isMobile}
                     numberOfCells={2}
