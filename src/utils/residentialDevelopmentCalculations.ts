@@ -49,6 +49,7 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         unitsPerAcre,
         houseSize,
         housePricePerSqFt,
+        multifamilyPricePerUnit,
         hardCostPerSqFt,
         permits,
         miscCosts,
@@ -60,7 +61,7 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
     } = convertInputsToNumbers(inputs);
 
     // Calculations
-    const houseSalePrice = houseSize * housePricePerSqFt;
+    const houseSalePrice = multifamilyPricePerUnit != 0 ? multifamilyPricePerUnit : houseSize * housePricePerSqFt;
     const hardCostLessProfit = houseSize * hardCostPerSqFt + permits + miscCosts;
     const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostLessProfit;
     const totalHardCostsPerUnit = hardCostLessProfit + homeBuilderProfit;
