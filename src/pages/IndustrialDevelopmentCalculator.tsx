@@ -323,6 +323,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
     const popupBoxvalues = () => {
 
         const titles: string[] = [];
+        const keys: OutputKeysForIndustrialDevelopmentCalculator[] = [];
         const values: any[] = [];
 
         activeCards.forEach((key) => {
@@ -330,11 +331,11 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
             if (item) {
                 titles.push(item.title);
                 values.push(item.value);
+                keys.push(key)
             }
         });
 
-        return [titles,values]
-
+        return [titles, values,keys]
     }
 
     return (
@@ -501,6 +502,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.LotSize}
@@ -512,6 +514,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedDrivewayArea}
@@ -522,6 +525,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedParkingArea}
@@ -532,6 +536,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedSidewalkArea}
@@ -543,6 +548,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedImperviousSurfaceRatio}
@@ -553,6 +559,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.TotalHandicappedParkingSpots}
@@ -563,6 +570,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.TotalParkingSpots}
@@ -573,6 +581,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintArea}
@@ -583,6 +592,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintDimensions}
@@ -593,6 +603,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.TotalLeasableSpace}
@@ -603,6 +614,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.TotalBuildingSqft}
@@ -615,6 +627,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                     output={true}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
             </div>
 
@@ -635,6 +648,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.BuildingSalePrice}
@@ -646,6 +660,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.PropertyNOI}
@@ -656,6 +671,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.PropertyCapRate}
@@ -666,6 +682,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.HardCostForBuild}
@@ -677,6 +694,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.GeneralContractorProfit}
@@ -688,6 +706,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.TotalHardCosts}
@@ -700,6 +719,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                     inputCellIndex={1}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.REAgentCommission}
@@ -711,6 +731,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.LandPercentageOfTotalValue}
@@ -722,6 +743,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.FinishedLotValue}
@@ -734,6 +756,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                     output={true}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
             </div>
 
@@ -754,6 +777,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.CostToDevelopLand}
@@ -765,6 +789,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.SDCFees}
@@ -776,6 +801,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.LandValueIfAlreadyOwned}
@@ -787,6 +813,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner}
@@ -799,6 +826,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                     output={true}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
             </div>
 
@@ -809,6 +837,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                     header={true}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.LandCosts}
@@ -819,6 +848,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.SoftCosts}
@@ -829,6 +859,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.HardCosts}
@@ -839,6 +870,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.TotalCosts}
@@ -850,6 +882,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
                 <DynamicRow
                     id={OutputKeysForIndustrialDevelopmentCalculator.TotalProfit}
@@ -862,6 +895,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     numberOfCells={2}
                     output={true}
                     setActiveCards={setActiveCards}
+                    activeCards={activeCards}
                 />
             </div>
 
@@ -882,7 +916,9 @@ titles={[
             <PopupBox
                 data={popupBoxvalues()[1]}
                 titles={popupBoxvalues()[0]}
-                  
+                dataKeys={popupBoxvalues()[2]}
+                setActiveCards={setActiveCards}
+
             />
 
 

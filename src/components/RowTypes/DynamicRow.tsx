@@ -19,6 +19,7 @@ const DynamicRow = ({
     isDatePicker,
     setActiveCards,
     id,
+    activeCards
     // inputUnits
 }:
     {
@@ -34,8 +35,9 @@ const DynamicRow = ({
         output?: boolean;
         header?: boolean;
         inputUnits?: string
-        setActiveCards?: React.Dispatch<React.SetStateAction<Set<OutputKeysForIndustrialDevelopmentCalculator>>>; 
+        setActiveCards?: React.Dispatch<React.SetStateAction<Set<OutputKeysForIndustrialDevelopmentCalculator>>>;
         id?: string | number;
+        activeCards?: Set<OutputKeysForIndustrialDevelopmentCalculator>;
         // type?: 'currency' | 'percentage' | 'number';
 
 
@@ -45,6 +47,8 @@ const DynamicRow = ({
     const [cell, setCell] = useState((`${cellValues[inputCellIndex || -1]}`) as (string | number | readonly string[] | undefined));
     const [isClicked, setIsClicked] = useState(false);
 
+
+    const isActiveCard = activeCards && activeCards.has(id as OutputKeysForIndustrialDevelopmentCalculator)
 
     const getCellClass = (cellIndex: number) => {
         switch (cellIndex) {
@@ -97,9 +101,7 @@ const DynamicRow = ({
     }
 
 
-    const toggleCard = (id: string,e:any) => {
-
-        console.log(`e`, e)
+    const toggleCard = (id: string) => {
         setActiveCards && setActiveCards(prev => {
             const newSet = new Set(prev);
             if (newSet.has(id as OutputKeysForIndustrialDevelopmentCalculator)) {
@@ -191,10 +193,12 @@ const DynamicRow = ({
             {constructRow()}
 
             {toggleCard && id &&
-                <div onClick={(e) => { toggleCard(id.toString(),e) }} className="hover-add-icon">+</div>
-
+                <div onClick={() => { toggleCard(id.toString()) }} className={`hover-add-icon ${isActiveCard ? "hover-add-icon-active" : ""}`}>
+                    {
+                        isActiveCard ? `✓` : "+"
+                    }
+                </div>
             }
-
         </div>
     )
 }

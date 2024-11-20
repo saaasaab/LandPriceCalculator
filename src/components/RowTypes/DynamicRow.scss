@@ -23,6 +23,9 @@
     text-align: center;
     background: white;
     cursor: pointer;
+    &.hover-add-icon-active{
+      display: block;
+    }
     &:hover {
       opacity: .9;
     }
