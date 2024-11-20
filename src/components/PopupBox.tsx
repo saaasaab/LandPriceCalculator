@@ -22,24 +22,24 @@ const PopupBox = ({
         dataKeys && setActiveCards && setActiveCards(prev => {
             const id = dataKeys[index];
             const newSet = new Set(prev);
-            if (newSet.has(id as OutputKeysForIndustrialDevelopmentCalculator)) {
-                newSet.delete(id as OutputKeysForIndustrialDevelopmentCalculator);
-            } else {
-                newSet.add(id as OutputKeysForIndustrialDevelopmentCalculator);
-            }
+            newSet.delete(id as OutputKeysForIndustrialDevelopmentCalculator);
+
+            // if (newSet.has(id as OutputKeysForIndustrialDevelopmentCalculator)) {
+            // } else {
+            //     newSet.add(id as OutputKeysForIndustrialDevelopmentCalculator);
+            // }
             return newSet;
         });
 
 
     }
-    // const [boxes, setBoxes] = useState(1)
     return (
 
         <div className="popup-box-container">
-            {data.map((d: string, i: number) =>
+            {dataKeys?.map((d: string, i: number) =>
                 <div key={d} className="popup-box" onClick={() => handleClick(i)}>
                     <div className="box-title">{titles[i]}</div>
-                    <div className="box-data">{d}</div>
+                    <div className="box-data">{data[i]}</div>
                 </div>
             )}
         </div>
