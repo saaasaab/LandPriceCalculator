@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './DynamicRow.scss';
 import { formatNumberWithCommas } from '../../utils/utils';
+import { OutputKeysForIndustrialDevelopmentCalculator } from '../../pages/IndustrialDevelopmentCalculator';
 
 
 
@@ -16,11 +17,13 @@ const DynamicRow = ({
     setBooleanInput,
     booleanInputIndex,
     isDatePicker,
+    setActiveCards,
+    id,
     // inputUnits
 }:
     {
         cellValues: (string | number | boolean | undefined)[]
-        description?: string,
+        description?: string | null;
         setInput?: (value: string) => void
         setBooleanInput?: (event: React.ChangeEvent<HTMLInputElement>) => void,
         isMobile: boolean;
@@ -31,6 +34,8 @@ const DynamicRow = ({
         output?: boolean;
         header?: boolean;
         inputUnits?: string
+        setActiveCards?: React.Dispatch<React.SetStateAction<Set<OutputKeysForIndustrialDevelopmentCalculator>>>; 
+        id?: string | number;
         // type?: 'currency' | 'percentage' | 'number';
 
 
@@ -90,6 +95,21 @@ const DynamicRow = ({
 
         return cleanedInput;
     }
+
+
+    const toggleCard = (id: string,e:any) => {
+
+        console.log(`e`, e)
+        setActiveCards && setActiveCards(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id as OutputKeysForIndustrialDevelopmentCalculator)) {
+                newSet.delete(id as OutputKeysForIndustrialDevelopmentCalculator);
+            } else {
+                newSet.add(id as OutputKeysForIndustrialDevelopmentCalculator);
+            }
+            return newSet;
+        });
+    };
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,7 +190,11 @@ const DynamicRow = ({
             </div>
             {constructRow()}
 
-            {/* <div className="hover-add-icon">+</div> */}
+            {toggleCard && id &&
+                <div onClick={(e) => { toggleCard(id.toString(),e) }} className="hover-add-icon">+</div>
+
+            }
+
         </div>
     )
 }

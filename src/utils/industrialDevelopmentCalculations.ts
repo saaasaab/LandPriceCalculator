@@ -89,7 +89,7 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
     const landPercentage = finishedLotValue / buildingSalePrice;
     const landDeveloperProfit = (landDeveloperProfitPercentage / 100) * finishedLotValue;
 
-    const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelop - landDeveloperProfit - SDCFees;
+    const totalOfferToLandOwner = Math.max(ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelop - landDeveloperProfit - SDCFees,0);
     const totalCosts = totalOfferToLandOwner + costToDevelop + landDeveloperProfit + totalHardCosts;
     const annualLeasingIncome = annualLeaseRatesPerSQFT* resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace;
     const propertyNOI = annualLeasingIncome*(1-percentageOfIncomeToExpenses/100)
