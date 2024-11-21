@@ -1,3 +1,4 @@
+import { OutputKeys } from "./constants";
 import { BuildingCalculationResult, EPageNames } from "./types";
 
 export const getDefault = (
@@ -360,4 +361,26 @@ export function getMonthsBetweenDates(purchaseDate: string, todayDate: string) {
   }
 
   return months;
+}
+
+
+export const popupBoxValues = ( activeCards: Set<OutputKeys>, outputData: Partial<Record<OutputKeys, {
+  title: string;
+  value: any;
+  value2?: any;
+  description: string | null;
+}>> ) => {
+  const titles: string[] = [];
+  const keys: OutputKeys[] = [];
+  const values: any[] = [];
+
+  activeCards.forEach((key) => {
+      const item = outputData[key];
+      if (item) {
+          titles.push(item.title);
+          values.push(item.value);
+          keys.push(key)
+      }
+  });
+  return [titles, values,keys]
 }

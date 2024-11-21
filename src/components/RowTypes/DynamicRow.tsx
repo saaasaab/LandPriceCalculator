@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './DynamicRow.scss';
 import { formatNumberWithCommas } from '../../utils/utils';
-import { OutputKeysForIndustrialDevelopmentCalculator } from '../../pages/IndustrialDevelopmentCalculator';
+import { OutputKeys } from '../../pages/IndustrialDevelopmentCalculator';
 
 
 
@@ -35,9 +35,9 @@ const DynamicRow = ({
         output?: boolean;
         header?: boolean;
         inputUnits?: string
-        setActiveCards?: React.Dispatch<React.SetStateAction<Set<OutputKeysForIndustrialDevelopmentCalculator>>>;
+        setActiveCards?: React.Dispatch<React.SetStateAction<Set<OutputKeys>>>;
         id?: string | number;
-        activeCards?: Set<OutputKeysForIndustrialDevelopmentCalculator>;
+        activeCards?: Set<OutputKeys>;
         // type?: 'currency' | 'percentage' | 'number';
 
 
@@ -48,7 +48,7 @@ const DynamicRow = ({
     const [isClicked, setIsClicked] = useState(false);
 
 
-    const isActiveCard = activeCards && activeCards.has(id as OutputKeysForIndustrialDevelopmentCalculator)
+    const isActiveCard = activeCards && activeCards.has(id as OutputKeys)
 
     const getCellClass = (cellIndex: number) => {
         switch (cellIndex) {
@@ -104,10 +104,10 @@ const DynamicRow = ({
     const toggleCard = (id: string) => {
         setActiveCards && setActiveCards(prev => {
             const newSet = new Set(prev);
-            if (newSet.has(id as OutputKeysForIndustrialDevelopmentCalculator)) {
-                newSet.delete(id as OutputKeysForIndustrialDevelopmentCalculator);
+            if (newSet.has(id as OutputKeys)) {
+                newSet.delete(id as OutputKeys);
             } else {
-                newSet.add(id as OutputKeysForIndustrialDevelopmentCalculator);
+                newSet.add(id as OutputKeys);
             }
             return newSet;
         });

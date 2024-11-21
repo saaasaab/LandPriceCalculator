@@ -1,7 +1,7 @@
-import { convertToPercent, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
+import { convertToPercent, popupBoxValues, removeCommas, roundAndLocalString, setInLocalStorage } from '../utils/utils';
 import DynamicRow from '../components/RowTypes/DynamicRow';
 import industrialDevelopmentCalculations from '../utils/industrialDevelopmentCalculations';
-import { DEFAULT_VALUES, SQ_FT_PER_ACRE } from '../utils/constants';
+import { DEFAULT_VALUES, OutputKeys, SQ_FT_PER_ACRE } from '../utils/constants';
 import { EAllStates, EPageNames } from '../utils/types';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 
@@ -9,47 +9,6 @@ import PopupBox from '../components/PopupBox';
 import ShareButton from '../components/ShareButton';
 import InputRow from '../components/RowTypes/InputRow';
 import { useState } from 'react';
-
-
-export enum OutputKeysForIndustrialDevelopmentCalculator {
-    BasicLandInfo = "basicLandInfo",
-    NetBuildableAcres = "netBuildableAcres",
-    LotSize = "lotSize",
-    CalculatedDrivewayArea = "calculatedDrivewayArea",
-    CalculatedParkingArea = "calculatedParkingArea",
-    CalculatedSidewalkArea = "calculatedSidewalkArea",
-    CalculatedImperviousSurfaceRatio = "calculatedImperviousSurfaceRatio",
-    TotalHandicappedParkingSpots = "totalHandicappedParkingSpots",
-    TotalParkingSpots = "totalParkingSpots",
-    BuildingFootprintArea = "buildingFootprintArea",
-    BuildingFootprintDimensions = "buildingFootprintDimensions",
-    TotalLeasableSpace = "totalLeasableSpace",
-    TotalBuildingSqft = "totalBuildingSqft",
-    FinancialAssumptions = "financialAssumptions",
-    AnnualRentalIncome = "annualRentalIncome",
-    BuildingSalePrice = "buildingSalePrice",
-    PropertyNOI = "propertyNOI",
-    PropertyCapRate = "propertyCapRate",
-    HardCostForBuild = "hardCostForBuild",
-    GeneralContractorProfit = "generalContractorProfit",
-    TotalHardCosts = "totalHardCosts",
-    REAgentCommission = "reAgentCommission",
-    LandPercentageOfTotalValue = "landPercentageOfTotalValue",
-    FinishedLotValue = "finishedLotValue",
-    RawLandCalculations = "rawLandCalculations",
-    LandDeveloperProfit = "landDeveloperProfit",
-    CostToDevelopLand = "costToDevelopLand",
-    SDCFees = "sdcFees",
-    LandValueIfAlreadyOwned = "landValueIfAlreadyOwned",
-    OfferToLandOwner = "offerToLandOwner",
-    ProjectOverview = "projectOverview",
-    LandCosts = "landCosts",
-    SoftCosts = "softCosts",
-    HardCosts = "hardCosts",
-    TotalCosts = "totalCosts",
-    TotalProfit = "totalProfit",
-}
-
 
 interface MultifamilyDevelopmentCalculationProps {
     isMobile: boolean;
@@ -59,7 +18,6 @@ interface MultifamilyDevelopmentCalculationProps {
 const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculationProps> = ({
     isMobile,
     page,
-
 
 }) => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -87,8 +45,8 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
 
 
-    const [activeCards, setActiveCards] = useState<Set<OutputKeysForIndustrialDevelopmentCalculator>>(new Set([OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner]));
-    // const activeCards: Set<OutputKeysForIndustrialDevelopmentCalculator> = new Set([OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner]);
+    const [activeCards, setActiveCards] = useState<Set<OutputKeys>>(new Set([OutputKeys.OfferToLandOwner]));
+    // const activeCards: Set<OutputKeys> = new Set([OutputKeys.OfferToLandOwner]);
 
 
     const inputs = {
@@ -134,184 +92,184 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
 
 
-    const outputData: Record<OutputKeysForIndustrialDevelopmentCalculator, { title: string; value: any; description: string | null }> = {
-        [OutputKeysForIndustrialDevelopmentCalculator.BasicLandInfo]: {
+    const outputData: Partial<Record<OutputKeys, { title: string; value: any; description: string | null }>> = {
+        [OutputKeys.BasicLandInfo]: {
             title: "Basic Land Info, Land Limitations, Restrictions, and Requirements",
             value: null,
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.NetBuildableAcres]: {
+        [OutputKeys.NetBuildableAcres]: {
             title: "Net Buildable Acres",
             value: netBuildableAcres,
             description: "The area of land available for building after subtracting unbuildable acres from gross acres.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.LotSize]: {
+        [OutputKeys.LotSize]: {
             title: "Lot Size",
             value: roundAndLocalString(SQ_FT_PER_ACRE * removeCommas(grossAcres)),
             description: "Total size of the lot in sqft",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.CalculatedDrivewayArea]: {
+        [OutputKeys.CalculatedDrivewayArea]: {
             title: "Calculated Driveway Area",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.drivewayArea),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.CalculatedParkingArea]: {
+        [OutputKeys.CalculatedParkingArea]: {
             title: "Calculated Parking Area",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.parkingArea),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.CalculatedSidewalkArea]: {
+        [OutputKeys.CalculatedSidewalkArea]: {
             title: "Calculated Sidewalk Area",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.sidewalkArea),
             description: "Estimated at about 20% of the building footprint",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.CalculatedImperviousSurfaceRatio]: {
+        [OutputKeys.CalculatedImperviousSurfaceRatio]: {
             title: "Calculated Impervious Surface Ratio",
             value: convertToPercent(resultCalculateBuildingSqftIndustrial.imperviousSurfaceRatio, 1),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.TotalHandicappedParkingSpots]: {
+        [OutputKeys.TotalHandicappedParkingSpots]: {
             title: "Total handicapped parking spots",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.handicappedParking),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.TotalParkingSpots]: {
+        [OutputKeys.TotalParkingSpots]: {
             title: "Total parking spots",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.parkingSpotsRequired),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintArea]: {
+        [OutputKeys.BuildingFootprintArea]: {
             title: "Building footprint area",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.buildingFootprint.area),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintDimensions]: {
+        [OutputKeys.BuildingFootprintDimensions]: {
             title: "Building footprint dimensions",
             value: `${resultCalculateBuildingSqftIndustrial.buildingFootprint.dimensions.length}' x ${resultCalculateBuildingSqftIndustrial.buildingFootprint.dimensions.width}'`,
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.TotalLeasableSpace]: {
+        [OutputKeys.TotalLeasableSpace]: {
             title: "Total leasable space",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.TotalBuildingSqft]: {
+        [OutputKeys.TotalBuildingSqft]: {
             title: "Total Building sqft",
             value: roundAndLocalString(resultCalculateBuildingSqftIndustrial.totalBuildingSqft),
             description: "The total square feet building space",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.FinancialAssumptions]: {
+        [OutputKeys.FinancialAssumptions]: {
             title: "Financial Assumptions",
             value: null,
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.AnnualRentalIncome]: {
+        [OutputKeys.AnnualRentalIncome]: {
             title: "Annual Rental Income",
             value: roundAndLocalString(annualLeasingIncome),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.BuildingSalePrice]: {
+        [OutputKeys.BuildingSalePrice]: {
             title: "Building Sale Price",
             value: roundAndLocalString(buildingSalePrice),
             description: "The total sale price of the building based on the size and price per square foot.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.PropertyNOI]: {
+        [OutputKeys.PropertyNOI]: {
             title: "Property NOI",
             value: roundAndLocalString(propertyNOI),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.PropertyCapRate]: {
+        [OutputKeys.PropertyCapRate]: {
             title: "Property Cap Rate",
             value: convertToPercent(propertyCapRate),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.HardCostForBuild]: {
+        [OutputKeys.HardCostForBuild]: {
             title: "Hard Cost for Build ($)",
             value: roundAndLocalString(removeCommas(hardCostPerSqFt) * resultCalculateBuildingSqftIndustrial.totalBuildingSqft),
             description: "The hard costs for building the structure per square foot.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.GeneralContractorProfit]: {
+        [OutputKeys.GeneralContractorProfit]: {
             title: "General Contractor Profit ($)",
             value: roundAndLocalString(homeBuilderProfit),
             description: "The builder's profit based on a percentage of the hard costs.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.TotalHardCosts]: {
+        [OutputKeys.TotalHardCosts]: {
             title: "Total Hard Costs",
             value: roundAndLocalString(totalHardCosts),
             description: "The total hard costs, including construction costs, permits, and miscellaneous costs.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.REAgentCommission]: {
+        [OutputKeys.REAgentCommission]: {
             title: "RE Agent Commission ($)",
             value: roundAndLocalString(reAgentCommission),
             description: "The real estate agent commission, calculated as a percentage of the building sale price.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.LandPercentageOfTotalValue]: {
+        [OutputKeys.LandPercentageOfTotalValue]: {
             title: "Land Percentage of Total Value",
             value: convertToPercent(landPercentage, 1),
             description: "The percentage of the total building value attributed to the land.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.FinishedLotValue]: {
+        [OutputKeys.FinishedLotValue]: {
             title: "Finished Lot Value",
             value: roundAndLocalString(finishedLotValue),
             description: "The value of the finished lot without the structure.",
         },
 
-        [OutputKeysForIndustrialDevelopmentCalculator.RawLandCalculations]: {
+        [OutputKeys.RawLandCalculations]: {
             title: "Raw Land Calculations",
             value: null,
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.LandDeveloperProfit]: {
+        [OutputKeys.LandDeveloperProfit]: {
             title: "Land Developer Profit ($)",
             value: roundAndLocalString(landDeveloperProfit),
             description: "Percentage profit made by the developer per lot.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.CostToDevelopLand]: {
+        [OutputKeys.CostToDevelopLand]: {
             title: "Costs to Develop the land ($)",
             value: costToDevelop,
             description: "Costs for engineering, architecture, demolition, clearing, street improvements, utilities, etc.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.SDCFees]: {
+        [OutputKeys.SDCFees]: {
             title: "SDC Fees ($)",
             value: SDCFees,
             description: "Fees to the city to connect to the city. Normally this is required for all new developments.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.LandValueIfAlreadyOwned]: {
+        [OutputKeys.LandValueIfAlreadyOwned]: {
             title: "Land value if already own ($)",
             value: removeCommas(ownedLandCost) === 0 ? "" : ownedLandCost,
             description: "If you own the property already, enter in the price of the property here.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner]: {
+        [OutputKeys.OfferToLandOwner]: {
             title: "Offer to Land Owner/Seller",
             value: roundAndLocalString(totalOfferToLandOwner),
             description: "Total offer from the buyer to the land owner or seller.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.ProjectOverview]: {
+        [OutputKeys.ProjectOverview]: {
             title: "Project Overview",
             value: null,
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.LandCosts]: {
+        [OutputKeys.LandCosts]: {
             title: "Land Costs",
             value: roundAndLocalString(totalOfferToLandOwner),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.SoftCosts]: {
+        [OutputKeys.SoftCosts]: {
             title: "Soft Costs",
             value: roundAndLocalString(removeCommas(costToDevelop) + landDeveloperProfit + removeCommas(SDCFees)),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.HardCosts]: {
+        [OutputKeys.HardCosts]: {
             title: "Hard Costs",
             value: roundAndLocalString(totalHardCosts),
             description: null,
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.TotalCosts]: {
+        [OutputKeys.TotalCosts]: {
             title: "Total Costs",
             value: roundAndLocalString(totalCosts),
             description: "Total Costs to Build this Project.",
         },
-        [OutputKeysForIndustrialDevelopmentCalculator.TotalProfit]: {
+        [OutputKeys.TotalProfit]: {
             title: "Total Profit",
             value: roundAndLocalString(buildingSalePrice - totalCosts),
             description: "Total profit if sold at the projected sell price.",
@@ -319,24 +277,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
     };
 
-
-    const popupBoxvalues = () => {
-
-        const titles: string[] = [];
-        const keys: OutputKeysForIndustrialDevelopmentCalculator[] = [];
-        const values: any[] = [];
-
-        activeCards.forEach((key) => {
-            const item = outputData[key];
-            if (item) {
-                titles.push(item.title);
-                values.push(item.value);
-                keys.push(key)
-            }
-        });
-
-        return [titles, values,keys]
-    }
+    const popupValues = popupBoxValues(activeCards, outputData)
 
     return (
         <>
@@ -485,53 +426,43 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
             <div className="table-container">
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.BasicLandInfo}
-                    cellValues={[outputData[OutputKeysForIndustrialDevelopmentCalculator.BasicLandInfo].title]}
+                    id={OutputKeys.BasicLandInfo}
+
+                    cellValues={[outputData[OutputKeys.BasicLandInfo]?.title]}
                     isMobile={isMobile}
                     numberOfCells={1}
                     inputCellIndex={-1}
                     header={true}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.NetBuildableAcres}
+                    id={OutputKeys.NetBuildableAcres}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.NetBuildableAcres].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.NetBuildableAcres].value
+                        outputData[OutputKeys.NetBuildableAcres]?.title,
+                        outputData[OutputKeys.NetBuildableAcres]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.NetBuildableAcres].description}
+                    description={outputData[OutputKeys.NetBuildableAcres]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.LotSize}
+                    id={OutputKeys.LotSize}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LotSize].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LotSize].value
+                        outputData[OutputKeys.LotSize]?.title,
+                        outputData[OutputKeys.LotSize]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.LotSize].description}
+                    description={outputData[OutputKeys.LotSize]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedDrivewayArea}
+                    id={OutputKeys.CalculatedDrivewayArea}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedDrivewayArea].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedDrivewayArea].value
-                    ]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                />
-                <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedParkingArea}
-                    cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedParkingArea].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedParkingArea].value
+                        outputData[OutputKeys.CalculatedDrivewayArea]?.title,
+                        outputData[OutputKeys.CalculatedDrivewayArea]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -539,22 +470,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedSidewalkArea}
+                    id={OutputKeys.CalculatedParkingArea}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedSidewalkArea].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedSidewalkArea].value
-                    ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedSidewalkArea].description}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                />
-                <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.CalculatedImperviousSurfaceRatio}
-                    cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedImperviousSurfaceRatio].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CalculatedImperviousSurfaceRatio].value
+                        outputData[OutputKeys.CalculatedParkingArea]?.title,
+                        outputData[OutputKeys.CalculatedParkingArea]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -562,10 +481,22 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.TotalHandicappedParkingSpots}
+                    id={OutputKeys.CalculatedSidewalkArea}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalHandicappedParkingSpots].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalHandicappedParkingSpots].value
+                        outputData[OutputKeys.CalculatedSidewalkArea]?.title,
+                        outputData[OutputKeys.CalculatedSidewalkArea]?.value
+                    ]}
+                    description={outputData[OutputKeys.CalculatedSidewalkArea]?.description}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    setActiveCards={setActiveCards}
+                    activeCards={activeCards}
+                />
+                <DynamicRow
+                    id={OutputKeys.CalculatedImperviousSurfaceRatio}
+                    cellValues={[
+                        outputData[OutputKeys.CalculatedImperviousSurfaceRatio]?.title,
+                        outputData[OutputKeys.CalculatedImperviousSurfaceRatio]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -573,10 +504,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.TotalParkingSpots}
+                    id={OutputKeys.TotalHandicappedParkingSpots}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalParkingSpots].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalParkingSpots].value
+                        outputData[OutputKeys.TotalHandicappedParkingSpots]?.title,
+                        outputData[OutputKeys.TotalHandicappedParkingSpots]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -584,10 +515,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintArea}
+                    id={OutputKeys.TotalParkingSpots}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintArea].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintArea].value
+                        outputData[OutputKeys.TotalParkingSpots]?.title,
+                        outputData[OutputKeys.TotalParkingSpots]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -595,10 +526,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintDimensions}
+                    id={OutputKeys.BuildingFootprintArea}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintDimensions].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.BuildingFootprintDimensions].value
+                        outputData[OutputKeys.BuildingFootprintArea]?.title,
+                        outputData[OutputKeys.BuildingFootprintArea]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -606,10 +537,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.TotalLeasableSpace}
+                    id={OutputKeys.BuildingFootprintDimensions}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalLeasableSpace].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalLeasableSpace].value
+                        outputData[OutputKeys.BuildingFootprintDimensions]?.title,
+                        outputData[OutputKeys.BuildingFootprintDimensions]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -617,12 +548,23 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.TotalBuildingSqft}
+                    id={OutputKeys.TotalLeasableSpace}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalBuildingSqft].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalBuildingSqft].value
+                        outputData[OutputKeys.TotalLeasableSpace]?.title,
+                        outputData[OutputKeys.TotalLeasableSpace]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalBuildingSqft].description}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    setActiveCards={setActiveCards}
+                    activeCards={activeCards}
+                />
+                <DynamicRow
+                    id={OutputKeys.TotalBuildingSqft}
+                    cellValues={[
+                        outputData[OutputKeys.TotalBuildingSqft]?.title,
+                        outputData[OutputKeys.TotalBuildingSqft]?.value
+                    ]}
+                    description={outputData[OutputKeys.TotalBuildingSqft]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     output={true}
@@ -633,17 +575,17 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
             <div className="table-container">
                 <DynamicRow
-                    cellValues={[outputData[OutputKeysForIndustrialDevelopmentCalculator.FinancialAssumptions].title]}
+                    cellValues={[outputData[OutputKeys.FinancialAssumptions]?.title]}
                     isMobile={isMobile}
                     numberOfCells={1}
                     inputCellIndex={-1}
                     header={true}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.AnnualRentalIncome}
+                    id={OutputKeys.AnnualRentalIncome}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.AnnualRentalIncome].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.AnnualRentalIncome].value
+                        outputData[OutputKeys.AnnualRentalIncome]?.title,
+                        outputData[OutputKeys.AnnualRentalIncome]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -651,33 +593,22 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.BuildingSalePrice}
+                    id={OutputKeys.BuildingSalePrice}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.BuildingSalePrice].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.BuildingSalePrice].value
+                        outputData[OutputKeys.BuildingSalePrice]?.title,
+                        outputData[OutputKeys.BuildingSalePrice]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.BuildingSalePrice].description}
+                    description={outputData[OutputKeys.BuildingSalePrice]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.PropertyNOI}
+                    id={OutputKeys.PropertyNOI}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.PropertyNOI].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.PropertyNOI].value
-                    ]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                />
-                <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.PropertyCapRate}
-                    cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.PropertyCapRate].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.PropertyCapRate].value
+                        outputData[OutputKeys.PropertyNOI]?.title,
+                        outputData[OutputKeys.PropertyNOI]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -685,36 +616,47 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.HardCostForBuild}
+                    id={OutputKeys.PropertyCapRate}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.HardCostForBuild].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.HardCostForBuild].value
+                        outputData[OutputKeys.PropertyCapRate]?.title,
+                        outputData[OutputKeys.PropertyCapRate]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.HardCostForBuild].description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.GeneralContractorProfit}
+                    id={OutputKeys.HardCostForBuild}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.GeneralContractorProfit].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.GeneralContractorProfit].value
+                        outputData[OutputKeys.HardCostForBuild]?.title,
+                        outputData[OutputKeys.HardCostForBuild]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.GeneralContractorProfit].description}
+                    description={outputData[OutputKeys.HardCostForBuild]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.TotalHardCosts}
+                    id={OutputKeys.GeneralContractorProfit}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalHardCosts].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalHardCosts].value
+                        outputData[OutputKeys.GeneralContractorProfit]?.title,
+                        outputData[OutputKeys.GeneralContractorProfit]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalHardCosts].description}
+                    description={outputData[OutputKeys.GeneralContractorProfit]?.description}
+                    isMobile={isMobile}
+                    numberOfCells={2}
+                    setActiveCards={setActiveCards}
+                    activeCards={activeCards}
+                />
+                <DynamicRow
+                    id={OutputKeys.TotalHardCosts}
+                    cellValues={[
+                        outputData[OutputKeys.TotalHardCosts]?.title,
+                        outputData[OutputKeys.TotalHardCosts]?.value
+                    ]}
+                    description={outputData[OutputKeys.TotalHardCosts]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     inputCellIndex={1}
@@ -722,36 +664,36 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.REAgentCommission}
+                    id={OutputKeys.REAgentCommission}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.REAgentCommission].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.REAgentCommission].value
+                        outputData[OutputKeys.REAgentCommission]?.title,
+                        outputData[OutputKeys.REAgentCommission]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.REAgentCommission].description}
+                    description={outputData[OutputKeys.REAgentCommission]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.LandPercentageOfTotalValue}
+                    id={OutputKeys.LandPercentageOfTotalValue}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandPercentageOfTotalValue].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandPercentageOfTotalValue].value
+                        outputData[OutputKeys.LandPercentageOfTotalValue]?.title,
+                        outputData[OutputKeys.LandPercentageOfTotalValue]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.LandPercentageOfTotalValue].description}
+                    description={outputData[OutputKeys.LandPercentageOfTotalValue]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.FinishedLotValue}
+                    id={OutputKeys.FinishedLotValue}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.FinishedLotValue].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.FinishedLotValue].value
+                        outputData[OutputKeys.FinishedLotValue]?.title,
+                        outputData[OutputKeys.FinishedLotValue]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.FinishedLotValue].description}
+                    description={outputData[OutputKeys.FinishedLotValue]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     output={true}
@@ -762,66 +704,66 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
             <div className="table-container">
                 <DynamicRow
-                    cellValues={[outputData[OutputKeysForIndustrialDevelopmentCalculator.RawLandCalculations].title]}
+                    cellValues={[outputData[OutputKeys.RawLandCalculations]?.title]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     header={true}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.LandDeveloperProfit}
+                    id={OutputKeys.LandDeveloperProfit}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandDeveloperProfit].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandDeveloperProfit].value
+                        outputData[OutputKeys.LandDeveloperProfit]?.title,
+                        outputData[OutputKeys.LandDeveloperProfit]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.LandDeveloperProfit].description}
+                    description={outputData[OutputKeys.LandDeveloperProfit]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.CostToDevelopLand}
+                    id={OutputKeys.CostToDevelopLand}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CostToDevelopLand].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.CostToDevelopLand].value
+                        outputData[OutputKeys.CostToDevelopLand]?.title,
+                        outputData[OutputKeys.CostToDevelopLand]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.CostToDevelopLand].description}
+                    description={outputData[OutputKeys.CostToDevelopLand]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.SDCFees}
+                    id={OutputKeys.SDCFees}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.SDCFees].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.SDCFees].value
+                        outputData[OutputKeys.SDCFees]?.title,
+                        outputData[OutputKeys.SDCFees]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.SDCFees].description}
+                    description={outputData[OutputKeys.SDCFees]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.LandValueIfAlreadyOwned}
+                    id={OutputKeys.LandValueIfAlreadyOwned}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandValueIfAlreadyOwned].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandValueIfAlreadyOwned].value
+                        outputData[OutputKeys.LandValueIfAlreadyOwned]?.title,
+                        outputData[OutputKeys.LandValueIfAlreadyOwned]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.LandValueIfAlreadyOwned].description}
+                    description={outputData[OutputKeys.LandValueIfAlreadyOwned]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner}
+                    id={OutputKeys.OfferToLandOwner}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner].value
+                        outputData[OutputKeys.OfferToLandOwner]?.title,
+                        outputData[OutputKeys.OfferToLandOwner]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.OfferToLandOwner].description}
+                    description={outputData[OutputKeys.OfferToLandOwner]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     output={true}
@@ -832,7 +774,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
             <div className="table-container">
                 <DynamicRow
-                    cellValues={[outputData[OutputKeysForIndustrialDevelopmentCalculator.ProjectOverview].title]}
+                    cellValues={[outputData[OutputKeys.ProjectOverview]?.title]}
                     isMobile={isMobile}
                     numberOfCells={2}
                     header={true}
@@ -840,10 +782,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.LandCosts}
+                    id={OutputKeys.LandCosts}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandCosts].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.LandCosts].value
+                        outputData[OutputKeys.LandCosts]?.title,
+                        outputData[OutputKeys.LandCosts]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -851,10 +793,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.SoftCosts}
+                    id={OutputKeys.SoftCosts}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.SoftCosts].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.SoftCosts].value
+                        outputData[OutputKeys.SoftCosts]?.title,
+                        outputData[OutputKeys.SoftCosts]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -862,10 +804,10 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.HardCosts}
+                    id={OutputKeys.HardCosts}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.HardCosts].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.HardCosts].value
+                        outputData[OutputKeys.HardCosts]?.title,
+                        outputData[OutputKeys.HardCosts]?.value
                     ]}
                     isMobile={isMobile}
                     numberOfCells={2}
@@ -873,24 +815,24 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.TotalCosts}
+                    id={OutputKeys.TotalCosts}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalCosts].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalCosts].value
+                        outputData[OutputKeys.TotalCosts]?.title,
+                        outputData[OutputKeys.TotalCosts]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalCosts].description}
+                    description={outputData[OutputKeys.TotalCosts]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                 />
                 <DynamicRow
-                    id={OutputKeysForIndustrialDevelopmentCalculator.TotalProfit}
+                    id={OutputKeys.TotalProfit}
                     cellValues={[
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalProfit].title,
-                        outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalProfit].value
+                        outputData[OutputKeys.TotalProfit]?.title,
+                        outputData[OutputKeys.TotalProfit]?.value
                     ]}
-                    description={outputData[OutputKeysForIndustrialDevelopmentCalculator.TotalProfit].description}
+                    description={outputData[OutputKeys.TotalProfit]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
                     output={true}
@@ -899,24 +841,11 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                 />
             </div>
 
-
-            {/* [
-
-// convertToPercent(propertyCapRate),
-"$" + roundAndLocalString(totalOfferToLandOwner),
-
-
-]}
-titles={[
-// "Cap rate for the property",
-"How much you should pay for the land"
-]}
- */}
 
             <PopupBox
-                data={popupBoxvalues()[1]}
-                titles={popupBoxvalues()[0]}
-                dataKeys={popupBoxvalues()[2]}
+                data={popupValues[1]}
+                titles={popupValues[0]}
+                dataKeys={popupValues[2]}
                 setActiveCards={setActiveCards}
 
             />
