@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './DynamicRow.scss';
 import { formatNumberWithCommas } from '../../utils/utils';
-import { OutputKeys } from '../../pages/IndustrialDevelopmentCalculator';
+import { OutputKeys } from '../../utils/constants';
 
 
 

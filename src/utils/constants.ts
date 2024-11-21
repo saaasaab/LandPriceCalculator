@@ -25,7 +25,7 @@ export const DEFAULT_VALUES_ZEROS = {
     costToDevelopPerLot: "0",
     costToDevelopPerUnit: "0",
     housePricePerSqFt: "0",
-    multifamilyPricePerUnit:"0",
+    multifamilyPricePerUnit: "0",
     houseSize: "0",
     multifamilyPricePerSqFt: "0",
     numberOfUnits: "0",
@@ -34,8 +34,8 @@ export const DEFAULT_VALUES_ZEROS = {
     sqFtPerLot: "0",
     unitsPerAcre: "0",
     annualLeaseRatesPerSQFT: "0",
-    leasableSQFT:"0",
-    percentageOfIncomeToExpenses:"0",
+    leasableSQFT: "0",
+    percentageOfIncomeToExpenses: "0",
     rents: "0",
     interestRate: "0",
     numberOfYears: "0",
@@ -87,7 +87,7 @@ export const DEFAULT_VALUES_ZEROS = {
     propertyValue: "0",
     loanToValue: "0",
     constructionToLongTermLoan: "0",
-    isInterestOnly: false,                  
+    isInterestOnly: false,
 
 }
 export const DEFAULT_VALUES = {
@@ -147,8 +147,8 @@ export const DEFAULT_VALUES = {
         costToDevelop: "40,000",
         SDCFees: "20,000",
         ownedLandCost: "0",
-        annualLeaseRatesPerSQFT:"18",
-        percentageOfIncomeToExpenses:"45",
+        annualLeaseRatesPerSQFT: "18",
+        percentageOfIncomeToExpenses: "45",
     },
     [EPageNames.MULTI_FAMILY_PRICE_PER_DOOR]: {
         ...DEFAULT_VALUES_ZEROS,
@@ -216,10 +216,10 @@ export const DEFAULT_VALUES = {
         constructionToLongTermLoan: "75",    // Default conversion to long-term loan percentage (%)
         isInterestOnly: false,                  // Default interest-only option (unchecked)
     },
-    [EPageNames.INDUSTRIAL_PRICE_PER_SQFT]:{
+    [EPageNames.INDUSTRIAL_PRICE_PER_SQFT]: {
         ...DEFAULT_VALUES_ZEROS,
         annualLeaseRatesPerSQFT: "18",
-        leasableSQFT:"5000",
+        leasableSQFT: "5000",
         interestRate: "7.75",
         numberOfYears: "25",
         cashOnCashReturn: "10",
@@ -227,10 +227,10 @@ export const DEFAULT_VALUES = {
         downPayment: "30",
         units: "4",
     },
-    [EPageNames.WATERFALL]:{
+    [EPageNames.WATERFALL]: {
         ...DEFAULT_VALUES_ZEROS,
     },
-    [EPageNames.CONSTRUCTION_BUDGET]:{
+    [EPageNames.CONSTRUCTION_BUDGET]: {
         ...DEFAULT_VALUES_ZEROS,
     },
 }
@@ -271,6 +271,7 @@ export const allStateVariables = [
 
 
 export enum OutputKeys {
+    AdjustedInfrastructure = "adjustedInfrastructure",
     AnnualRentalIncome = "annualRentalIncome",
     BasicLandInfo = "basicLandInfo",
     BuilderProfit = "builderProfit",
@@ -281,18 +282,22 @@ export enum OutputKeys {
     CalculatedImperviousSurfaceRatio = "calculatedImperviousSurfaceRatio",
     CalculatedParkingArea = "calculatedParkingArea",
     CalculatedSidewalkArea = "calculatedSidewalkArea",
-    CalculatedValueToLandOwner="calculatedValueToLandOwner",
+    CalculatedValueToLandOwner = "calculatedValueToLandOwner",
     CostToDevelopLand = "costToDevelopLand",
     DrivewayArea = "drivewayArea",
     FinancialAssumptions = "financialAssumptions",
     FinishedLotValue = "finishedLotValue",
     GeneralContractorProfit = "generalContractorProfit",
     HardCostForBuild = "hardCostForBuild",
+    HardCostPerSqFt = "hardCostPerSqFt",
     HardCosts = "hardCosts",
-    HardCostsTotal="hardCostsTotal",
+    HardCostsTotal = "hardCostsTotal",
+    HomeBuilderProfit = "homeBuilderProfit",
+    HouseSalePrice = "houseSalePrice",
     ImperviousSurfaceRatio = "imperviousSurfaceRatio",
     LandCosts = "landCosts",
     LandDeveloperProfit = "landDeveloperProfit",
+    LandDeveloperProfitPerLot = "landDeveloperProfitPerLot",
     LandPercentage = "landPercentage",
     LandPercentageOfTotalValue = "landPercentageOfTotalValue",
     LandValueIfAlreadyOwned = "landValueIfAlreadyOwned",
@@ -303,12 +308,13 @@ export enum OutputKeys {
     OfferToLandOwner = "offerToLandOwner",
     ParkingArea = "parkingArea",
     Permits = "permits",
-    PermitsPerUnit="PermitsPerUnit",
+    PermitsPerUnit = "PermitsPerUnit",
     ProjectOverview = "projectOverview",
     PropertyCapRate = "propertyCapRate",
     PropertyNOI = "propertyNOI",
     RawLandCalculations = "rawLandCalculations",
     REAgentCommission = "reAgentCommission",
+    REAgentCommissionPerUnit = "reAgentCommissionPerUnit",
     SDCFees = "sdcFees",
     SidewalkArea = "sidewalkArea",
     SoftCosts = "softCosts",
@@ -317,10 +323,12 @@ export enum OutputKeys {
     TotalCosts = "totalCosts",
     TotalHandicappedParkingSpots = "totalHandicappedParkingSpots",
     TotalHardCosts = "totalHardCosts",
+    TotalHardCostsPerUnit = "totalHardCostsPerUnit",
     TotalLeasableSpace = "totalLeasableSpace",
+    TotalLotYield = "totalLotYield",
     TotalOfferToLandOwner = "totalOfferToLandOwner",
     TotalParkingSpots = "totalParkingSpots",
     TotalProfit = "totalProfit",
     UnitSqFt = "unitSqFt",
-
+    ValuePerLotToLandOwner = "valuePerLotToLandOwner",
 }

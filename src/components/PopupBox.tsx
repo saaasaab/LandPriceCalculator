@@ -30,8 +30,6 @@ const PopupBox = ({
             // }
             return newSet;
         });
-
-
     }
     return (
 

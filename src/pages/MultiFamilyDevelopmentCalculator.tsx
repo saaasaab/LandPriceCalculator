@@ -146,13 +146,14 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         },
         [OutputKeys.HardCosts]: {
             title: "Hard Cost",
-            value: roundAndLocalString(totalHardCosts),
+            value: roundAndLocalString(perUnitHardCosts),
+            value2: roundAndLocalString(totalHardCosts),
             description: "The total hard costs, including construction and miscellaneous costs.",
         },
         [OutputKeys.HardCostsTotal]: {
             title: "Hard Cost",
             value: roundAndLocalString(perUnitHardCosts),
-            value2: roundAndLocalString(totalHardCosts),
+            
             description: "The total hard costs, including construction and miscellaneous costs.",
         },
         [OutputKeys.MiscCosts]: {
@@ -252,7 +253,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         [OutputKeys.ProjectOverview]: {
             title: "Project Overview",
             value: null, // No specific value, as this is a header
-            description: null, // No description needed for headers
+            description: null,
         },
         [OutputKeys.TotalBuildingSqft]: {
             title: "Total Building Sq Ft",

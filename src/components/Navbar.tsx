@@ -9,7 +9,7 @@ import { EPageTitles } from '../utils/types';
 export const routes = {
   MULTIFAMILY_DEVELOPMENT:"/residential-development",
   INDUSTRIAL_DEVELOPMENT :"/industrial-development",
-  RESIDENTIAL_DEVELOPMENT: "/multifamily-development",
+  RESIDENTIAL_DEVELOPMENT: "/residential-development",
   MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
   INDUSTRIAL_PRICE_PER_SQFT: "industrial-price-per-sqft-calculator",
   MULTIFAMILY_ANALYSIS:"/multifamily-analysis",
