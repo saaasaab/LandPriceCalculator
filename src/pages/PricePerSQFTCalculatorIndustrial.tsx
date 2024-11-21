@@ -87,7 +87,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setNumberOfYears(value)}
-                    cellValues={["Years for financing (#)", numberOfYears]}
+                    cellValues={["Financing Term (Years)", numberOfYears]}
                     description="How many years is is the loan amortizing for"
                 />
                 <InputRow
@@ -149,7 +149,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Debt service coverage ratio DSCR", Math.round(DSCR * 100) / 100 + "X"]}
+                    cellValues={["Debt service coverage ratio (DSCR)", Math.round(DSCR * 100) / 100 + "X"]}
                     description="A bank normally is looking for 1.25 or greater"
                 />
 

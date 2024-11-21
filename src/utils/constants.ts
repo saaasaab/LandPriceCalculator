@@ -153,7 +153,7 @@ export const DEFAULT_VALUES = {
     [EPageNames.MULTI_FAMILY_PRICE_PER_DOOR]: {
         ...DEFAULT_VALUES_ZEROS,
         rents: "1,600",
-        interestRate: "8",
+        interestRate: "7.75",
         numberOfYears: "25",
         cashOnCashReturn: "8",
         expensePercentage: "50",
@@ -166,7 +166,7 @@ export const DEFAULT_VALUES = {
         units: "4",
         rentPerUnit: "1,500",
         repairPerUnit: "0",
-        interestRate: "8.0",
+        interestRate: "7.75",
         downPayment: "25",
         duration: "25",
         taxRate: "35",
