@@ -14,15 +14,16 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
     const queryParams = new URLSearchParams(window.location.search)
 
-
     const [rents, setRents] = usePersistedState2(page, EAllStates.rents, DEFAULT_VALUES[page].rents, queryParams);
-
     const [interestRate, setInterestRate] = usePersistedState2(page, EAllStates.interestRate, DEFAULT_VALUES[page].interestRate, queryParams);
     const [numberOfYears, setNumberOfYears] = usePersistedState2(page, EAllStates.catchAll, DEFAULT_VALUES[page].numberOfYears, queryParams);
     const [cashOnCashReturn, setCashOnCashReturn] = usePersistedState2(page, EAllStates.cashOnCashReturn, DEFAULT_VALUES[page].cashOnCashReturn, queryParams);
     const [expensePercentage, setExpensePercentage] = usePersistedState2(page, EAllStates.expensePercentage, DEFAULT_VALUES[page].expensePercentage, queryParams);
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
     const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
+    const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
+    const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
+    
 
     const params: {
         rents: string;
@@ -58,7 +59,10 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const capRate = operatingIncome * 12 / pricePerUnit;
 
     const totalPrice = removeCommas(units) * pricePerUnit;
+    const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
+    const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
 
+    const offerPrice = totalPrice - totalBuyersAgentFee -  totalClosingCosts;
 
 
     return (
@@ -91,7 +95,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     cellValues={["Down Payment (%)", downPayment]}
                     description="The down payment needed from the bank for the loan."
                     isPercent={true}
-               />
+                />
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setExpensePercentage(value)}
@@ -111,6 +115,18 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     setInput={value => setUnits(value)}
                     cellValues={["Number of units (#)", units]}
                     description="How many units are in the building"
+                />
+                <InputRow
+                    isMobile={isMobile}
+                    setInput={value => setBuyersAgentFee(value)}
+                    cellValues={["Buyers agent fee (%)", buyersAgentFee]}
+                    description="The percentage for the buyers agent of the total building value"
+                />
+                <InputRow
+                    isMobile={isMobile}
+                    setInput={value => setClostingCostsFee(value)}
+                    cellValues={["Closing cost fee(%)", clostingCostsFee]}
+                    description="The percentage for the closing costs of the total building value"
                 />
 
             </div>
@@ -161,6 +177,11 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     description="This is the total value of the building based on the per unit price"
                 />
 
+                <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
+                    description="This is the total you will offer to the seller including closing costs"
+                />
 
             </div>
 

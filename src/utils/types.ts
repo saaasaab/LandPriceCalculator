@@ -92,6 +92,8 @@ export enum EAllStates {
     cashOnCashReturn = "cashOnCashReturn",
     expensePercentage = "expensePercentage",
     downPayment = "downPayment",
+    buyersAgentFee="buyersAgentFee",
+    clostingCostsFee="clostingCostsFee",
 
 
     //   FOR THE MULTI FAMILY ANALYSIS
@@ -117,6 +119,7 @@ export enum EAllStates {
     repairs = "repairs",
     capEx = "capEx",
     propertyManagement = "propertyManagement",
+    closingCosts = "closingCosts",
 
 
     // FOR IRR CALCULATIONS

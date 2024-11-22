@@ -13,13 +13,9 @@ import { useState } from 'react';
 
 
 interface ResidentialDevelopmentCalculationProps {
-
     isMobile: boolean;
     page: EPageNames;
-
-
 }
-
 
 const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculationProps> = ({
     isMobile,
