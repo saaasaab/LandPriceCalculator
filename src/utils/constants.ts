@@ -229,6 +229,8 @@ export const DEFAULT_VALUES = {
         expensePercentage: "50",
         downPayment: "30",
         units: "4",
+        buyersAgentFee:"2.5",
+        closingCosts:"1.5",
     },
     [EPageNames.WATERFALL]: {
         ...DEFAULT_VALUES_ZEROS,

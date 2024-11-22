@@ -21,7 +21,9 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const [cashOnCashReturn, setCashOnCashReturn] = usePersistedState2(page, EAllStates.cashOnCashReturn, DEFAULT_VALUES[page].cashOnCashReturn, queryParams);
     const [expensePercentage, setExpensePercentage] = usePersistedState2(page, EAllStates.expensePercentage, DEFAULT_VALUES[page].expensePercentage, queryParams);
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
-
+    const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
+    const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
+    
     const params: {
         annualLeaseRatesPerSQFT: string;
         downPayment: string;
@@ -59,6 +61,13 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const capRate = operatingIncome * 12 / pricePerSQFT;
 
     const totalPrice = removeCommas(leasableSQFT) * pricePerSQFT;
+
+    const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
+    const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
+    const offerPrice = totalPrice - totalBuyersAgentFee -  totalClosingCosts;
+
+
+
 
 
 
@@ -110,6 +119,18 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     cellValues={["Cash on cash return (%)", cashOnCashReturn]}
                     description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
                     isPercent={true}
+                />
+                  <InputRow
+                    isMobile={isMobile}
+                    setInput={value => setBuyersAgentFee(value)}
+                    cellValues={["Buyers agent fee (%)", buyersAgentFee]}
+                    description="The percentage for the buyers agent of the total building value"
+                />
+                <InputRow
+                    isMobile={isMobile}
+                    setInput={value => setClostingCostsFee(value)}
+                    cellValues={["Closing cost fee(%)", clostingCostsFee]}
+                    description="The percentage for the closing costs of the total building value"
                 />
             </div>
 
@@ -163,6 +184,11 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     isMobile={isMobile}
                     cellValues={["Total Building Value", "$" + roundAndLocalString(totalPrice)]}
                     description="This is the total value of the building based on the persqft price"
+                />
+                 <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
+                    description="This is the total you will offer to the seller including closing costs"
                 />
 
 
