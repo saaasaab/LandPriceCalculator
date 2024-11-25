@@ -31,13 +31,13 @@ export const roundAndLocalString = (value: number) => {
   return Math.round(removeCommas(value.toString())).toLocaleString();
 };
 
-export const convertToPercent = (value:number, decimals = 1) =>{
+export const convertToPercent = (value: number, decimals = 1) => {
   return (value * 100).toFixed(decimals) + "%"
 }
 
-export const roundToDecimal = (value:number, decimals = 2) =>{
-  const places = Math.pow(10,decimals);
-  return Math.round(value*places)/places;
+export const roundToDecimal = (value: number, decimals = 2) => {
+  const places = Math.pow(10, decimals);
+  return Math.round(value * places) / places;
 }
 
 
@@ -131,7 +131,7 @@ export function calculateBuildingSqft(
   const parkingSpotL = 17;
   const handicappedParkingSpotW = 16;
 
-  const interval =  lotSize === 0 ? 100 : lotSize * .01;
+  const interval = lotSize === 0 ? 100 : lotSize * .01;
 
   // Initial calculations
   const maxImperviousSurface = lotSize * imperviousSurfaceRatio; // Max impervious surface allowed
@@ -315,7 +315,7 @@ export const copyToClipboard = (
 
 
 export const removeCommas = (str: string) => {
-  if(!str) return 0
+  if (!str) return 0
   return Number(str.toString().replace(/,/g, ''));
 }
 
@@ -353,34 +353,36 @@ export function getMonthsBetweenDates(purchaseDate: string, todayDate: string) {
 
   // Loop through each month between the purchase date and today
   while (currentMonth <= endDate) {
-      // Format the current month as "YYYY-MM-DD"
-      months.push(currentMonth.toISOString().split('T')[0]);
+    // Format the current month as "YYYY-MM-DD"
+    months.push(currentMonth.toISOString().split('T')[0]);
 
-      // Move to the next month
-      currentMonth.setMonth(currentMonth.getMonth() + 1);
+    // Move to the next month
+    currentMonth.setMonth(currentMonth.getMonth() + 1);
   }
 
   return months;
 }
 
 
-export const popupBoxValues = ( activeCards: Set<OutputKeys>, outputData: Partial<Record<OutputKeys, {
+export const popupBoxValues = (activeCards: Set<OutputKeys>, outputData: Partial<Record<OutputKeys, {
   title: string;
   value: any;
   value2?: any;
   description: string | null;
-}>> ) => {
+}>>) => {
   const titles: string[] = [];
   const keys: OutputKeys[] = [];
   const values: any[] = [];
+  const values2: any[] = [];
 
   activeCards.forEach((key) => {
-      const item = outputData[key];
-      if (item) {
-          titles.push(item.title);
-          values.push(item.value);
-          keys.push(key)
-      }
+    const item = outputData[key];
+    if (item) {
+      titles.push(item.title);
+      values.push(item.value);
+      values2.push(item.value2);
+      keys.push(key)
+    }
   });
-  return [titles, values,keys]
+  return [titles, values, keys, values2]
 }

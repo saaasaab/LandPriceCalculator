@@ -7,12 +7,14 @@ import './PopupBox.scss';
 
 const PopupBox = ({
     data,
+    data2,
     titles,
     setActiveCards,
     dataKeys,
 }:
     {
         data: string[];
+        data2?: string[];
         titles: string[];
         setActiveCards?: React.Dispatch<React.SetStateAction<Set<OutputKeys>>>;
         dataKeys?: OutputKeys[];
@@ -37,7 +39,8 @@ const PopupBox = ({
             {dataKeys?.map((d: string, i: number) =>
                 <div key={d} className="popup-box" onClick={() => handleClick(i)}>
                     <div className="box-title">{titles[i]}</div>
-                    <div className="box-data">{data[i]}</div>
+                    <div className="box-data">{data2 && data2[i] ? data2[i] : data[i]}</div>
+                    {/* { ? <div className="box-data">{}</div>:<></>} */}
                 </div>
             )}
         </div>

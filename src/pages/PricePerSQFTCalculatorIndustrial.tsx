@@ -23,7 +23,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
     const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
-    
+
     const params: {
         annualLeaseRatesPerSQFT: string;
         downPayment: string;
@@ -64,10 +64,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
     const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
     const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
-    const offerPrice = totalPrice - totalBuyersAgentFee -  totalClosingCosts;
-
-
-
+    const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
 
 
 
@@ -75,7 +72,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
         <div className="group-section">
             <div className="input-fields-container has-bottom-border">
-
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setAnnualLeaseRatesPerSQFT(value)}
@@ -120,7 +116,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
                     isPercent={true}
                 />
-                  <InputRow
+                <InputRow
                     isMobile={isMobile}
                     setInput={value => setBuyersAgentFee(value)}
                     cellValues={["Buyers agent fee (%)", buyersAgentFee]}
@@ -163,7 +159,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Annual Cash flow per sqft", "$" + roundToDecimal(cashFlowPerSQFT * 12,2)]}
+                    cellValues={["Annual Cash flow per sqft", "$" + roundToDecimal(cashFlowPerSQFT * 12, 2)]}
                     description="The cash flow per sqft"
                 />
 
@@ -185,13 +181,11 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     cellValues={["Total Building Value", "$" + roundAndLocalString(totalPrice)]}
                     description="This is the total value of the building based on the persqft price"
                 />
-                 <OutputRow
+                <OutputRow
                     isMobile={isMobile}
                     cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
                     description="This is the total you will offer to the seller including closing costs"
                 />
-
-
             </div>
 
             <ShareButton params={params} />

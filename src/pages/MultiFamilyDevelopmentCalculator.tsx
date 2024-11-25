@@ -152,8 +152,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         },
         [OutputKeys.HardCostsTotal]: {
             title: "Hard Cost",
-            value: roundAndLocalString(perUnitHardCosts),
-            
+            value: roundAndLocalString(totalHardCosts),
             description: "The total hard costs, including construction and miscellaneous costs.",
         },
         [OutputKeys.MiscCosts]: {
@@ -839,6 +838,7 @@ setActiveCards={setActiveCards}
 
             <PopupBox
                 data={popupValues[1]}
+                data2={popupValues[3]}
                 titles={popupValues[0]}
                 dataKeys={popupValues[2]}
                 setActiveCards={setActiveCards}
