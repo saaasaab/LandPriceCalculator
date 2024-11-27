@@ -1,4 +1,4 @@
-import { convertToPercent, removeCommas, roundAndLocalString } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
@@ -23,7 +23,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
     const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
-    
+
 
     const params: {
         rents: string;
@@ -42,7 +42,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     };
 
 
-    const interestRateMonthly = removeCommas(interestRate) / 100 / 12;
+    const interestRateMonthly = (removeCommas(interestRate) || .0000001) / 100 / 12;
     const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
     const numberOfPayments = removeCommas(numberOfYears) * 12;
     const mortTop = interestRateMonthly * Math.pow((1 + interestRateMonthly), numberOfPayments);
@@ -62,8 +62,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
     const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
 
-    const offerPrice = totalPrice - totalBuyersAgentFee -  totalClosingCosts;
-
+    const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
+    const grossRentMultiplier = offerPrice / (12 * removeCommas(rents) * removeCommas(units))
 
     return (
 
@@ -163,6 +163,12 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     isMobile={isMobile}
                     cellValues={["Debt service coverage ratio (DSCR)", Math.round(DSCR * 100) / 100 + "X"]}
                     description="A bank normally is looking for 1.25 or greater"
+                />
+
+                <OutputRow
+                    isMobile={isMobile}
+                    cellValues={["Gross Rent Multiplier", roundToDecimal(grossRentMultiplier, 2) + "X"]}
+                    description="The GRM is calculated by dividing the value of the property by the annual gross rents. Generally the lower the better."
                 />
 
                 <OutputRow
