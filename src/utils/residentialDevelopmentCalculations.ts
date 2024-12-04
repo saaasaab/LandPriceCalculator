@@ -12,7 +12,7 @@ type TResidentialDevelopmentCalculationsInputs = {
     permits: string;
     miscCosts: string;
     homeBuilderProfitPercentage: string;
-    realEstateCommissionPercentage: string;
+    // realEstateCommissionPercentage: string;
     landDeveloperProfitPercentage: string;
     costToDevelopPerLot: string;
     ownedLandCost?: string; // Optional
@@ -23,7 +23,7 @@ type TResidentialDevelopmentCalculationsOutputs = {
     hardCostLessProfit: number;
     homeBuilderProfit: number;
     totalHardCostsPerUnit: number;
-    reAgentCommission: number;
+    // reAgentCommission: number;
     finishedLotValue: number;
     landPercentage: number;
     netBuildableAcres: number;
@@ -39,6 +39,7 @@ type TResidentialDevelopmentCalculationsOutputs = {
     totalSoftCosts: number;
     totalCosts: number;
     totalProfits: number;
+    // totalClosingCosts: number;
 };
 
 const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalculationsInputs): TResidentialDevelopmentCalculationsOutputs => {
@@ -54,7 +55,7 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         permits,
         miscCosts,
         homeBuilderProfitPercentage,
-        realEstateCommissionPercentage,
+        // realEstateCommissionPercentage,
         landDeveloperProfitPercentage,
         costToDevelopPerLot,
         ownedLandCost
@@ -65,8 +66,8 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
     const hardCostLessProfit = houseSize * hardCostPerSqFt + permits + miscCosts;
     const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostLessProfit;
     const totalHardCostsPerUnit = hardCostLessProfit + homeBuilderProfit;
-    const reAgentCommission = (realEstateCommissionPercentage / 100) * houseSalePrice;
-    const finishedLotValue = houseSalePrice - totalHardCostsPerUnit - reAgentCommission;
+    // const reAgentCommission = (realEstateCommissionPercentage / 100) * houseSalePrice;
+    const finishedLotValue = houseSalePrice - totalHardCostsPerUnit;// - reAgentCommission;
     const landPercentage = finishedLotValue / houseSalePrice;
 
     // Calculate net buildable acres
@@ -90,13 +91,13 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
     const totalSoftCosts = costToDevelopPerLot * totalLotYield + landDeveloperProfit;
     const totalCosts = totalOfferToLandOwner + costToDevelopPerLot * totalLotYield + landDeveloperProfit + totalHardCostsPerUnit * totalLotYield;
     const totalProfits = houseSalePrice * totalLotYield - totalCosts;
-
+    // const totalClosingCosts = reAgentCommission
     return {
         houseSalePrice,
         hardCostLessProfit,
         homeBuilderProfit,
         totalHardCostsPerUnit,
-        reAgentCommission,
+        // reAgentCommission,
         finishedLotValue,
         landPercentage,
         netBuildableAcres,
@@ -111,7 +112,8 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         totalHardCosts,
         totalSoftCosts,
         totalCosts,
-        totalProfits
+        totalProfits,
+        // totalClosingCosts
     };
 };
 

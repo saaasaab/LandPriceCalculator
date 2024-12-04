@@ -336,4 +336,9 @@ export enum OutputKeys {
     TotalProfit = "totalProfit",
     UnitSqFt = "unitSqFt",
     ValuePerLotToLandOwner = "valuePerLotToLandOwner",
+
+    TotalPermitCosts="permits",
+    TotalMiscCosts="miscCosts",
+    TotalSDCCosts="costToDevelopPerLot",
+    ClosingCosts="totalClosingCosts",
 }

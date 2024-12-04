@@ -36,7 +36,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
     const [miscCosts, setMiscCosts] = usePersistedState2(page, EAllStates.miscCosts, DEFAULT_VALUES[page].miscCosts, queryParams);
     const [ownedLandCost, setOwnedLandCost] = usePersistedState2(page, EAllStates.ownedLandCost, DEFAULT_VALUES[page].ownedLandCost, queryParams);
     const [permits, setPermits] = usePersistedState2(page, EAllStates.permits, DEFAULT_VALUES[page].permits, queryParams);
-    const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState2(page, EAllStates.realEstateCommissionPercentage, DEFAULT_VALUES[page].realEstateCommissionPercentage, queryParams);
+    // const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState2(page, EAllStates.realEstateCommissionPercentage, DEFAULT_VALUES[page].realEstateCommissionPercentage, queryParams);
     const [sqFtPerLot, setSqFtPerLot] = usePersistedState2(page, EAllStates.sqFtPerLot, DEFAULT_VALUES[page].sqFtPerLot, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
     const [unitsPerAcre, setUnitsPerAcre] = usePersistedState2(page, EAllStates.unitsPerAcre, DEFAULT_VALUES[page].unitsPerAcre, queryParams);
@@ -55,7 +55,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         permits,
         miscCosts,
         homeBuilderProfitPercentage,
-        realEstateCommissionPercentage,
+        // realEstateCommissionPercentage,
         landDeveloperProfitPercentage,
         costToDevelopPerLot,
         ownedLandCost
@@ -65,7 +65,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         houseSalePrice,
         homeBuilderProfit,
         totalHardCostsPerUnit,
-        reAgentCommission,
+        // reAgentCommission,
         finishedLotValue,
         landPercentage,
         netBuildableAcres,
@@ -78,7 +78,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         totalHardCosts,
         totalSoftCosts,
         totalCosts,
-        totalProfits
+        totalProfits,
+        // totalClosingCosts
     } = residentialDevelopmentCalculations(inputs)
 
 
@@ -111,34 +112,49 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         [OutputKeys.HouseSalePrice]: {
             title: "House Sale Price",
             value: houseSalePrice.toLocaleString(),
-            value2: (houseSalePrice*totalLotYield).toLocaleString(),
+            value2: (houseSalePrice * totalLotYield).toLocaleString(),
             description: "The total sale price of the house based on the size and price per square foot.",
         },
         [OutputKeys.HardCostPerSqFt]: {
             title: "Hard Cost to House Build ($)",
             value: (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)).toLocaleString(),
-            value2: (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)* totalLotYield).toLocaleString(),
+            value2: (removeCommas(hardCostPerSqFt) * removeCommas(houseSize) * totalLotYield).toLocaleString(),
             description: "The hard costs for building the house per square foot.",
         },
         [OutputKeys.HomeBuilderProfit]: {
             title: "Home Builder Profit ($)",
             value: homeBuilderProfit.toLocaleString(),
-            value2: (homeBuilderProfit* totalLotYield).toLocaleString(),
+            value2: (homeBuilderProfit * totalLotYield).toLocaleString(),
             description: "The builder's profit based on a percentage of the hard costs.",
         },
         [OutputKeys.TotalHardCostsPerUnit]: {
             title: "Total Hard Costs",
             value: totalHardCostsPerUnit.toLocaleString(),
-            value2: (totalHardCostsPerUnit* totalLotYield).toLocaleString(),
-            description: "The total hard costs, including construction costs, permits, and miscellaneous costs.",
+            value2: (totalHardCostsPerUnit * totalLotYield).toLocaleString(),
+            description: "The total hard costs, including construction costs.",
         },
-        [OutputKeys.REAgentCommissionPerUnit]: {
-            title: "RE Agent Commission",
-            value: Math.round(reAgentCommission).toLocaleString(),
-            value2: Math.round(reAgentCommission*totalLotYield).toLocaleString(),
 
-            description: "The real estate agent commission, calculated as a percentage of the house sale price.",
+        [OutputKeys.TotalPermitCosts]: {
+            title: "Total Permit Costs",
+            value: permits.toLocaleString(),
+            value2: (removeCommas(permits) * totalLotYield).toLocaleString(),
+            description: "The total permit costs.",
         },
+
+        [OutputKeys.TotalMiscCosts]: {
+            title: "Total Miscellaneous Costs",
+            value: miscCosts,
+            value2: (removeCommas(miscCosts) * totalLotYield).toLocaleString(),
+            description: "The total miscellaneous costs.",
+        },
+
+        // [OutputKeys.REAgentCommissionPerUnit]: {
+        //     title: "RE Agent Commission",
+        //     value: Math.round(reAgentCommission).toLocaleString(),
+        //     value2: Math.round(reAgentCommission * totalLotYield).toLocaleString(),
+
+        //     description: "The real estate agent commission, calculated as a percentage of the house sale price.",
+        // },
         [OutputKeys.LandPercentageOfTotalValue]: {
             title: "Land Percentage of Total Value",
             value: convertToPercent(landPercentage),
@@ -146,61 +162,69 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         },
         [OutputKeys.FinishedLotValue]: {
             title: "Finished Lot Value",
-            value: Math.round(finishedLotValue / totalLotYield).toLocaleString(),
-            value2: Math.round(finishedLotValue).toLocaleString(),
+            value: Math.round(finishedLotValue).toLocaleString(),
+            value2: Math.round(finishedLotValue * totalLotYield).toLocaleString(),
             description: "The value of the finished lot without the house.",
         },
         [OutputKeys.LandDeveloperProfitPerLot]: {
             title: "Land Developer Profit ($)",
             value: landDeveloperProfitPerLot.toLocaleString(),
-            value2: (landDeveloperProfitPerLot* totalLotYield).toLocaleString(),
+            value2: (landDeveloperProfitPerLot * totalLotYield).toLocaleString(),
             description: "Percentage profit made by the developer.",
         },
         [OutputKeys.LandDeveloperProfit]: {
             title: "Land Developer's Profit",
             value: landDeveloperProfit.toLocaleString(),
-            value2: (landDeveloperProfit* totalLotYield).toLocaleString(),
+            value2: (landDeveloperProfit * totalLotYield).toLocaleString(),
             description: "Total profit made by the land developer from the entire project.",
         },
-        [OutputKeys.ValuePerLotToLandOwner]: {
-            title: "Value to Land Owner/Seller",
-            value: perLotOfferToLandOwner.toLocaleString(),
-            value2: (perLotOfferToLandOwner* totalLotYield).toLocaleString(),
-            description: "The value of each lot after development, as perceived by the landowner or seller.",
+        [OutputKeys.TotalSDCCosts]: {
+            title: "Total SDC Costs",
+            value: costToDevelopPerLot,
+            value2: (removeCommas(costToDevelopPerLot) * totalLotYield).toLocaleString(),
+            description: "The total SDC costs and engineering/architectural fees.",
         },
+
+
         [OutputKeys.OfferToLandOwner]: {
-            title: "Offer to Land Owner/Seller",
-            value: Math.round(totalOfferToLandOwner/totalLotYield).toLocaleString(),
-            value2: Math.round(totalOfferToLandOwner ).toLocaleString(),
+            title: "Breakeven Offer Price",
+            value: Math.round(perLotOfferToLandOwner).toLocaleString(),
+            value2: Math.round(totalOfferToLandOwner).toLocaleString(),
             description: "Total offer from the buyer to the land owner or seller.",
         },
         [OutputKeys.LandCosts]: {
             title: "Land Costs",
-            value: roundAndLocalString(totalOfferToLandOwner/totalLotYield),
-            value2: roundAndLocalString(totalOfferToLandOwner ),
+            value: roundAndLocalString(totalOfferToLandOwner / totalLotYield),
+            value2: roundAndLocalString(totalOfferToLandOwner),
             description: "The total cost for acquiring the land for the project.",
         },
         [OutputKeys.SoftCosts]: {
             title: "Soft Costs",
-            value: roundAndLocalString(totalSoftCosts/totalLotYield),
+            value: roundAndLocalString(totalSoftCosts / totalLotYield),
             value2: roundAndLocalString(totalSoftCosts),
             description: "Total soft costs for the project, including fees for permits, engineering, and other services.",
         },
         [OutputKeys.HardCosts]: {
             title: "Hard Costs",
-            value: roundAndLocalString(totalHardCosts/totalLotYield),
+            value: roundAndLocalString(totalHardCosts / totalLotYield),
             value2: roundAndLocalString(totalHardCosts),
             description: "The hard costs for the entire project.",
         },
+        // [OutputKeys.ClosingCosts]: {
+        //     title: "Closing Costs",
+        //     value: roundAndLocalString(totalClosingCosts / totalLotYield),
+        //     value2: roundAndLocalString(totalClosingCosts),
+        //     description: "Total Costs to Build this Project",
+        // },
         [OutputKeys.TotalCosts]: {
             title: "Total Costs",
-            value: roundAndLocalString(totalCosts/totalLotYield),
+            value: roundAndLocalString(totalCosts / totalLotYield),
             value2: roundAndLocalString(totalCosts),
             description: "Total Costs to Build this Project",
         },
         [OutputKeys.TotalProfit]: {
             title: "Total Profit",
-            value: roundAndLocalString(totalProfits/totalLotYield),
+            value: roundAndLocalString(totalProfits / totalLotYield),
             value2: roundAndLocalString(totalProfits),
             description: "Total profit if sold at the projected sell price.",
         },
@@ -212,7 +236,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         },
         [OutputKeys.RawLandCalculations]: {
             title: "Raw Land Calculations",
-            value: "Per Home",
+            value: "Per Lot",
             value2: "Total",
             description: null,
         },
@@ -318,14 +342,14 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         isMobile={isMobile}
                         isPercent={true}
                     />
-                    {/* Real Estate Agent Commission */}
+                    {/* Real Estate Agent Commission
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.realEstateCommissionPercentage}`); setRealEstateCommissionPercentage(value) }}
                         cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage, Math.round(reAgentCommission).toLocaleString()]}
                         description="The real estate agent commission, calculated as a percentage of the house sale price."
                         isMobile={isMobile}
                         isPercent={true}
-                    />
+                    /> */}
 
 
                     {/* Land Developer Profit */}
@@ -474,6 +498,37 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     isMobile={isMobile}
                     numberOfCells={3}
                 />
+
+
+                <DynamicRow
+                    setActiveCards={setActiveCards}
+                    activeCards={activeCards}
+                    id={OutputKeys.TotalPermitCosts}
+                    cellValues={[
+                        outputData[OutputKeys.TotalPermitCosts]?.title,
+                        outputData[OutputKeys.TotalPermitCosts]?.value,
+                        outputData[OutputKeys.TotalPermitCosts]?.value2,
+                    ]}
+                    description={outputData[OutputKeys.TotalPermitCosts]?.description}
+                    isMobile={isMobile}
+                    numberOfCells={3}
+                />
+
+                <DynamicRow
+                    setActiveCards={setActiveCards}
+                    activeCards={activeCards}
+                    id={OutputKeys.TotalMiscCosts}
+                    cellValues={[
+                        outputData[OutputKeys.TotalMiscCosts]?.title,
+                        outputData[OutputKeys.TotalMiscCosts]?.value,
+                        outputData[OutputKeys.TotalMiscCosts]?.value2,
+                    ]}
+                    description={outputData[OutputKeys.TotalMiscCosts]?.description}
+                    isMobile={isMobile}
+                    numberOfCells={3}
+                />
+
+
                 <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
@@ -487,7 +542,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     isMobile={isMobile}
                     numberOfCells={3}
                 />
-                <DynamicRow
+
+                {/* <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                     id={OutputKeys.REAgentCommissionPerUnit}
@@ -500,7 +556,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     description={outputData[OutputKeys.REAgentCommissionPerUnit]?.description}
                     isMobile={isMobile}
                     numberOfCells={3}
-                />
+                /> */}
                 <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
@@ -545,6 +601,21 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     inputCellIndex={-1}
                     header={true}
                 />
+                
+                     <DynamicRow
+                     setActiveCards={setActiveCards}
+                     activeCards={activeCards}
+                     id={OutputKeys.TotalSDCCosts}
+                     cellValues={[
+                         outputData[OutputKeys.TotalSDCCosts]?.title,
+                         outputData[OutputKeys.TotalSDCCosts]?.value,
+                         outputData[OutputKeys.TotalSDCCosts]?.value2,
+                     ]}
+                     description={outputData[OutputKeys.TotalSDCCosts]?.description}
+                     isMobile={isMobile}
+                     numberOfCells={3}
+                 />
+
                 <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
@@ -558,7 +629,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     isMobile={isMobile}
                     numberOfCells={3}
                 />
-                <DynamicRow
+                {/* <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                     id={OutputKeys.LandDeveloperProfit}
@@ -570,8 +641,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     description={outputData[OutputKeys.LandDeveloperProfit]?.description}
                     isMobile={isMobile}
                     numberOfCells={3}
-                />
-                <DynamicRow
+                /> */}
+                {/* <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                     id={OutputKeys.ValuePerLotToLandOwner}
@@ -584,7 +655,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     isMobile={isMobile}
                     numberOfCells={3}
                     inputCellIndex={1}
-                />
+                /> */}
                 <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
@@ -652,6 +723,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     isMobile={isMobile}
                     numberOfCells={3}
                 />
+
                 <DynamicRow
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
