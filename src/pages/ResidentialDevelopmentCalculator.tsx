@@ -111,26 +111,32 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         [OutputKeys.HouseSalePrice]: {
             title: "House Sale Price",
             value: houseSalePrice.toLocaleString(),
+            value2: (houseSalePrice*totalLotYield).toLocaleString(),
             description: "The total sale price of the house based on the size and price per square foot.",
         },
         [OutputKeys.HardCostPerSqFt]: {
-            title: "Hard Cost per Sq Ft for House Build ($)",
+            title: "Hard Cost to House Build ($)",
             value: (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)).toLocaleString(),
+            value2: (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)* totalLotYield).toLocaleString(),
             description: "The hard costs for building the house per square foot.",
         },
         [OutputKeys.HomeBuilderProfit]: {
-            title: "Home Builder Profit per unit ($)",
+            title: "Home Builder Profit ($)",
             value: homeBuilderProfit.toLocaleString(),
+            value2: (homeBuilderProfit* totalLotYield).toLocaleString(),
             description: "The builder's profit based on a percentage of the hard costs.",
         },
         [OutputKeys.TotalHardCostsPerUnit]: {
-            title: "Total Hard Costs per unit",
+            title: "Total Hard Costs",
             value: totalHardCostsPerUnit.toLocaleString(),
+            value2: (totalHardCostsPerUnit* totalLotYield).toLocaleString(),
             description: "The total hard costs, including construction costs, permits, and miscellaneous costs.",
         },
         [OutputKeys.REAgentCommissionPerUnit]: {
-            title: "RE Agent Commission per unit",
+            title: "RE Agent Commission",
             value: Math.round(reAgentCommission).toLocaleString(),
+            value2: Math.round(reAgentCommission*totalLotYield).toLocaleString(),
+
             description: "The real estate agent commission, calculated as a percentage of the house sale price.",
         },
         [OutputKeys.LandPercentageOfTotalValue]: {
@@ -140,67 +146,80 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         },
         [OutputKeys.FinishedLotValue]: {
             title: "Finished Lot Value",
-            value: Math.round(finishedLotValue).toLocaleString(),
+            value: Math.round(finishedLotValue / totalLotYield).toLocaleString(),
+            value2: Math.round(finishedLotValue).toLocaleString(),
             description: "The value of the finished lot without the house.",
         },
         [OutputKeys.LandDeveloperProfitPerLot]: {
-            title: "Land Developer Profit Per Lot ($)",
+            title: "Land Developer Profit ($)",
             value: landDeveloperProfitPerLot.toLocaleString(),
-            description: "Percentage profit made by the developer per lot.",
+            value2: (landDeveloperProfitPerLot* totalLotYield).toLocaleString(),
+            description: "Percentage profit made by the developer.",
         },
         [OutputKeys.LandDeveloperProfit]: {
             title: "Land Developer's Profit",
             value: landDeveloperProfit.toLocaleString(),
+            value2: (landDeveloperProfit* totalLotYield).toLocaleString(),
             description: "Total profit made by the land developer from the entire project.",
         },
         [OutputKeys.ValuePerLotToLandOwner]: {
-            title: "Value Per Lot to Land Owner/Seller",
+            title: "Value to Land Owner/Seller",
             value: perLotOfferToLandOwner.toLocaleString(),
+            value2: (perLotOfferToLandOwner* totalLotYield).toLocaleString(),
             description: "The value of each lot after development, as perceived by the landowner or seller.",
         },
         [OutputKeys.OfferToLandOwner]: {
             title: "Offer to Land Owner/Seller",
-            value: Math.round(totalOfferToLandOwner).toLocaleString(),
+            value: Math.round(totalOfferToLandOwner/totalLotYield).toLocaleString(),
+            value2: Math.round(totalOfferToLandOwner ).toLocaleString(),
             description: "Total offer from the buyer to the land owner or seller.",
         },
         [OutputKeys.LandCosts]: {
             title: "Land Costs",
-            value: roundAndLocalString(totalOfferToLandOwner),
+            value: roundAndLocalString(totalOfferToLandOwner/totalLotYield),
+            value2: roundAndLocalString(totalOfferToLandOwner ),
             description: "The total cost for acquiring the land for the project.",
         },
         [OutputKeys.SoftCosts]: {
             title: "Soft Costs",
-            value: roundAndLocalString(totalSoftCosts),
+            value: roundAndLocalString(totalSoftCosts/totalLotYield),
+            value2: roundAndLocalString(totalSoftCosts),
             description: "Total soft costs for the project, including fees for permits, engineering, and other services.",
         },
         [OutputKeys.HardCosts]: {
             title: "Hard Costs",
-            value: roundAndLocalString(totalHardCosts),
+            value: roundAndLocalString(totalHardCosts/totalLotYield),
+            value2: roundAndLocalString(totalHardCosts),
             description: "The hard costs for the entire project.",
         },
         [OutputKeys.TotalCosts]: {
             title: "Total Costs",
-            value: roundAndLocalString(totalCosts),
+            value: roundAndLocalString(totalCosts/totalLotYield),
+            value2: roundAndLocalString(totalCosts),
             description: "Total Costs to Build this Project",
         },
         [OutputKeys.TotalProfit]: {
             title: "Total Profit",
-            value: roundAndLocalString(totalProfits),
+            value: roundAndLocalString(totalProfits/totalLotYield),
+            value2: roundAndLocalString(totalProfits),
             description: "Total profit if sold at the projected sell price.",
         },
         [OutputKeys.FinancialAssumptions]: {
             title: "Financial Assumptions",
-            value: null,
+            value: "Per Home",
+            value2: "Total",
             description: null,
         },
         [OutputKeys.RawLandCalculations]: {
             title: "Raw Land Calculations",
-            value: null,
+            value: "Per Home",
+            value2: "Total",
             description: null,
         },
         [OutputKeys.ProjectOverview]: {
             title: "Project Overview",
-            value: null,
+            value: "Per Home",
+            value2: "Total",
             description: null,
         },
     };
@@ -269,17 +288,15 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Hard Cost Per Sq Ft */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.hardCostPerSqFt}`); setHardCostPerSqFt(value) }}
-                        cellValues={["Hard Cost per Sq Ft for House Build ($)", hardCostPerSqFt, (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)).toLocaleString()]}
-                        description="The hard costs for building the house per square foot."
+                        cellValues={["Hard Cost to Build House ($)", hardCostPerSqFt, (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)).toLocaleString()]}
+                        description="The hard costs for building the house based on square foot cost."
                         isMobile={isMobile}
                     />
-
-
 
                     {/* Permits */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.permits}`); setPermits(value) }}
-                        cellValues={["Permits per unit ($)", permits]}
+                        cellValues={["Permits ($)", permits]}
                         description="The total cost of permits required for the house build."
                         isMobile={isMobile}
                     />
@@ -288,7 +305,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Misc Costs */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.miscCosts}`); setMiscCosts(value) }}
-                        cellValues={["Misc Costs per unit ($)", miscCosts]}
+                        cellValues={["Misc Costs ($)", miscCosts]}
                         description="Miscellaneous costs involved in the house build."
                         isMobile={isMobile}
                     />
@@ -296,7 +313,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Home Builder Profit */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.homeBuilderProfitPercentage}`); setHomeBuilderProfitPercentage(value) }}
-                        cellValues={["Home Builder Profit per unit (%)", homeBuilderProfitPercentage, homeBuilderProfit.toLocaleString()]}
+                        cellValues={["Home Builder Profit (%)", homeBuilderProfitPercentage, homeBuilderProfit.toLocaleString()]}
                         description="The builder's profit based on a percentage of the hard costs."
                         isMobile={isMobile}
                         isPercent={true}
@@ -304,27 +321,27 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Real Estate Agent Commission */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.realEstateCommissionPercentage}`); setRealEstateCommissionPercentage(value) }}
-                        cellValues={["RE Agent Commission per unit (%)", realEstateCommissionPercentage, Math.round(reAgentCommission).toLocaleString()]}
+                        cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage, Math.round(reAgentCommission).toLocaleString()]}
                         description="The real estate agent commission, calculated as a percentage of the house sale price."
                         isMobile={isMobile}
                         isPercent={true}
                     />
 
 
-                    {/* Land Developer Profit Per Lot */}
+                    {/* Land Developer Profit */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.landDeveloperProfitPercentage}`); setLandDeveloperProfitPercentage(value) }}
-                        cellValues={["Land Developer Profit Per Lot (%)", landDeveloperProfitPercentage, landDeveloperProfitPerLot.toLocaleString()]}
-                        description="Percentage profit made by the developer per lot."
+                        cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage, landDeveloperProfitPerLot.toLocaleString()]}
+                        description="Percentage profit made by the developer."
                         isMobile={isMobile}
                         isPercent={true}
                     />
 
 
-                    {/* Cost to Develop Land Per Lot */}
+                    {/* Cost to Develop Land */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.costToDevelopPerLot}`); setCostToDevelopPerLot(value) }}
-                        cellValues={["Cost to Develop the Land Per Lot ($)", costToDevelopPerLot]}
+                        cellValues={["Cost to Develop the Land ($)", costToDevelopPerLot]}
                         description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
                         isMobile={isMobile}
                     />
@@ -400,7 +417,6 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     description={outputData[OutputKeys.TotalLotYield]?.description}
                     isMobile={isMobile}
                     numberOfCells={2}
-                    inputCellIndex={1}
                     output={true}
                 />
             </div>
@@ -410,9 +426,12 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                     id={OutputKeys.FinancialAssumptions}
-                    cellValues={[outputData[OutputKeys.FinancialAssumptions]?.title]}
+                    cellValues={[
+                        outputData[OutputKeys.FinancialAssumptions]?.title,
+                        outputData[OutputKeys.FinancialAssumptions]?.value,
+                        outputData[OutputKeys.FinancialAssumptions]?.value2]}
                     isMobile={isMobile}
-                    numberOfCells={1}
+                    numberOfCells={3}
                     inputCellIndex={-1}
                     header={true}
                 />
@@ -423,10 +442,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.HouseSalePrice]?.title,
                         outputData[OutputKeys.HouseSalePrice]?.value,
+                        outputData[OutputKeys.HouseSalePrice]?.value2,
                     ]}
                     description={outputData[OutputKeys.HouseSalePrice]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -435,10 +455,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.HardCostPerSqFt]?.title,
                         outputData[OutputKeys.HardCostPerSqFt]?.value,
+                        outputData[OutputKeys.HardCostPerSqFt]?.value2,
                     ]}
                     description={outputData[OutputKeys.HardCostPerSqFt]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -447,10 +468,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.HomeBuilderProfit]?.title,
                         outputData[OutputKeys.HomeBuilderProfit]?.value,
+                        outputData[OutputKeys.HomeBuilderProfit]?.value2,
                     ]}
                     description={outputData[OutputKeys.HomeBuilderProfit]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -459,10 +481,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.TotalHardCostsPerUnit]?.title,
                         outputData[OutputKeys.TotalHardCostsPerUnit]?.value,
+                        outputData[OutputKeys.TotalHardCostsPerUnit]?.value2,
                     ]}
                     description={outputData[OutputKeys.TotalHardCostsPerUnit]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -471,10 +494,12 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.REAgentCommissionPerUnit]?.title,
                         outputData[OutputKeys.REAgentCommissionPerUnit]?.value,
+                        outputData[OutputKeys.REAgentCommissionPerUnit]?.value2,
+
                     ]}
                     description={outputData[OutputKeys.REAgentCommissionPerUnit]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -495,10 +520,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.FinishedLotValue]?.title,
                         outputData[OutputKeys.FinishedLotValue]?.value,
+                        outputData[OutputKeys.FinishedLotValue]?.value2,
                     ]}
                     description={outputData[OutputKeys.FinishedLotValue]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     inputCellIndex={1}
                     output={true}
                 />
@@ -509,9 +535,13 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                     id={OutputKeys.RawLandCalculations}
-                    cellValues={[outputData[OutputKeys.RawLandCalculations]?.title]}
+                    cellValues={[
+                        outputData[OutputKeys.RawLandCalculations]?.title,
+                        outputData[OutputKeys.RawLandCalculations]?.value,
+                        outputData[OutputKeys.RawLandCalculations]?.value2,
+                    ]}
                     isMobile={isMobile}
-                    numberOfCells={1}
+                    numberOfCells={3}
                     inputCellIndex={-1}
                     header={true}
                 />
@@ -522,10 +552,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.LandDeveloperProfitPerLot]?.title,
                         outputData[OutputKeys.LandDeveloperProfitPerLot]?.value,
+                        outputData[OutputKeys.LandDeveloperProfitPerLot]?.value2,
                     ]}
                     description={outputData[OutputKeys.LandDeveloperProfitPerLot]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -534,10 +565,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.LandDeveloperProfit]?.title,
                         outputData[OutputKeys.LandDeveloperProfit]?.value,
+                        outputData[OutputKeys.LandDeveloperProfit]?.value2,
                     ]}
                     description={outputData[OutputKeys.LandDeveloperProfit]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -546,10 +578,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.ValuePerLotToLandOwner]?.title,
                         outputData[OutputKeys.ValuePerLotToLandOwner]?.value,
+                        outputData[OutputKeys.ValuePerLotToLandOwner]?.value2,
                     ]}
                     description={outputData[OutputKeys.ValuePerLotToLandOwner]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     inputCellIndex={1}
                 />
                 <DynamicRow
@@ -559,10 +592,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.OfferToLandOwner]?.title,
                         outputData[OutputKeys.OfferToLandOwner]?.value,
+                        outputData[OutputKeys.OfferToLandOwner]?.value2,
                     ]}
                     description={outputData[OutputKeys.OfferToLandOwner]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     output={true}
                 />
             </div>
@@ -572,9 +606,14 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     setActiveCards={setActiveCards}
                     activeCards={activeCards}
                     id={OutputKeys.ProjectOverview}
-                    cellValues={[outputData[OutputKeys.ProjectOverview]?.title]}
+                    cellValues={[
+                        outputData[OutputKeys.ProjectOverview]?.title,
+                        outputData[OutputKeys.ProjectOverview]?.value,
+                        outputData[OutputKeys.ProjectOverview]?.value2,
+
+                    ]}
                     isMobile={isMobile}
-                    numberOfCells={1}
+                    numberOfCells={3}
                     header={true}
                 />
                 <DynamicRow
@@ -584,9 +623,10 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.LandCosts]?.title,
                         outputData[OutputKeys.LandCosts]?.value,
+                        outputData[OutputKeys.LandCosts]?.value2,
                     ]}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -595,9 +635,10 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.SoftCosts]?.title,
                         outputData[OutputKeys.SoftCosts]?.value,
+                        outputData[OutputKeys.SoftCosts]?.value2,
                     ]}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -606,9 +647,10 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.HardCosts]?.title,
                         outputData[OutputKeys.HardCosts]?.value,
+                        outputData[OutputKeys.HardCosts]?.value2,
                     ]}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -617,10 +659,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.TotalCosts]?.title,
                         outputData[OutputKeys.TotalCosts]?.value,
+                        outputData[OutputKeys.TotalCosts]?.value2,
                     ]}
                     description={outputData[OutputKeys.TotalCosts]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                 />
                 <DynamicRow
                     setActiveCards={setActiveCards}
@@ -629,275 +672,19 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     cellValues={[
                         outputData[OutputKeys.TotalProfit]?.title,
                         outputData[OutputKeys.TotalProfit]?.value,
+                        outputData[OutputKeys.TotalProfit]?.value2,
                     ]}
                     description={outputData[OutputKeys.TotalProfit]?.description}
                     isMobile={isMobile}
-                    numberOfCells={2}
+                    numberOfCells={3}
                     output={true}
                 />
             </div>
 
-
-
-
-            <div className="table-container">
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Basic Land Info, Land Limitations, Restrictions, and Requirements"]}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    inputCellIndex={-1}
-                    header={true}
-                />
-
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={['Net Buildable Acres', netBuildableAcres.toLocaleString()]}
-                    description=' The area of land available for building after subtracting unbuildable acres from gross acres.'
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Adjusted for Infrastructure (%)", infrastructurePercentage.toLocaleString() + "%"]}
-                    description="Every lot requires infrastructure like streets, which reduces the buildable area."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={['Total Buildable Sq Ft', Math.round(totalBuildableSqFt).toLocaleString()]}
-                    description='The total buildable square feet after accounting for infrastructure adjustments.'
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={['Total Lot Yield', totalLotYield.toLocaleString()]}
-                    description='The total number of buildable lots for houses.'
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                    output={true}
-                />
-            </div>
-
-
-            <div className="table-container">
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Financial Assumptions"]}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    inputCellIndex={-1}
-                    header={true}
-                />
-
-
-
-
-                {/* House Sale Price */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["House Sale Price", houseSalePrice.toLocaleString()]}
-                    description="The total sale price of the house based on the size and price per square foot."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-
-                {/* Hard Cost Per Sq Ft */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Hard Cost per Sq Ft for House Build ($)", (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)).toLocaleString()]}
-                    description="The hard costs for building the house per square foot."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-                {/* Home Builder Profit */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Home Builder Profit per unit ($)", homeBuilderProfit.toLocaleString()]}
-                    description="The builder's profit based on a percentage of the hard costs."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-
-
-                {/* Total Hard Costs */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Total Hard Costs per unit", totalHardCostsPerUnit.toLocaleString()]}
-                    description="The total hard costs, including construction costs, permits, and miscellaneous costs."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-
-                {/* Real Estate Agent Commission */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["RE Agent Commission per unit", Math.round(reAgentCommission).toLocaleString()]}
-                    description="The real estate agent commission, calculated as a percentage of the house sale price."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-                {/* Land Percentage */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Land Percentage of Total Value", convertToPercent(landPercentage)]}
-                    description="The percentage of the total house value attributed to the finished lot."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-                {/* Finished Lot Value */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Finished Lot Value", Math.round(finishedLotValue).toLocaleString()]}
-                    description="The value of the finished lot without the house."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                    output={true}
-                />
-            </div>
-
-
-            <div className="table-container">
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Raw Land Calculations"]}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    inputCellIndex={-1}
-                    header={true}
-                />
-
-                {/* Land Developer Profit Per Lot */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Land Developer Profit Per Lot ($)", landDeveloperProfitPerLot.toLocaleString()]}
-                    description="Percentage profit made by the developer per lot."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-                {/* Land Developer's Total Profit */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Land Developer's Profit", landDeveloperProfit.toLocaleString()]}
-                    description="Total profit made by the land developer from the entire project."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-
-
-                {/* Value Per Lot to Land Owner/Seller */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Value Per Lot to Land Owner/Seller", perLotOfferToLandOwner.toLocaleString()]}
-                    description="The value of each lot after development, as perceived by the landowner or seller."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    inputCellIndex={1}
-                />
-
-
-
-                {/* Buyer Offer to Land Owner/Seller */}
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Offer to Land Owner/Seller", Math.round(totalOfferToLandOwner).toLocaleString()]}
-                    description="Total offer from the buyer to the land owner or seller."
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                    output={true}
-                />
-            </div>
-
-
-            <div className="table-container">
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Project Overview"]}
-                    isMobile={isMobile}
-                    numberOfCells={1}
-                    header={true}
-                />
-
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Land Costs", roundAndLocalString(totalOfferToLandOwner)]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Soft Costs", roundAndLocalString(totalSoftCosts)]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Hard Costs", roundAndLocalString(totalHardCosts)]}
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-                {/* Buyer Offer to Land Owner/Seller */}
-
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Total Costs", roundAndLocalString(totalCosts)]}
-                    description="Total Costs to Build this Project"
-                    isMobile={isMobile}
-                    numberOfCells={2}
-                />
-                {/* Buyer Offer to Land Owner/Seller */}
-
-                <DynamicRow
-                    setActiveCards={setActiveCards}
-                    activeCards={activeCards}
-                    cellValues={["Total Profit", roundAndLocalString(totalProfits)]}
-                    isMobile={isMobile}
-                    description="Total profit if sold at the projected sell price"
-                    numberOfCells={2}
-                    output={true}
-                />
-            </div>
 
             <PopupBox
                 data={popupValues[1]}
+                data2={popupValues[3]}
                 titles={popupValues[0]}
                 dataKeys={popupValues[2]}
                 setActiveCards={setActiveCards}

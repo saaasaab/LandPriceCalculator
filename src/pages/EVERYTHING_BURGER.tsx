@@ -8,7 +8,7 @@ import ContactMe from '../components/ContactMe';
 import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './PricePerDoorCalculatorMultifamily';
 import IRRCalculator from './IRRCalculator';
-import LendingCosts from './LendingCosts';
+// import LendingCosts from './LendingCosts';
 import WaterfallGenerator from './WaterfallGenerator';
 import ConstructionBudget from './ConstructionBudget';
 import PricePerSQFTCalculatorIndustrial from './PricePerSQFTCalculatorIndustrial';
@@ -55,11 +55,11 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                     isMobile={isMobile}
                     page={page}
                 />
-            case EPageNames.LENDING_COST:
-                return <LendingCosts
-                    isMobile={isMobile}
-                    page={page}
-                />
+            // case EPageNames.LENDING_COST:
+            //     return <LendingCosts
+            //         isMobile={isMobile}
+            //         page={page}
+            //     />
             case EPageNames.WATERFALL:
                 return <WaterfallGenerator
                     isMobile={isMobile}
