@@ -31,6 +31,7 @@ export enum EPageNames {
     WATERFALL = "WATERFALL",
     CONSTRUCTION_BUDGET = "CONSTRUCTION_BUDGET",
     INDUSTRIAL_PRICE_PER_SQFT="INDUSTRIAL_PRICE_PER_SQFT",
+    // LOT_LINE_DRAWER="LOT_LINE_DRAWER",
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
@@ -46,6 +47,7 @@ export enum EPageTitles {
     LENDING_COST = "Lending Cost Estimator",
     WATERFALL = "Waterfall Distribution Generator",
     CONSTRUCTION_BUDGET = "Construction Budget Generator",
+    LOT_LINE_DRAWER = "Lot Line Drawer"
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 

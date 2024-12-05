@@ -18,7 +18,7 @@ export const routes = {
   LENDING_COST: "/lending-costs",
   WATERFALL: "/waterfall-generator",
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
-
+  LOT_LINE_DRAWER: "/lot-line-drawer",
 }
 
 
@@ -62,14 +62,20 @@ const Navbar = () => {
             <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
             {/* <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link> */}
             {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
+            <Link onClick={handleToggleMenu} to={routes.LOT_LINE_DRAWER}>{EPageTitles.LOT_LINE_DRAWER}</Link>
+
+            
           </div>
         </li>
 
+        
+
          {/* Howto and Blogs */}
          {/* <li className="dropdown">
-          <span className="dropdown-title">Analyzing real estate</span>
+          <span className="dropdown-title">Education Center</span>
           <div className="dropdown-content">
             <Link onClick={handleToggleMenu} to={routes.HOW_TO_LAND_FOR_MULTIFAMILY}>How to analyze land for multifamily</Link>
+            <Link onClick={handleToggleMenu} to={routes.ARTICLES}>Articles</Link>
           </div>
         </li> */}
       </ul>

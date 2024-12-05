@@ -22,7 +22,17 @@
     gap: 10px 20px;
     padding: 20px;
 
-    &.has-bottom-border{
+    .input-grouping {
+      grid-column: span 2;
+      font-size: 24px;
+      text-align: left;
+      padding: 40px 10px 0 10px;
+      &:first-child{
+        padding-top: 0;
+      }
+
+    }
+    &.has-bottom-border {
       border-bottom: 1px solid rgb(210, 210, 210);
     }
 
@@ -38,7 +48,6 @@
       padding: 0 10px 0 10px;
 
       .input-cell {
-        
         input {
           border: 1px solid #b1b1b1;
           height: 100%;
@@ -52,11 +61,10 @@
           box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, 0.2);
         }
         &.input-cell-date {
-          input{
+          input {
             font-size: 16px;
           }
         }
-
       }
     }
   }
@@ -100,10 +108,13 @@ $breakpoint-tablet: 768px;
     .input-fields-container {
       grid-template-columns: 1fr;
       padding: 10px;
+      .input-grouping {
+        grid-column: span 1;
+      }
       .input-row {
         gap: 10px;
         min-height: 40px;
-  
+
         .input-cell {
           input {
             font-size: 16px;
@@ -111,14 +122,12 @@ $breakpoint-tablet: 768px;
             max-width: 120px;
           }
           &.input-cell-date {
-            input{
+            input {
               font-size: 12px;
             }
           }
-  
         }
       }
-
     }
 
     .output-fields-container {

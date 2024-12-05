@@ -277,6 +277,9 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
             <div className="group-section">
                 <div className="input-fields-container">
 
+                    <div className="input-grouping">
+                        Basic Land Info Inputs
+                    </div>
                     <InputRow
                         cellValues={["Gross Acres", grossAcres]}
                         setInput={value => setGrossAcres(value)}
@@ -299,7 +302,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                     <InputRow
                         setInput={(value) => setCommonSpacePercentage(value)}
-                        cellValues={["Percentage used for common space(%)", commonSpacePercentage]}
+                        cellValues={["Percentage used for common space (%)", commonSpacePercentage]}
                         description="Every building requires common space that cannot be leased and should be excluded from parking calculations. This includes halls, elevators, stairs, foyers, etc."
                         isMobile={isMobile}
                         isPercent={true}
@@ -319,11 +322,8 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         isMobile={isMobile}
                         description="A catchall amount to capture all extra driveway sqft. This will include extra sqft for approaches, garbage, utilities, and other miscellaneous hardscape excluding sidewalk. This is added to the Calculated Driveway Area"
                     />
-                    <InputRow
-                        setInput={(value) => setNumberOfFloors(value)}
-                        cellValues={["Number of floors (#)", numberOfFloors]}
-                        isMobile={isMobile}
-                    />
+
+
                     <InputRow
                         setInput={(value) => setParkingSpotsPerUnit(value)}
                         cellValues={["Parking spots per unit", parkingSpotsPerUnit]}
@@ -331,6 +331,16 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         description="The parking number of parking spots required per unit"
                     />
 
+
+                    <div className="input-grouping">
+                        Building Assumptions
+                    </div>
+
+                    <InputRow
+                        setInput={(value) => setNumberOfFloors(value)}
+                        cellValues={["Number of floors (#)", numberOfFloors]}
+                        isMobile={isMobile}
+                    />
 
                     {/* Multifamily Sale Price */}
                     <InputRow
@@ -357,7 +367,9 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         isMobile={isMobile}
                         isPercent={true}
                     />
-
+                    <div className="input-grouping">
+                        Construction Inputs
+                    </div>
                     {/* Home Builder Profit */}
                     <InputRow
                         setInput={(value) => setBuilderProfitPercentage(value)}
@@ -398,6 +410,9 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     />
 
 
+                    <div className="input-grouping">
+                        Land Entitlement Inputs
+                    </div>
                     <InputRow
                         setInput={(value) => setLandDeveloperProfitPercentage(value)}
                         cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage]}

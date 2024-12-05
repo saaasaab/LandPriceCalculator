@@ -256,7 +256,9 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
             <div className="group-section">
                 <div className="input-fields-container" >
-
+                    <div className="input-grouping">
+                        Basic Land Info Inputs
+                    </div>
                     <InputRow
                         cellValues={["Gross Acres", grossAcres]}
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.grossAcres}`); setGrossAcres(value) }}
@@ -284,7 +286,9 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         isMobile={isMobile}
                     />
 
-
+                    <div className="input-grouping">
+                        Building Assumptions
+                    </div>
 
                     {/* House Price Per Sq Ft */}
                     <InputRow
@@ -309,6 +313,10 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         isMobile={isMobile}
                     />
 
+
+                    <div className="input-grouping">
+                        Construction Inputs
+                    </div>
                     {/* Hard Cost Per Sq Ft */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.hardCostPerSqFt}`); setHardCostPerSqFt(value) }}
@@ -351,6 +359,10 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         isPercent={true}
                     /> */}
 
+
+                    <div className="input-grouping">
+                        Land Entitlement Inputs
+                    </div>
 
                     {/* Land Developer Profit */}
                     <InputRow
@@ -601,20 +613,20 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     inputCellIndex={-1}
                     header={true}
                 />
-                
-                     <DynamicRow
-                     setActiveCards={setActiveCards}
-                     activeCards={activeCards}
-                     id={OutputKeys.TotalSDCCosts}
-                     cellValues={[
-                         outputData[OutputKeys.TotalSDCCosts]?.title,
-                         outputData[OutputKeys.TotalSDCCosts]?.value,
-                         outputData[OutputKeys.TotalSDCCosts]?.value2,
-                     ]}
-                     description={outputData[OutputKeys.TotalSDCCosts]?.description}
-                     isMobile={isMobile}
-                     numberOfCells={3}
-                 />
+
+                <DynamicRow
+                    setActiveCards={setActiveCards}
+                    activeCards={activeCards}
+                    id={OutputKeys.TotalSDCCosts}
+                    cellValues={[
+                        outputData[OutputKeys.TotalSDCCosts]?.title,
+                        outputData[OutputKeys.TotalSDCCosts]?.value,
+                        outputData[OutputKeys.TotalSDCCosts]?.value2,
+                    ]}
+                    description={outputData[OutputKeys.TotalSDCCosts]?.description}
+                    isMobile={isMobile}
+                    numberOfCells={3}
+                />
 
                 <DynamicRow
                     setActiveCards={setActiveCards}

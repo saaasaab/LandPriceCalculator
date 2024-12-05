@@ -9,6 +9,8 @@ import { EPageNames } from './utils/types';
 
 import './App.css'
 import BlogPost from './pages/BlogPost';
+import LotLineDrawer from './pages/LotLineDrawer';
+import SitePlanDesigner from './pages/SitePlanDesigner';
 
 
 function App() {
@@ -47,6 +49,7 @@ function App() {
           <Route path={routes.LENDING_COST} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.LENDING_COST} />} />
           <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL} />} />
           <Route path={routes.CONSTRUCTION_BUDGET} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_BUDGET} />} />
+          <Route path={routes.LOT_LINE_DRAWER} element={<SitePlanDesigner/>} />
 
           <Route path="*" element={<NotFound />} />
           {/* <Route path="/contact" element={<Contact />} /> */}

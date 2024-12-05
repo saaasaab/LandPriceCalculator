@@ -241,7 +241,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
         <div className="table-container">
 
           <DynamicRow
-            cellValues={["1. Income", "%", "Monthly", "Annually"]}
+            cellValues={["1. Income", "%", "Month", "Annual"]}
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={-1}
@@ -351,7 +351,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
         </div>
         <div className="table-container">
           <DynamicRow
-            cellValues={["2. Expenses", "%", "Monthly", "Annually"]}
+            cellValues={["2. Expenses", "%", "Month", "Annual"]}
             isMobile={isMobile}
             numberOfCells={4}
             inputCellIndex={-1}
@@ -509,7 +509,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
         </div>
         <div className="table-container">
           <DynamicRow
-            cellValues={["3. Cash Flow", "Monthly", "Annually"]}
+            cellValues={["3. Cash Flow", "Month", "Annual"]}
             isMobile={isMobile}
             numberOfCells={3}
             inputCellIndex={-1}
