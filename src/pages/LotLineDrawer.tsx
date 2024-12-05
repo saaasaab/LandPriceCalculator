@@ -70,7 +70,7 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
     // Draw points and lines
     ctx.lineWidth = 2;
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       ctx.beginPath();
       ctx.moveTo(line.start.x, line.start.y);
       ctx.lineTo(line.end.x, line.end.y);
@@ -86,8 +86,11 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
       // Calculate setback polygon if setbacks exist
       if (mode === 'setback' && lines.some((line) => typeof line.setback === 'number')) {
         // Create inset lines for each original line with a setback
+        const polygonPoints = points;
+        const clockwise = isClockwise(polygonPoints);
+
         const setbackLines = lines.map((line) =>
-          typeof line.setback === 'number' ? getPerpendicularOffset(line, line.setback!) : line
+          typeof line.setback === 'number' ? getPerpendicularOffset(line, line.setback, scale, clockwise) : line
         );
 
         // Calculate intersection points for the setback polygon
@@ -320,7 +323,7 @@ function updateSetbacksForLotBoundries(setSetbackInput: React.Dispatch<React.Set
     );
 
     // Update lines based on the updated points
-    const updatedLines = updatedPoints.map((point, index) => {
+    const updatedLines = updatedPoints.map((_point, index) => {
       const nextIndex = (index + 1) % updatedPoints.length;
       return {
         start: updatedPoints[index],
@@ -454,13 +457,18 @@ function handleMouseDownInCanvas(canvasRef: React.MutableRefObject<HTMLCanvasEle
 
 
 
-const getPerpendicularOffset = (line: Line, distance: number): Line => {
+const getPerpendicularOffset = (line: Line, distance: number, scale: number,isClockwise:boolean): Line => {
   const dx = line.end.x - line.start.x;
   const dy = line.end.y - line.start.y;
-  const length = Math.hypot(dx, dy);
-  const offsetX = (dy / length) * distance;
-  const offsetY = (-dx / length) * distance;
+  const length = -Math.hypot(dx, dy);
+  console.log(`distance`, distance,scale)
 
+ 
+  const offsetX = (dy / length) * ( 100/scale*distance) * (isClockwise ? -1 : 1);;
+  const offsetY = (-dx / length) * ( 100/scale*distance) * (isClockwise ? -1 : 1);;
+
+
+  
   return {
     start: { x: line.start.x + offsetX, y: line.start.y + offsetY },
     end: { x: line.end.x + offsetX, y: line.end.y + offsetY },
@@ -491,3 +499,13 @@ const getLineIntersection = (
 
 
 
+
+const isClockwise = (polygon: Point[]): boolean => {
+  let sum = 0;
+  for (let i = 0; i < polygon.length; i++) {
+    const current = polygon[i];
+    const next = polygon[(i + 1) % polygon.length];
+    sum += (next.x - current.x) * (next.y + current.y);
+  }
+  return sum > 0;
+};
