@@ -9,7 +9,6 @@ import { EPageNames } from './utils/types';
 
 import './App.css'
 import BlogPost from './pages/BlogPost';
-import LotLineDrawer from './pages/LotLineDrawerP5';
 import SitePlanDesigner from './pages/SitePlanDesigner';
 
 
@@ -26,6 +25,7 @@ function App() {
       window.removeEventListener('resize', handleWindowSizeChange);
     }
   }, []);
+
 
   return (
     <Router>
