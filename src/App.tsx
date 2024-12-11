@@ -9,7 +9,7 @@ import { EPageNames } from './utils/types';
 
 import './App.css'
 import BlogPost from './pages/BlogPost';
-import LotLineDrawer from './pages/LotLineDrawer';
+import LotLineDrawer from './pages/LotLineDrawerP5';
 import SitePlanDesigner from './pages/SitePlanDesigner';
 
 

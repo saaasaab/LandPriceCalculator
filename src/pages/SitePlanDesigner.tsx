@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import LotLineDrawer from './LotLineDrawer';
+import LotLineDrawer from './LotLineDrawerP5';
+import VoronoiDiagram from './VoronoiDiagram';
 
 interface Point {
   x: number;
@@ -24,13 +25,16 @@ const ParentComponent: React.FC = () => {
 
   const handleFinalize = (data: FinalizedData) => {
     setFinalizedData(data); // Save the finalized data
-    console.log('Finalized Data:', data); // Debug or use this data for further processing
   };
 
   return (
     <div>
+
+      {/* <VoronoiDiagram/> */}
       {!finalizedData ? (
-        <LotLineDrawer onFinalize={handleFinalize} />
+        // <LotLineDrawer onFinalize={handleFinalize} />
+        <LotLineDrawer  />
+
       ) : (
         <div>
           <h2>Finalized Data</h2>
