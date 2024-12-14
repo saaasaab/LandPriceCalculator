@@ -3,6 +3,7 @@ import LotLineDrawer from './LotLineDrawerP5';
 import VoronoiDiagram from './VoronoiDiagram';
 import { AdjacencyGraph } from '../utils/AdjacencyGraph';
 import p5 from 'p5';
+import { AdjacencyGraphVisualizer } from '../utils/AdjacencyGraphVisualizer';
 
 
 interface Point {
@@ -44,14 +45,13 @@ const SitePlanDesigner: React.FC = () => {
   // graph.addEdges("Setback", ["Easement", "Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
   // graph.addEdges("Easement", ["Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
   // graph.addEdges("Landscaping", ["Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
-  graph.addEdges("Parking1", ["Driveway", "Sidewalk"]);
-  graph.addEdges("Parking2", ["Driveway", "Sidewalk"]);
-  graph.addEdges("Driveway", ["Bike Parking", "Approach",  "Garbage"]);
-  graph.addEdges("Bike Parking", [ "Approach","Sidewalk","Building"]);
+  // graph.addEdges("Sidewalk", ["Garbage","Driveway","Bike Parking","Building","Approach","Parking1","Parking2"]);
 
-  graph.addEdges("Building", [ "Sidewalk"]);
-  graph.addEdge( "Approach", "Sidewalk");
-  graph.addEdge("Sidewalk", "Garbage");
+  graph.addEdges("Parking1", ["Driveway"]);
+  graph.addEdges("Parking2", ["Driveway"]);
+  graph.addEdges("Driveway", ["Bike Parking", "Approach",  "Garbage"]);
+  graph.addEdges("Bike Parking", [ "Approach","Building"]);
+
 
 
   // graph.display();
@@ -62,17 +62,21 @@ const SitePlanDesigner: React.FC = () => {
 
   useEffect(() => {
     const sketch = (p: any) => {
+      const visualizer = new AdjacencyGraphVisualizer(graph);
+
+
       p.setup = () => {
         p.createCanvas(800, 600).parent(canvasRef.current!);
-        graph.visualizeGraph(p);
-        console.log(`graph`, graph) 
+        visualizer.visualize(p);
+        p.frameRate(1);
       };
+    
+      // p.draw = () => {
+      //   visualizer.visualize(p);
+      // };
     };
     new p5(sketch);
   },[])
-
-
-
 
   const handleFinalize = (data: FinalizedData) => {
     setFinalizedData(data); // Save the finalized data
@@ -83,6 +87,8 @@ const SitePlanDesigner: React.FC = () => {
 
 
       {/* <VoronoiDiagram/> */}
+
+
       {!finalizedData ? (
         // <LotLineDrawer onFinalize={handleFinalize} />
         // <LotLineDrawer  />
