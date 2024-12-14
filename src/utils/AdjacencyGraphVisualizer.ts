@@ -56,10 +56,12 @@ export class AdjacencyGraphVisualizer {
 
 
     // create a new variation of each poly point offset. Let the first child be an exact clone of the parent
+    const nudgeStrengthOffsets = 0.5;
     for (let i = 1; i < numChildren; i++) {
       for (let vertex in this.graph["adjacencyList"]) {
         for (let offset = 0; offset < possibleOffsets[i][vertex].length; offset++) {
-          const randomNudge = arrayOfRandomNudges(nudgeStrength, 2)
+          
+          const randomNudge = arrayOfRandomNudges(nudgeStrengthOffsets, 2)
           const newOffset = {
             x: possibleOffsets[i][vertex][offset].x + randomNudge[0],
             y: possibleOffsets[i][vertex][offset].y + randomNudge[1]
@@ -69,8 +71,6 @@ export class AdjacencyGraphVisualizer {
             x: possiblePoints[i][vertex].x + newOffset.x,
             y: possiblePoints[i][vertex].y + newOffset.y
           }
-
-          // console.log(`newOffset`, newOffset)
 
           if (checkIfInBoundryWidth(newPoint, p.width, 40)) {
             possibleOffsets[i][vertex][offset].x = newOffset.x
@@ -104,7 +104,6 @@ export class AdjacencyGraphVisualizer {
     let closestDistanceParking2ToDriveway = calculateDistanceBetweenPoints(positions["Parking2"], positions["Driveway"]);
     let closestDistanceParking1ToDrivewayIndex = 0;
     let closestDistanceParking2ToDrivewayIndex = 0;
-
 
 
     for (let i = 0; i < numChildren; i++) {
@@ -235,20 +234,23 @@ export class AdjacencyGraphVisualizer {
     const drivewayDefault = possiblePoints[0]["Driveway"];
     const drivewayOffsetsDefault = possibleOffsets[0]["Driveway"];
 
-    // console.log(`drivewayDefault `, drivewayDefault )
+
     const drivewayPolygonDefault = drivewayOffsetsDefault.map(offset => {
       return { x: drivewayDefault.x + offset.x, y: drivewayDefault.y + offset.y }
     })
 
     let drivewayAreaDefault = calculateArea(drivewayPolygonDefault);
-
     let largestDrivewayAreaIndex = 0;
+
+
+    let drivewayWidthDefault = getBoundingBox(drivewayPolygonDefault);
+     
+
+
     for (let i = 0; i < numChildren; i++) {
       // const approach = possiblePoints[i]["Approach"];
       const driveway = possiblePoints[i]["Driveway"];
       const drivewayOffsets = possibleOffsets[i]["Driveway"];
-
-
       const drivewayPolygon = drivewayOffsets.map(offset => {
         return { x: driveway.x + offset.x, y: driveway.y + offset.y }
       })
@@ -256,41 +258,36 @@ export class AdjacencyGraphVisualizer {
       // const drivewayWidth = calculateDistanceBetweenPoints()
       const drivewayArea = calculateArea(drivewayPolygon);
 
+      // console.log(`drivewayArea > drivewayAreaDefault`, drivewayArea, drivewayAreaDefault)
+      const { width: drivewayWidth, height:drivewayHeight} = getBoundingBox(drivewayPolygon);
+      if(drivewayArea > drivewayAreaDefault && (drivewayWidth < 100 || drivewayHeight < 100) ){
 
-      if(drivewayArea < drivewayAreaDefault){
         largestDrivewayAreaIndex = i;
         drivewayAreaDefault = drivewayArea;
       }
-
-      
-      // Width of approach needs to be 24. Width needs to be inline with the approach and garbage
-
-      
     }
 
     for (let vertex in this.graph["adjacencyList"]) {
       if (vertex === "Driveway") {
-    
-        console.log(`drivewayAreaDefault`, drivewayAreaDefault)
-        polyPointsOffset[vertex][0].x = possibleOffsets[largestDrivewayAreaIndex]["Approach"][0].x;
-        polyPointsOffset[vertex][1].x = possibleOffsets[largestDrivewayAreaIndex]["Approach"][1].x;
-        polyPointsOffset[vertex][2].x = possibleOffsets[largestDrivewayAreaIndex]["Approach"][2].x;
-        polyPointsOffset[vertex][3].x = possibleOffsets[largestDrivewayAreaIndex]["Approach"][3].x;
+  
+        polyPointsOffset[vertex][0].x = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][0].x;
+        polyPointsOffset[vertex][1].x = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][1].x;
+        polyPointsOffset[vertex][2].x = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][2].x;
+        polyPointsOffset[vertex][3].x = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][3].x;
 
-        polyPointsOffset[vertex][0].y = possibleOffsets[largestDrivewayAreaIndex]["Approach"][0].y;
-        polyPointsOffset[vertex][1].y = possibleOffsets[largestDrivewayAreaIndex]["Approach"][1].y;
-        polyPointsOffset[vertex][2].y = possibleOffsets[largestDrivewayAreaIndex]["Approach"][2].y;
-        polyPointsOffset[vertex][3].y = possibleOffsets[largestDrivewayAreaIndex]["Approach"][3].y;
-
-
+        polyPointsOffset[vertex][0].y = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][0].y;
+        polyPointsOffset[vertex][1].y = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][1].y;
+        polyPointsOffset[vertex][2].y = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][2].y;
+        polyPointsOffset[vertex][3].y = possibleOffsets[largestDrivewayAreaIndex]["Driveway"][3].y;
       }
 
     }
 
     if (this.iteration % 200 === 0) {
-      // console.log(`area `, closestTo90ApproachDrivewayParkingAngle)
-      console.log(` closestTo90ApproachDrivewayParkingAngle2`, polyPointsOffset)
+      // console.log(` closestTo90ApproachDrivewayParkingAngle2`, polyPointsOffset)
     }
+
+
 
   }
 
@@ -515,3 +512,29 @@ const calculateArea = (polygon: Point[]): number => {
   }
   return Math.abs(total / 2);
 };
+
+
+
+function getBoundingBox(polygon: Point[]): { width: number, height: number } {
+  if (polygon.length === 0) {
+      throw new Error("Polygon must have at least one point.");
+  }
+
+  // Initialize min and max values
+  let minX = Infinity, minY = Infinity;
+  let maxX = -Infinity, maxY = -Infinity;
+
+  // Iterate through each point to find min and max coordinates
+  for (const point of polygon) {
+      if (point.x < minX) minX = point.x;
+      if (point.x > maxX) maxX = point.x;
+      if (point.y < minY) minY = point.y;
+      if (point.y > maxY) maxY = point.y;
+  }
+
+  // Calculate width and height
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  return { width, height };
+}

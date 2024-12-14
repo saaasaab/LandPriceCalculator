@@ -68,7 +68,7 @@ const SitePlanDesigner: React.FC = () => {
       p.setup = () => {
         p.createCanvas(800, 600).parent(canvasRef.current!);
         visualizer.visualize(p);
-        p.frameRate(1);
+        // p.frameRate(2);
       };
     
       // p.draw = () => {
