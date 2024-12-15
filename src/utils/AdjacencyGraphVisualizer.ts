@@ -1,3 +1,4 @@
+import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 
@@ -18,6 +19,15 @@ type DimensionValue = {
 
 type Dimensions = Record<SitePlanObjects, DimensionValue>;
 
+interface ControlPoints {
+  start: TPointObject;
+  end: TPointObject;
+  control1: TPointObject;
+  control2: TPointObject;
+}
+
+
+
 // Visualization module using p5.js
 export class AdjacencyGraphVisualizer {
   private graph: AdjacencyGraph;
@@ -33,6 +43,7 @@ export class AdjacencyGraphVisualizer {
   solver(
     p: any,
     dimensions: Dimensions,
+    controlPoints: ControlPoints,
   ): void {
 
 
@@ -51,8 +62,6 @@ export class AdjacencyGraphVisualizer {
 
     // Step 1: Untangle nodes
     // Step 2: Prevent any overlapping Areas.
-
-
 
 
     // Initialize the potential children
@@ -83,16 +92,19 @@ export class AdjacencyGraphVisualizer {
 
       vertices.forEach((vertex: SitePlanObjects, index: number) => {
         const randomNudgePosition = arrayOfRandomNudges(nudgeStrength, 2)
-        const newPoint = { x: possibleDimensions[i][vertex].x + randomNudgePosition[0], y: possibleDimensions[i][vertex].y + randomNudgePosition[1] };
+        const newDimension = {
+          ...possibleDimensions[i][vertex],
+          x: possibleDimensions[i][vertex].x + randomNudgePosition[0],
+          y: possibleDimensions[i][vertex].y + randomNudgePosition[1],
+          angle: possibleDimensions[i][vertex].angle + randomAnglesNudge[index]
+        };
 
-        // if (checkIfInBoundryWidth(newPoint, p.width, 40)) {
-        possibleDimensions[i][vertex].x = newPoint.x
-        // if (checkIfInBoundryHeight(newPoint, p.height, 40)) {
-        possibleDimensions[i][vertex].y = newPoint.y;
 
-        possibleDimensions[i][vertex].angle = possibleDimensions[i][vertex].angle + randomAnglesNudge[index];
-
-        // }
+        if (checkNoOverlap(p, dimensions, vertex, newDimension, vertices)) {
+          possibleDimensions[i][vertex].x = newDimension.x
+          possibleDimensions[i][vertex].y = newDimension.y;
+          possibleDimensions[i][vertex].angle = possibleDimensions[i][vertex].angle + randomAnglesNudge[index];
+        }
       })
 
 
@@ -121,12 +133,13 @@ export class AdjacencyGraphVisualizer {
         height: 80 * newParking2.normalParkingSpots,
       }
 
-      if (isRectangleWithinBoundary(possibleDimensions[i]["Approach"], newApproach.width, newApproach.height, boundary, possibleDimensions[i]["Approach"].angle)) {
-        possibleDimensions[i]["Approach"] = { ...possibleDimensions[i]["Approach"], ...newApproach }
-      }
-      if (isRectangleWithinBoundary(possibleDimensions[i]["Driveway"], newDriveway.width, newDriveway.height, boundary, possibleDimensions[i]["Driveway"].angle)) {
-        possibleDimensions[i]["Driveway"] = { ...possibleDimensions[i]["Driveway"], ...newDriveway }
-      }
+      // if (isRectangleWithinBoundary(possibleDimensions[i]["Approach"], newApproach.width, newApproach.height, boundary, possibleDimensions[i]["Approach"].angle)) {
+      // }
+      // if (isRectangleWithinBoundary(possibleDimensions[i]["Driveway"], newDriveway.width, newDriveway.height, boundary, possibleDimensions[i]["Driveway"].angle)) {
+      // }
+
+      possibleDimensions[i]["Approach"] = { ...possibleDimensions[i]["Approach"], ...newApproach }
+      possibleDimensions[i]["Driveway"] = { ...possibleDimensions[i]["Driveway"], ...newDriveway }
 
       possibleDimensions[i]["Parking1"] = { ...possibleDimensions[i]["Parking1"], ...newParking1, ...newParking1Dimensions }
 
@@ -134,6 +147,36 @@ export class AdjacencyGraphVisualizer {
       possibleDimensions[i]["Parking2"] = { ...possibleDimensions[i]["Parking2"], ...newParking2, ...newParking2Dimensions }
 
     }
+
+
+    // THINGS TO CHECK:
+    // [ ] Minimize bezier curve
+    // [ ] Driveway and garbage need to be colinear
+    // [ ] parking angles need to be same as driveway, colinear with driveway. 
+    // [ ] if there is space for parking spot, add it. Remove it if position moves over
+    // [ ] approach position can move to make best use of the building size
+    // [ ] Need to iron out the movements
+    // [ ] Bike parking is between the building and the approach 
+    // [ ] Bike parking needs to be close to building. Ideally right next to it.
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+    // [ ] 
+
+
+
+
+
+
+
+
 
 
     // Calculate the base angles, areas, distances, and scores
@@ -156,6 +199,9 @@ export class AdjacencyGraphVisualizer {
 
     let currentMaxParking = possibleDimensions[0]["Parking1"].normalParkingSpots || 0;
     let currentMaxParking2 = possibleDimensions[0]["Parking2"].normalParkingSpots || 0;
+
+
+
 
 
     for (let i = 0; i < numChildren; i++) {
@@ -196,23 +242,18 @@ export class AdjacencyGraphVisualizer {
         dimensions["Parking1"].angle
       )
 
-
-      // console.log({polygon2, polygon1})
-
       const minDistance = getMinimumPolygonDistance(polygon1, polygon2)
 
       if
         (Math.abs((parkingSpots || 0) - numParkingSpots) < Math.abs(currentMaxParking - numParkingSpots) &&
-        currentMaxParking + currentMaxParking2 <= numParkingSpots &&
-        isRectangleWithinBoundary(possibleDimensions[i]["Parking1"], possibleDimensions[i]["Parking1"].width, possibleDimensions[i]["Parking1"].height, boundary, possibleDimensions[i]["Parking1"].angle)
+        currentMaxParking + currentMaxParking2 <= numParkingSpots
       ) {
         currentMaxParking = parkingSpots
         currentMaxParkingIndex = i;
       }
 
       if (Math.abs((parkingSpots2 || 0) - numParkingSpots) < Math.abs(currentMaxParking2 - numParkingSpots) &&
-        currentMaxParking + currentMaxParking2 <= numParkingSpots &&
-        isRectangleWithinBoundary(possibleDimensions[i]["Parking2"], possibleDimensions[i]["Parking2"].width, possibleDimensions[i]["Parking2"].height, boundary, possibleDimensions[i]["Parking2"].angle)
+        currentMaxParking + currentMaxParking2 <= numParkingSpots
       ) {
         currentMaxParking2 = parkingSpots2
         currentMaxParking2Index = i;
@@ -274,7 +315,7 @@ export class AdjacencyGraphVisualizer {
           closestTo90ApproachDrivewayParkingAngleIndex,
           closestDistanceParking1ToDrivewayIndex
         ];
-        const weights = [0.3, 0.3, 0.4];
+        const weights = [0.6, 0.3, 0.1];
         const weightedPoint = calculateWeightedPoint(possibleDimensions, indices, vertex, weights);
 
         dimensions[vertex].x = weightedPoint.x
@@ -287,25 +328,25 @@ export class AdjacencyGraphVisualizer {
 
 
       }
-      if (vertex === "Parking2") {
+      else if (vertex === "Parking2") {
 
         const indices = [
           closestTo180ParkingAngleIndex,
           closestTo90ApproachDrivewayParkingAngle2Index,
           closestDistanceParking2ToDrivewayIndex
         ];
-        const weights = [0.3, 0.3, 0.4];
+        const weights = [0.6, 0.3, 0.1];
         const weightedPoint = calculateWeightedPoint(possibleDimensions, indices, vertex, weights);
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
 
         dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
         // dimensions[vertex].normalParkingSpots = possibleDimensions[currentMaxParking2Index][vertex].normalParkingSpots
-        // dimensions[vertex].height = (possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots || 0) * 90
+        // dimensions[vertex].height = (possibleDimensions[currentMaxParking2Index][vertex].normalParkingSpots || 0) * 90
 
       }
 
-      if (vertex === "Driveway") {
+      else if (vertex === "Driveway") {
         const indices = [
           closestTo180ParkingAngleIndex,
           closestTo180DrivewayAngleIndex
@@ -317,27 +358,29 @@ export class AdjacencyGraphVisualizer {
         dimensions[vertex].y = weightedPoint.y
 
         dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
+
+        controlPoints.end.x = weightedPoint.x
+        controlPoints.end.y = weightedPoint.y
+
+        controlPoints.control2.x = weightedPoint.x - Math.sin(possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle * Math.PI / 180) * 100;
+        controlPoints.control2.y = weightedPoint.y + Math.cos(possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle * Math.PI / 180) * 100;
+
         if (dimensions[vertex].width < 240) {
           // dimensions[vertex].width += 1
         }
 
-
-
-
-
-
-
-
-        // console.log(`object`,boundingBox)
       }
 
-      if (vertex === "Garbage") {
+      else if (vertex === "Garbage") {
         const indices = [
           closestTo180DrivewayAngleIndex
         ];
         const weights = [1];
         const weightedPoint = calculateWeightedPoint(possibleDimensions, indices, vertex, weights);
 
+
+        // Match garbage to driveway angle
+        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex]["Driveway"].angle;
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
         // dimensions[vertex].angle =  possibleDimensions[currentMaxParkingIndex][vertex].angle;
@@ -352,7 +395,13 @@ export class AdjacencyGraphVisualizer {
 
       }
 
-      if (vertex === "Approach") {
+      else if (vertex === "Approach") {
+
+
+        controlPoints.control1.x = dimensions[vertex].x - Math.sin(dimensions[vertex].angle * Math.PI / 180) * 100;
+        controlPoints.control1.y = dimensions[vertex].y - Math.cos(dimensions[vertex].angle * Math.PI / 180) * 100;
+
+
         if (dimensions[vertex].width < 200) {
           // dimensions[vertex].width += 1
 
@@ -361,7 +410,8 @@ export class AdjacencyGraphVisualizer {
 
 
       else {
-
+        dimensions[vertex as SitePlanObjects].x = possibleDimensions[3][vertex as SitePlanObjects].x
+        dimensions[vertex as SitePlanObjects].y = possibleDimensions[3][vertex as SitePlanObjects].y
       }
     }
 
@@ -372,8 +422,6 @@ export class AdjacencyGraphVisualizer {
 
     if (this.iteration % 200 === 0) {
 
-      console.log(`dimensions["Parking1"].angle`, dimensions["Parking1"].angle)
-      // console.log(` closestTo90ApproachDrivewayParkingAngle2`, polyPointsOffset)
     }
 
 
@@ -400,7 +448,9 @@ export class AdjacencyGraphVisualizer {
         normalParkingSpots: 0,
         angle: 0,
         dragging: false,
-        width: 190, height: 80,
+        // width: 190, height: 80,
+        width: 20, height: 20,
+
       },
 
       Parking2: {
@@ -409,7 +459,7 @@ export class AdjacencyGraphVisualizer {
         normalParkingSpots: 0,
         angle: 0,
         dragging: false,
-        width: 30, height: 30,
+        width: 20, height: 20,
       },
       Driveway: {
         x: 0,
@@ -469,6 +519,8 @@ export class AdjacencyGraphVisualizer {
 
 
 
+
+    let selectedPoint: TPointObject | null = null;
     // Assign random positions to vertices
     vertices.forEach((vertex) => {
 
@@ -513,6 +565,24 @@ export class AdjacencyGraphVisualizer {
     });
 
 
+    let controlPoints: ControlPoints = {
+      start: { x: dimensions["Approach"].x, y: dimensions["Approach"].y },
+      end: { x: dimensions["Driveway"].x, y: dimensions["Driveway"].y },
+      control1: { x: dimensions["Approach"].x, y: dimensions["Approach"].y - 50 },
+      control2: { x: 400, y: 200 },
+    };
+
+
+
+    p.mouseDragged = () => {
+      // Move the selected control point
+      if (selectedPoint) {
+        selectedPoint.x = p.mouseX;
+        selectedPoint.y = p.mouseY;
+      }
+    };
+
+
     p.mousePressed = () => {
       vertices.forEach((vertex) => {
         const d = p.dist(p.mouseX, p.mouseY, dimensions[vertex].x, dimensions[vertex].y);
@@ -521,17 +591,30 @@ export class AdjacencyGraphVisualizer {
           dimensions[vertex].dragging = true;
         }
       });
+
+
+      for (const point of Object.values(controlPoints)) {
+        if (isMouseNearPoint(p, point)) {
+          selectedPoint = point;
+          break;
+        }
+      }
     };
 
     p.mouseReleased = () => {
       vertices.forEach((vertex) => {
         dimensions[vertex].dragging = false;
       });
+
+      selectedPoint = null;
+
     };
 
     p.draw = () => {
 
-      // this.solver(p, dimensions)
+
+      // Hide this to stop the solve
+      this.solver(p, dimensions, controlPoints)
 
 
       p.background(240);
@@ -545,6 +628,8 @@ export class AdjacencyGraphVisualizer {
           if (checkNoOverlap(p, dimensions, vertex, newPoint, vertices)) {
             dimensions[vertex].x = p.mouseX;
             dimensions[vertex].y = p.mouseY;
+            // controlPoints.control1.x = dimensions[vertex].x - Math.sin(dimensions[vertex].angle * Math.PI / 180) * 100;
+            // controlPoints.control1.y = dimensions[vertex].y - Math.cos(dimensions[vertex].angle * Math.PI / 180) * 100;
           }
 
         }
@@ -562,6 +647,8 @@ export class AdjacencyGraphVisualizer {
         });
       }
 
+
+      drawRoundedCurve(p, controlPoints);
       // Draw vertices
       p.fill(255);
       p.stroke(0);
@@ -863,16 +950,9 @@ function getMinimumPolygonDistance(polygon1: TPointObject[], polygon2: TPointObj
   return minDistance;
 }
 
-
 let truthChecker = (arr: boolean[]) => arr.every(v => v === true);
 
-
-
-
-
 function checkNoOverlap(p: any, dimensions: Dimensions, vertex: SitePlanObjects, newPoint: TPointObject, vertices: SitePlanObjects[]) {
-
-
 
   // Gets the points of the rectangle that the new point creates
   const rectCorners = getRectangleCorners(newPoint,
@@ -978,8 +1058,63 @@ function checkNoOverlap(p: any, dimensions: Dimensions, vertex: SitePlanObjects,
     ) === -1
   )
 
-  if (truthChecker(everyObjectCheck) && truthChecker(allRectPointsInBoundary) &&  truthChecker(everyObjectCheck2)) {
+  if (truthChecker(everyObjectCheck) && truthChecker(allRectPointsInBoundary) && truthChecker(everyObjectCheck2)) {
     return true
   }
 
+}
+
+function drawRoundedCurve(
+  p: p5,
+  controlPoints: ControlPoints
+): void {
+  // Calculate the control points based on curvature
+
+
+  // Draw the bezier curve
+  p.stroke(40, 160, 20);
+  p.noFill();
+  p.strokeWeight(2);
+  p.bezier(
+
+    controlPoints.start.x,
+    controlPoints.start.y,
+    controlPoints.control1.x,
+    controlPoints.control1.y,
+    controlPoints.control2.x,
+    controlPoints.control2.y,
+    controlPoints.end.x,
+    controlPoints.end.y
+  );
+
+  // Draw control lines
+  p.stroke(150);
+  p.strokeWeight(1);
+  p.line(
+    controlPoints.start.x,
+    controlPoints.start.y,
+    controlPoints.control1.x,
+    controlPoints.control1.y
+  );
+  p.line(
+    controlPoints.control2.x,
+    controlPoints.control2.y,
+    controlPoints.end.x,
+    controlPoints.end.y
+  );
+
+  // Draw control points (handles)
+  p.fill(255, 0, 0);
+  p.noStroke();
+  for (const point of Object.values(controlPoints)) {
+    p.circle(point.x, point.y, 10);
+  }
+
+
+
+}
+
+// Utility function to check if the mouse is close to a point
+function isMouseNearPoint(p: p5, point: TPointObject, radius: number = 10): boolean {
+  return p.dist(p.mouseX, p.mouseY, point.x, point.y) < radius;
 }

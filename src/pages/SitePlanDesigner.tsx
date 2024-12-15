@@ -65,11 +65,11 @@ const SitePlanDesigner: React.FC = () => {
       const visualizer = new AdjacencyGraphVisualizer(graph);
 
 
-      console.log(`graph`, graph)
+  
       p.setup = () => {
         p.createCanvas(800, 600).parent(canvasRef.current!);
         visualizer.visualize(p);
-        p.frameRate(15);
+        p.frameRate();
       };
     
       // p.draw = () => {
