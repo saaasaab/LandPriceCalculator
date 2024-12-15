@@ -1,10 +1,8 @@
 import { AdjacencyGraph } from "./AdjacencyGraph";
+import classifyPoint from "robust-point-in-polygon"
 
-
-type Point = { x: number, y: number };
-type Positions = Record<string, Point>
-
-
+type TPointObject = { x: number, y: number };
+type Point = [number, number]
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building";
 
 type DimensionValue = {
@@ -36,6 +34,8 @@ export class AdjacencyGraphVisualizer {
     p: any,
     dimensions: Dimensions,
   ): void {
+
+
     const vertices = Object.keys(this.graph["adjacencyList"]) as SitePlanObjects[];
 
     const numParkingSpots = 10;
@@ -43,8 +43,15 @@ export class AdjacencyGraphVisualizer {
 
 
     const possibleDimensions: Dimensions[] = [];
-
     const numChildren = 10;
+
+
+
+
+
+    // Step 1: Untangle nodes
+    // Step 2: Prevent any overlapping Areas.
+
 
 
 
@@ -53,37 +60,41 @@ export class AdjacencyGraphVisualizer {
       possibleDimensions.push(JSON.parse(JSON.stringify(dimensions)));
     }
 
-
-
     const nudgeStrength = 2;
-    // create a new variation of each child. Let the first child be an exact clone of the parent
-    for (let i = 1; i < numChildren; i++) {
-
-
-      vertices.forEach((vertex: SitePlanObjects) => {
-        const randomNudge = arrayOfRandomNudges(nudgeStrength, 2)
-        // [Math.random() * nudgeStrength * 2 - nudgeStrength, Math.random() * nudgeStrength * 2 - nudgeStrength];
-
-        const newPoint = { x: possibleDimensions[i][vertex].x + randomNudge[0], y: possibleDimensions[i][vertex].y + randomNudge[1] };
-
-        //  && Math.abs(newPoint.x - possibleDimensions[i][vertex].x ) > 40)
-        if (checkIfInBoundryWidth(newPoint, p.width, 40)) {
-          possibleDimensions[i][vertex].x = newPoint.x
-        }
-        if (checkIfInBoundryHeight(newPoint, p.height, 40)) {
-          possibleDimensions[i][vertex].y = newPoint.y
-        }
-      })
-    }
-
-
     const nudgeStrengthDimensions = 1;
     const parkingNudge = [-1, 0, 1];
+    const angleNudge = 2;
+
+    const boundary = [
+      { x: 40, y: 40 },
+      { x: p.width - 40, y: 40 },
+      { x: p.width - 40, y: p.height - 40 },
+      { x: 40, y: p.height }
+    ];
+
 
     const getRandomElement = (items: number[]) => items[Math.floor(Math.random() * items.length)];
     // create a new variation of each child. Let the first child be an exact clone of the parent
     for (let i = 1; i < numChildren; i++) {
+
       const randomNudge = arrayOfRandomNudges(nudgeStrengthDimensions, 8);
+      const randomAnglesNudge = arrayOfRandomNudges(angleNudge, vertices.length);
+
+
+      vertices.forEach((vertex: SitePlanObjects, index: number) => {
+        const randomNudgePosition = arrayOfRandomNudges(nudgeStrength, 2)
+        const newPoint = { x: possibleDimensions[i][vertex].x + randomNudgePosition[0], y: possibleDimensions[i][vertex].y + randomNudgePosition[1] };
+
+        // if (checkIfInBoundryWidth(newPoint, p.width, 40)) {
+        possibleDimensions[i][vertex].x = newPoint.x
+        // if (checkIfInBoundryHeight(newPoint, p.height, 40)) {
+        possibleDimensions[i][vertex].y = newPoint.y;
+
+        possibleDimensions[i][vertex].angle = possibleDimensions[i][vertex].angle + randomAnglesNudge[index];
+
+        // }
+      })
+
 
       const newApproach = {
         width: possibleDimensions[i]["Approach"].width + randomNudge[0],
@@ -100,13 +111,6 @@ export class AdjacencyGraphVisualizer {
         normalParkingSpots: (possibleDimensions[i]["Parking2"].normalParkingSpots || 0) + getRandomElement(parkingNudge),
       }
 
-      const boundary = [
-        { x: 40, y: 40 },
-        { x: p.width - 40, y: 40 },
-        { x: p.width - 40, y: p.height - 40 },
-        { x: 40, y: p.height }
-      ];
-
       const newParking1Dimensions = {
         width: 190,
         height: 80 * newParking1.normalParkingSpots,
@@ -117,25 +121,22 @@ export class AdjacencyGraphVisualizer {
         height: 80 * newParking2.normalParkingSpots,
       }
 
-      if (isRectangleWithinBoundary(possibleDimensions[i]["Approach"], newApproach.width, newApproach.height, boundary)) {
+      if (isRectangleWithinBoundary(possibleDimensions[i]["Approach"], newApproach.width, newApproach.height, boundary, possibleDimensions[i]["Approach"].angle)) {
         possibleDimensions[i]["Approach"] = { ...possibleDimensions[i]["Approach"], ...newApproach }
       }
-      if (isRectangleWithinBoundary(possibleDimensions[i]["Driveway"], newDriveway.width, newDriveway.height, boundary)) {
+      if (isRectangleWithinBoundary(possibleDimensions[i]["Driveway"], newDriveway.width, newDriveway.height, boundary, possibleDimensions[i]["Driveway"].angle)) {
         possibleDimensions[i]["Driveway"] = { ...possibleDimensions[i]["Driveway"], ...newDriveway }
       }
 
+      possibleDimensions[i]["Parking1"] = { ...possibleDimensions[i]["Parking1"], ...newParking1, ...newParking1Dimensions }
 
-      if (isRectangleWithinBoundary(possibleDimensions[i]["Parking1"], newParking1Dimensions.width, newParking1Dimensions.height, boundary)) {
-        possibleDimensions[i]["Parking1"] = { ...possibleDimensions[i]["Parking1"], ...newParking1 }
-      }
-      if (isRectangleWithinBoundary(possibleDimensions[i]["Parking2"], newParking2Dimensions.width, newParking2Dimensions.height, boundary)) {
-        possibleDimensions[i]["Parking2"] = { ...possibleDimensions[i]["Parking2"], ...newParking2 }
-      }
+
+      possibleDimensions[i]["Parking2"] = { ...possibleDimensions[i]["Parking2"], ...newParking2, ...newParking2Dimensions }
+
     }
 
 
     // Calculate the base angles, areas, distances, and scores
-
     let closestTo180ParkingAngleIndex = 0;
     let closestTo180DrivewayAngleIndex = 0;
     let closestTo90ApproachDrivewayParkingAngleIndex = 0;
@@ -166,6 +167,7 @@ export class AdjacencyGraphVisualizer {
       const approach = possibleDimensions[i]["Approach"]
 
 
+
       // Calculate the angle betwene parking and driveway
       const parkingAngle = calculateAngle(p1, driveway, p2)
       const drivewayAngle = calculateAngle(approach, driveway, garbage);
@@ -180,33 +182,38 @@ export class AdjacencyGraphVisualizer {
       const parkingSpots = possibleDimensions[i]["Parking1"].normalParkingSpots || 0;
       const parkingSpots2 = possibleDimensions[i]["Parking2"].normalParkingSpots || 0;
 
-
-
       const polygon1 = getRectangleCorners(
-        { x: dimensions["Parking1"].x, y:  dimensions["Parking1"].y},
+        { x: dimensions["Parking1"].x, y: dimensions["Parking1"].y },
         dimensions["Parking1"].width,
-        dimensions["Parking1"].height
+        dimensions["Parking1"].height,
+        dimensions["Parking1"].angle
       )
 
       const polygon2 = getRectangleCorners(
-        { x: dimensions["Parking2"].x, y:  dimensions["Parking2"].y},
+        { x: dimensions["Parking2"].x, y: dimensions["Parking2"].y },
         dimensions["Parking2"].width,
-        dimensions["Parking2"].height
+        dimensions["Parking2"].height,
+        dimensions["Parking1"].angle
       )
+
+
+      // console.log({polygon2, polygon1})
 
       const minDistance = getMinimumPolygonDistance(polygon1, polygon2)
 
-
-
-      if (Math.abs((parkingSpots || 0) - numParkingSpots) < Math.abs(currentMaxParking - numParkingSpots) && currentMaxParking + currentMaxParking2 <= numParkingSpots) {
-
-
-
+      if
+        (Math.abs((parkingSpots || 0) - numParkingSpots) < Math.abs(currentMaxParking - numParkingSpots) &&
+        currentMaxParking + currentMaxParking2 <= numParkingSpots &&
+        isRectangleWithinBoundary(possibleDimensions[i]["Parking1"], possibleDimensions[i]["Parking1"].width, possibleDimensions[i]["Parking1"].height, boundary, possibleDimensions[i]["Parking1"].angle)
+      ) {
         currentMaxParking = parkingSpots
         currentMaxParkingIndex = i;
       }
 
-      if (Math.abs((parkingSpots2 || 0) - numParkingSpots) < Math.abs(currentMaxParking2 - numParkingSpots) && currentMaxParking + currentMaxParking2 <= numParkingSpots) {
+      if (Math.abs((parkingSpots2 || 0) - numParkingSpots) < Math.abs(currentMaxParking2 - numParkingSpots) &&
+        currentMaxParking + currentMaxParking2 <= numParkingSpots &&
+        isRectangleWithinBoundary(possibleDimensions[i]["Parking2"], possibleDimensions[i]["Parking2"].width, possibleDimensions[i]["Parking2"].height, boundary, possibleDimensions[i]["Parking2"].angle)
+      ) {
         currentMaxParking2 = parkingSpots2
         currentMaxParking2Index = i;
       }
@@ -235,11 +242,11 @@ export class AdjacencyGraphVisualizer {
 
       // Chcking that the parking stalls are not that far from the driveway. 
 
-      if (distanceParking1ToDriveway < closestDistanceParking1ToDriveway  && minDistance > 240) {
+      if (distanceParking1ToDriveway < closestDistanceParking1ToDriveway && minDistance > 240) {
         closestDistanceParking1ToDriveway = distanceParking1ToDriveway
         closestDistanceParking1ToDrivewayIndex = i;
       }
-      else if ( minDistance < 240 && distanceParking1ToDriveway > closestDistanceParking1ToDriveway) {
+      else if (minDistance < 240 && distanceParking1ToDriveway > closestDistanceParking1ToDriveway) {
         closestDistanceParking1ToDriveway = distanceParking1ToDriveway
         closestDistanceParking1ToDrivewayIndex = i;
       }
@@ -273,8 +280,9 @@ export class AdjacencyGraphVisualizer {
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
 
-        dimensions[vertex].normalParkingSpots = possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots
-        dimensions[vertex].height = (possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots || 0) * 90
+        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
+        // dimensions[vertex].normalParkingSpots = possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots
+        // dimensions[vertex].height = (possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots || 0) * 90
 
 
 
@@ -291,8 +299,9 @@ export class AdjacencyGraphVisualizer {
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
 
-        dimensions[vertex].normalParkingSpots = possibleDimensions[currentMaxParking2Index][vertex].normalParkingSpots
-        dimensions[vertex].height = (possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots || 0) * 90
+        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
+        // dimensions[vertex].normalParkingSpots = possibleDimensions[currentMaxParking2Index][vertex].normalParkingSpots
+        // dimensions[vertex].height = (possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots || 0) * 90
 
       }
 
@@ -307,8 +316,9 @@ export class AdjacencyGraphVisualizer {
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
 
+        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
         if (dimensions[vertex].width < 240) {
-          dimensions[vertex].width += 1
+          // dimensions[vertex].width += 1
         }
 
 
@@ -316,7 +326,7 @@ export class AdjacencyGraphVisualizer {
 
 
 
-        
+
 
         // console.log(`object`,boundingBox)
       }
@@ -330,21 +340,22 @@ export class AdjacencyGraphVisualizer {
 
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
+        // dimensions[vertex].angle =  possibleDimensions[currentMaxParkingIndex][vertex].angle;
 
-
-        if (dimensions[vertex].width < 50) {
-          dimensions[vertex].width += 1
-        }
-        if (dimensions[vertex].height < 50) {
-          dimensions[vertex].height += 1
-        }
+        // if (dimensions[vertex].width < 50) {
+        //   dimensions[vertex].width += 1
+        // }
+        // if (dimensions[vertex].height < 50) {
+        //   dimensions[vertex].height += 1
+        // }
 
 
       }
 
       if (vertex === "Approach") {
         if (dimensions[vertex].width < 200) {
-          dimensions[vertex].width += 1
+          // dimensions[vertex].width += 1
+
         }
       }
 
@@ -360,6 +371,8 @@ export class AdjacencyGraphVisualizer {
 
 
     if (this.iteration % 200 === 0) {
+
+      console.log(`dimensions["Parking1"].angle`, dimensions["Parking1"].angle)
       // console.log(` closestTo90ApproachDrivewayParkingAngle2`, polyPointsOffset)
     }
 
@@ -370,6 +383,15 @@ export class AdjacencyGraphVisualizer {
 
   visualize(p: any): void {
     const vertices = Object.keys(this.graph["adjacencyList"]) as SitePlanObjects[];
+
+    const boundary = [
+      { x: 40, y: 40 },
+      { x: p.width - 40, y: 40 },
+      { x: p.width - 40, y: p.height - 40 },
+      { x: 40, y: p.height }
+    ];
+
+
 
     const dimensions: Dimensions = {
       Parking1: {
@@ -387,9 +409,8 @@ export class AdjacencyGraphVisualizer {
         normalParkingSpots: 0,
         angle: 0,
         dragging: false,
-        width: 190, height: 80,
+        width: 30, height: 30,
       },
-
       Driveway: {
         x: 0,
         y: 0,
@@ -398,8 +419,6 @@ export class AdjacencyGraphVisualizer {
         rotation: 0,
         dragging: false,
         angle: 0,
-
-
       },
       "Bike Parking": {
         x: 0,
@@ -453,19 +472,41 @@ export class AdjacencyGraphVisualizer {
     // Assign random positions to vertices
     vertices.forEach((vertex) => {
 
+      // Prevent all new points and rectangles from overlapping eachother
       if (vertex === "Approach") {
         dimensions[vertex] = {
           ...dimensions[vertex],
           x: p.width / 2,
-          y: p.height - 40
+          y: p.height - 10
         };
       }
       else {
-        dimensions[vertex] = {
-          ...dimensions[vertex],
-          x: getRandomNumber(100, p.width - 100),
-          y: getRandomNumber(100, p.height - 100)
-        };
+        let count = 0;
+        let searchingForSafePoint = true;
+        while (searchingForSafePoint) {
+
+
+
+          // Picks a random point in the canvase
+          const newPoint = {
+            x: getRandomNumber(100, p.width - 100),
+            y: getRandomNumber(100, p.height - 100)
+          };
+
+          if (checkNoOverlap(p, dimensions, vertex, newPoint, vertices)) {
+
+            searchingForSafePoint = false;
+            dimensions[vertex] = {
+              ...dimensions[vertex],
+              ...newPoint
+            };
+          }
+          count++
+
+          if (count > 10) {
+            searchingForSafePoint = false;
+          }
+        }
       }
 
       dimensions[vertex as SitePlanObjects].dragging = false;
@@ -477,7 +518,6 @@ export class AdjacencyGraphVisualizer {
         const d = p.dist(p.mouseX, p.mouseY, dimensions[vertex].x, dimensions[vertex].y);
         if (d < 20) {
 
-          console.log(`true`, true)
           dimensions[vertex].dragging = true;
         }
       });
@@ -491,7 +531,7 @@ export class AdjacencyGraphVisualizer {
 
     p.draw = () => {
 
-      this.solver(p, dimensions)
+      // this.solver(p, dimensions)
 
 
       p.background(240);
@@ -499,8 +539,14 @@ export class AdjacencyGraphVisualizer {
       // Update dimensions if dragging
       vertices.forEach((vertex) => {
         if (dimensions[vertex].dragging) {
-          dimensions[vertex].x = p.mouseX;
-          dimensions[vertex].y = p.mouseY;
+
+          // TODO: Speed this up by checking the distance to the closest polygon instead.
+          const newPoint = { x: p.mouseX, y: p.mouseY };
+          if (checkNoOverlap(p, dimensions, vertex, newPoint, vertices)) {
+            dimensions[vertex].x = p.mouseX;
+            dimensions[vertex].y = p.mouseY;
+          }
+
         }
       });
 
@@ -523,30 +569,32 @@ export class AdjacencyGraphVisualizer {
 
       vertices.forEach((vertex) => {
 
+        const angle = dimensions[vertex].angle || 0;
 
-        p.fill(255, 0, 0); // Text color red
+        p.stroke(0);
+        p.fill(30, 200, 45);
+
         p.rectMode(p.CENTER)
-        p.rect(dimensions[vertex].x, dimensions[vertex].y, dimensions[vertex].width, dimensions[vertex].height);
 
+        p.push();
+        // Translate to the rectangle's center
+        p.translate(dimensions[vertex].x, dimensions[vertex].y);
 
+        // Rotate by the angle (convert to radians)
+        p.rotate(p.radians(angle));
 
+        // Draw the rectangle at the origin (center already translated)
 
-        // console.log(`dimensions[vertex].normalParkingSpots`, dimensions["Parking1"].normalParkingSpots)
-        if (vertex === "Parking1" || vertex === "Parking2") {
-          p.stroke(0);
-          p.fill(30, 200, 45);
-
-
-          p.rectMode(p.CENTER)
-          p.rect(dimensions[vertex].x,dimensions[vertex].y,  dimensions[vertex].width,  dimensions[vertex].height)
-        }
-
-
+        p.rect(0, 0, dimensions[vertex].width, dimensions[vertex].height);
         p.noStroke();
         p.textAlign(p.CENTER, p.CENTER);
         p.fill(0);
         p.textSize(18);
-        p.text(vertex, dimensions[vertex].x, dimensions[vertex].y);
+        p.text(vertex, 0, 0);
+
+
+        p.pop(); // Restore the previous drawing state
+
       });
 
 
@@ -562,7 +610,7 @@ function arrayOfRandomNudges(nudgeStrength: number, numberOfRandomNumbers: numbe
   return arr.map(() => Math.random() * nudgeStrength * 2 - nudgeStrength)
 }
 
-function calculateAngle(p1: Point, p2: Point, p3: Point): number {
+function calculateAngle(p1: TPointObject, p2: TPointObject, p3: TPointObject): number {
   // Calculate vectors
   const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
   const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
@@ -587,19 +635,19 @@ function calculateAngle(p1: Point, p2: Point, p3: Point): number {
   return angleInDegrees;
 }
 
-function calculateDistanceBetweenPoints(p1: Point, p2: Point) {
+function calculateDistanceBetweenPoints(p1: TPointObject, p2: TPointObject) {
   return Math.hypot(p2.x - p1.x, p2.y - p1.y);
 }
 
-function checkIfInBoundry(p1: Point, bWidth: number, bHeight: number, offset = 0) {
+function checkIfInBoundry(p1: TPointObject, bWidth: number, bHeight: number, offset = 0) {
   return p1.x > 0 + offset && p1.x < bWidth - offset && p1.y > 0 + offset && p1.y < bHeight - offset;
 }
 
-function checkIfInBoundryWidth(p1: Point, bWidth: number, offset = 0) {
+function checkIfInBoundryWidth(p1: TPointObject, bWidth: number, offset = 0) {
   return p1.x > 0 + offset && p1.x < bWidth - offset;
 }
 
-function checkIfInBoundryHeight(p1: Point, bHeight: number, offset = 0) {
+function checkIfInBoundryHeight(p1: TPointObject, bHeight: number, offset = 0) {
   return p1.y > 0 + offset && p1.y < bHeight - offset;
 }
 
@@ -607,17 +655,17 @@ function getRandomNumber(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function arePointsWithinBoundary(point1: Point, point2: Point, boundary: number): boolean {
+function arePointsWithinBoundary(point1: TPointObject, point2: TPointObject, boundary: number): boolean {
   return Math.hypot(point2.x - point1.x, point2.y - point1.y) <= boundary;
 }
 
 
 function calculateWeightedPoint(
-  possibleDimensions: { [key: string]: Point }[],
+  possibleDimensions: { [key: string]: TPointObject }[],
   indices: number[],
   vertex: string,
   weights: number[]
-): Point {
+): TPointObject {
   if (indices.length !== weights.length) {
     throw new Error("Indices and weights arrays must have the same length.");
   }
@@ -639,7 +687,7 @@ function calculateWeightedPoint(
 
 
 
-const calculateArea = (polygon: Point[]): number => {
+const calculateArea = (polygon: TPointObject[]): number => {
   let total = 0;
   for (let i = 0; i < polygon.length; i++) {
     const next = (i + 1) % polygon.length;
@@ -650,7 +698,7 @@ const calculateArea = (polygon: Point[]): number => {
 
 
 
-function getBoundingBox(polygon: Point[]): { width: number, height: number } {
+function getBoundingBox(polygon: TPointObject[]): { width: number, height: number } {
   if (polygon.length === 0) {
     throw new Error("Polygon must have at least one point.");
   }
@@ -676,21 +724,14 @@ function getBoundingBox(polygon: Point[]): { width: number, height: number } {
 
 
 function isRectangleWithinBoundary(
-  center: Point,
+  center: TPointObject,
   width: number,
   height: number,
-  boundary: Point[]
+  boundary: TPointObject[],
+  angle: number
 ): boolean {
-  // Calculate the corners of the rectangle
-  const halfWidth = width / 2;
-  const halfHeight = height / 2;
 
-  const rectangleCorners: Point[] = [
-    { x: center.x - halfWidth, y: center.y - halfHeight }, // Bottom-left
-    { x: center.x + halfWidth, y: center.y - halfHeight }, // Bottom-right
-    { x: center.x + halfWidth, y: center.y + halfHeight }, // Top-right
-    { x: center.x - halfWidth, y: center.y + halfHeight }  // Top-left
-  ];
+  const rectangleCorners = getRectangleCorners(center, width, height, angle)
 
   // Check if all corners are inside the boundary
   return rectangleCorners.every(corner => isPointInsidePolygon(corner, boundary));
@@ -698,27 +739,44 @@ function isRectangleWithinBoundary(
 
 
 function getRectangleCorners(
-  center: Point,
+  center: TPointObject,
   width: number,
-  height: number
-): Point[] {
-  // Calculate the corners of the rectangle
+  height: number,
+  angle: number
+): TPointObject[] {
   const halfWidth = width / 2;
   const halfHeight = height / 2;
 
-  const rectangleCorners: Point[] = [
-    { x: center.x - halfWidth, y: center.y - halfHeight }, // Bottom-left
-    { x: center.x + halfWidth, y: center.y - halfHeight }, // Bottom-right
-    { x: center.x + halfWidth, y: center.y + halfHeight }, // Top-right
-    { x: center.x - halfWidth, y: center.y + halfHeight }  // Top-left
+  // Calculate the corners of the rectangle relative to its center
+  const rectangleCorners: TPointObject[] = [
+    { x: -halfWidth, y: -halfHeight }, // Bottom-left
+    { x: halfWidth, y: -halfHeight },  // Bottom-right
+    { x: halfWidth, y: halfHeight },   // Top-right
+    { x: -halfWidth, y: halfHeight },  // Top-left
   ];
 
-  // Check if all corners are inside the boundary
-  return rectangleCorners;
+  // Convert the angle to radians
+  const angleRad = (angle * Math.PI) / 180;
+
+  // Rotate and translate each corner
+  const rotatedCorners = rectangleCorners.map((corner) => {
+    const rotatedX =
+      corner.x * Math.cos(angleRad) - corner.y * Math.sin(angleRad);
+    const rotatedY =
+      corner.x * Math.sin(angleRad) + corner.y * Math.cos(angleRad);
+
+    // Translate back to the rectangle's center
+    return {
+      x: rotatedX + center.x,
+      y: rotatedY + center.y,
+    };
+  });
+
+  return rotatedCorners;
 }
 
 
-function isPointInsidePolygon(point: Point, polygon: Point[]): boolean {
+function isPointInsidePolygon(point: TPointObject, polygon: TPointObject[]): boolean {
   let intersectCount = 0;
 
   for (let i = 0; i < polygon.length; i++) {
@@ -749,58 +807,179 @@ function isPointInsidePolygon(point: Point, polygon: Point[]): boolean {
 
 
 
-function calculateDistance(p1: Point, p2: Point): number {
-    return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+function calculateDistance(p1: TPointObject, p2: TPointObject): number {
+  return Math.hypot(p2.x - p1.x, p2.y - p1.y);
 }
 
-function pointToEdgeDistance(point: Point, edgeStart: Point, edgeEnd: Point): number {
-    const edgeLengthSquared = calculateDistance(edgeStart, edgeEnd) ** 2;
-    if (edgeLengthSquared === 0) {
-        return calculateDistance(point, edgeStart); // The edge is a single point
-    }
+function pointToEdgeDistance(point: TPointObject, edgeStart: TPointObject, edgeEnd: TPointObject): number {
+  const edgeLengthSquared = calculateDistance(edgeStart, edgeEnd) ** 2;
+  if (edgeLengthSquared === 0) {
+    return calculateDistance(point, edgeStart); // The edge is a single point
+  }
 
-    // Projection of the point onto the edge (normalized t)
-    const t = Math.max(
-        0,
-        Math.min(
-            1,
-            ((point.x - edgeStart.x) * (edgeEnd.x - edgeStart.x) +
-                (point.y - edgeStart.y) * (edgeEnd.y - edgeStart.y)) /
-                edgeLengthSquared
-        )
-    );
+  // Projection of the point onto the edge (normalized t)
+  const t = Math.max(
+    0,
+    Math.min(
+      1,
+      ((point.x - edgeStart.x) * (edgeEnd.x - edgeStart.x) +
+        (point.y - edgeStart.y) * (edgeEnd.y - edgeStart.y)) /
+      edgeLengthSquared
+    )
+  );
 
-    // Closest point on the edge
-    const projection = {
-        x: edgeStart.x + t * (edgeEnd.x - edgeStart.x),
-        y: edgeStart.y + t * (edgeEnd.y - edgeStart.y),
-    };
+  // Closest point on the edge
+  const projection = {
+    x: edgeStart.x + t * (edgeEnd.x - edgeStart.x),
+    y: edgeStart.y + t * (edgeEnd.y - edgeStart.y),
+  };
 
-    return calculateDistance(point, projection);
+  return calculateDistance(point, projection);
 }
 
-function getMinimumPolygonDistance(polygon1: Point[], polygon2: Point[]): number {
-    let minDistance = Infinity;
+function getMinimumPolygonDistance(polygon1: TPointObject[], polygon2: TPointObject[]): number {
+  let minDistance = Infinity;
 
-    // Check distances from each vertex in polygon1 to every edge in polygon2
-    for (const point1 of polygon1) {
-        for (let i = 0; i < polygon2.length; i++) {
-            const edgeStart = polygon2[i];
-            const edgeEnd = polygon2[(i + 1) % polygon2.length];
-            const distance = pointToEdgeDistance(point1, edgeStart, edgeEnd);
-            minDistance = Math.min(minDistance, distance);
-        }
+  // Check distances from each vertex in polygon1 to every edge in polygon2
+  for (const point1 of polygon1) {
+    for (let i = 0; i < polygon2.length; i++) {
+      const edgeStart = polygon2[i];
+      const edgeEnd = polygon2[(i + 1) % polygon2.length];
+      const distance = pointToEdgeDistance(point1, edgeStart, edgeEnd);
+      minDistance = Math.min(minDistance, distance);
     }
+  }
 
-    // Check distances from each vertex in polygon2 to every edge in polygon1
-    for (const point2 of polygon2) {
-        for (let i = 0; i < polygon1.length; i++) {
-            const edgeStart = polygon1[i];
-            const edgeEnd = polygon1[(i + 1) % polygon1.length];
-            const distance = pointToEdgeDistance(point2, edgeStart, edgeEnd);
-            minDistance = Math.min(minDistance, distance);
-        }
+  // Check distances from each vertex in polygon2 to every edge in polygon1
+  for (const point2 of polygon2) {
+    for (let i = 0; i < polygon1.length; i++) {
+      const edgeStart = polygon1[i];
+      const edgeEnd = polygon1[(i + 1) % polygon1.length];
+      const distance = pointToEdgeDistance(point2, edgeStart, edgeEnd);
+      minDistance = Math.min(minDistance, distance);
     }
+  }
 
-    return minDistance;
+  return minDistance;
+}
+
+
+let truthChecker = (arr: boolean[]) => arr.every(v => v === true);
+
+
+
+
+
+function checkNoOverlap(p: any, dimensions: Dimensions, vertex: SitePlanObjects, newPoint: TPointObject, vertices: SitePlanObjects[]) {
+
+
+
+  // Gets the points of the rectangle that the new point creates
+  const rectCorners = getRectangleCorners(newPoint,
+    dimensions[vertex].width,
+    dimensions[vertex].height,
+    dimensions[vertex].angle)
+
+
+  // COULD BE A PROBLEM WHERE THE POINTS ARE DOING A ZIG ZAG.
+  const rectCorners1AsPoints = [
+    [rectCorners[0].x, rectCorners[0].y],
+    [rectCorners[1].x, rectCorners[1].y],
+    [rectCorners[2].x, rectCorners[2].y],
+    [rectCorners[3].x, rectCorners[3].y]
+  ]
+
+  //  go through all the site plan objects to see if the new rectangle intersects with any existing object.
+
+
+  // This is checking if rectangle's points are in all the other polygons, BUT we need to check if 
+  // any of their points are this rectangle.
+
+
+  const everyObjectCheck = vertices.map((vertex2) => {
+    // Skip the current vertex
+    if (vertex !== vertex2) {
+
+      // Get the corner points of another object.
+      const rectCorners2 = getRectangleCorners(
+        dimensions[vertex2],
+        dimensions[vertex2].width,
+        dimensions[vertex2].height,
+        dimensions[vertex2].angle)
+
+      const rectCorners2AsPoints = [
+        [rectCorners2[0].x, rectCorners2[0].y],
+        [rectCorners2[1].x, rectCorners2[1].y],
+        [rectCorners2[2].x, rectCorners2[2].y],
+        [rectCorners2[3].x, rectCorners2[3].y]
+      ]
+
+
+      const allPointsOutOfPolygon = rectCorners.map(corner => {
+
+        const point = [corner.x, corner.y];
+        const pointClassification = classifyPoint(rectCorners2AsPoints as Point[], point as Point)
+        // 1 = outside
+        // 0 = on the border
+        // -1 = inside
+        return pointClassification === 1
+      })
+
+      return truthChecker(allPointsOutOfPolygon)
+    }
+    else {
+      return true;
+    }
+  })
+
+
+  const everyObjectCheck2 = vertices.map((vertex2) => {
+    // Skip the current vertex
+    if (vertex !== vertex2) {
+
+      // Get the corner points of another object.
+      const rectCorners2 = getRectangleCorners(
+        dimensions[vertex2],
+        dimensions[vertex2].width,
+        dimensions[vertex2].height,
+        dimensions[vertex2].angle)
+
+
+
+
+      const allPointsOutOfPolygon = rectCorners2.map(corner => {
+
+        const point = [corner.x, corner.y];
+        const pointClassification = classifyPoint(rectCorners1AsPoints as Point[], point as Point)
+        // 1 = outside
+        // 0 = on the border
+        // -1 = inside
+        return pointClassification === 1
+      })
+
+      return truthChecker(allPointsOutOfPolygon)
+    }
+    else {
+      return true;
+    }
+  })
+
+
+
+  const allRectPointsInBoundary = rectCorners1AsPoints.map((point) =>
+    classifyPoint(
+      [
+        [40, 40],
+        [p.width - 40, 40],
+        [p.width - 40, p.height - 40],
+        [40, p.height - 40]] as Point[],
+
+      point as Point
+    ) === -1
+  )
+
+  if (truthChecker(everyObjectCheck) && truthChecker(allRectPointsInBoundary) &&  truthChecker(everyObjectCheck2)) {
+    return true
+  }
+
 }
