@@ -1,5 +1,7 @@
+import { SitePlanObjects } from "./AdjacencyGraphVisualizer";
+
 export class AdjacencyGraph {
-    private adjacencyList: Record<string, string[]>;
+    private adjacencyList: Record<string, SitePlanObjects[]>;
   
     constructor() {
       this.adjacencyList = {};
@@ -13,7 +15,7 @@ export class AdjacencyGraph {
     }
   
     // Add an edge between two vertices (undirected graph)
-    addEdge(vertex1: string, vertex2: string): void {
+    addEdge(vertex1: SitePlanObjects, vertex2: SitePlanObjects): void {
       if (!this.adjacencyList[vertex1]) {
         this.addVertex(vertex1);
       }
@@ -25,7 +27,7 @@ export class AdjacencyGraph {
     }
   
      // Add multiple edges for a single vertex
-    addEdges(vertex: string, edges: string[]): void {
+    addEdges(vertex: SitePlanObjects, edges: SitePlanObjects[]): void {
       edges.forEach((edge) => this.addEdge(vertex, edge));
     }
   
