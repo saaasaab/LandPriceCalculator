@@ -320,8 +320,7 @@ export class AdjacencyGraphVisualizer2 {
           approach.center.y = newY;
           approach.updateApproachEdges()
 
-        
-
+    
 
 
           // If rotating the parking is going to push the parking outside the boundary, then update the center of the parking
