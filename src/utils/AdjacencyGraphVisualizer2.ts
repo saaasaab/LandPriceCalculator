@@ -2,6 +2,7 @@ import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 
+type Point=[number,number];
 
 
 
@@ -281,6 +282,8 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
+
+
     const propertyEdges: Edge[] = [];
 
     for (let i = 0; i < propertyCorners.length; i++) {
@@ -293,7 +296,7 @@ export class AdjacencyGraphVisualizer2 {
 
     // const angle = edge.calculateAngle();
     const angle = 11
-    const approach = new Approach(p, getCenterPoint(propertyEdges[2].point1, propertyEdges[2].point2), 100, 30, angle);
+    const approach = new Approach(p, getCenterPoint(propertyEdges[2].point1, propertyEdges[2].point2), 100, 20, angle);
     const parking = new ParkingLot(p, p.createVector(300, 200), 120, 200, 30);
 
     approach.initialize()
@@ -320,18 +323,58 @@ export class AdjacencyGraphVisualizer2 {
           approach.center.y = newY;
           approach.updateApproachEdges()
 
-    
-
-
           // If rotating the parking is going to push the parking outside the boundary, then update the center of the parking
           // in the opposite direction of the contact point. If that's going to cause a conflict, then move it reflected 90degrees
 
+
+          // ACTUALLY if I'm close to an edge, make the angle steer toward the edge until it snaps in place
           const edgeMidpoint1 = getCenterPoint(parking.parkingEdges[2].point1, parking.parkingEdges[2].point2);
           const edgeMidpoint2 = getCenterPoint(approach.approachEdges[0].point1, approach.approachEdges[0].point2);
 
+
+
+          
+
+          // Take a snapshop
+          const _angle = parking.angle;
+          
           const angle = calculateAngle(edgeMidpoint1,edgeMidpoint2)
           parking.updateAngle(-angle+90)
           parking.updateParkingEdges();
+
+          const pointsOutsideBoundary = [];
+
+          const allPointsInPolygon = parking.parkingCorners.map((corner,i) => {
+            const point = [corner.x, corner.y];
+            const pointClassification = classifyPoint(propertyCorners.map(corner=>[corner.x,corner.y]) as Point[], point as Point)
+            // 1 = outside
+            // 0 = on the border
+            // -1 = inside
+
+            if(pointClassification === 1) pointsOutsideBoundary.push(i);
+            
+            return pointClassification === -1
+          })
+
+
+
+
+          
+    
+  
+          if( !truthChecker(allPointsInPolygon)){
+
+            parking.updateAngle(_angle)
+            parking.updateParkingEdges();
+          }
+
+
+
+
+
+
+         
+
          
         }
       }
@@ -492,12 +535,9 @@ function drawPerpendicularBezier(
 ): void {
   // Define the two control points
 
-  const controlDistance = p.dist(point1.x, point2.x, point1.y, point2.y) / 5;
+  const controlDistance = p.dist(point1.x, point1.y, point2.x, point2.y) / 3;
   const angle1 = edge1.calculateAngle() + 90;
   const angle2 = edge2.calculateAngle() - 90;
-
-  // console.log(`angle1 and angle2`, angle1, angle2)
-
   const controlPoint1 = p.createVector(
 
     point1.x + p.cos(angle1) * controlDistance,
@@ -534,6 +574,7 @@ function drawPerpendicularBezier(
 
 
 
+let truthChecker = (arr: boolean[]) => arr.every(v => v === true);
 
 function calculateAngle(point1: p5.Vector,point2: p5.Vector): number {
   const deltaY = point2.y - point1.y;
