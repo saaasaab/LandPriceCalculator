@@ -18,6 +18,11 @@ class Edge {
     this.p = p;
   }
 
+  updateEdge(newPoint1: p5.Vector, newPoint2: p5.Vector) {
+    this.point1 = newPoint1;
+    this.point2 = newPoint2;
+  }
+
   drawLine() {
     this.p.stroke(0);
     this.p.strokeWeight(5);
@@ -65,24 +70,32 @@ class Approach {
     this.approachEdges = [];
   }
 
+  initialize() {
+    this.createApproachCorners();
+    this.setApproachEdges();
+  }
 
-  setParkingEdges() {
+
+  setApproachEdges() {
     const approachCorners = this.approachCorners;
 
+    const edges = []
     for (let i = 0; i < approachCorners.length; i++) {
       const corner1 = approachCorners[i];
       let corner2 = i === approachCorners.length - 1 ? approachCorners[0] : approachCorners[i + 1];
       const isApproach = i === 2;
       const newEdge = new Edge(this.p, corner1, corner2, isApproach);
-      this.approachEdges.push(newEdge);
+      edges.push(newEdge);
     }
+
+    this.approachEdges = edges
   }
 
-
-
-  isMouseHovering(): boolean {
-    return polyPoint(this.approachCorners, this.p.mouseX, this.p.mouseY);
+  updateApproachEdges() {
+    this.createApproachCorners()
+    this.setApproachEdges()
   }
+
 
   createApproachCorners() {
     const p = this.p;
@@ -110,11 +123,12 @@ class Approach {
 
   }
 
-
+  isMouseHovering(): boolean {
+    return polyPoint(this.approachCorners, this.p.mouseX, this.p.mouseY);
+  }
 
   drawApproach() {
-    this.createApproachCorners();
-    this.setParkingEdges();
+
     const p = this.p;
     p.angleMode(p.DEGREES);
 
@@ -133,9 +147,6 @@ class Approach {
     p.ellipse(this.center.x, this.center.y, 50, 50);
   }
 }
-
-
-
 
 class ParkingLot {
   public center: p5.Vector;
@@ -161,21 +172,37 @@ class ParkingLot {
   }
 
 
+
+  initialize() {
+    this.createParkingCorners()
+    this.setParkingEdges();
+  }
+
+  isMouseHovering(): boolean {
+    return polyPoint(this.parkingCorners, this.p.mouseX, this.p.mouseY);
+  }
+
   setParkingEdges() {
     const parkingCorners = this.parkingCorners;
 
+    const edges = []
     for (let i = 0; i < parkingCorners.length; i++) {
       const corner1 = parkingCorners[i];
       let corner2 = i === parkingCorners.length - 1 ? parkingCorners[0] : parkingCorners[i + 1];
       const isApproach = i === 2;
       const newEdge = new Edge(this.p, corner1, corner2, isApproach);
-      this.parkingEdges.push(newEdge);
+      edges.push(newEdge);
     }
+    this.parkingEdges = edges;
   }
 
+  updateAngle(angle: number){
+    this.angle = angle;
+  }
 
-  isMouseHovering(): boolean {
-    return polyPoint(this.parkingCorners, this.p.mouseX, this.p.mouseY);
+  updateParkingEdges() {
+    this.createParkingCorners();
+    this.setParkingEdges()
   }
 
   createParkingCorners() {
@@ -201,16 +228,11 @@ class ParkingLot {
       const rotatedY = corner.x * Math.sin(angleRad) + corner.y * Math.cos(angleRad);
       return p.createVector(center.x + rotatedX, center.y + rotatedY);
     });
-
-
   }
 
 
 
   drawParking() {
-    this.createParkingCorners()
-    this.setParkingEdges();
-
     const p = this.p;
     p.angleMode(p.DEGREES);
 
@@ -247,6 +269,8 @@ export class AdjacencyGraphVisualizer2 {
   }
 
   visualize2(p: p5): void {
+    p.angleMode(p.DEGREES);
+
 
     const propertyCorners = [
       p.createVector(40, 40),
@@ -267,25 +291,24 @@ export class AdjacencyGraphVisualizer2 {
       propertyEdges.push(newEdge);
     }
 
-
-
-
-    p.angleMode(p.DEGREES);
-
     // const angle = edge.calculateAngle();
-
     const angle = 11
     const approach = new Approach(p, getCenterPoint(propertyEdges[2].point1, propertyEdges[2].point2), 100, 30, angle);
-    const parking = new ParkingLot(p, p.createVector(300, 200), 120 + 90 * 2, 200, 0);
+    const parking = new ParkingLot(p, p.createVector(300, 200), 120, 200, 30);
+
+    approach.initialize()
+    parking.initialize();
 
 
-    let isDragging = false;
+    let isDraggingParking = false;
+    let isDraggingApproach = false
     p.mouseDragged = () => {
-      const isHovered = approach.isMouseHovering();
+      const isHoveredApproach = approach.isMouseHovering();
+      const isHoveredParking = parking.isMouseHovering();
 
 
-      if (isHovered || isDragging) {
-        isDragging = true;
+      if (isHoveredApproach || isDraggingApproach) {
+        isDraggingApproach = true;
         const newX = p.mouseX;
         const newY = approach.center.y + (approach.center.x - newX) * .2; //Need to update based on the actual angle of approach edge.
 
@@ -295,8 +318,50 @@ export class AdjacencyGraphVisualizer2 {
         ) {
           approach.center.x = newX;
           approach.center.y = newY;
+          approach.updateApproachEdges()
+
+        
+
+
+
+          // If rotating the parking is going to push the parking outside the boundary, then update the center of the parking
+          // in the opposite direction of the contact point. If that's going to cause a conflict, then move it reflected 90degrees
+
+          const edgeMidpoint1 = getCenterPoint(parking.parkingEdges[2].point1, parking.parkingEdges[2].point2);
+          const edgeMidpoint2 = getCenterPoint(approach.approachEdges[0].point1, approach.approachEdges[0].point2);
+
+          const angle = calculateAngle(edgeMidpoint1,edgeMidpoint2)
+          parking.updateAngle(-angle+90)
+          parking.updateParkingEdges();
+         
         }
       }
+
+
+      if (isHoveredParking || isDraggingParking) {
+        isDraggingParking = true;
+        const newX = p.mouseX;
+        const newY = p.mouseY; 
+
+        if (
+          newX - parking.width / 2 > propertyCorners[3].x &&
+          newX + parking.width / 2 < propertyCorners[2].x
+        ) {
+          parking.center.x = newX;
+          parking.center.y = newY;
+
+
+
+          const edgeMidpoint1 = getCenterPoint(parking.parkingEdges[2].point1, parking.parkingEdges[2].point2);
+          const edgeMidpoint2 = getCenterPoint(approach.approachEdges[0].point1, approach.approachEdges[0].point2);
+
+          const angle = calculateAngle(edgeMidpoint1,edgeMidpoint2)
+          parking.updateAngle(-angle+90)
+          parking.updateParkingEdges();
+        }
+      }
+
+
     };
 
 
@@ -305,7 +370,8 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.mouseReleased = () => {
-      isDragging = false
+      isDraggingParking = false
+      isDraggingApproach = false
     };
 
     p.draw = () => {
@@ -315,26 +381,50 @@ export class AdjacencyGraphVisualizer2 {
       p.background(240);
       p.stroke(0);
 
-      p.beginShape()
+
       propertyEdges.forEach(edge =>
         edge.drawLine()
       )
 
       approach.drawApproach();
       parking.drawParking();
-     
-     
+
+
+
+
+
+
+      // Left Line
+      drawPerpendicularBezier(
+        p,
+        approach.approachCorners[0],
+        parking.parkingCorners[3],
+
+
+        approach.approachEdges[2],
+        parking.parkingEdges[parking.entranceEdgeIndex]
+      );
+
+
+
+
+      // Center line
       drawPerpendicularBezier(
         p,
         approach.center,
         getCenterPoint(parking.parkingEdges[parking.entranceEdgeIndex].point1, parking.parkingEdges[parking.entranceEdgeIndex].point2),
-
         approach.approachEdges[2],
-        parking.parkingEdges[parking.entranceEdgeIndex],
-        100
+        parking.parkingEdges[parking.entranceEdgeIndex]
       );
 
-
+      // Right Line
+      drawPerpendicularBezier(
+        p,
+        approach.approachCorners[1],
+        parking.parkingCorners[2],
+        approach.approachEdges[2],
+        parking.parkingEdges[parking.entranceEdgeIndex]
+      );
 
 
 
@@ -393,40 +483,17 @@ function polyPoint(vertices: p5.Vector[], px: number, py: number) {
 }
 
 
-
-
-
-
-
-
-
 function drawPerpendicularBezier(
   p: p5,
   point1: p5.Vector,
   point2: p5.Vector,
   edge1: Edge,
   edge2: Edge,
-  controlDistance: number
+  // controlDistance: number
 ): void {
-  // Calculate the midpoint of the line segment
-  const midpoint = p.createVector(
-    (point1.x + point2.x) / 2,
-    (point1.y + point2.y) / 2
-  );
-
-  // Compute the vector along the line segment
-  const lineVector = p.createVector(point2.x - point1.x, point2.y - point1.y);
-
-  // Compute the perpendicular vector (by swapping x and y and flipping one sign)
-  const perpendicularVector = p.createVector(-lineVector.y, lineVector.x).normalize();
-
-  // Scale the perpendicular vector to control the distance of the control points
-  const controlOffset = perpendicularVector.mult(controlDistance);
-
   // Define the two control points
 
-  // control1: { x: dimensions["Approach"].x, y: dimensions["Approach"].y - 50 },
-  // control2: { x: 400, y: 200 },
+  const controlDistance = p.dist(point1.x, point2.x, point1.y, point2.y) / 5;
   const angle1 = edge1.calculateAngle() + 90;
   const angle2 = edge2.calculateAngle() - 90;
 
@@ -434,18 +501,18 @@ function drawPerpendicularBezier(
 
   const controlPoint1 = p.createVector(
 
-    point1.x + p.cos(angle1)*100,
-    point1.y + p.sin(angle1)*100
-    );
-    const controlPoint2 = p.createVector(
+    point1.x + p.cos(angle1) * controlDistance,
+    point1.y + p.sin(angle1) * controlDistance
+  );
+  const controlPoint2 = p.createVector(
 
-      point2.x + p.cos(angle2)*100,
-      point2.y + p.sin(angle2)*100
-      );
+    point2.x + p.cos(angle2) * controlDistance,
+    point2.y + p.sin(angle2) * controlDistance
+  );
 
-  // Draw the Bézier curve
-  p.stroke(0, 100, 255);
-  p.strokeWeight(3);
+  // // Draw the Bézier curve
+  // p.stroke(0, 100, 255);
+  // p.strokeWeight(3);
   p.noFill();
   p.bezier(
     point1.x,
@@ -459,7 +526,7 @@ function drawPerpendicularBezier(
 
   // Optional: Draw the line segment and control points for visualization
   p.stroke(0);
-  p.line(point1.x, point1.y, point2.x, point2.y); // Original line segment
+  // p.line(point1.x, point1.y, point2.x, point2.y); // Original line segment
   p.fill(255, 0, 0);
   p.ellipse(controlPoint1.x, controlPoint1.y, 8, 8); // Control point 1
   p.ellipse(controlPoint2.x, controlPoint2.y, 8, 8); // Control point 2
@@ -468,5 +535,18 @@ function drawPerpendicularBezier(
 
 
 
+
+function calculateAngle(point1: p5.Vector,point2: p5.Vector): number {
+  const deltaY = point2.y - point1.y;
+  const deltaX = point2.x - point1.x;
+
+  // atan2 handles quadrants and division by zero
+  const angleInRadians = Math.atan2(deltaY, deltaX);
+
+  // Convert radians to degrees
+  const angleInDegrees = angleInRadians*180/Math.PI;
+
+  return angleInDegrees;
+}
 
 
