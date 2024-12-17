@@ -335,6 +335,10 @@ export class AdjacencyGraphVisualizer2 {
 
           
 
+
+
+
+
           // Take a snapshop
           const _angle = parking.angle;
           
@@ -389,17 +393,62 @@ export class AdjacencyGraphVisualizer2 {
           newX - parking.width / 2 > propertyCorners[3].x &&
           newX + parking.width / 2 < propertyCorners[2].x
         ) {
+          
+          const _angle = parking.angle;
+          const _center = [parking.center.x, parking.center.y];
+          
+
+
           parking.center.x = newX;
           parking.center.y = newY;
-
-
 
           const edgeMidpoint1 = getCenterPoint(parking.parkingEdges[2].point1, parking.parkingEdges[2].point2);
           const edgeMidpoint2 = getCenterPoint(approach.approachEdges[0].point1, approach.approachEdges[0].point2);
 
+          
           const angle = calculateAngle(edgeMidpoint1,edgeMidpoint2)
           parking.updateAngle(-angle+90)
           parking.updateParkingEdges();
+
+
+
+
+
+
+
+
+
+          // Take a snapshop
+          
+          parking.updateAngle(-angle+90)
+          parking.updateParkingEdges();
+
+          const pointsOutsideBoundary = [];
+
+          const allPointsInPolygon = parking.parkingCorners.map((corner,i) => {
+            const point = [corner.x, corner.y];
+            const pointClassification = classifyPoint(propertyCorners.map(corner=>[corner.x,corner.y]) as Point[], point as Point)
+            // 1 = outside
+            // 0 = on the border
+            // -1 = inside
+
+            if(pointClassification === 1) pointsOutsideBoundary.push(i);
+            
+            return pointClassification === -1
+          })
+
+          
+          if( !truthChecker(allPointsInPolygon)){
+            parking.center.x = _center[0]
+            parking.center.y = _center[1]
+            parking.updateAngle(_angle)
+            parking.updateParkingEdges();
+          }
+
+
+
+
+
         }
       }
 
