@@ -3,7 +3,7 @@ import LotLineDrawer from './LotLineDrawerP5';
 import VoronoiDiagram from './VoronoiDiagram';
 import { AdjacencyGraph } from '../utils/AdjacencyGraph';
 import p5 from 'p5';
-import { AdjacencyGraphVisualizer } from '../utils/AdjacencyGraphVisualizer';
+import { AdjacencyGraphVisualizer2 } from '../utils/AdjacencyGraphVisualizer2';
 
 
 interface Point {
@@ -62,14 +62,14 @@ const SitePlanDesigner: React.FC = () => {
 
   useEffect(() => {
     const sketch = (p: any) => {
-      const visualizer = new AdjacencyGraphVisualizer(graph);
+      const visualizer = new AdjacencyGraphVisualizer2(graph);
 
 
   
       p.setup = () => {
         p.createCanvas(800, 600).parent(canvasRef.current!);
-        visualizer.visualize(p);
-        p.frameRate();
+        visualizer.visualize2(p);
+        p.frameRate(10);
       };
     
       // p.draw = () => {

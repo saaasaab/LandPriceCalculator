@@ -54,8 +54,7 @@ export class AdjacencyGraphVisualizer {
 
 
     const possibleDimensions: Dimensions[] = [];
-    const numChildren = 10;
-
+    const numChildren = 10
 
 
 
@@ -74,15 +73,10 @@ export class AdjacencyGraphVisualizer {
     const parkingNudge = [-1, 0, 1];
     const angleNudge = 2;
 
-    const boundary = [
-      { x: 40, y: 40 },
-      { x: p.width - 40, y: 40 },
-      { x: p.width - 40, y: p.height - 40 },
-      { x: 40, y: p.height }
-    ];
-
 
     const getRandomElement = (items: number[]) => items[Math.floor(Math.random() * items.length)];
+
+
     // create a new variation of each child. Let the first child be an exact clone of the parent
     for (let i = 1; i < numChildren; i++) {
 
@@ -100,27 +94,42 @@ export class AdjacencyGraphVisualizer {
         };
 
 
+
         if (checkNoOverlap(p, dimensions, vertex, newDimension, vertices)) {
           possibleDimensions[i][vertex].x = newDimension.x
           possibleDimensions[i][vertex].y = newDimension.y;
           possibleDimensions[i][vertex].angle = possibleDimensions[i][vertex].angle + randomAnglesNudge[index];
         }
+
+
       })
 
 
       const newApproach = {
         width: possibleDimensions[i]["Approach"].width + randomNudge[0],
         height: possibleDimensions[i]["Approach"].height + randomNudge[1],
+
+
       }
       const newDriveway = {
         width: possibleDimensions[i]["Driveway"].width + randomNudge[0],
         height: possibleDimensions[i]["Driveway"].height + randomNudge[1],
+        angle: possibleDimensions[i]["Driveway"].angle + randomAnglesNudge[0]
+      }
+
+      const newGarbage = {
+        width: possibleDimensions[i]["Garbage"].width + randomNudge[0],
+        height: possibleDimensions[i]["Garbage"].height + randomNudge[1],
+        angle: possibleDimensions[i]["Driveway"].angle + randomAnglesNudge[0]
       }
       const newParking1 = {
         normalParkingSpots: (possibleDimensions[i]["Parking1"].normalParkingSpots || 0) + getRandomElement(parkingNudge),
+        angle: possibleDimensions[i]["Driveway"].angle,
+
       }
       const newParking2 = {
         normalParkingSpots: (possibleDimensions[i]["Parking2"].normalParkingSpots || 0) + getRandomElement(parkingNudge),
+        angle: possibleDimensions[i]["Driveway"].angle
       }
 
       const newParking1Dimensions = {
@@ -140,11 +149,9 @@ export class AdjacencyGraphVisualizer {
 
       possibleDimensions[i]["Approach"] = { ...possibleDimensions[i]["Approach"], ...newApproach }
       possibleDimensions[i]["Driveway"] = { ...possibleDimensions[i]["Driveway"], ...newDriveway }
-
       possibleDimensions[i]["Parking1"] = { ...possibleDimensions[i]["Parking1"], ...newParking1, ...newParking1Dimensions }
-
-
       possibleDimensions[i]["Parking2"] = { ...possibleDimensions[i]["Parking2"], ...newParking2, ...newParking2Dimensions }
+      possibleDimensions[i]["Garbage"] = { ...possibleDimensions[i]["Garbage"], ...newGarbage }
 
     }
 
@@ -158,17 +165,12 @@ export class AdjacencyGraphVisualizer {
     // [ ] Need to iron out the movements
     // [ ] Bike parking is between the building and the approach 
     // [ ] Bike parking needs to be close to building. Ideally right next to it.
+    // [ ] Be able to increase the number of buildings if it passes a certain threshhold 
+    // [ ] Place the garbage 10 units away from the top of the driveway edge. 
+    // [ ] Align parking lots to the exge of lots. 
     // [ ] 
     // [ ] 
-    // [ ] 
-    // [ ] 
-    // [ ] 
-    // [ ] 
-    // [ ] 
-    // [ ] 
-    // [ ] 
-    // [ ] 
-    // [ ] 
+
 
 
 
@@ -190,6 +192,22 @@ export class AdjacencyGraphVisualizer {
     let currentMaxParking2Index = 0;
 
 
+
+    let drivewayToParking1AlignmentDefault = calculateAngleBetweenTwoPoints(dimensions["Parking1"], dimensions["Driveway"]);
+    let drivewayToParking1AlignmentIndex = 0
+
+    let drivewayToParking2AlignmentDefault = calculateAngleBetweenTwoPoints(dimensions["Driveway"], dimensions["Parking2"]);
+    let drivewayToParking2AlignmentIndex = 0
+
+    let drivewayToGarbageAlignmentDefault = calculateAngleBetweenTwoPoints(dimensions["Garbage"], dimensions["Driveway"])
+
+    // differenceBetweenAngles(
+    //   calculateAngleBetweenTwoPoints(dimensions["Garbage"], dimensions["Driveway"]),
+    //   modulateAngle(dimensions["Driveway"].angle + 90)
+    // );
+
+    let drivewayToGarbageAlignmentIndex = 0
+
     let closestTo180ParkingAngle = calculateAngle(dimensions["Parking1"], dimensions["Driveway"], dimensions["Parking2"])
     let closestTo180DrivewayAngle = calculateAngle(dimensions["Approach"], dimensions["Driveway"], dimensions["Garbage"])
     let closestTo90ApproachDrivewayParkingAngle = calculateAngle(dimensions["Approach"], dimensions["Driveway"], dimensions["Parking1"])
@@ -204,6 +222,7 @@ export class AdjacencyGraphVisualizer {
 
 
 
+
     for (let i = 0; i < numChildren; i++) {
 
       const p1 = possibleDimensions[i]["Parking1"];
@@ -213,14 +232,26 @@ export class AdjacencyGraphVisualizer {
       const approach = possibleDimensions[i]["Approach"]
 
 
-
       // Calculate the angle betwene parking and driveway
-      const parkingAngle = calculateAngle(p1, driveway, p2)
-      const drivewayAngle = calculateAngle(approach, driveway, garbage);
-      const approachDrivewayParkingAngle = calculateAngle(approach, driveway, p1);
-      const approachDrivewayParkingAngle2 = calculateAngle(approach, driveway, p2);
-      const distanceParking1ToDriveway = calculateDistanceBetweenPoints(p1, driveway);
-      const distanceParking2ToDriveway = calculateDistanceBetweenPoints(p2, driveway);
+      let drivewayToParking1Alignment = calculateAngleBetweenTwoPoints(possibleDimensions[i]["Parking1"], possibleDimensions[i]["Driveway"]);
+      let drivewayToParking2Alignment = calculateAngleBetweenTwoPoints(possibleDimensions[i]["Driveway"], possibleDimensions[i]["Parking2"]);
+      let drivewayToGarbageAlignment = calculateAngleBetweenTwoPoints(possibleDimensions[i]["Garbage"], possibleDimensions[i]["Driveway"])
+      // differenceBetweenAngles(
+      //   calculateAngleBetweenTwoPoints(possibleDimensions[i]["Garbage"], possibleDimensions[i]["Driveway"]),
+      //   modulateAngle(dimensions["Driveway"].angle+ 90)
+      // ) ;
+
+
+
+
+
+
+      // const parkingAngle = calculateAngle(p1, driveway, p2)
+      // const drivewayAngle = calculateAngle(approach, driveway, garbage);
+      // const approachDrivewayParkingAngle = calculateAngle(approach, driveway, p1);
+      // const approachDrivewayParkingAngle2 = calculateAngle(approach, driveway, p2);
+      // const distanceParking1ToDriveway = calculateDistanceBetweenPoints(p1, driveway);
+      // const distanceParking2ToDriveway = calculateDistanceBetweenPoints(p2, driveway);
 
 
 
@@ -239,11 +270,13 @@ export class AdjacencyGraphVisualizer {
         { x: dimensions["Parking2"].x, y: dimensions["Parking2"].y },
         dimensions["Parking2"].width,
         dimensions["Parking2"].height,
-        dimensions["Parking1"].angle
+        dimensions["Parking2"].angle
       )
 
       const minDistance = getMinimumPolygonDistance(polygon1, polygon2)
 
+
+      // Calculating parking spots for Parking 1
       if
         (Math.abs((parkingSpots || 0) - numParkingSpots) < Math.abs(currentMaxParking - numParkingSpots) &&
         currentMaxParking + currentMaxParking2 <= numParkingSpots
@@ -252,6 +285,8 @@ export class AdjacencyGraphVisualizer {
         currentMaxParkingIndex = i;
       }
 
+
+      // Calculating parking spots for Parking 2
       if (Math.abs((parkingSpots2 || 0) - numParkingSpots) < Math.abs(currentMaxParking2 - numParkingSpots) &&
         currentMaxParking + currentMaxParking2 <= numParkingSpots
       ) {
@@ -260,47 +295,26 @@ export class AdjacencyGraphVisualizer {
       }
 
 
-      if (Math.abs(parkingAngle - 180) < Math.abs(closestTo180ParkingAngle - 180)) {
-        closestTo180ParkingAngle = parkingAngle
-        closestTo180ParkingAngleIndex = i;
-      }
 
-      if (Math.abs(drivewayAngle - 180) < Math.abs(closestTo180DrivewayAngle - 180)) {
-        closestTo180DrivewayAngle = drivewayAngle
-        closestTo180DrivewayAngleIndex = i;
-      }
 
-      if (Math.abs(approachDrivewayParkingAngle - 90) < Math.abs(closestTo90ApproachDrivewayParkingAngle - 90)) {
-        closestTo90ApproachDrivewayParkingAngle = approachDrivewayParkingAngle
-        closestTo90ApproachDrivewayParkingAngleIndex = i;
-      }
 
-      if (Math.abs(approachDrivewayParkingAngle2 - 90) < Math.abs(closestTo90ApproachDrivewayParkingAngle2 - 90)) {
-        closestTo90ApproachDrivewayParkingAngle2 = approachDrivewayParkingAngle2
-        closestTo90ApproachDrivewayParkingAngle2Index = i;
+
+      // Calculating the driveway angle between 
+      if (isAngleCloser(drivewayToParking1Alignment, drivewayToParking1AlignmentDefault, normalize(possibleDimensions[i]["Driveway"].angle))) {
+        drivewayToParking1AlignmentDefault = drivewayToParking1Alignment
+        drivewayToParking1AlignmentIndex = i;
       }
 
 
-      // Chcking that the parking stalls are not that far from the driveway. 
-
-      if (distanceParking1ToDriveway < closestDistanceParking1ToDriveway && minDistance > 240) {
-        closestDistanceParking1ToDriveway = distanceParking1ToDriveway
-        closestDistanceParking1ToDrivewayIndex = i;
-      }
-      else if (minDistance < 240 && distanceParking1ToDriveway > closestDistanceParking1ToDriveway) {
-        closestDistanceParking1ToDriveway = distanceParking1ToDriveway
-        closestDistanceParking1ToDrivewayIndex = i;
+      if (isAngleCloser(drivewayToParking2Alignment, drivewayToParking2AlignmentDefault, normalize(possibleDimensions[i]["Driveway"].angle))) {
+        drivewayToParking2AlignmentDefault = drivewayToParking2Alignment
+        drivewayToParking2AlignmentIndex = i;
       }
 
 
-
-      if (distanceParking2ToDriveway < closestDistanceParking2ToDriveway && minDistance > 240) {
-        closestDistanceParking2ToDriveway = distanceParking2ToDriveway
-        closestDistanceParking2ToDrivewayIndex = i;
-      }
-      else if (distanceParking2ToDriveway > closestDistanceParking2ToDriveway && minDistance < 240) {
-        closestDistanceParking2ToDriveway = distanceParking2ToDriveway
-        closestDistanceParking2ToDrivewayIndex = i;
+      if (isAngleCloser(drivewayToGarbageAlignment, drivewayToGarbageAlignmentDefault, normalize(possibleDimensions[i]["Driveway"].angle + 90))) {
+        drivewayToGarbageAlignmentDefault = drivewayToGarbageAlignment;
+        drivewayToGarbageAlignmentIndex = i;
       }
     }
 
@@ -311,17 +325,22 @@ export class AdjacencyGraphVisualizer {
       if (vertex === "Parking1") {
         // Calculate the averate of the best answers
         const indices = [
-          closestTo180ParkingAngleIndex,
-          closestTo90ApproachDrivewayParkingAngleIndex,
-          closestDistanceParking1ToDrivewayIndex
+          drivewayToParking1AlignmentIndex
         ];
-        const weights = [0.6, 0.3, 0.1];
+        const weights = [1];
         const weightedPoint = calculateWeightedPoint(possibleDimensions, indices, vertex, weights);
+
+
+        dimensions[vertex as SitePlanObjects].x = possibleDimensions[3][vertex as SitePlanObjects].x
+
 
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
 
-        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
+        dimensions[vertex].angle = possibleDimensions[drivewayToParking1AlignmentIndex][vertex].angle;
+
+
+        // dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
         // dimensions[vertex].normalParkingSpots = possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots
         // dimensions[vertex].height = (possibleDimensions[currentMaxParkingIndex][vertex].normalParkingSpots || 0) * 90
 
@@ -331,16 +350,16 @@ export class AdjacencyGraphVisualizer {
       else if (vertex === "Parking2") {
 
         const indices = [
-          closestTo180ParkingAngleIndex,
-          closestTo90ApproachDrivewayParkingAngle2Index,
-          closestDistanceParking2ToDrivewayIndex
+          drivewayToParking2AlignmentIndex
         ];
-        const weights = [0.6, 0.3, 0.1];
+        const weights = [1];
         const weightedPoint = calculateWeightedPoint(possibleDimensions, indices, vertex, weights);
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
 
-        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
+        dimensions[vertex].angle = possibleDimensions[drivewayToParking2AlignmentIndex][vertex].angle;
+
+
         // dimensions[vertex].normalParkingSpots = possibleDimensions[currentMaxParking2Index][vertex].normalParkingSpots
         // dimensions[vertex].height = (possibleDimensions[currentMaxParking2Index][vertex].normalParkingSpots || 0) * 90
 
@@ -349,21 +368,20 @@ export class AdjacencyGraphVisualizer {
       else if (vertex === "Driveway") {
         const indices = [
           closestTo180ParkingAngleIndex,
-          closestTo180DrivewayAngleIndex
+          // closestTo180DrivewayAngleIndex
         ];
-        const weights = [0.4, 0.6];
+        const weights = [1];
         const weightedPoint = calculateWeightedPoint(possibleDimensions, indices, vertex, weights);
 
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
 
-        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle;
+        // dimensions[vertex].angle = possibleDimensions[1][vertex].angle;
+
+        // dimensions[vertex].angle =  possibleDimensions[1][vertex].angle;
 
         controlPoints.end.x = weightedPoint.x
         controlPoints.end.y = weightedPoint.y
-
-        controlPoints.control2.x = weightedPoint.x - Math.sin(possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle * Math.PI / 180) * 100;
-        controlPoints.control2.y = weightedPoint.y + Math.cos(possibleDimensions[closestTo180ParkingAngleIndex][vertex].angle * Math.PI / 180) * 100;
 
         if (dimensions[vertex].width < 240) {
           // dimensions[vertex].width += 1
@@ -373,14 +391,17 @@ export class AdjacencyGraphVisualizer {
 
       else if (vertex === "Garbage") {
         const indices = [
-          closestTo180DrivewayAngleIndex
+          drivewayToGarbageAlignmentIndex
         ];
+
+
+
         const weights = [1];
         const weightedPoint = calculateWeightedPoint(possibleDimensions, indices, vertex, weights);
 
 
         // Match garbage to driveway angle
-        dimensions[vertex].angle = possibleDimensions[closestTo180ParkingAngleIndex]["Driveway"].angle;
+        dimensions[vertex].angle = possibleDimensions[drivewayToGarbageAlignmentIndex]["Driveway"].angle;
         dimensions[vertex].x = weightedPoint.x
         dimensions[vertex].y = weightedPoint.y
         // dimensions[vertex].angle =  possibleDimensions[currentMaxParkingIndex][vertex].angle;
@@ -401,7 +422,6 @@ export class AdjacencyGraphVisualizer {
         controlPoints.control1.x = dimensions[vertex].x - Math.sin(dimensions[vertex].angle * Math.PI / 180) * 100;
         controlPoints.control1.y = dimensions[vertex].y - Math.cos(dimensions[vertex].angle * Math.PI / 180) * 100;
 
-
         if (dimensions[vertex].width < 200) {
           // dimensions[vertex].width += 1
 
@@ -410,8 +430,8 @@ export class AdjacencyGraphVisualizer {
 
 
       else {
-        dimensions[vertex as SitePlanObjects].x = possibleDimensions[3][vertex as SitePlanObjects].x
-        dimensions[vertex as SitePlanObjects].y = possibleDimensions[3][vertex as SitePlanObjects].y
+        // dimensions[vertex as SitePlanObjects].x = possibleDimensions[3][vertex as SitePlanObjects].x
+        // dimensions[vertex as SitePlanObjects].y = possibleDimensions[3][vertex as SitePlanObjects].y
       }
     }
 
@@ -423,23 +443,11 @@ export class AdjacencyGraphVisualizer {
     if (this.iteration % 200 === 0) {
 
     }
-
-
-
   }
 
 
   visualize(p: any): void {
     const vertices = Object.keys(this.graph["adjacencyList"]) as SitePlanObjects[];
-
-    const boundary = [
-      { x: 40, y: 40 },
-      { x: p.width - 40, y: 40 },
-      { x: p.width - 40, y: p.height - 40 },
-      { x: 40, y: p.height }
-    ];
-
-
 
     const dimensions: Dimensions = {
       Parking1: {
@@ -468,7 +476,7 @@ export class AdjacencyGraphVisualizer {
         height: 20,
         rotation: 0,
         dragging: false,
-        angle: 0,
+        angle: 135,
       },
       "Bike Parking": {
         x: 0,
@@ -545,6 +553,9 @@ export class AdjacencyGraphVisualizer {
             y: getRandomNumber(100, p.height - 100)
           };
 
+
+
+
           if (checkNoOverlap(p, dimensions, vertex, newPoint, vertices)) {
 
             searchingForSafePoint = false;
@@ -576,9 +587,15 @@ export class AdjacencyGraphVisualizer {
 
     p.mouseDragged = () => {
       // Move the selected control point
+
+      console.log(`selectedPoint`, selectedPoint)
       if (selectedPoint) {
         selectedPoint.x = p.mouseX;
         selectedPoint.y = p.mouseY;
+
+        const newAngle = calculateAngleBetweenTwoPoints({ x: p.mouseX, y: p.mouseY }, dimensions["Driveway"]) + 90;
+        dimensions["Driveway"].angle = newAngle;
+
       }
     };
 
@@ -587,18 +604,14 @@ export class AdjacencyGraphVisualizer {
       vertices.forEach((vertex) => {
         const d = p.dist(p.mouseX, p.mouseY, dimensions[vertex].x, dimensions[vertex].y);
         if (d < 20) {
-
           dimensions[vertex].dragging = true;
         }
-      });
-
-
-      for (const point of Object.values(controlPoints)) {
-        if (isMouseNearPoint(p, point)) {
-          selectedPoint = point;
-          break;
+        else if (vertex = "Driveway") {
+          if (isMouseNearPoint(p, controlPoints.control2)) {
+            selectedPoint = controlPoints.control2;
+          }
         }
-      }
+      });
     };
 
     p.mouseReleased = () => {
@@ -626,10 +639,21 @@ export class AdjacencyGraphVisualizer {
           // TODO: Speed this up by checking the distance to the closest polygon instead.
           const newPoint = { x: p.mouseX, y: p.mouseY };
           if (checkNoOverlap(p, dimensions, vertex, newPoint, vertices)) {
+
             dimensions[vertex].x = p.mouseX;
-            dimensions[vertex].y = p.mouseY;
-            // controlPoints.control1.x = dimensions[vertex].x - Math.sin(dimensions[vertex].angle * Math.PI / 180) * 100;
-            // controlPoints.control1.y = dimensions[vertex].y - Math.cos(dimensions[vertex].angle * Math.PI / 180) * 100;
+
+            if (vertex !== "Approach") {
+              dimensions[vertex].y = p.mouseY;
+
+            }
+
+            if (vertex === "Driveway") {
+
+              controlPoints.control2.x = dimensions[vertex].x - Math.sin((dimensions[vertex].angle - 90) * Math.PI / 180) * 100;
+              controlPoints.control2.y = dimensions[vertex].y - Math.cos((dimensions[vertex].angle - 90) * Math.PI / 180) * 100;
+            }
+            // controlPoints.control2.x = dimensions[vertex].x - Math.sin(dimensions[vertex].angle ) * 100;
+            // controlPoints.control2.y = dimensions[vertex].y - Math.cos(dimensions[vertex].angle ) * 100;
           }
 
         }
@@ -646,6 +670,7 @@ export class AdjacencyGraphVisualizer {
           );
         });
       }
+
 
 
       drawRoundedCurve(p, controlPoints);
@@ -668,7 +693,7 @@ export class AdjacencyGraphVisualizer {
         p.translate(dimensions[vertex].x, dimensions[vertex].y);
 
         // Rotate by the angle (convert to radians)
-        p.rotate(p.radians(angle));
+        p.rotate(angle);
 
         // Draw the rectangle at the origin (center already translated)
 
@@ -684,6 +709,39 @@ export class AdjacencyGraphVisualizer {
 
       });
 
+      p.stroke(50, 50, 150)
+
+      for (let i = 0; i < 360; i += 45) {
+        p.line(
+          p.width / 2,
+          p.height / 2,
+          p.width / 2 + Math.sin(i * Math.PI / 180) * 50,
+          p.height / 2 + Math.cos(i * Math.PI / 180) * 50
+
+
+        )
+        p.text(i, p.width / 2 + Math.sin(i * Math.PI / 180) * 60,
+          p.height / 2 + Math.cos(i * Math.PI / 180) * 60);
+
+      }
+
+
+      // p.line(
+      //   p.width / 2,
+      //   p.height / 2,
+      //   p.width / 2 + Math.sin(dimensions["Driveway"].angle * Math.PI / 180) * 50,
+      //   p.height / 2 + Math.cos(dimensions["Driveway"].angle * Math.PI / 180) * 50
+      // )
+
+      // p.line(
+      //   p.width / 2,
+      //   p.height / 2,
+      //   p.width / 2 + Math.sin(dimensions["Driveway"].angle * Math.PI / 180) * 50,
+      //   p.height / 2 - Math.cos(dimensions["Driveway"].angle * Math.PI / 180) * 50
+      // )
+
+
+
 
 
       this.iteration++;
@@ -696,6 +754,51 @@ function arrayOfRandomNudges(nudgeStrength: number, numberOfRandomNumbers: numbe
   const arr = new Array(numberOfRandomNumbers).fill(0)
   return arr.map(() => Math.random() * nudgeStrength * 2 - nudgeStrength)
 }
+
+function calculateAngleBetweenTwoPoints(p1: TPointObject, p2: TPointObject): number {
+  // Calculate the vector from p1 to p2
+  const vector = { x: p2.x - p1.x, y: p2.y - p1.y };
+
+  // Calculate the angle in radians
+  const angleInRadians = Math.atan2(vector.y, vector.x);
+
+  // Convert the angle to degrees
+  const angleInDegrees = (angleInRadians * 180) / Math.PI;
+
+  return angleInDegrees;
+}
+
+function differenceBetweenAngles(angle: number, target: number) {
+  return modulateAngle(angle - target);
+}
+
+// Forces the angle to be between 0 and 360.
+function modulateAngle(angle: number) {
+  return angle - (361 * Math.floor(angle / 361));
+}
+
+const normalize = (angle: number) => ((angle % 360) + 360) % 360;
+
+function isAngleCloser(angle1: number, angle2: number, targetAngle: number): boolean {
+  // Normalize angles to the range [0, 360)
+
+  const normalizedAngle1 = normalize(angle1);
+  const normalizedAngle2 = normalize(angle2);
+  const normalizedTarget = normalize(targetAngle);
+
+  // Calculate the shortest distance between two angles
+  const angleDistance = (a: number, b: number) =>
+    Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+
+  // Calculate distances to the target
+  const distance1 = angleDistance(normalizedAngle1, normalizedTarget);
+  const distance2 = angleDistance(normalizedAngle2, normalizedTarget);
+
+  // Return true if angle1 is closer, otherwise false
+  return distance1 < distance2;
+}
+
+
 
 function calculateAngle(p1: TPointObject, p2: TPointObject, p3: TPointObject): number {
   // Calculate vectors
@@ -1051,8 +1154,8 @@ function checkNoOverlap(p: any, dimensions: Dimensions, vertex: SitePlanObjects,
       [
         [40, 40],
         [p.width - 40, 40],
-        [p.width - 40, p.height - 40],
-        [40, p.height - 40]] as Point[],
+        [p.width - 40, p.height],
+        [40, p.height]] as Point[],
 
       point as Point
     ) === -1
