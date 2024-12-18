@@ -2,17 +2,17 @@ import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 
-type Point=[number,number];
+type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
-enum  ESitePlanObjects {
-  ParkingWay="ParkingWay",
-  Parking1="Parking1",
-  Parking2= "Parking2" ,
-  Driveway="Driveway",
-  BikeParking="Bike Parking",
-  Approach="Approach",
-  Garbage="Garbage",
-  Building="Building"
+enum ESitePlanObjects {
+  ParkingWay = "ParkingWay",
+  Parking1 = "Parking1",
+  Parking2 = "Parking2",
+  Driveway = "Driveway",
+  BikeParking = "Bike Parking",
+  Approach = "Approach",
+  Garbage = "Garbage",
+  Building = "Building"
 }
 
 
@@ -32,6 +32,10 @@ class Edge {
   updateEdge(newPoint1: p5.Vector, newPoint2: p5.Vector) {
     this.point1 = newPoint1;
     this.point2 = newPoint2;
+  }
+
+  getLineLength() {
+    return this.p.dist(this.point1.x, this.point1.y, this.point2.x, this.point2.y)
   }
 
   drawLine() {
@@ -70,7 +74,7 @@ class SitePlanElement {
   private p: p5;
   public sitePlanElementCorners: p5.Vector[];
   public sitePlanElementEdges: Edge[];
-  private elementType:  SitePlanObjects;
+  private elementType: SitePlanObjects;
   public entranceEdgeIndex: number | null;
 
 
@@ -84,12 +88,12 @@ class SitePlanElement {
     this.sitePlanElementEdges = [];
     this.elementType = elementType;
     this.entranceEdgeIndex = null;
-    
+
   }
 
   initialize() {
 
-    if(this.elementType === ESitePlanObjects.ParkingWay){
+    if (this.elementType === ESitePlanObjects.ParkingWay) {
       this.entranceEdgeIndex = 2;
     }
     this.createSitePlanElementCorners();
@@ -104,9 +108,8 @@ class SitePlanElement {
     for (let i = 0; i < sitePlanElementCorners.length; i++) {
       const corner1 = sitePlanElementCorners[i];
       let corner2 = i === sitePlanElementCorners.length - 1 ? sitePlanElementCorners[0] : sitePlanElementCorners[i + 1];
-      
 
-      const isApproach = i === 2 && this.elementType ===  ESitePlanObjects.Approach;
+      const isApproach = i === 2 && this.elementType === ESitePlanObjects.Approach;
       const newEdge = new Edge(this.p, corner1, corner2, isApproach);
       edges.push(newEdge);
     }
@@ -119,7 +122,7 @@ class SitePlanElement {
     this.setSitePlanElementEdges()
   }
 
-  updateAngle(angle: number){
+  updateAngle(angle: number) {
     this.angle = angle;
   }
 
@@ -154,7 +157,6 @@ class SitePlanElement {
   }
 
   drawSitePlanElement() {
-
     const p = this.p;
     p.angleMode(p.DEGREES);
 
@@ -184,7 +186,6 @@ export class AdjacencyGraphVisualizer2 {
   constructor(graph: AdjacencyGraph) {
     this.graph = graph;
     this.iteration = 0;
-
   }
 
   visualize2(p: p5): void {
@@ -196,8 +197,7 @@ export class AdjacencyGraphVisualizer2 {
       p.createVector(p.width - 40, 40),
       p.createVector(p.width - 40, p.height - 180),
       p.createVector(40, p.height - 40),
-    ]
-
+    ];
 
     const propertyEdges: Edge[] = [];
 
@@ -209,17 +209,21 @@ export class AdjacencyGraphVisualizer2 {
       propertyEdges.push(newEdge);
     }
 
-    // const angle = edge.calculateAngle();
-    const angle = 11
-    const approach = new SitePlanElement(p, getCenterPoint(propertyEdges[2].point1, propertyEdges[2].point2), 100, 20, angle, ESitePlanObjects.Approach );
+    //
+    const angle = propertyEdges[2].calculateAngle();
+    console.log(`angle`, angle)
+    const approach = new SitePlanElement(p, getCenterPoint(propertyEdges[2].point1, propertyEdges[2].point2), 100, 20, 180 - angle, ESitePlanObjects.Approach);
     const parking = new SitePlanElement(p, p.createVector(300, 200), 120, 200, 30, ESitePlanObjects.ParkingWay);
 
     approach.initialize()
     parking.initialize();
 
 
+
     let isDraggingParking = false;
-    let isDraggingApproach = false
+    let isDraggingApproach = false;
+
+
     p.mouseDragged = () => {
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParking = parking.isMouseHovering();
@@ -248,40 +252,35 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-          
-
-
-
-
-
           // Take a snapshop
           const _angle = parking.angle;
-          
-          const angle = calculateAngle(edgeMidpoint1,edgeMidpoint2)
-          parking.updateAngle(-angle+90)
+
+          const angle = calculateAngle(edgeMidpoint1, edgeMidpoint2)
+          parking.updateAngle(-angle + 90)
           parking.updateSitePlanElementEdges();
 
-          const pointsOutsideBoundary = [];
+          const pointsOutsideBoundary: number[] = [];
 
-          const allPointsInPolygon = parking.sitePlanElementCorners.map((corner,i) => {
+          const allPointsInPolygon = parking.sitePlanElementCorners.map((corner, i) => {
             const point = [corner.x, corner.y];
-            const pointClassification = classifyPoint(propertyCorners.map(corner=>[corner.x,corner.y]) as Point[], point as Point)
+            const pointClassification = classifyPoint(propertyCorners.map(corner => [corner.x, corner.y]) as Point[], point as Point)
             // 1 = outside
             // 0 = on the border
             // -1 = inside
 
-            if(pointClassification === 1) pointsOutsideBoundary.push(i);
-            
+            if (pointClassification === 1 || pointClassification === 0) pointsOutsideBoundary.push(i);
+
             return pointClassification === -1
           })
 
 
 
 
-          
-    
-  
-          if( !truthChecker(allPointsInPolygon)){
+
+
+
+
+          if (!truthChecker(allPointsInPolygon)) {
 
             parking.updateAngle(_angle)
             parking.updateSitePlanElementEdges();
@@ -292,9 +291,9 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-         
 
-         
+
+
         }
       }
 
@@ -302,16 +301,16 @@ export class AdjacencyGraphVisualizer2 {
       if (isHoveredParking || isDraggingParking) {
         isDraggingParking = true;
         const newX = p.mouseX;
-        const newY = p.mouseY; 
+        const newY = p.mouseY;
 
         if (
           newX - parking.width / 2 > propertyCorners[3].x &&
           newX + parking.width / 2 < propertyCorners[2].x
         ) {
-          
+
           const _angle = parking.angle;
           const _center = [parking.center.x, parking.center.y];
-          
+
 
 
           parking.center.x = newX;
@@ -320,9 +319,9 @@ export class AdjacencyGraphVisualizer2 {
           const edgeMidpoint1 = getCenterPoint(parking.sitePlanElementEdges[2].point1, parking.sitePlanElementEdges[2].point2);
           const edgeMidpoint2 = getCenterPoint(approach.sitePlanElementEdges[0].point1, approach.sitePlanElementEdges[0].point2);
 
-          
-          const angle = calculateAngle(edgeMidpoint1,edgeMidpoint2)
-          parking.updateAngle(-angle+90)
+
+          const angle = calculateAngle(edgeMidpoint1, edgeMidpoint2)
+          parking.updateAngle(-angle + 90)
           parking.updateSitePlanElementEdges();
 
 
@@ -334,30 +333,83 @@ export class AdjacencyGraphVisualizer2 {
 
 
           // Take a snapshop
-          
-          parking.updateAngle(-angle+90)
+
+          parking.updateAngle(-angle + 90)
           parking.updateSitePlanElementEdges();
 
-          const pointsOutsideBoundary = [];
+          const pointsOutsideBoundary: number[] = [];
 
-          const allPointsInPolygon = parking.sitePlanElementCorners.map((corner,i) => {
-            const point = [corner.x, corner.y];
-            const pointClassification = classifyPoint(propertyCorners.map(corner=>[corner.x,corner.y]) as Point[], point as Point)
+
+
+          const allPointsInPolygon = parking.sitePlanElementCorners.map((corner1, i) => {
+            const point = [corner1.x, corner1.y];
+            const pointClassification = classifyPoint(propertyCorners.map(corner => [corner.x, corner.y]) as Point[], point as Point)
             // 1 = outside
             // 0 = on the border
             // -1 = inside
 
-            if(pointClassification === 1) pointsOutsideBoundary.push(i);
-            
+            if (pointClassification === 1) pointsOutsideBoundary.push(i);
+
             return pointClassification === -1
           })
 
-          
-          if( !truthChecker(allPointsInPolygon)){
+
+
+
+
+
+          // console.log(`allBoundaryPointsInPolygon `, allBoundaryPointsInPolygon )
+
+
+
+
+
+          if (!truthChecker(allPointsInPolygon)) {
             parking.center.x = _center[0]
             parking.center.y = _center[1]
             parking.updateAngle(_angle)
             parking.updateSitePlanElementEdges();
+          }
+
+          if (pointsOutsideBoundary.length === 1) {
+            const stuckPointIndex = pointsOutsideBoundary[0]
+            const stuckPoint = parking.sitePlanElementCorners[stuckPointIndex];
+
+            let propertyEdgeViolated = findClosestEdge(propertyEdges, stuckPoint);
+
+
+            const pointToEdgelookup = [
+              [3, 0],
+              [0, 1],
+              [1, 2],
+              [2, 3]
+            ];
+
+
+            // Find which edge is closest to the property line edge
+            const pivotDirection = findWhichSideOfThePivotTheObjectShouldRotateToward(
+              parking.sitePlanElementEdges[pointToEdgelookup[stuckPointIndex][0]],
+              parking.sitePlanElementEdges[pointToEdgelookup[stuckPointIndex][1]],
+
+              propertyEdges[propertyEdgeViolated]
+            )
+
+
+
+
+            // const pivotX =  pivotDirection[1].point2.x+pivotDirection[1].getLineLength()/2;
+            // const pivotY =  propertyEdges[propertyEdgeViolated].point1.y + pivotDirection[1].getLineLength()/2;
+
+            // // console.log(stuckPoint.x,stuckPoint.y,pivotX, pivotY )
+
+            // parking.center.x =pivotX;
+            // parking.center.y = pivotY;
+            // parking.updateAngle(_angle)
+            // parking.updateSitePlanElementEdges();
+
+
+
+
           }
 
 
@@ -403,7 +455,7 @@ export class AdjacencyGraphVisualizer2 {
       // Left Line
       drawPerpendicularBezier(
         p,
-        approach.sitePlanElementCorners [0],
+        approach.sitePlanElementCorners[0],
         parking.sitePlanElementCorners[3],
         approach.sitePlanElementEdges[2],
         parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0]
@@ -424,7 +476,7 @@ export class AdjacencyGraphVisualizer2 {
       // Right Line
       drawPerpendicularBezier(
         p,
-        approach.sitePlanElementCorners [1],
+        approach.sitePlanElementCorners[1],
         parking.sitePlanElementCorners[2],
         approach.sitePlanElementEdges[2],
         parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0]
@@ -538,7 +590,7 @@ function drawPerpendicularBezier(
 
 let truthChecker = (arr: boolean[]) => arr.every(v => v === true);
 
-function calculateAngle(point1: p5.Vector,point2: p5.Vector): number {
+function calculateAngle(point1: p5.Vector, point2: p5.Vector): number {
   const deltaY = point2.y - point1.y;
   const deltaX = point2.x - point1.x;
 
@@ -546,9 +598,98 @@ function calculateAngle(point1: p5.Vector,point2: p5.Vector): number {
   const angleInRadians = Math.atan2(deltaY, deltaX);
 
   // Convert radians to degrees
-  const angleInDegrees = angleInRadians*180/Math.PI;
+  const angleInDegrees = angleInRadians * 180 / Math.PI;
 
   return angleInDegrees;
 }
 
 
+
+
+
+function calculateAngularDifference(angle1: number, angle2: number): number {
+  const diff = Math.abs(angle1 - angle2);
+  return Math.min(diff, 360 - diff); // Account for wrapping around 360
+}
+
+
+function findWhichSideOfThePivotTheObjectShouldRotateToward(
+  edge1: Edge,
+  edge2: Edge,
+  intersectingEdge: Edge
+): Edge[] {
+  // Calculate angles of the edges
+  const angle1 = normalizeAngle(edge1.calculateAngle());
+  const angle2 = normalizeAngle(edge2.calculateAngle());
+  const intersectingAngle = normalizeAngle(intersectingEdge.calculateAngle());
+
+  // Calculate angular differences
+  const difference1 = calculateAngularDifference(angle1, intersectingAngle);
+  const difference2 = calculateAngularDifference(angle2, intersectingAngle);
+
+  // Return the edge with the smaller angular difference
+  return difference1 <= difference2 ? [edge1, edge2] : [edge1, edge2];
+}
+
+/**
+ * Normalizes an angle to the range [0, 360).
+ * @param angle - The angle in degrees.
+ * @returns The normalized angle.
+ */
+function normalizeAngle(angle: number): number {
+  return (angle + 360) % 360;
+}
+
+
+
+function findClosestEdge(edges: Edge[], point: p5.Vector): number {
+  let closestEdge: Edge | null = null;
+  let shortestDistance = Infinity;
+  let shortestIndex = 0;
+  for (let i = 0; i < edges.length; i++) {
+    const edge = edges[i];
+    // Calculate the distance from the point to the edge
+    const distance = calculatePointToEdgeDistance(edge, point);
+
+    // Update the closest edge if the distance is shorter
+    if (distance < shortestDistance) {
+      shortestDistance = distance;
+      closestEdge = edge;
+      shortestIndex = i
+    }
+  }
+
+  // Return the closest edge
+  if (!closestEdge) {
+    throw new Error("No edges provided.");
+  }
+  return shortestIndex;
+}
+
+
+
+function calculatePointToEdgeDistance(edge: Edge, point: p5.Vector): number {
+  const lineStart = edge.point1;
+  const lineEnd = edge.point2;
+
+  // Vector from start of line to the point
+  const startToPoint = p5.Vector.sub(point, lineStart);
+
+  // Vector from start to end of the line segment
+  const startToEnd = p5.Vector.sub(lineEnd, lineStart);
+
+  // Project the point onto the line segment
+  const t = p5.Vector.dot(startToPoint, startToEnd) / startToEnd.magSq();
+
+  // Clamp t to the range [0, 1] to stay within the segment
+  const clampedT = Math.max(0, Math.min(1, t));
+
+  // Closest point on the line segment
+  const closestPoint = p5.Vector.add(
+    lineStart,
+    startToEnd.mult(clampedT)
+  );
+
+  // Distance from the point to the closest point on the line
+  return p5.Vector.dist(point, closestPoint);
+}
