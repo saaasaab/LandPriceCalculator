@@ -1,5 +1,5 @@
 
-import './LandCalculator.scss';
+import '../pages/LandCalculator.scss';
 import ContactMe from '../components/ContactMe';
 
 

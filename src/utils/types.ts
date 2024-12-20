@@ -47,7 +47,8 @@ export enum EPageTitles {
     LENDING_COST = "Lending Cost Estimator",
     WATERFALL = "Waterfall Distribution Generator",
     CONSTRUCTION_BUDGET = "Construction Budget Generator",
-    LOT_LINE_DRAWER = "Lot Line Drawer"
+    LOT_LINE_DRAWER = "Lot Line Drawer",
+    SITE_PLAN_BUILDER="Site Plan Builder",
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 

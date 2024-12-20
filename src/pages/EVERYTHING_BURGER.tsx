@@ -9,7 +9,7 @@ import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './PricePerDoorCalculatorMultifamily';
 import IRRCalculator from './IRRCalculator';
 // import LendingCosts from './LendingCosts';
-import WaterfallGenerator from './WaterfallGenerator';
+import WaterfallGenerator from '../futureItems/WaterfallGenerator';
 import ConstructionBudget from './ConstructionBudget';
 import PricePerSQFTCalculatorIndustrial from './PricePerSQFTCalculatorIndustrial';
 

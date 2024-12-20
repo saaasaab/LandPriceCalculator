@@ -108,7 +108,7 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
           onClick={saveInputsToParent}
           style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
         >
-          {`Save & Return to Parent`}
+          {`Create subdivision`}
         </button>
         {['adjust', 'select', 'setback'].map((buttonMode) => (
           <button
@@ -142,7 +142,9 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
             <option value={10}>100px = 10 ft</option>
             <option value={20}>100px = 20 ft</option>
             <option value={50}>100px = 50 ft</option>
+            <option value={100}>100px = 100 ft</option>
             <option value={200}>100px = 200 ft</option>
+
           </select>
         </div>
       </div>

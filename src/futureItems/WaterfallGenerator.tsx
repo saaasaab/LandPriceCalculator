@@ -1,7 +1,7 @@
 import DynamicRow from '../components/RowTypes/DynamicRow';
 import { convertToPercent, removeCommas } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
-import './DynamicTable.scss';
+import '../pages/DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { XIRR } from '../utils/xirrCalculation';

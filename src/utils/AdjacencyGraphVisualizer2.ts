@@ -327,12 +327,38 @@ class SitePlanElement {
       this.previousEntranceEdge.point2.y = this.entranceEdge.point2.y;
       this.previousAngle = this.angle;
     }
+  }
+
+  updateParkingHeight() {
 
 
+    const _height = this.height;
+    const _center = this.center;
+
+    // const stallHeight = 45;
+
+
+    // this.height = this.height + stallHeight
+    // this.center = this.center.add(this.p.sin(this.angle-180) * stallHeight/2, this.p.cos(this.angle) * stallHeight/2,)
+
+
+
+    this.createSitePlanElementCorners()
+
+
+
+
+    // const allIn = this.sitePlanElementCorners.map(corner => {
+    //   const point: Point = [corner.x, corner.y];
+    //   return pointsAreInBoundary(propertyCorners, point) === -1
+    // });
+
+    // if (!truthChecker(allIn)) {
+    //   leftStallsToRemove.push(i);
+    // }
 
 
   }
-
   calculateNumberOfFittableStalls(propertyCorners: p5.Vector[]) {
     const maxNumStalls = 10;
 
@@ -343,29 +369,26 @@ class SitePlanElement {
     const leftStallsToRemove: number[] = []
     const rightStallsToRemove: number[] = []
 
-    // Remove parking spots outside the boundary
-    this.parkingStalls.left.forEach((stall, i) => {
 
-      const allIn = stall.stallCorners.map(corner => {
-        const point: Point = [corner.x, corner.y];
-        return pointsAreInBoundary(propertyCorners, point) === -1
-      });
+    // Get the enterance points and the direction they are pointing.
+    Object.keys(this.parkingStalls).forEach(side =>
+      this.parkingStalls[side as ("left" | "right")].forEach((stall, i) => {
+        const allIn = stall.stallCorners.map(corner => {
+          const point: Point = [corner.x, corner.y];
+          return pointsAreInBoundary(propertyCorners, point) === -1
+        });
 
-      if (!truthChecker(allIn)) {
-        leftStallsToRemove.push(i);
-      }
-    })
+        if (!truthChecker(allIn)) {
 
-    this.parkingStalls.right.forEach((stall, i) => {
-      const allIn = stall.stallCorners.map(corner => {
-        const point: Point = [corner.x, corner.y];
-        return pointsAreInBoundary(propertyCorners, point) === -1
-      });
+          if (side === "left") leftStallsToRemove.push(i);
+          if (side === "right") rightStallsToRemove.push(i);
 
-      if (!truthChecker(allIn)) {
-        rightStallsToRemove.push(i);
-      }
-    })
+
+        }
+      })
+    )
+
+
     if (leftStallsToRemove.length > 0 || rightStallsToRemove.length > 0) {
       const _removedLeft = removeItemsByIndices(this.parkingStalls.left, leftStallsToRemove)
       const _removedRight = removeItemsByIndices(this.parkingStalls.right, rightStallsToRemove)
@@ -378,20 +401,18 @@ class SitePlanElement {
 
 
 
-    // Get the enterance points and the direction they are pointing.
+    const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p, entranceEdge, parkingAngle, this.parkingStalls);
+
+
 
     // Expand the parking size
-    const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p, entranceEdge, parkingAngle, this.parkingStalls);
 
     const _sitePlanElementCorners = this.sitePlanElementCorners;
 
-    this.sitePlanElementCorners = [
-      stallCornerLeft[1],
-      stallCornerRight[1],
 
-      entranceEdge.point1,
-      entranceEdge.point2,
-    ]
+
+
+
 
     const sideNumber = getAdjacentIndices(this.entranceEdgeIndex || 0, propertyCorners.length);
 
@@ -405,6 +426,45 @@ class SitePlanElement {
       const point: Point = [corner.x, corner.y];
       return pointsAreInBoundary(propertyCorners, point) === -1
     });
+
+
+
+
+
+
+    /* 
+    
+    UPDATE THE PARKING HEIGHT BASED ON THE UPDATED PARKING STALLS
+
+    */
+    // UPDATE PARKING SIZE
+    // For the parking corners, assume the max height will fit, then cut it back if it doesn't.
+
+    const leastStalls = Math.max(this.parkingStalls.right.length, this.parkingStalls.left.length)
+
+    const updatedPointsR = calculateStallPosition(this.p, entranceEdge, this.angle, this.parkingStalls.right, "right", leastStalls)
+    const updatedPointsL = calculateStallPosition(this.p, entranceEdge, this.angle, this.parkingStalls.left, "left", leastStalls)
+
+    // this.sitePlanElementCorners = [
+    //   updatedPointsL[1],
+    //   updatedPointsR[1],
+    //   entranceEdge.point1,
+    //   entranceEdge.point2,
+    // ]
+
+    // this.height = this.p.dist(this.sitePlanElementCorners[1].x, this.sitePlanElementCorners[1].y, this.sitePlanElementCorners[2].x, this.sitePlanElementCorners[2].y)
+
+
+
+
+
+
+
+
+
+
+
+    // this.updateSitePlanElementEdges();
 
     const updatedParkingLotIsInBoundary = this.sitePlanElementCorners.map(corner => {
       const point: Point = [corner.x, corner.y];
@@ -420,12 +480,7 @@ class SitePlanElement {
 
 
 
-    if (!truthChecker(updatedParkingLotIsInBoundary)) {
 
-      console.log(`1234`, 1234)
-      this.sitePlanElementCorners = _sitePlanElementCorners
-
-    }
 
     if (truthChecker(newPointsAreInBoundaryRight) && this.parkingStalls.right.length < maxNumStalls) {
       const newParkingStall = new ParkingStall(this.p, sideNumber[1], this.parkingStalls.right.length + 1, this.angle, stallCornerRight, entranceEdge);
@@ -439,9 +494,13 @@ class SitePlanElement {
 
 
 
+    if (!truthChecker(updatedParkingLotIsInBoundary)) {
+    }
+
+
+
     if (truthChecker(newPointsAreInBoundaryRight)) {
       this.p.fill(140, 200, 1);
-
     }
     else {
       this.p.fill(200, 10, 140);
@@ -530,6 +589,8 @@ class SitePlanElement {
       return p.createVector(center.x + rotatedX, center.y + rotatedY);
     });
 
+
+
   }
 
   isMouseHovering(): boolean {
@@ -615,7 +676,7 @@ export class AdjacencyGraphVisualizer2 {
     //
     const angle = propertyEdges[2].calculateAngle();
     const approach = new SitePlanElement(p, getCenterPoint(propertyEdges[2].point1, propertyEdges[2].point2), 100, 60, 180 + angle, ESitePlanObjects.Approach);
-    const parking = new SitePlanElement(p, p.createVector(488, 308), 120, 45, 15, ESitePlanObjects.ParkingWay);
+    const parking = new SitePlanElement(p, p.createVector(488, 308), 120, 350, 15, ESitePlanObjects.ParkingWay);
 
     approach.initialize()
     parking.initialize();
@@ -652,9 +713,10 @@ export class AdjacencyGraphVisualizer2 {
           // Take a snapshop
           const _angle = parking.angle;
 
-          const angle = calculateAngle(edgeMidpoint1, edgeMidpoint2)
-          parking.updateAngle(angle - 90); // +90 to get the perpendicular angle
+          const angle = calculateAngle(edgeMidpoint1, edgeMidpoint2) - 90
+          parking.updateAngle(angle); // +90 to get the perpendicular angle
           parking.updateSitePlanElementEdges();
+
 
           const pointsOutsideBoundary: number[] = [];
 
@@ -670,7 +732,6 @@ export class AdjacencyGraphVisualizer2 {
             return pointClassification === -1
           })
           if (!truthChecker(allPointsInPolygon)) {
-
             parking.updateAngle(_angle)
             parking.updateSitePlanElementEdges();
           }
@@ -755,35 +816,43 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
+
+
+          /*
+          
+          PREVENT PARKING LOT FROM GOING OUTSIDE THE BOUNDARY
+          
+          */
+
           // Take a snapshop
-          const pointsOutsideBoundary: number[] = [];
-          const allPointsInPolygon = parking.sitePlanElementCorners.map((corner1, i) => {
-            const point = [corner1.x, corner1.y];
-            const pointClassification = classifyPoint(propertyCorners.map(corner => [corner.x, corner.y]) as Point[], point as Point)
-            // 1 = outside
-            // 0 = on the border
-            // -1 = inside
+          // const pointsOutsideBoundary: number[] = [];
+          // const allPointsInPolygon = parking.sitePlanElementCorners.map((corner1, i) => {
+          //   const point = [corner1.x, corner1.y];
+          //   const pointClassification = classifyPoint(propertyCorners.map(corner => [corner.x, corner.y]) as Point[], point as Point)
+          //   // 1 = outside
+          //   // 0 = on the border
+          //   // -1 = inside
 
-            if (pointClassification === 1) pointsOutsideBoundary.push(i);
+          //   if (pointClassification === 1) pointsOutsideBoundary.push(i);
 
-            return pointClassification === -1
-          })
-
-
-          if (!truthChecker(allPointsInPolygon)) {
-            parking.center.x = _center[0]
-            parking.center.y = _center[1]
-            parking.updateAngle(_angle)
-            parking.updateSitePlanElementEdges();
-          }
+          //   return pointClassification === -1
+          // })
 
 
-          if (pointsOutsideBoundary.length === 1) {
-            const stuckPointIndex = pointsOutsideBoundary[0]
-            const stuckPoint = parking.sitePlanElementCorners[stuckPointIndex];
+          // if (!truthChecker(allPointsInPolygon)) {
+          //   parking.center.x = _center[0]
+          //   parking.center.y = _center[1]
+          //   parking.updateAngle(_angle)
+          //   parking.updateSitePlanElementEdges();
+          // }
 
-            let propertyEdgeViolated = findClosestEdge(propertyEdges, stuckPoint);
-          }
+
+          // if (pointsOutsideBoundary.length === 1) {
+          //   const stuckPointIndex = pointsOutsideBoundary[0]
+          //   const stuckPoint = parking.sitePlanElementCorners[stuckPointIndex];
+
+          //   let propertyEdgeViolated = findClosestEdge(propertyEdges, stuckPoint);
+          // }
 
 
         }
@@ -813,6 +882,7 @@ export class AdjacencyGraphVisualizer2 {
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
       parking.updateStallCorners();
+      parking.updateParkingHeight();
       parking.calculateNumberOfFittableStalls(propertyCorners);
       // parking.updateStallCorners();
 
@@ -905,7 +975,6 @@ function drawPerpendicularBezier(
     point1.y + p.sin(angle1) * controlDistance
   );
   const controlPoint2 = p.createVector(
-
     point2.x + p.cos(angle2) * controlDistance,
     point2.y + p.sin(angle2) * controlDistance
   );

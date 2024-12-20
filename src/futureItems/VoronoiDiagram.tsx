@@ -67,3 +67,4 @@ const VoronoiDiagram: React.FC = () => {
 };
 
 export default VoronoiDiagram;
+
