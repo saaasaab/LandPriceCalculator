@@ -608,18 +608,12 @@ class SitePlanElement {
       p.createVector(-halfWidth, halfHeight),  // Bottom-left
     ];
 
-
-
     // Rotate each corner around the center and compute its absolute position
     this.sitePlanElementCorners = corners.map((corner) => {
-      if (angle == 0) {
-        return p.createVector(corner.x, corner.y);
-      }
       const rotatedX = corner.x * p.cos(angle) - corner.y * p.sin(angle);
       const rotatedY = corner.x * p.sin(angle) + corner.y * p.cos(angle);
       return p.createVector(center.x + rotatedX, center.y + rotatedY);
     });
-
   }
 
   createSitePlanElementCorners() {
@@ -708,16 +702,14 @@ export class AdjacencyGraphVisualizer2 {
   }
 
   visualize2(p: p5): void {
-
-
     p.angleMode(p.DEGREES);
 
     const propertyEdges: Edge[] = [];
     const propertyCorners = [
-      p.createVector(40, 40),
-      p.createVector(p.width - 40, 40),
-      p.createVector(p.width - 40, p.height - 180),
-      p.createVector(40, p.height - 40),
+      p.createVector(80, 40),
+      p.createVector(p.width - 120, 10),
+      p.createVector(p.width - 75, p.height - 40),
+      p.createVector(40, p.height - 180),
     ];
 
     for (let i = 0; i < propertyCorners.length; i++) {
@@ -729,7 +721,7 @@ export class AdjacencyGraphVisualizer2 {
     }
 
     const initialApproachAngle = propertyEdges[2].calculateAngle();
-    const approach = new SitePlanElement(p, getCenterPoint(p, propertyEdges[2].point1, propertyEdges[2].point2), 100, 60, 180 + initialApproachAngle, ESitePlanObjects.Approach);
+    const approach = new SitePlanElement(p, getCenterPoint(p, propertyEdges[2].point1, propertyEdges[2].point2), 100, 30, 180 + initialApproachAngle, ESitePlanObjects.Approach);
     const parking = new SitePlanElement(p, p.createVector(488, 308), 120, 350, 15, ESitePlanObjects.ParkingWay);
 
     approach.initialize()
@@ -752,8 +744,10 @@ export class AdjacencyGraphVisualizer2 {
         const _center = p.createVector(approach.center.x, approach.center.y);
 
         // Follow along the line
+
+        console.log(`(approach.angle+180)/90`, -1* p.sin(approach.angle));
         const newX = p.mouseX;
-        const newY = approach.center.y + (approach.center.x - newX) * .2; //Need to update based on the actual angle of approach edge.
+        const newY = approach.center.y + (approach.center.x - newX) * -1* p.sin(approach.angle); //Need to update based on the actual angle of approach edge.
 
         approach.updateCenter(newX, newY);
 
@@ -762,7 +756,7 @@ export class AdjacencyGraphVisualizer2 {
         // parking.updateAngle(normalizeAngle(angle2 - 90))
 
 
-        const allPointsInBoundary = allPointsInPolygon(propertyCorners, [approach.sitePlanElementCorners[0]]);
+        const allPointsInBoundary = allPointsInPolygon(propertyCorners, [approach.sitePlanElementCorners[0],approach.sitePlanElementCorners[1]]);
 
         if (truthChecker(allPointsInBoundary)) {
 
