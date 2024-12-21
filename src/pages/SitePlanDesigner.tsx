@@ -50,7 +50,7 @@ const SitePlanDesigner: React.FC = () => {
         visualizer.visualize2(p);
         // subdivisionGenerator.subdivide(p);
 
-        p.frameRate(10);
+        p.frameRate(8);
       };
 
     };
