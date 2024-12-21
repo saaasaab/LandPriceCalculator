@@ -342,7 +342,7 @@ class SitePlanElement {
 
     let parkingNotFit = true;
     let recalcCount = 1;
-    while (parkingNotFit && maxParkingStalls-recalcCount > 0) {
+    while (parkingNotFit && maxParkingStalls - recalcCount > 0) {
       const allIn = this.sitePlanElementCorners.map(corner => {
         const point: Point = [corner.x, corner.y];
         return pointsAreInBoundary(propertyCorners, point) === -1
@@ -356,22 +356,22 @@ class SitePlanElement {
 
       else {
 
-        if(this.parkingStalls.left.length >= maxParkingStalls-recalcCount){
+        if (this.parkingStalls.left.length >= maxParkingStalls - recalcCount) {
 
           this.parkingStalls.left.pop();
         }
-        if(this.parkingStalls.right.length >= maxParkingStalls-recalcCount){
+        if (this.parkingStalls.right.length >= maxParkingStalls - recalcCount) {
 
           this.parkingStalls.right.pop();
         }
-        
-        this.updateheight((maxParkingStalls-recalcCount) * stallHeight );
+
+        this.updateheight((maxParkingStalls - recalcCount) * stallHeight);
         recalcCount++
       }
     }
   }
 
-  
+
   calculateNumberOfFittableStalls(propertyCorners: p5.Vector[]) {
     const maxNumStalls = 10;
 
@@ -726,6 +726,12 @@ export class AdjacencyGraphVisualizer2 {
 
     approach.initialize()
     parking.initialize();
+
+    parking.updateStallCorners();
+    parking.calculateNumberOfFittableStalls(propertyCorners);
+    parking.updateStallCorners();
+    parking.updateParkingHeight(propertyCorners);
+
     let isDraggingParking = false;
     let isDraggingApproach = false;
 
@@ -745,9 +751,9 @@ export class AdjacencyGraphVisualizer2 {
 
         // Follow along the line
 
-        console.log(`(approach.angle+180)/90`, -1* p.sin(approach.angle));
+        console.log(`(approach.angle+180)/90`, -1 * p.sin(approach.angle));
         const newX = p.mouseX;
-        const newY = approach.center.y + (approach.center.x - newX) * -1* p.sin(approach.angle); //Need to update based on the actual angle of approach edge.
+        const newY = approach.center.y + (approach.center.x - newX) * -1 * p.sin(approach.angle); //Need to update based on the actual angle of approach edge.
 
         approach.updateCenter(newX, newY);
 
@@ -756,7 +762,7 @@ export class AdjacencyGraphVisualizer2 {
         // parking.updateAngle(normalizeAngle(angle2 - 90))
 
 
-        const allPointsInBoundary = allPointsInPolygon(propertyCorners, [approach.sitePlanElementCorners[0],approach.sitePlanElementCorners[1]]);
+        const allPointsInBoundary = allPointsInPolygon(propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
 
         if (truthChecker(allPointsInBoundary)) {
 
@@ -779,25 +785,33 @@ export class AdjacencyGraphVisualizer2 {
           parking.updateAngle(angle); // +90 to get the perpendicular angle
 
 
-          const pointsOutsideBoundary: number[] = [];
+          // const pointsOutsideBoundary: number[] = [];
 
-          const allPointsInPolygon = parking.sitePlanElementCorners.map((corner, i) => {
-            const point = [corner.x, corner.y];
-            const pointClassification = classifyPoint(propertyCorners.map(corner => [corner.x, corner.y]) as Point[], point as Point)
-            // 1 = outside
-            // 0 = on the border
-            // -1 = inside
+          // const allPointsInPolygon = parking.sitePlanElementCorners.map((corner, i) => {
+          //   const point = [corner.x, corner.y];
+          //   const pointClassification = classifyPoint(propertyCorners.map(corner => [corner.x, corner.y]) as Point[], point as Point)
+          //   // 1 = outside
+          //   // 0 = on the border
+          //   // -1 = inside
 
-            if (pointClassification === 1 || pointClassification === 0) pointsOutsideBoundary.push(i);
+          //   if (pointClassification === 1 || pointClassification === 0) pointsOutsideBoundary.push(i);
 
-            return pointClassification === -1
-          })
-          if (!truthChecker(allPointsInPolygon)) {
-            // parking.updateAngle(_angle)
-          }
+          //   return pointClassification === -1
+          // })
+          // if (!truthChecker(allPointsInPolygon)) {
+          //   // parking.updateAngle(_angle)
+          // }
+
+
+          parking.updateStallCorners();
+          parking.calculateNumberOfFittableStalls(propertyCorners);
+          parking.updateStallCorners();
+          parking.updateParkingHeight(propertyCorners);
+
         }
         else {
           approach.updateCenter(_center.x, _center.y);
+          parking.updateParkingHeight(propertyCorners);
         }
       }
 
@@ -817,6 +831,11 @@ export class AdjacencyGraphVisualizer2 {
         const allPointsInBoundary = allPointsInPolygon(propertyCorners, parking.sitePlanElementCorners);
 
         if (truthChecker(allPointsInBoundary)) {
+
+          parking.updateStallCorners();
+          parking.calculateNumberOfFittableStalls(propertyCorners);
+          parking.updateStallCorners();
+          parking.updateParkingHeight(propertyCorners);
 
           // For all the points of the parking, find the point and edge that are closest. If they're 
           // Within a certain distance, start to move the angle of the object to match the edge's angle.
@@ -943,6 +962,7 @@ export class AdjacencyGraphVisualizer2 {
 
 
         } else {
+          parking.updateParkingHeight(propertyCorners);
           // parking.updateCenter(_center.x, _center.y);
 
         }
@@ -971,10 +991,6 @@ export class AdjacencyGraphVisualizer2 {
       propertyEdges.forEach(edge => edge.drawLine())
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
-      parking.updateStallCorners();
-      parking.calculateNumberOfFittableStalls(propertyCorners);
-      // parking.updateStallCorners();
-      parking.updateParkingHeight(propertyCorners);
 
 
       createDriveway(p, approach, parking);
