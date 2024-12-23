@@ -82,8 +82,6 @@ const RealEstatePolygon: React.FC = () => {
 
       p.mousePressed = () => {
         const mousePos: Point = { x: p.mouseX, y: p.mouseY };
-
-        console.log(`mode`, mode)
         if (mode === 'draw') {
           // Add point or close polygon
           if (draggingPoint !== null) return;

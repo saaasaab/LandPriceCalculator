@@ -433,8 +433,6 @@ class SitePlanElement {
 
 
 
-
-
     if (truthChecker(newPointsAreInBoundaryRight) && this.parkingStalls.right.length < maxNumStalls) {
       const newParkingStall = new ParkingStall(this.p, sideNumber[1], this.parkingStalls.right.length + 1, this.angle, stallCornerRight, entranceEdge);
       this.parkingStalls.right.push(newParkingStall);
@@ -632,7 +630,7 @@ class SitePlanElement {
 }
 
 
-class Building{
+class Building {
   public center: p5.Vector;
   public width: number;
   public height: number;
@@ -714,10 +712,14 @@ export class AdjacencyGraphVisualizer2 {
     approach.initialize()
     parking.initialize();
 
+    // approach.updateCenter(approach.center.x,approach.center.y);
+    // parking.updateCenter(parking.center.x,parking.center.y)
 
     parking.calculateNumberOfFittableStalls(propertyCorners);
     parking.updateStallCorners();
     parking.updateParkingHeight(propertyCorners);
+
+
 
     let isDraggingParking = false;
     let isDraggingApproach = false;
@@ -737,8 +739,6 @@ export class AdjacencyGraphVisualizer2 {
         const _center = p.createVector(approach.center.x, approach.center.y);
 
         // Follow along the line
-
-        console.log(`(approach.angle+180)/90`, -1 * p.sin(approach.angle));
         const newX = p.mouseX;
         const newY = approach.center.y + (approach.center.x - newX) * -1 * p.sin(approach.angle); //Need to update based on the actual angle of approach edge.
 
@@ -965,7 +965,30 @@ export class AdjacencyGraphVisualizer2 {
 
       createDriveway(p, approach, parking);
 
-      // p.ellipse(p.width/2, p.height/2,40,40);
+
+
+      p.stroke(50, 150, 150)
+      const crossSize = 500
+      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle) * crossSize, parking.center.y + p.sin(parking.angle) * crossSize)
+      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle - 90) * crossSize, parking.center.y + p.sin(parking.angle - 90) * crossSize)
+      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + 90) * crossSize, parking.center.y + p.sin(parking.angle + 90) * crossSize)
+      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + 180) * crossSize, parking.center.y + p.sin(parking.angle + 180) * crossSize)
+
+
+
+      // Find which edge the line intersects by looping through all the edges. If there are more than one, use the one closest to the center point
+
+      const intersect1= getLineIntersection(
+        p,
+        [p.createVector(parking.center.x, parking.center.y),p.createVector(parking.center.x + p.cos(parking.angle) * crossSize, parking.center.y + p.sin(parking.angle) * crossSize)],
+        [propertyEdges[1].point1,propertyEdges[1].point2]
+
+      )
+
+      p.ellipse( intersect1?.x||0,intersect1?.y||0,40.40)
+      // Find the intersection points of all the crosses, then calculate the area minus the parking size to get the "quadrant" with the most availiable area.
+
+
     };
   }
 }
@@ -1313,3 +1336,27 @@ function allPointsInPolygon(boundary: p5.Vector[], poly: p5.Vector[]) {
 
   return allPointsInPolygon
 }
+
+
+
+function getLineIntersection(
+  p: p5,
+  line1: p5.Vector[],
+  line2: p5.Vector[]
+): p5.Vector | null {
+  const { x: x1, y: y1 } = line1[0];
+  const { x: x2, y: y2 } = line1[1];
+  const { x: x3, y: y3 } = line2[0];
+  const { x: x4, y: y4 } = line2[1];
+
+  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+  if (denom === 0) return null;
+
+  const intersectX =
+    ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+  const intersectY =
+    ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+
+  return p.createVector(intersectX,intersectY );
+};
