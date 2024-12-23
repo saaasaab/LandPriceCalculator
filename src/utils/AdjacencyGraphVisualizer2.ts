@@ -343,8 +343,6 @@ class SitePlanElement {
 
 
         }
-
-        console.log(`truthChecker(allIn)`, truthChecker(allIn))
       })
     )
 
@@ -967,26 +965,61 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-      p.stroke(50, 150, 150)
-      const crossSize = 500
-      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle) * crossSize, parking.center.y + p.sin(parking.angle) * crossSize)
-      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle - 90) * crossSize, parking.center.y + p.sin(parking.angle - 90) * crossSize)
-      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + 90) * crossSize, parking.center.y + p.sin(parking.angle + 90) * crossSize)
-      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + 180) * crossSize, parking.center.y + p.sin(parking.angle + 180) * crossSize)
-
-
 
       // Find which edge the line intersects by looping through all the edges. If there are more than one, use the one closest to the center point
-
-      const intersect1= getLineIntersection(
-        p,
-        [p.createVector(parking.center.x, parking.center.y),p.createVector(parking.center.x + p.cos(parking.angle) * crossSize, parking.center.y + p.sin(parking.angle) * crossSize)],
-        [propertyEdges[1].point1,propertyEdges[1].point2]
-
-      )
-
-      p.ellipse( intersect1?.x||0,intersect1?.y||0,40.40)
       // Find the intersection points of all the crosses, then calculate the area minus the parking size to get the "quadrant" with the most availiable area.
+
+      p.stroke(50, 150, 150)
+      const crossSize = 200;
+
+
+
+      const offsets = [[0, 0],
+      [-90, -90],
+      [90, 90],
+      [180, 180]];
+
+      const edgeIntersections: Record<number, p5.Vector> = {
+
+      }
+
+      offsets.forEach((offset, offsetIndex) => {
+
+
+        const intersections: p5.Vector[] = []
+        propertyEdges.forEach(edge => {
+
+          const intersect = getLineIntersection(
+            p,
+            [p.createVector(parking.center.x, parking.center.y), p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)],
+            [edge.point1, edge.point2]
+          )
+          if (intersect) {
+            intersections.push(intersect)
+          }
+        })
+
+
+
+        let minDistance = Infinity;
+        let minDistanceIndex = 0;
+        intersections.forEach((intersection, i) => {
+          let d = intersection.dist(parking.center);
+
+          if (d < minDistance && !edgeIntersections[offsetIndex]) {
+            minDistanceIndex = i;
+            minDistance = d;
+          }
+        })
+
+        p.ellipse(intersections[minDistanceIndex]?.x || 0, intersections[minDistanceIndex]?.y || 0, 40.40)
+
+        p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)
+
+
+
+      })
+
 
 
     };
@@ -1339,24 +1372,60 @@ function allPointsInPolygon(boundary: p5.Vector[], poly: p5.Vector[]) {
 
 
 
+// function getLineIntersection(
+//   p: p5,
+//   line1: p5.Vector[],
+//   line2: p5.Vector[]
+// ): p5.Vector | null {
+//   const { x: x1, y: y1 } = line1[0];
+//   const { x: x2, y: y2 } = line1[1];
+//   const { x: x3, y: y3 } = line2[0];
+//   const { x: x4, y: y4 } = line2[1];
+
+//   const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+//   if (denom === 0) return null;
+
+//   const intersectX =
+//     ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+//   const intersectY =
+//     ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+
+//   return p.createVector(intersectX, intersectY);
+// };
+
+
 function getLineIntersection(
-  p: p5,
-  line1: p5.Vector[],
-  line2: p5.Vector[]
-): p5.Vector | null {
+  p: p5, // p5 instance
+  line1: p5.Vector[], // Array of two p5.Vector points [start, end]
+  line2: p5.Vector[] // Array of two p5.Vector points [start, end]
+) {
   const { x: x1, y: y1 } = line1[0];
   const { x: x2, y: y2 } = line1[1];
   const { x: x3, y: y3 } = line2[0];
   const { x: x4, y: y4 } = line2[1];
 
+  // Calculate the denominator for intersection formula
   const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 
+  // Lines are parallel if denom is zero
   if (denom === 0) return null;
 
+  // Calculate the intersection point (unbounded)
   const intersectX =
     ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
   const intersectY =
     ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
 
-  return p.createVector(intersectX,intersectY );
-};
+  const intersection = p.createVector(intersectX, intersectY);
+
+  // Ensure the intersection is in the forward direction of line1
+  const directionVector = p5.Vector.sub(line1[1], line1[0]); // Direction of line1
+  const toIntersectionVector = p5.Vector.sub(intersection, line1[0]); // Vector to intersection
+
+  if (toIntersectionVector.dot(directionVector) >= 0) {
+    return intersection; // Valid intersection point
+  }
+
+  return null; // Intersection is behind line1's start point
+}
