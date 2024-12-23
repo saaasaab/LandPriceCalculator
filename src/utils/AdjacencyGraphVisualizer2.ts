@@ -3,53 +3,7 @@ import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 
 
-const eq1 = (AD: number, PA: number) => AD - 90 - PA;
-const eq2 = (AD: number, PA: number) => AD + PA;
-const eq3 = (AD: number, PA: number) => PA - AD + 90;
-const eq4 = (AD: number, PA: number) => AD - PA;
-const eq5 = (AD: number, PA: number) => PA - 90 - AD;
-const eq6 = (AD: number, PA: number) => AD - PA - 90;
-const refiningAngle: RefiningAngleType = {
-  0: {
-    0: {
-      1: { parkingAngle: 0, angleDiff: 90, "fn": eq1, },
-      3: { parkingAngle: 90, angleDiff: 0, "fn": eq2, }
 
-    },
-    1: {
-      0: { parkingAngle: 360, angleDiff: 0, "fn": eq2, },
-      2: { parkingAngle: 270, angleDiff: 90, "fn": eq3, },
-    }
-  },
-
-  1: {
-    1: {
-      0: { parkingAngle: 90, angleDiff: 0, "fn": eq2, },
-      2: { parkingAngle: 0, angleDiff: 90, "fn": eq4, }
-    },
-    2: {
-      1: { parkingAngle: 360, angleDiff: 0, "fn": eq2, },
-    }
-  },
-  2: {
-    2: {
-      1: { parkingAngle: 90, angleDiff: 0, "fn": eq2, },
-    },
-    3: {
-      0: { parkingAngle: 270, angleDiff: 0, "fn": eq2, },
-    }
-  },
-  3: {
-    0: {
-      1: { parkingAngle: 270, angleDiff: 90, "fn": eq5, },
-      3: { parkingAngle: 360, angleDiff: 0, "fn": eq2, }
-    },
-    3: {
-      0: { parkingAngle: 0, angleDiff: 90, "fn": eq6, },
-    }
-  },
-
-}
 
 type RefiningAngleType = {
   [key: number]: {
@@ -58,14 +12,6 @@ type RefiningAngleType = {
     };
   };
 };
-
-
-// const pointToEdgelookup = [
-//   [3, 0],
-//   [0, 1],
-//   [1, 2],
-//   [2, 3]
-// ];
 
 
 type Point = [number, number];
@@ -349,7 +295,6 @@ class SitePlanElement {
       });
 
       if (truthChecker(allIn)) {
-
         parkingNotFit = false;
       }
 
@@ -398,6 +343,8 @@ class SitePlanElement {
 
 
         }
+
+        console.log(`truthChecker(allIn)`, truthChecker(allIn))
       })
     )
 
@@ -533,11 +480,6 @@ class SitePlanElement {
 
     // Go through all the parking stalls and determine if they all fit in the boundary
     // Remove those that don't fit. 
-
-
-
-
-
   }
 
 
@@ -690,6 +632,51 @@ class SitePlanElement {
 }
 
 
+class Building{
+  public center: p5.Vector;
+  public width: number;
+  public height: number;
+  public angle: number;
+  private p: p5;
+
+  constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number) {
+    this.center = center;
+    this.width = width
+    this.height = height;
+    this.angle = angle;
+    this.p = p;
+  }
+
+
+  initialize() {
+    // Find the spot that on the lot where the building is best fit. 
+    // max size, 
+    // appropriate angle
+
+
+
+    // Know where the enterance is (OR determine that after the fact.)
+    // find the best X/Y position, which is the park that has the most area
+
+
+
+    // if (this.elementType === ESitePlanObjects.ParkingWay) {
+    //   this.entranceEdgeIndex = 2;
+    // }
+    // this.createSitePlanElementCorners();
+    // this.setSitePlanElementEdges();
+
+
+
+    // this.entranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0]
+    // this.previousEntranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0]
+
+
+
+
+  }
+}
+
 // Visualization module using p5.js
 export class AdjacencyGraphVisualizer2 {
   private graph: AdjacencyGraph;
@@ -727,7 +714,7 @@ export class AdjacencyGraphVisualizer2 {
     approach.initialize()
     parking.initialize();
 
-    parking.updateStallCorners();
+
     parking.calculateNumberOfFittableStalls(propertyCorners);
     parking.updateStallCorners();
     parking.updateParkingHeight(propertyCorners);
@@ -802,8 +789,6 @@ export class AdjacencyGraphVisualizer2 {
           //   // parking.updateAngle(_angle)
           // }
 
-
-          parking.updateStallCorners();
           parking.calculateNumberOfFittableStalls(propertyCorners);
           parking.updateStallCorners();
           parking.updateParkingHeight(propertyCorners);
@@ -831,8 +816,6 @@ export class AdjacencyGraphVisualizer2 {
         const allPointsInBoundary = allPointsInPolygon(propertyCorners, parking.sitePlanElementCorners);
 
         if (truthChecker(allPointsInBoundary)) {
-
-          parking.updateStallCorners();
           parking.calculateNumberOfFittableStalls(propertyCorners);
           parking.updateStallCorners();
           parking.updateParkingHeight(propertyCorners);
@@ -892,14 +875,7 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-          // //  const angle =  findOptimalAngle(
-          // //     p,
-          // //     parking.sitePlanElementEdges[2],
-          // //     approach.sitePlanElementEdges[0],
-          // //     parking.angle,
-          // //     1,
-          // //     36,
-          // //   )
+
 
 
           // // const distance = calculateEdgeDistance(parking.sitePlanElementEdges[2],approach.sitePlanElementEdges[0]);
@@ -916,12 +892,6 @@ export class AdjacencyGraphVisualizer2 {
 
           // // const adjustedAngle = PARKING_LOT_AT_RIGHT_ANGLE ? angle : angle - 90;
           // parking.updateAngle(normalizeAngle(angle2 - 90))
-
-
-
-
-
-
 
 
           /*

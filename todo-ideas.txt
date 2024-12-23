@@ -20,3 +20,11 @@
     [ ] Industrial Proforma
 
 
+
+[ ] Site plan generation
+    [ ] Updload image of the property, then tell them to give one dimension and select the approach
+    [ ] 
+    [ ] 
+    [ ] 
+[ ] 
+[ ] 
