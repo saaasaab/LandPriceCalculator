@@ -691,7 +691,9 @@ export class AdjacencyGraphVisualizer2 {
     const propertyCorners = [
       p.createVector(80, 40),
       p.createVector(p.width - 120, 10),
+      p.createVector(p.width - 10, p.height / 2 + 10),
       p.createVector(p.width - 75, p.height - 40),
+      p.createVector(p.width / 2 - 140, p.height - 80),
       p.createVector(40, p.height - 180),
     ];
 
@@ -974,21 +976,28 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-      const offsets = [[0, 0],
-      [-90, -90],
-      [90, 90],
-      [180, 180]];
+      const offsets = [
+        [-90, -90],
+        [0, 0],
+        [90, 90],
+        [180, 180],
+      ];
 
-      const edgeIntersections: Record<number, p5.Vector> = {
+      const edgeIntersections: {
+        edge: number;
+        intersection: p5.Vector;
+        distance: number;
+        minDistanceIndex: number;
+        offset: number[];
+      }[] = [];
 
-      }
+
 
       offsets.forEach((offset, offsetIndex) => {
-
-
         const intersections: p5.Vector[] = []
-        propertyEdges.forEach(edge => {
+        const edgeIndecies: number[] = []
 
+        propertyEdges.forEach((edge, edgeIndex) => {
           const intersect = getLineIntersection(
             p,
             [p.createVector(parking.center.x, parking.center.y), p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)],
@@ -996,6 +1005,7 @@ export class AdjacencyGraphVisualizer2 {
           )
           if (intersect) {
             intersections.push(intersect)
+            edgeIndecies.push(edgeIndex);
           }
         })
 
@@ -1006,23 +1016,145 @@ export class AdjacencyGraphVisualizer2 {
         intersections.forEach((intersection, i) => {
           let d = intersection.dist(parking.center);
 
-          if (d < minDistance && !edgeIntersections[offsetIndex]) {
+          if (d < minDistance) {
             minDistanceIndex = i;
             minDistance = d;
           }
         })
 
-        p.ellipse(intersections[minDistanceIndex]?.x || 0, intersections[minDistanceIndex]?.y || 0, 40.40)
+        edgeIntersections.push({
+          edge: edgeIndecies[minDistanceIndex],
+          intersection: intersections[minDistanceIndex],
+          distance: minDistance,
+          minDistanceIndex: minDistanceIndex,
+          offset: offset,
+        });
 
-        p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)
 
 
+      });
 
+
+      edgeIntersections.forEach((intersection, i) => {
+        p.ellipse(intersection.intersection.x || 0, intersection.intersection.y || 0, 40.40)
+        p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + intersection.offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + intersection.offset[1]) * crossSize)
+        p.text(i, intersection.intersection.x, intersection.intersection.y)
       })
 
 
 
+
+      const totalEdges = edgeIntersections.length;
+
+
+      const polys: p5.Vector[][] = []
+      edgeIntersections.forEach((current, index) => {
+
+        const nextIndex = (index + 1) % totalEdges; // Wrap around to the start when at the last index
+        // const next = edgeIntersections[nextIndex];
+
+
+        const poly = [
+          parking.center,
+          edgeIntersections[index].intersection,
+          propertyEdges[edgeIntersections[index].edge].point2,
+        ];
+
+
+        const startEdge = edgeIntersections[index].edge;
+        const endEdge = edgeIntersections[nextIndex].edge;
+
+
+
+        const indexes = createWrappedIndices(startEdge, endEdge, propertyEdges.length)
+
+        indexes.forEach(index =>
+          poly.push(
+            propertyEdges[index].point2,
+          )
+        )
+
+
+        poly.push(edgeIntersections[nextIndex].intersection);
+
+
+        // // Draw the polygon using the corner vectors
+        // p.beginShape();
+        // const r = p.map(index, 0, totalEdges, 0, 255)
+        // const g = p.map(index, 0, totalEdges, 255, 50)
+
+        // p.fill(r, g, 225,50); // Fill color with transparency
+        // p.stroke(0); // Outline color
+        // p.strokeWeight(2);
+
+
+
+        polys.push(poly);
+        // poly.forEach((corner, i) => {
+        //   p.vertex(corner.x, corner.y);
+        //   // p.text(i, corner.x, corner.y)
+
+        // });
+        // p.endShape(p.CLOSE); // Close the polygon
+
+        // callback(current, next); // Call the callback function with the current and next pair
+      });
+
+
+      let maxArea = -Infinity;
+      let maxAreaIndex = 0;
+      polys.forEach((poly, i) => {
+        let area = calculateArea(poly);
+
+        if (area > maxArea) {
+          maxAreaIndex = i;
+          maxArea = area;
+        }
+      })
+
+
+
+      // Draw the polygon using the corner vectors
+      p.beginShape();
+      const r = p.map(2, 0, totalEdges, 0, 255)
+      const g = p.map(2, 0, totalEdges, 255, 50)
+
+      p.fill(r, g, 225, 50); // Fill color with transparency
+      p.stroke(0); // Outline color
+      p.strokeWeight(2);
+
+
+
+      polys[maxAreaIndex].forEach((corner, i) => {
+        p.vertex(corner.x, corner.y);
+        // p.text(i, corner.x, corner.y)
+
+      });
+      p.endShape(p.CLOSE); // Close the polygon
+
+
+
+
+
+
+
+
+
+
+      // edgeIntersections[0],edgeIntersections[1]
+      // edgeIntersections[1],edgeIntersections[2]
+      // edgeIntersections[2],edgeIntersections[3],
+      // edgeIntersections[3],edgeIntersections[0]
+
+
+
+
+      // calculateArea(polygon);
+
+      // p.noLoop()
     };
+
+
   }
 }
 
@@ -1428,4 +1560,29 @@ function getLineIntersection(
   }
 
   return null; // Intersection is behind line1's start point
+}
+
+
+
+function calculateArea(polygon: p5.Vector[]): number {
+  let total = 0;
+  for (let i = 0; i < polygon.length; i++) {
+    const next = (i + 1) % polygon.length;
+    total += polygon[i].x * polygon[next].y - polygon[next].x * polygon[i].y;
+  }
+  return Math.abs(total / 2);
+};
+
+
+function createWrappedIndices(startIndex: number, endIndex: number, totalLength: number) {
+  let indices = [];
+  let currentIndex = startIndex;
+
+  while (true) {
+    indices.push(currentIndex);
+    if (currentIndex === endIndex) break; // Stop when reaching the endIndex
+    currentIndex = (currentIndex + 1) % totalLength; // Move to the next index, wrapping around if necessary
+  }
+
+  return indices;
 }
