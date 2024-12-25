@@ -191,17 +191,17 @@ class Property {
 
     this.approachEdge = propertyEdges[this.approachEdgeIndex];
     const initialApproachAngle = this.approachEdge?.calculateAngle();
-    
-    
+
+
     this.approachAngle = initialApproachAngle
-  
+
   }
 
 
 
   drawProperty() {
 
-    
+
 
 
   }
@@ -217,6 +217,7 @@ class SitePlanElement {
   private p: p5;
   public sitePlanElementCorners: p5.Vector[];
   public sitePlanElementEdges: Edge[];
+
   private elementType: SitePlanObjects;
   public entranceEdgeIndex: number | null;
   public parkingStalls: {
@@ -686,6 +687,8 @@ class Building {
   public width: number;
   public height: number;
   public angle: number;
+  public buildingCorners: p5.Vector[];
+  public buildingEdges: Edge[];
   private p: p5;
 
   constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number) {
@@ -694,11 +697,14 @@ class Building {
     this.height = height;
     this.angle = angle;
     this.p = p;
+    this.buildingCorners = [];
+    this.buildingEdges = [];
   }
 
 
   initialize() {
-
+    this.setBuildingEdges();
+    this.createBuildingCorners();
     // Find the spot that on the lot where the building is best fit. 
     // max size, 
     // appropriate angle
@@ -708,22 +714,87 @@ class Building {
     // Know where the enterance is (OR determine that after the fact.)
     // find the best X/Y position, which is the park that has the most area
 
+  }
 
 
-    // if (this.elementType === ESitePlanObjects.ParkingWay) {
-    //   this.entranceEdgeIndex = 2;
-    // }
-    // this.createSitePlanElementCorners();
-    // this.setSitePlanElementEdges();
+  setBuildingEdges() {
+    const buildingCorners = this.buildingCorners;
+
+    const edges: Edge[] = []
+    for (let i = 0; i < buildingCorners.length; i++) {
+      const corner1 = buildingCorners[i];
+      let corner2 = i === buildingCorners.length - 1 ? buildingCorners[0] : buildingCorners[i + 1];
+
+      const newEdge = new Edge(this.p, corner1, corner2, false);
+      edges.push(newEdge);
+    }
+
+    this.buildingEdges = edges
+
+  }
 
 
 
-    // this.entranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0]
-    // this.previousEntranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0]
+
+  createBuildingCorners() {
+    const p = this.p;
+    const center = this.center;
+    const halfWidth = this.width / 2;
+    const halfHeight = this.height / 2;
+
+    // Define the initial (unrotated) corner points relative to the center
+    const corners: p5.Vector[] = [
+      p.createVector(-halfWidth, -halfHeight), // Top-left
+      p.createVector(halfWidth, -halfHeight),  // Top-right
+      p.createVector(halfWidth, halfHeight),   // Bottom-right
+      p.createVector(-halfWidth, halfHeight),  // Bottom-left
+    ];
+
+    // Convert the angle to radians
+    const angle = normalizeAngle(this.angle);
+
+    // Rotate each corner around the center and compute its absolute position
+    this.buildingCorners = corners.map((corner) => {
+      const rotatedX = corner.x * p.cos(angle) - corner.y * p.sin(angle);
+      const rotatedY = corner.x * p.sin(angle) + corner.y * p.cos(angle);
+      return p.createVector(center.x + rotatedX, center.y + rotatedY);
+    });
+  }
 
 
 
 
+  drawBuilding() {
+    const p = this.p;
+
+    // Draw the polygon using the corner vectors
+    p.beginShape();
+    p.fill(100, 200, 255, 150); // Fill color with transparency
+    p.stroke(0); // Outline color
+    p.strokeWeight(2);
+
+    this.buildingCorners.forEach((corner) => {
+      p.vertex(corner.x, corner.y);
+    });
+
+
+    p.endShape(p.CLOSE); // Close the polygon
+
+    p.ellipse(this.center.x, this.center.y, 50, 50);
+
+
+    p.text(p.round(this.angle), this.center.x, this.center.y);
+
+    this.buildingEdges.forEach(edge => {
+      const center = getCenterPoint(this.p, edge.point1, edge.point2);
+      p.fill(200, 20, 40);
+      p.ellipse(center.x, center.y, 20, 20);
+      p.strokeWeight(1)
+      p.fill(40, 200, 20);
+
+
+      p.text(p.round(edge.calculateAngle()), center.x, center.y);
+    })
   }
 }
 
@@ -745,26 +816,27 @@ export class AdjacencyGraphVisualizer2 {
     const propertyCorners = [
       p.createVector(80, 40),
       p.createVector(p.width - 120, 10),
-      // p.createVector(p.width - 10, p.height / 2 + 10),
+      p.createVector(p.width - 10, p.height / 2 + 10),
       p.createVector(p.width - 75, p.height - 40),
-      // p.createVector(p.width / 2 - 140, p.height - 80),
+      p.createVector(p.width / 2 - 140, p.height - 80),
       p.createVector(40, p.height - 180),
     ];
 
 
     const property = new Property(p, propertyCorners);
-    property.initialize() 
+    property.initialize()
 
 
-    const defaultVector=p.createVector(0,0)
+    const defaultVector = p.createVector(0, 0)
     const approach = new SitePlanElement(p, getCenterPoint(p, property.approachEdge?.point1 || defaultVector, property.approachEdge?.point2 || defaultVector), 100, 30, 180 + property.approachAngle, ESitePlanObjects.Approach);
     const parking = new SitePlanElement(p, p.createVector(488, 308), 120, 350, 15, ESitePlanObjects.ParkingWay);
 
 
-    const building = new Building(p,
+    const building = new SitePlanElement(p,
       p.createVector(p.width / 2, p.height / 2),
       50, 100,
-      15);
+      15,
+      ESitePlanObjects.Building);
 
     approach.initialize()
     parking.initialize();
@@ -798,16 +870,12 @@ export class AdjacencyGraphVisualizer2 {
 
         const _center = p.createVector(approach.center.x, approach.center.y);
 
+        const approachEdgeAngle = property.approachEdge?.calculateAngle()
         // Follow along the line
         const newX = p.mouseX;
-        const newY = approach.center.y + (approach.center.x - newX) * -1 * p.sin(approach.angle); //Need to update based on the actual angle of approach edge.
+        const newY = approach.center.y + (approach.center.x - newX) * p.sin(approachEdgeAngle || 0); //Need to update based on the actual angle of approach edge.
 
         approach.updateCenter(newX, newY);
-
-
-        // const angle2 = calculateAngle(parking.center, approach.center);
-        // parking.updateAngle(normalizeAngle(angle2 - 90))
-
 
         const allPointsInBoundary = allPointsInPolygon(propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
 
@@ -830,6 +898,8 @@ export class AdjacencyGraphVisualizer2 {
           approach.updateCenter(newX, newY);
           const angle = calculateAngle(parking.center, approach.center) - 90
           parking.updateAngle(angle); // +90 to get the perpendicular angle
+          building.updateAngle(angle); // +90 to get the perpendicular angle
+
 
 
           // const pointsOutsideBoundary: number[] = [];
@@ -873,6 +943,8 @@ export class AdjacencyGraphVisualizer2 {
 
         const angle2 = calculateAngle(parking.center, approach.center);
         parking.updateAngle(normalizeAngle(angle2 - 90))
+        building.updateAngle(normalizeAngle(angle2 - 90))
+
         const allPointsInBoundary = allPointsInPolygon(propertyCorners, parking.sitePlanElementCorners);
 
         if (truthChecker(allPointsInBoundary)) {
@@ -994,6 +1066,7 @@ export class AdjacencyGraphVisualizer2 {
 
         } else {
           parking.updateParkingHeight(propertyCorners);
+          
           // parking.updateCenter(_center.x, _center.y);
 
         }
@@ -1022,6 +1095,7 @@ export class AdjacencyGraphVisualizer2 {
       property.propertyEdges.forEach(edge => edge.drawLine())
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
+      building.drawSitePlanElement();
 
 
       createDriveway(p, approach, parking);
@@ -1149,17 +1223,17 @@ export class AdjacencyGraphVisualizer2 {
       let maxAreaIndex = 0;
       let neighboringMaxIndex = -1;
       let secondMaxArea = -Infinity;
-      
+
       polys.forEach((poly, i) => {
         let area = calculateArea(poly);
-      
+
         if (area > maxArea) {
           // Update second max area with the previous max area
           secondMaxArea = maxArea;
-      
+
           // Update neighbor index
           neighboringMaxIndex = maxAreaIndex;
-      
+
           // Set new max area and max area index
           maxArea = area;
           maxAreaIndex = i;
@@ -1170,6 +1244,28 @@ export class AdjacencyGraphVisualizer2 {
         }
       });
 
+
+
+      // console.log(`maxAreaIndex-neighboringMaxIndex>0`, maxAreaIndex-neighboringMaxIndex>0)
+      if (maxAreaIndex - neighboringMaxIndex > 0) {
+        const center = getCenterPoint(p, polys[maxAreaIndex][0], polys[maxAreaIndex][1]);
+
+        building.center = p.createVector(center.x, center.y);
+        p.ellipse(center.x, center.y, 30, 30)
+
+      } else {
+
+
+        const center = getCenterPoint(p, polys[neighboringMaxIndex][0], polys[neighboringMaxIndex][1]);
+
+        building.center = p.createVector(center.x, center.y);
+
+
+        p.ellipse(center.x, center.y, 30, 30)
+
+
+
+      }
 
 
       // Draw the polygon using the corner vectors
