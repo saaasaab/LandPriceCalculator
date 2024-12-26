@@ -19,8 +19,6 @@ enum ESitePlanObjects {
 
 
 class Building {
-
-
   public point1: p5.Vector;
   public point2: p5.Vector;
   public isApproach: boolean
@@ -209,6 +207,7 @@ class SitePlanElement {
   public previousAngle: number;
   public entranceEdge: Edge | null;
   public previousEntranceEdge: Edge | null;
+  public offsetSitePlanElementCorners: p5.Vector[];
 
 
 
@@ -221,6 +220,7 @@ class SitePlanElement {
     this.p = p;
     this.angle = angle;
     this.sitePlanElementCorners = [];
+    this.offsetSitePlanElementCorners = [];
     this.sitePlanElementEdges = [];
     this.elementType = elementType;
     this.entranceEdgeIndex = null;
@@ -428,7 +428,7 @@ class SitePlanElement {
     // UPDATE PARKING SIZE
     // For the parking corners, assume the max height will fit, then cut it back if it doesn't.
 
-    const leastStalls = Math.max(this.parkingStalls.right.length, this.parkingStalls.left.length)
+    // const leastStalls = Math.max(this.parkingStalls.right.length, this.parkingStalls.left.length)
 
     // const updatedPointsR = calculateStallPosition(this.p, entranceEdge, this.angle, this.parkingStalls.right, "right", leastStalls)
     // const updatedPointsL = calculateStallPosition(this.p, entranceEdge, this.angle, this.parkingStalls.left, "left", leastStalls)
@@ -551,6 +551,7 @@ class SitePlanElement {
     this.angle = angle;
     this.updateSitePlanElementEdges();
     this.setSitePlanElementEdges()
+    this.createOffsetPolygon();
   }
 
   updateheight(height: number) {
@@ -561,7 +562,8 @@ class SitePlanElement {
 
   updateSitePlanElementEdges() {
     this.updateSitePlanElementCorners();
-    this.setSitePlanElementEdges()
+    this.setSitePlanElementEdges();
+    this.createOffsetPolygon();
   }
 
   updateSitePlanElementCorners() {
@@ -618,7 +620,13 @@ class SitePlanElement {
   isMouseHovering(): boolean {
     return polyPoint(this.sitePlanElementCorners, this.p.mouseX, this.p.mouseY);
   }
+  isMouseHoveringOffset(): boolean {
+    return polyPoint(this.offsetSitePlanElementCorners, this.p.mouseX, this.p.mouseY);
+  }
 
+  createOffsetPolygon() {
+    this.offsetSitePlanElementCorners = expandPolygon(this.p, this.sitePlanElementCorners, 30);
+  }
   drawSitePlanElement() {
     const p = this.p;
     p.angleMode(p.DEGREES);
@@ -884,13 +892,16 @@ export class AdjacencyGraphVisualizer2 {
 
     let isDraggingParking = false;
     let isDraggingApproach = false;
+    let isDraggingParkingOffset = false;
 
 
     p.mouseDragged = () => {
 
       const isHoveredApproach = approach.isMouseHovering();
+      const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
 
+  
 
       if (isHoveredApproach || isDraggingApproach) {
         isDraggingApproach = true;
@@ -914,7 +925,6 @@ export class AdjacencyGraphVisualizer2 {
           // Take a snapshop
           const _angle = parking.angle;
 
-
           approach.updateCenter(newX, newY);
           const angle = calculateAngle(parking.center, approach.center) - 90
           parking.updateAngle(angle); // +90 to get the perpendicular angle
@@ -932,7 +942,28 @@ export class AdjacencyGraphVisualizer2 {
         }
       }
 
-      if (isHoveredParking || isDraggingParking) {
+
+
+      // Only hovering in the offset
+      if((isHoveredParkingOffset && !isHoveredParking) || isDraggingParkingOffset){
+        isDraggingParkingOffset = true;
+
+        // const _center = p.createVector(parking.center.x, parking.center.y);
+        const newX = p.mouseX;
+        const newY = p.mouseY;
+
+
+        const newAngle = calculateAngle(parking.center,p.createVector(newX, newY))+ 90;
+
+        parking.updateAngle(newAngle);
+        parking.calculateNumberOfFittableStalls(propertyCorners);
+        parking.updateStallCorners();
+        parking.updateParkingHeight(propertyCorners);
+      }
+
+
+
+      if ((isHoveredParking || isDraggingParking) && !isDraggingParkingOffset) {
         isDraggingParking = true;
 
         // const _center = p.createVector(parking.center.x, parking.center.y);
@@ -979,8 +1010,9 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.mouseReleased = () => {
-      isDraggingParking = false
-      isDraggingApproach = false
+      isDraggingParking = false;
+      isDraggingApproach = false;
+      isDraggingParkingOffset = false;
     };
 
     p.draw = () => {
@@ -1451,4 +1483,63 @@ function calculateCentroid(polygon: p5.Vector[]) {
   cy /= 6 * area;
 
   return { x: cx, y: cy };
+}
+
+
+
+
+
+function expandPolygon(p: p5, polygon: p5.Vector[], offset: number): p5.Vector[] {
+  const expandedPolygon: p5.Vector[] = [];
+  const totalVertices = polygon.length;
+
+  for (let i = 0; i < totalVertices; i++) {
+    // Get current, previous, and next points
+    const current = polygon[i];
+    const prev = polygon[(i - 1 + totalVertices) % totalVertices];
+    const next = polygon[(i + 1) % totalVertices];
+
+    // Calculate outward normals for the edges
+    const normalPrev = calculateEdgeNormal(p, prev, current);
+    const normalNext = calculateEdgeNormal(p, current, next);
+
+    // Calculate the offset direction by averaging the normals
+    const offsetNormal = p.createVector(
+      normalPrev.x + normalNext.x,
+      normalPrev.y + normalNext.y,
+    )
+
+    // Normalize the offset direction vector
+    const length = Math.sqrt(offsetNormal.x ** 2 + offsetNormal.y ** 2);
+    offsetNormal.x /= length;
+    offsetNormal.y /= length;
+
+    // Calculate the expanded vertex
+    const expandedPoint = p.createVector(
+      current.x + offsetNormal.x * offset,
+      current.y + offsetNormal.y * offset,
+    )
+
+    expandedPolygon.push(expandedPoint);
+  }
+
+  return expandedPolygon;
+}
+
+/**
+ * Calculate the outward normal of an edge.
+ * @param p1 - The start point of the edge.
+ * @param p2 - The end point of the edge.
+ * @returns The outward normal vector of the edge.
+ */
+function calculateEdgeNormal(p: p5, p1: p5.Vector, p2: p5.Vector): p5.Vector {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+
+  // Swap dx and dy and negate one to create a perpendicular vector
+  const length = Math.sqrt(dx ** 2 + dy ** 2);
+  return p.createVector(
+    dy / length,
+    -dx / length
+  )
 }
