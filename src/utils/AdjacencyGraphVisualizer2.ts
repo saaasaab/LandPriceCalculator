@@ -2,8 +2,6 @@ import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 
-
-
 type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
 enum ESitePlanObjects {
@@ -124,7 +122,6 @@ class ParkingStall {
 
 }
 
-
 class Property {
 
   private p: p5;
@@ -133,13 +130,13 @@ class Property {
   public approachEdge: Edge | null = null;
   public approachEdgeIndex = 2;
   public approachAngle: number = 15;
+  public propertyQuadrants: p5.Vector[][] = [];
+  public maxAreaIndex: number = 0;
 
 
   constructor(p: p5, propertyCorners: p5.Vector[]) {
     this.p = p;
     this.propertyCorners = propertyCorners;
-
-
   }
 
   initialize() {
@@ -170,8 +167,156 @@ class Property {
     this.propertyEdges.forEach(edge => edge.drawLine())
   }
 
-}
 
+  propertyQuadrant(property: Property, parking: SitePlanElement, building: Building) {
+    const p = this.p;
+    // Find which edge the line intersects by looping through all the edges. If there are more than one, use the one closest to the center point
+    // Find the intersection points of all the crosses, then calculate the area minus the parking size to get the "quadrant" with the most availiable area.
+
+    p.stroke(50, 150, 150)
+    const crossSize = 200;
+
+    const offsets = [
+      [-90, -90],
+      [0, 0],
+      [90, 90],
+      [180, 180],
+    ];
+
+    const edgeIntersections: {
+      edge: number;
+      intersection: p5.Vector;
+      distance: number;
+      minDistanceIndex: number;
+      offset: number[];
+    }[] = [];
+
+
+
+    offsets.forEach((offset, offsetIndex) => {
+      const intersections: p5.Vector[] = []
+      const edgeIndecies: number[] = []
+
+      property.propertyEdges.forEach((edge, edgeIndex) => {
+        const intersect = getLineIntersection(
+          p,
+          [p.createVector(parking.center.x, parking.center.y), p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)],
+          [edge.point1, edge.point2]
+        )
+        if (intersect) {
+          intersections.push(intersect)
+          edgeIndecies.push(edgeIndex);
+        }
+      })
+
+
+      let minDistance = Infinity;
+      let minDistanceIndex = 0;
+      intersections.forEach((intersection, i) => {
+        let d = intersection.dist(parking.center);
+
+        if (d < minDistance) {
+          minDistanceIndex = i;
+          minDistance = d;
+        }
+      })
+
+      edgeIntersections.push({
+        edge: edgeIndecies[minDistanceIndex],
+        intersection: intersections[minDistanceIndex],
+        distance: minDistance,
+        minDistanceIndex: minDistanceIndex,
+        offset: offset,
+      });
+    });
+
+
+    edgeIntersections.forEach((intersection, i) => {
+      p.ellipse(intersection?.intersection?.x || 0, intersection?.intersection?.y || 0, 40.40)
+      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + intersection.offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + intersection.offset[1]) * crossSize)
+      // p.text(i, intersection.intersection.x, intersection.intersection.y)
+    })
+
+    const totalEdges = edgeIntersections.length;
+    const polys: p5.Vector[][] = []
+    edgeIntersections.forEach((_current, index) => {
+
+      const nextIndex = (index + 1) % totalEdges; // Wrap around to the start when at the last index
+      // const next = edgeIntersections[nextIndex];
+
+
+      const poly = [
+        parking.center,
+        edgeIntersections[index].intersection,
+        property.propertyEdges[edgeIntersections[index].edge].point2,
+      ];
+      const startEdge = edgeIntersections[index].edge;
+      const endEdge = edgeIntersections[nextIndex].edge;
+      const indexes = createWrappedIndices(startEdge, endEdge, property.propertyEdges.length)
+
+      indexes.forEach(index =>
+        poly.push(
+          property.propertyEdges[index].point2,
+        )
+      )
+      poly.push(edgeIntersections[nextIndex].intersection);
+      polys.push(poly);
+    });
+
+    let maxArea = -Infinity;
+    let maxAreaIndex = 0;
+    let neighboringMaxIndex = -1;
+    let secondMaxArea = -Infinity;
+
+    polys.forEach((poly, i) => {
+      let area = calculateArea(poly);
+
+      if (area > maxArea) {
+        // Update second max area with the previous max area
+        secondMaxArea = maxArea;
+
+        // Update neighbor index
+        neighboringMaxIndex = maxAreaIndex;
+
+        // Set new max area and max area index
+        maxArea = area;
+        maxAreaIndex = i;
+      } else if (area > secondMaxArea) {
+        // Update the second max area and its index
+        secondMaxArea = area;
+        neighboringMaxIndex = i;
+      }
+    });
+
+    this.propertyQuadrants = polys;
+
+    this.maxAreaIndex = maxAreaIndex;
+    // let index = 0;
+    // if ((maxAreaIndex === 3 || maxAreaIndex === 0) && (neighboringMaxIndex === 3 || neighboringMaxIndex === 0)) {
+    //   index = 0
+    // }
+
+    // else if ((maxAreaIndex === 1 || maxAreaIndex === 0) && (neighboringMaxIndex === 1 || neighboringMaxIndex === 0)) {
+    //   index = 1
+    // }
+
+    // else if ((maxAreaIndex === 3 || maxAreaIndex === 2) && (neighboringMaxIndex === 3 || neighboringMaxIndex === 2)) {
+    //   index = 3
+    // }
+
+    // else if ((maxAreaIndex === 1 || maxAreaIndex === 2) && (neighboringMaxIndex === 1 || neighboringMaxIndex === 2)) {
+    //   index = 2
+    // }
+
+    // if (maxAreaIndex - neighboringMaxIndex > 0) {
+    // const center = getCenterPoint(p, [0], polys[index][1]);
+    // const center = getCenterPoint(p, polys[index][0], polys[index][1]);
+
+
+  }
+
+
+}
 
 class SitePlanElement {
   public angle: number;
@@ -254,6 +399,11 @@ class SitePlanElement {
     this.update();
   }
 
+  updateWidth(width: number) {
+    this.width = width;
+    this.update();
+  }
+
   updateSitePlanElementCorners() {
     const p = this.p;
     const center = this.center;
@@ -304,10 +454,10 @@ class SitePlanElement {
     });
   }
 
-
   isMouseHovering(): boolean {
     return polyPoint(this.sitePlanElementCorners, this.p.mouseX, this.p.mouseY);
   }
+
   isMouseHoveringOffset(): boolean {
     return polyPoint(this.offsetSitePlanElementCorners, this.p.mouseX, this.p.mouseY);
   }
@@ -315,6 +465,7 @@ class SitePlanElement {
   createOffsetPolygon() {
     this.offsetSitePlanElementCorners = expandPolygon(this.p, this.sitePlanElementCorners, 30);
   }
+
   drawSitePlanElement() {
     const p = this.p;
     p.angleMode(p.DEGREES);
@@ -351,183 +502,7 @@ class SitePlanElement {
 
   }
 
-
-  buildingLocator(property: Property, parking: SitePlanElement) {
-    const p = this.p;
-    // Find which edge the line intersects by looping through all the edges. If there are more than one, use the one closest to the center point
-    // Find the intersection points of all the crosses, then calculate the area minus the parking size to get the "quadrant" with the most availiable area.
-
-    p.stroke(50, 150, 150)
-    const crossSize = 200;
-
-    const offsets = [
-      [-90, -90],
-      [0, 0],
-      [90, 90],
-      [180, 180],
-    ];
-
-    const edgeIntersections: {
-      edge: number;
-      intersection: p5.Vector;
-      distance: number;
-      minDistanceIndex: number;
-      offset: number[];
-    }[] = [];
-
-
-
-    offsets.forEach((offset, offsetIndex) => {
-      const intersections: p5.Vector[] = []
-      const edgeIndecies: number[] = []
-
-      property.propertyEdges.forEach((edge, edgeIndex) => {
-        const intersect = getLineIntersection(
-          p,
-          [p.createVector(parking.center.x, parking.center.y), p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)],
-          [edge.point1, edge.point2]
-        )
-        if (intersect) {
-          intersections.push(intersect)
-          edgeIndecies.push(edgeIndex);
-        }
-      })
-
-
-      let minDistance = Infinity;
-      let minDistanceIndex = 0;
-      intersections.forEach((intersection, i) => {
-        let d = intersection.dist(parking.center);
-
-        if (d < minDistance) {
-          minDistanceIndex = i;
-          minDistance = d;
-        }
-      })
-
-      edgeIntersections.push({
-        edge: edgeIndecies[minDistanceIndex],
-        intersection: intersections[minDistanceIndex],
-        distance: minDistance,
-        minDistanceIndex: minDistanceIndex,
-        offset: offset,
-      });
-
-
-
-    });
-
-
-    edgeIntersections.forEach((intersection, i) => {
-      p.ellipse(intersection?.intersection?.x || 0, intersection?.intersection?.y || 0, 40.40)
-      p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + intersection.offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + intersection.offset[1]) * crossSize)
-      // p.text(i, intersection.intersection.x, intersection.intersection.y)
-    })
-
-    const totalEdges = edgeIntersections.length;
-    const polys: p5.Vector[][] = []
-    edgeIntersections.forEach((_current, index) => {
-
-      const nextIndex = (index + 1) % totalEdges; // Wrap around to the start when at the last index
-      // const next = edgeIntersections[nextIndex];
-
-
-      const poly = [
-        parking.center,
-        edgeIntersections[index].intersection,
-        property.propertyEdges[edgeIntersections[index].edge].point2,
-      ];
-      const startEdge = edgeIntersections[index].edge;
-      const endEdge = edgeIntersections[nextIndex].edge;
-      const indexes = createWrappedIndices(startEdge, endEdge, property.propertyEdges.length)
-
-      indexes.forEach(index =>
-        poly.push(
-          property.propertyEdges[index].point2,
-        )
-      )
-      poly.push(edgeIntersections[nextIndex].intersection);
-      polys.push(poly);
-    });
-
-    let maxArea = -Infinity;
-    let maxAreaIndex = 0;
-    let neighboringMaxIndex = -1;
-    let secondMaxArea = -Infinity;
-
-    polys.forEach((poly, i) => {
-      let area = calculateArea(poly);
-
-      if (area > maxArea) {
-        // Update second max area with the previous max area
-        secondMaxArea = maxArea;
-
-        // Update neighbor index
-        neighboringMaxIndex = maxAreaIndex;
-
-        // Set new max area and max area index
-        maxArea = area;
-        maxAreaIndex = i;
-      } else if (area > secondMaxArea) {
-        // Update the second max area and its index
-        secondMaxArea = area;
-        neighboringMaxIndex = i;
-      }
-    });
-
-
-    let index = 0;
-    if ((maxAreaIndex === 3 || maxAreaIndex === 0) && (neighboringMaxIndex === 3 || neighboringMaxIndex === 0)) {
-      index = 0
-    }
-
-    else if ((maxAreaIndex === 1 || maxAreaIndex === 0) && (neighboringMaxIndex === 1 || neighboringMaxIndex === 0)) {
-      index = 1
-    }
-
-    else if ((maxAreaIndex === 3 || maxAreaIndex === 2) && (neighboringMaxIndex === 3 || neighboringMaxIndex === 2)) {
-      index = 3
-    }
-
-    else if ((maxAreaIndex === 1 || maxAreaIndex === 2) && (neighboringMaxIndex === 1 || neighboringMaxIndex === 2)) {
-      index = 2
-    }
-
-    // if (maxAreaIndex - neighboringMaxIndex > 0) {
-    // const center = getCenterPoint(p, [0], polys[index][1]);
-    // const center = getCenterPoint(p, polys[index][0], polys[index][1]);
-
-    const center = calculateCentroid(polys[maxAreaIndex])
-
-    // Building
-    this.center = p.createVector(center.x, center.y);
-    p.ellipse(this.center.x, this.center.y, 30, 30)
-
-
-    // Draw the polygon using the corner vectors
-    p.beginShape();
-    const r = p.map(2, 0, totalEdges, 0, 255)
-    const g = p.map(2, 0, totalEdges, 255, 50)
-
-    p.fill(r, g, 225, 50); // Fill color with transparency
-    p.stroke(0); // Outline color
-    p.strokeWeight(2);
-
-    polys[maxAreaIndex].forEach((corner, i) => {
-      p.vertex(corner.x, corner.y);
-    });
-
-    // polys[neighboringMaxIndex].forEach((corner, i) => {
-    //   p.vertex(corner.x, corner.y);
-    // });
-
-
-    p.endShape(p.CLOSE); // Close the polygon
-  }
 }
-
-
-
 
 class Parking extends SitePlanElement {
   // public additionalProperty: string; // Example of a new property
@@ -854,6 +829,171 @@ class Building extends SitePlanElement {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType);
   }
+
+  buildingLocator(p: p5, polys: p5.Vector[][], maxAreaIndex: number, building: Building, totalEdges: number,) {
+    const center = calculateCentroid(polys[maxAreaIndex])
+
+    // Building
+    building.center = p.createVector(center.x, center.y);
+    // p.ellipse(building.center.x, building.center.y, 30, 30)
+
+
+    // // Draw the polygon using the corner vectors
+    // p.beginShape();
+    // const r = p.map(2, 0, totalEdges, 0, 255)
+    // const g = p.map(2, 0, totalEdges, 255, 50)
+
+    // p.fill(r, g, 225, 50); // Fill color with transparency
+    // p.stroke(0); // Outline color
+    // p.strokeWeight(2);
+
+    // polys[maxAreaIndex].forEach((corner, i) => {
+    //   p.vertex(corner.x, corner.y);
+    // });
+
+    // // polys[neighboringMaxIndex].forEach((corner, i) => {
+    // //   p.vertex(corner.x, corner.y);
+    // // });
+    // p.endShape(p.CLOSE); // Close the polygon
+  }
+
+  reset(){
+    this.updateheight(50);
+    this.updateWidth(50)
+  }
+
+  buildingGrower(property: Property, parking: Parking) {
+    type TDimensions = "center" | "angle" | "width" | "height" | "corners";
+    type DimensionValue = {
+      x: number;
+      y: number;
+
+      angle: number;
+      width: number;
+      height: number;
+      corners: p5.Vector[];
+    }
+
+    type Dimensions = Record<TDimensions, DimensionValue>;
+
+    const nudgeStrength = 10;
+
+    const nudgeStrengthDimensions = 1;
+    const angleNudge = 2;
+    const possibleDimensions: DimensionValue[] = [];
+    const numChildren = 10;
+
+    const defaultDimensions: DimensionValue = {
+      x: this.center.x,
+      y: this.center.y,
+      angle: this.angle,
+      width: this.width,
+      height: this.height,
+      corners: this.sitePlanElementCorners,
+    }
+
+
+    const targetArea = 200000;
+
+    // const vertices = Object.keys(defaultDimensions);
+    const vertices: (keyof DimensionValue)[] = Object.keys(defaultDimensions) as (keyof DimensionValue)[];
+
+
+    // Initialize the potential children
+    for (let i = 0; i < numChildren; i++) {
+      possibleDimensions.push(defaultDimensions);
+    }
+
+    const randomNudge = arrayOfRandomNudges(nudgeStrengthDimensions, numChildren * 2);
+    const randomAnglesNudge = arrayOfRandomNudges(angleNudge, numChildren);
+
+
+    let bestArea = calculateArea(this.sitePlanElementCorners);
+    let bestAreaDifference = Infinity;
+    let bestAreaIndex = 0;
+
+    // create a new variation of each child. Let the first child be an exact clone of the parent
+    for (let i = 1; i < numChildren; i++) {
+
+
+      // const corners = this.sitePlanElementCorners;
+
+
+      // vertices.forEach((vertex, index: number) => {
+      const randomNudgePosition = arrayOfRandomNudges(nudgeStrength, 4);
+
+      const newDimension = {
+        ...possibleDimensions[i],
+        width: possibleDimensions[i].width + randomNudgePosition[2],
+        height: possibleDimensions[i].height + randomNudgePosition[3],
+        x: possibleDimensions[i].x + randomNudgePosition[0],
+        y: possibleDimensions[i].y + randomNudgePosition[1],
+        // angle: possibleDimensions[i].angle + randomAnglesNudge[i]
+      };
+
+
+      const _x = newDimension.x
+      const _y = newDimension.y
+      const _width = newDimension.width
+      const _height = newDimension.height
+      const _angle = newDimension.angle
+      const tempBuildingCorners = createSitePlanElementCorners(this.p, _x, _y, _width, _height, _angle)
+
+
+
+
+      // check if new points are inside the boundary;
+
+      const newPointsAreInBoundary = truthChecker(tempBuildingCorners.map(corner => {
+        const point: Point = [corner.x, corner.y];
+        return pointsAreInBoundary(property.propertyCorners, point) === -1
+      }));
+
+      const newPointsAreOutOfParking = truthChecker(tempBuildingCorners.map(corner => {
+        const point: Point = [corner.x, corner.y];
+        return pointsAreInBoundary(property.propertyCorners, point) === -1
+      }));
+
+      const newPointsAreInBoundaryRight = truthChecker(tempBuildingCorners.map(corner => {
+        const point: Point = [corner.x, corner.y];
+        return truthChecker(parking.parkingStalls.right.map(stall => {
+          return pointsAreInBoundary(stall.stallCorners, point) === 1
+        }))
+      }));
+      const newPointsAreInBoundaryLeft = truthChecker(tempBuildingCorners.map(corner => {
+        const point: Point = [corner.x, corner.y];
+        return truthChecker(parking.parkingStalls.left.map(stall => {
+          return pointsAreInBoundary(stall.stallCorners, point) === 1
+        }))
+      }));
+
+
+      if (newPointsAreInBoundary && newPointsAreOutOfParking && newPointsAreInBoundaryRight && newPointsAreInBoundaryLeft) {
+        possibleDimensions[i] = {
+          ...possibleDimensions[i],
+          ...newDimension
+        };
+
+
+        const area = calculateArea(tempBuildingCorners);
+        if (Math.abs(targetArea - area) < Math.abs(targetArea - bestArea)) {
+          bestArea = area;
+          bestAreaIndex = i;
+        }
+      }
+    }
+
+
+
+    // this.updateAngle(possibleDimensions[bestAreaIndex].angle)
+    this.updateCenter(possibleDimensions[bestAreaIndex].x, possibleDimensions[bestAreaIndex].y)
+    this.updateheight(possibleDimensions[bestAreaIndex].height);
+    this.updateWidth(possibleDimensions[bestAreaIndex].width)
+
+    // console.log(`bestAreaIndex`, possibleDimensions[bestAreaIndex].x, possibleDimensions[0].x)
+
+  }
+
 }
 
 
@@ -891,9 +1031,11 @@ export class AdjacencyGraphVisualizer2 {
     const parking = new Parking(p, p.createVector(488, 308), 120, 350, 15, ESitePlanObjects.ParkingWay);
     const building = new Building(p, p.createVector(p.width / 2, p.height / 2), 100, 100, 15, ESitePlanObjects.Building);
 
+
+
+
     approach.initialize()
     parking.initializeParking()
-
 
     parking.calculateNumberOfFittableStalls(propertyCorners);
     parking.updateStallCorners();
@@ -949,6 +1091,8 @@ export class AdjacencyGraphVisualizer2 {
 
           parking.updateStallCorners();
           parking.updateParkingHeight(propertyCorners);
+          building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
+
 
         }
         else {
@@ -973,6 +1117,8 @@ export class AdjacencyGraphVisualizer2 {
         parking.calculateNumberOfFittableStalls(propertyCorners);
         parking.updateStallCorners();
         parking.updateParkingHeight(propertyCorners);
+        building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
+
       }
 
 
@@ -1000,6 +1146,8 @@ export class AdjacencyGraphVisualizer2 {
           parking.calculateNumberOfFittableStalls(propertyCorners);
           parking.updateStallCorners();
           parking.updateParkingHeight(propertyCorners);
+        building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
+
 
           // building.updateCenter();
 
@@ -1018,15 +1166,15 @@ export class AdjacencyGraphVisualizer2 {
 
     };
 
-
-    p.mousePressed = () => {
-
-    };
+    p.mousePressed = () => { };
 
     p.mouseReleased = () => {
       isDraggingParking = false;
       isDraggingApproach = false;
       isDraggingParkingOffset = false;
+
+      building.reset()
+
     };
 
     p.draw = () => {
@@ -1040,13 +1188,11 @@ export class AdjacencyGraphVisualizer2 {
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
       parking.drawParkingStalls();
-      // building.drawSitePlanElement();
+      building.drawSitePlanElement();
 
       createDriveway(p, approach, parking);
-      // building.buildingLocator(property, parking);
-
-
-
+      property.propertyQuadrant(property, parking, building);
+      building.buildingGrower(property, parking);
     };
   }
 }
@@ -1457,12 +1603,6 @@ function expandPolygon(p: p5, polygon: p5.Vector[], offset: number): p5.Vector[]
   return expandedPolygon;
 }
 
-/**
- * Calculate the outward normal of an edge.
- * @param p1 - The start point of the edge.
- * @param p2 - The end point of the edge.
- * @returns The outward normal vector of the edge.
- */
 function calculateEdgeNormal(p: p5, p1: p5.Vector, p2: p5.Vector): p5.Vector {
   const dx = p2.x - p1.x;
   const dy = p2.y - p1.y;
@@ -1472,5 +1612,37 @@ function calculateEdgeNormal(p: p5, p1: p5.Vector, p2: p5.Vector): p5.Vector {
   return p.createVector(
     dy / length,
     -dx / length
+  )
+}
+
+
+
+function arrayOfRandomNudges(nudgeStrength: number, numberOfRandomNumbers: number) {
+  const arr = new Array(numberOfRandomNumbers).fill(0)
+  return arr.map(() => Math.random() * nudgeStrength * 2 - nudgeStrength)
+}
+
+function createSitePlanElementCorners(p: p5, x: number, y: number, width: number, height: number, angle: number) {
+  const halfWidth = width / 2;
+  const halfHeight = height / 2;
+
+  // Define the initial (unrotated) corner points relative to the center
+  const corners: p5.Vector[] = [
+    p.createVector(-halfWidth, -halfHeight), // Top-left
+    p.createVector(halfWidth, -halfHeight),  // Top-right
+    p.createVector(halfWidth, halfHeight),   // Bottom-right
+    p.createVector(-halfWidth, halfHeight),  // Bottom-left
+  ];
+
+  // Convert the angle to radians
+  const _angle = normalizeAngle(angle);
+
+  // Rotate each corner around the center and compute its absolute position
+
+  return (corners.map((corner) => {
+    const rotatedX = corner.x * p.cos(_angle) - corner.y * p.sin(_angle);
+    const rotatedY = corner.x * p.sin(_angle) + corner.y * p.cos(_angle);
+    return p.createVector(x + rotatedX, y + rotatedY);
+  })
   )
 }
