@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import LotLineDrawer from './LotLineDrawerP5';
-import VoronoiDiagram from '../futureItems/VoronoiDiagram';
+// import LotLineDrawer from './LotLineDrawerP5';
+// import VoronoiDiagram from '../futureItems/VoronoiDiagram';
 import { AdjacencyGraph } from '../utils/AdjacencyGraph';
 import p5 from 'p5';
 import { AdjacencyGraphVisualizer2 } from '../utils/AdjacencyGraphVisualizer2';
-import LotLineDrawerOld from '../futureItems/LotLineDrawerOld';
-import { SubdivisionGenerator } from './SubdivisionGenerator';
-import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
+import LotLineDrawer from '../futureItems/LotLineDrawerOld';
+// import LotLineDrawerOld from '../futureItems/LotLineDrawerOld';
+// import { SubdivisionGenerator } from './SubdivisionGenerator';
+// import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
 
 
 interface Point {
@@ -15,10 +16,15 @@ interface Point {
 }
 
 interface Line {
-  start: Point;
-  end: Point;
-  selected: boolean; // Indicates if the line is selected for approach
-  setback?: number; // Stores the setback value in feet (optional)
+  start: number;
+  end: number;
+  // selected: boolean;
+  setback?: number;
+  color: string;
+  index: number;
+  selected: boolean;
+  isApproach: boolean;
+  isScale: boolean;
 }
 
 interface FinalizedData {
@@ -28,45 +34,354 @@ interface FinalizedData {
 }
 
 const SitePlanDesigner: React.FC = () => {
-
-
-  const graph = new AdjacencyGraph();
-  graph.addEdges("Parking1", ["Driveway"]);
-  graph.addEdges("Parking2", ["Driveway"]);
-  graph.addEdges("Driveway", ["Bike Parking", "Approach", "Garbage"]);
-  graph.addEdges("Bike Parking", ["Approach", "Building"]);
-
-  // graph.display();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageURL, setImageURL] = useState<string | null>(null);
+  // const [isPolygonClosed, setIsPolygonClosed] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const sketch = (p: any) => {
-      const visualizer = new AdjacencyGraphVisualizer2(graph);
-      // const subdivisionGenerator = new SubdivisionGenerator();
-      
-      p.setup = () => {
-        p.createCanvas(800, 800).parent(canvasRef.current!);
-        visualizer.visualize2(p);
-        // subdivisionGenerator.subdivide(p);
+  const pointsRef = useRef<Point[]>([]);
+  const linesRef = useRef<Line[]>([]);
+  const isPolygonClosedRef = useRef<boolean>(false);
+  const isSelectingApproachRef = useRef<boolean>(false);
+  const isDefiningScaleRef = useRef<boolean>(false);
+  const inputScaleRef = useRef<number | null>(null);
+  const scaleRef = useRef<number | null>(null);
 
-        p.frameRate(8);
-      };
 
+  const draggingPointIndexRef = useRef<number | null>(null);
+  const selectedLineIndexRef = useRef<number | null>(null);
+
+
+  // Handle file upload
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const url = URL.createObjectURL(file);
+      setImageURL(url);
+    }
+  };
+
+  // P5 sketch function
+  const sketch = (p: p5) => {
+    let img: p5.Image | null = null;
+    // const 
+    p.preload = () => {
+      if (imageURL) {
+        img = p.loadImage(imageURL);
+      }
     };
-    new p5(sketch);
-  }, [])
 
- 
+    p.setup = () => {
+      const canvas = p.createCanvas(800, 600);
+      if (canvasRef.current) {
+        canvas.parent(canvasRef.current);
+      }
+    };
+
+    p.draw = () => {
+      calculateScale()
+      const scale = scaleRef.current || .5;
+
+
+      if (img) {
+
+        // Resize the image, keeping the aspect ratio.
+        if(img.width >  img.height){
+          img.resize(0, p.height);
+
+        }else{
+          img.resize(p.width, 0);
+
+        }
+
+        // Display the resized image.
+        p.image(img, 0, 0);
+
+
+        // p.image(img, 0, 0, img.width, img.height); // Draw the image as the background
+      } else {
+        p.background(200); // Default background
+      }
+
+      // Draw lines connecting points
+      const points = pointsRef.current;
+      const lines = linesRef.current;
+      // const isPolygonClosed = isPolygonClosedRef.current;
+
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        if (line.isApproach) {
+          p.stroke(20, 230, 120);
+        }
+        else if (line.isScale) {
+          p.stroke(230, 120, 20);
+
+        }
+        else {
+          p.stroke(0, 20, 220);
+        }
+        // p.stroke(line.color);
+        p.strokeWeight(2);
+        const midX = (points[line.start].x + points[line.end].x) / 2;
+        const midY = (points[line.start].y +  points[line.end].y) / 2;
+        const length = Math.hypot( points[line.end].x - points[line.start].x,  points[line.end].y - points[line.start].y) * scale;
+        p.text(`${length.toFixed(1)} ft`, midX, midY);
+        p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
+      }
+
+      for (const point of points) {
+        p.fill(255, 0, 0);
+        p.noStroke();
+        p.ellipse(point.x, point.y, 10, 10);
+      }
+
+    
+
+      drawArea(p, isPolygonClosedRef.current, points, scale);
+    };
+
+    p.mousePressed = () => {
+      const points = pointsRef.current;
+      const lines = linesRef.current;
+      const isPolygonClosed = isPolygonClosedRef.current;
+      const isSelectingApproach = isSelectingApproachRef.current;
+      const isDefiningScale = isDefiningScaleRef.current;
+      const scale = scaleRef.current;
+
+
+      const mx = p.mouseX;
+      const my = p.mouseY;
+
+      if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
+
+      // Check if a point is clicked
+      const pointIndex = points.findIndex((point) => p.dist(point.x, point.y, mx, my) < 10);
+
+      if (pointIndex !== -1) {
+        // Start dragging the clicked point
+        draggingPointIndexRef.current = pointIndex;
+      }
+      else if (!isPolygonClosed) {
+        // Add a new point
+        points.push({ x: mx, y: my });
+
+        if (points.length > 1) {
+          const newLine: Line = {
+            start: points.length - 2,
+            end: points.length - 1,
+            color: "#000000", // Default line color
+            index: lines.length - 1,
+            selected: false,
+            isApproach: false,
+            isScale: false,
+          };
+          lines.push(newLine);
+        }
+      }
+
+      // Close the polygon if the first and last points are clicked
+      if (
+        points.length > 2 &&
+        p.dist(points[0].x, points[0].y, mx, my) < 10 &&
+        !isPolygonClosed
+      ) {
+        isPolygonClosedRef.current = true;
+
+        const newLine: Line = {
+          start: points.length - 1,
+          end: 0,
+          color: "#000000", // Default line color
+          index: lines.length - 1,
+          selected: false,
+          isApproach: false,
+          isScale: false
+        };
+        lines.push(newLine);
+      }
+
+
+      if (isPolygonClosed) {
+        // Check if a line is clicked
+        const lineIndex = lines.findIndex((line) => {
+          const d1 = p.dist(mx, my, points[line.start].x, points[line.start].y);
+          const d2 = p.dist(mx, my, points[line.end].x, points[line.end].y);
+          const lineLength = p.dist(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
+          return Math.abs(d1 + d2 - lineLength) < 5; // Allow for small tolerance
+        });
+
+
+        // Set line to be an approach
+        if (lineIndex !== -1) {
+          selectedLineIndexRef.current = lineIndex;
+
+
+          if (isSelectingApproach) {
+            lines[lineIndex].isApproach = !lines[lineIndex].isApproach
+          }
+
+          if (isDefiningScale && !inputScaleRef.current && !scale) {
+            lines[lineIndex].isScale = !lines[lineIndex].isScale
+          }
+
+          // lines[lineIndex].color = "#00FF00"; // Change color of the selected line to green
+          return;
+        }
+      }
+    };
+
+    p.mouseDragged = () => {
+      const draggingPointIndex = draggingPointIndexRef.current;
+      if (draggingPointIndex !== null) {
+        const points = pointsRef.current;
+        points[draggingPointIndex] = { x: p.mouseX, y: p.mouseY };
+      }
+    };
+
+    p.mouseReleased = () => {
+      draggingPointIndexRef.current = null;
+      selectedLineIndexRef.current = null;
+    };
+
+
+
+    const calculateScale = () => {
+      const inputScale = inputScaleRef.current;
+      const points = pointsRef.current;
+      const lines = linesRef.current;
+      const lineIndex = lines.find(line => line.isScale)?.index;
+
+      if (lineIndex && lineIndex !== -1) {
+
+
+       
+        const lineLength = p.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
+
+        if (inputScale && lineLength) {
+          scaleRef.current = inputScale / lineLength;
+        }
+      }
+    }
+  };
+
+
+
+  useEffect(() => {
+    const p5Instance = new p5(sketch);
+    return () => {
+      p5Instance.remove();
+    };
+  }, [imageURL]);
+
+
+  const createPoints = () => {
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = false;
+  }
+  const clearCanvas = () => {
+    setImageFile(null);
+    setImageURL(null);
+    pointsRef.current = []
+    linesRef.current = [];
+    isPolygonClosedRef.current = false;
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = false;
+    draggingPointIndexRef.current = null;
+    selectedLineIndexRef.current = null;
+    inputScaleRef.current = null;
+  };
+
+  const selectApproach = () => {
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = true;
+  }
+  const defineScale = () => {
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = true;
+  }
+
+  const generateSitePlan = () => {
+    const points = pointsRef.current;
+    const lines = linesRef.current;
+    const scale = scaleRef.current;
+
+
+    console.log(`points`, points, scale, lines)
+
+  }
 
   return (
     <div>
+      <h1>Polygon Editor</h1>
+      <button
+        onClick={clearCanvas}
+        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+      >
+        Clear
+      </button>
+
+      <button
+        onClick={createPoints}
+        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+      >
+        Create Points
+      </button>
+
+      <button
+        onClick={selectApproach}
+        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+      >
+        Select approach
+      </button>
+
+      <button
+        onClick={defineScale}
+        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+      >
+        Define Scale
+      </button>
+
+      <button
+        onClick={generateSitePlan}
+        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+      >
+        Generate Site Plan
+      </button>
 
 
-      {/* <VoronoiSubdivision/> */}
-      <div ref={canvasRef} style={{ marginTop: '20px' }}>
+
+      <div style={{ marginTop: '10px' }}>
+        <label>Edge Length (ft): </label>
+        <input
+          // ref={setbackInputRef} // Attach ref for auto-focus
+          type="number"
+          value={inputScaleRef.current || undefined}
+          onChange={(e) => { inputScaleRef.current = Number(e.target.value) }}
+          autoFocus
+        />
       </div>
+
+
+
+
+
+      <input type="file" accept="image/*" onChange={handleFileUpload} />
+      <div ref={canvasRef} />
     </div>
+
+    // <div>
+
+
+    //   {/* <VoronoiSubdivision/> */}
+    //   <input type="file" accept="image/*" onChange={handleFileUpload} />
+    //   <LotLineDrawer imageURL={imageURL}/>
+
+    //   <div ref={canvasRef} style={{ marginTop: '20px' }}>
+    //   </div>
+    // </div>
   );
 };
 
@@ -75,19 +390,75 @@ export default SitePlanDesigner;
 
 
 
+const calculateArea = (polygon: Point[]): number => {
+  let total = 0;
+  for (let i = 0; i < polygon.length; i++) {
+    const next = (i + 1) % polygon.length;
+    total += polygon[i].x * polygon[next].y - polygon[next].x * polygon[i].y;
+  }
+  return Math.abs(total / 2);
+};
+
+
+function drawArea(
+  p: p5,
+  isPolygonClosed: boolean,
+  points: Point[],
+  scale: number,
+) {
+  if (!isPolygonClosed || points.length < 3) return;
+  const area = calculateArea(points) * Math.pow(scale, 2)
+  // p.noFill()
+  p.stroke(0, 0, 0)
+  p.strokeWeight(1)
+
+  p.textSize(24);
+  p.text(`Area: ${area.toFixed(2)} sq ft`, 10, p.height - 20);
+}
 
 
 
 
-{/* <LotLineDrawerOld onFinalize={handleFinalize} /> */}
+// const graph = new AdjacencyGraph();
+// graph.addEdges("Parking1", ["Driveway"]);
+// graph.addEdges("Parking2", ["Driveway"]);
+// graph.addEdges("Driveway", ["Bike Parking", "Approach", "Garbage"]);
+// graph.addEdges("Bike Parking", ["Approach", "Building"]);
+
+
+// const canvasRef = useRef<HTMLDivElement>(null);
+
+// const sketch = (p: p5) => {
+//   let img: p5.Image | null = null;
+//   p.preload = () => {
+//     if (imageURL) {
+//       img = p.loadImage(imageURL);
+//     }
+//   };
+
+//   const visualizer = new AdjacencyGraphVisualizer2(graph);
+//   // const subdivisionGenerator = new SubdivisionGenerator();
+
+//   p.setup = () => {
+//     p.createCanvas(800, 800).parent(canvasRef.current!);
+
+
+//     visualizer.visualize2(p);
+//     // subdivisionGenerator.subdivide(p);
+//     p.frameRate(8);
+
+
+//   };
+
+{/* <LotLineDrawerOld onFinalize={handleFinalize} /> */ }
 
 // const handleFinalize = (data: FinalizedData) => {
 //   setFinalizedData(data); // Save the finalized data
 // };
 // const [finalizedData, setFinalizedData] = useState<FinalizedData | null>(null);
-  {/* <VoronoiDiagram/> */}
-      {/* <PolygonDivider /> */}
-      {/* {!finalizedData ? (
+{/* <VoronoiDiagram/> */ }
+{/* <PolygonDivider /> */ }
+{/* {!finalizedData ? (
         
         // <LotLineDrawer  />
      
@@ -97,26 +468,26 @@ export default SitePlanDesigner;
           <h2>Finalized Data</h2>
           <pre>{JSON.stringify(finalizedData, null, 2)}</pre>
           {/* Replace this with the next step in your workflow */}
-      {/* </div> */}
-      {/* // )} */}
+{/* </div> */ }
+{/* // )} */ }
 
 
 
-  // // graph.addVertex("Property Line");
-  // // graph.addVertex("Setback");
-  // // graph.addVertex("Easement");
-  // // graph.addVertex("Landscaping");
-  // // graph.addVertex("Parking1");
-  // // graph.addVertex("Parking2");
-  // // graph.addVertex("Driveway");
-  // // graph.addVertex("Bike Parking");
-  // // graph.addVertex("Building");
-  // // graph.addVertex("Approach");
-  // // graph.addVertex("Sidewalk");
-  // // graph.addVertex("Garbage");
+// // graph.addVertex("Property Line");
+// // graph.addVertex("Setback");
+// // graph.addVertex("Easement");
+// // graph.addVertex("Landscaping");
+// // graph.addVertex("Parking1");
+// // graph.addVertex("Parking2");
+// // graph.addVertex("Driveway");
+// // graph.addVertex("Bike Parking");
+// // graph.addVertex("Building");
+// // graph.addVertex("Approach");
+// // graph.addVertex("Sidewalk");
+// // graph.addVertex("Garbage");
 
-  // // graph.addEdges("Property Line", ["Setback", "Easement", "Landscaping", "Approach", "Sidewalk"]);
-  // // graph.addEdges("Setback", ["Easement", "Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
-  // // graph.addEdges("Easement", ["Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
-  // // graph.addEdges("Landscaping", ["Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
-  // // graph.addEdges("Sidewalk", ["Garbage","Driveway","Bike Parking","Building","Approach","Parking1","Parking2"]);
+// // graph.addEdges("Property Line", ["Setback", "Easement", "Landscaping", "Approach", "Sidewalk"]);
+// // graph.addEdges("Setback", ["Easement", "Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
+// // graph.addEdges("Easement", ["Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
+// // graph.addEdges("Landscaping", ["Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
+// // graph.addEdges("Sidewalk", ["Garbage","Driveway","Bike Parking","Building","Approach","Parking1","Parking2"]);

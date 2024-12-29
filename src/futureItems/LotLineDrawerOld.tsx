@@ -13,10 +13,11 @@ interface Line {
 }
 
 interface LotLineDrawerProps {
-  onFinalize: (data: { lines: Line[]; approachLines: Line[]; setbacks: { lineIndex: number; setback: number }[] }) => void;
+  imageURL: string | null
+  // onFinalize: (data: { lines: Line[]; approachLines: Line[]; setbacks: { lineIndex: number; setback: number }[] }) => void;
 }
 
-const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
+const LotLineDrawer: React.FC<LotLineDrawerProps> = ({  imageURL  }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const setbackInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -30,6 +31,8 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
   const [setbackInput, setSetbackInput] = useState<string>(''); // Temporary input for setback
   const [scale, setScale] = useState<number>(20); // Default scale (100px = 20ft)
   const [area, setArea] = useState<number>(0); // Area of the polygon
+
+
 
 
   // Ensure the input is focused when a line is selected
@@ -74,11 +77,13 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
     drawArea(ctx, isPolygonClosed, points, area);
   }, [points, lines, hoverPoint, isPolygonClosed, mode, scale, area]);
   
+
   const handleMouseDown = handleMouseDownInCanvas(canvasRef, points, setDraggingIndex, isPolygonClosed, lines, mode, setLines, setSelectedLineIndex, setIsPolygonClosed, setPoints);
   const handleMouseMove = handleMouseMoveInCanvas(canvasRef, draggingIndex, setPoints, setLines, points, isPolygonClosed, setHoverPoint, mode, lines);
   const handleMouseUp = () => { setDraggingIndex(null); };
-  const saveInputsToParent = saveInputs(lines, onFinalize);
+  const saveInputsToParent = ()=>{};//saveInputs(lines, onFinalize);
   const updateSetback = updateSetbacksForLotBoundries(setSetbackInput, selectedLineIndex, setLines);
+
 
   const clearCanvas = () => {
     setPoints([]);
@@ -94,6 +99,8 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
 
   return (
     <div>
+
+
       <canvas
         ref={canvasRef}
         width={800}
@@ -103,6 +110,10 @@ const LotLineDrawer: React.FC<LotLineDrawerProps> = ({ onFinalize }) => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       />
+
+
+{/* <div ref={canvasRef} style={{ marginTop: '20px' }}></div> */}
+
       <div style={{ marginTop: '10px' }}>
         <button
           onClick={saveInputsToParent}

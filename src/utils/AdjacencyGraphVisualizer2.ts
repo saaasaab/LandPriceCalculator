@@ -857,27 +857,22 @@ class Building extends SitePlanElement {
     // p.endShape(p.CLOSE); // Close the polygon
   }
 
-  reset(){
+  reset() {
     this.updateheight(50);
     this.updateWidth(50)
   }
 
   buildingGrower(property: Property, parking: Parking) {
-    type TDimensions = "center" | "angle" | "width" | "height" | "corners";
     type DimensionValue = {
       x: number;
       y: number;
-
       angle: number;
       width: number;
       height: number;
       corners: p5.Vector[];
     }
 
-    type Dimensions = Record<TDimensions, DimensionValue>;
-
     const nudgeStrength = 10;
-
     const nudgeStrengthDimensions = 1;
     const angleNudge = 2;
     const possibleDimensions: DimensionValue[] = [];
@@ -892,13 +887,6 @@ class Building extends SitePlanElement {
       corners: this.sitePlanElementCorners,
     }
 
-
-    const targetArea = 200000;
-
-    // const vertices = Object.keys(defaultDimensions);
-    const vertices: (keyof DimensionValue)[] = Object.keys(defaultDimensions) as (keyof DimensionValue)[];
-
-
     // Initialize the potential children
     for (let i = 0; i < numChildren; i++) {
       possibleDimensions.push(defaultDimensions);
@@ -908,18 +896,16 @@ class Building extends SitePlanElement {
     const randomAnglesNudge = arrayOfRandomNudges(angleNudge, numChildren);
 
 
+    // Area needs to be closest to X
+    const targetArea = 50000;
     let bestArea = calculateArea(this.sitePlanElementCorners);
-    let bestAreaDifference = Infinity;
     let bestAreaIndex = 0;
+
+    // Building should be at lease 20 px away from anything else.
+
 
     // create a new variation of each child. Let the first child be an exact clone of the parent
     for (let i = 1; i < numChildren; i++) {
-
-
-      // const corners = this.sitePlanElementCorners;
-
-
-      // vertices.forEach((vertex, index: number) => {
       const randomNudgePosition = arrayOfRandomNudges(nudgeStrength, 4);
 
       const newDimension = {
@@ -928,8 +914,9 @@ class Building extends SitePlanElement {
         height: possibleDimensions[i].height + randomNudgePosition[3],
         x: possibleDimensions[i].x + randomNudgePosition[0],
         y: possibleDimensions[i].y + randomNudgePosition[1],
-        // angle: possibleDimensions[i].angle + randomAnglesNudge[i]
+        angle: possibleDimensions[i].angle + randomAnglesNudge[i]
       };
+
 
 
       const _x = newDimension.x
@@ -941,26 +928,53 @@ class Building extends SitePlanElement {
 
 
 
-
       // check if new points are inside the boundary;
 
-      const newPointsAreInBoundary = truthChecker(tempBuildingCorners.map(corner => {
+      const tempBuildingCornersBufferForParking = expandPolygon(this.p, tempBuildingCorners, 50);
+      const tempBuildingCornersBufferForBorder = expandPolygon(this.p, tempBuildingCorners, 100);
+
+      /* HIDE, only used to show the offsets  */
+      
+      // this.p.beginShape();
+      // this.p.fill(150, 240, 55, 50); // Fill color with transparency
+      // this.p.stroke(0); // Outline color
+      // this.p.strokeWeight(2);
+  
+      // tempBuildingCornersBufferForParking.forEach((corner, i) => {
+      //   this.p.vertex(corner.x, corner.y);
+      //   this.p.text(i, corner.x, corner.y)
+      // });
+      // this.p.endShape(this.p.CLOSE); // Close the polygon
+
+      // this.p.beginShape();
+      // this.p.fill(250, 130, 55, 50); // Fill color with transparency
+      // this.p.stroke(0); // Outline color
+      // this.p.strokeWeight(2);
+  
+      // tempBuildingCornersBufferForBorder .forEach((corner, i) => {
+      //   this.p.vertex(corner.x, corner.y);
+      //   this.p.text(i, corner.x, corner.y)
+      // });
+      // this.p.endShape(this.p.CLOSE); // Close the polygon
+
+
+      const newPointsAreInBoundary = truthChecker(tempBuildingCornersBufferForBorder.map(corner => {
         const point: Point = [corner.x, corner.y];
         return pointsAreInBoundary(property.propertyCorners, point) === -1
       }));
 
-      const newPointsAreOutOfParking = truthChecker(tempBuildingCorners.map(corner => {
+      const newPointsAreOutOfParking = truthChecker(tempBuildingCornersBufferForBorder.map(corner => {
         const point: Point = [corner.x, corner.y];
         return pointsAreInBoundary(property.propertyCorners, point) === -1
       }));
 
-      const newPointsAreInBoundaryRight = truthChecker(tempBuildingCorners.map(corner => {
+      const newPointsAreInBoundaryRight = truthChecker(tempBuildingCornersBufferForParking.map(corner => {
         const point: Point = [corner.x, corner.y];
         return truthChecker(parking.parkingStalls.right.map(stall => {
           return pointsAreInBoundary(stall.stallCorners, point) === 1
         }))
       }));
-      const newPointsAreInBoundaryLeft = truthChecker(tempBuildingCorners.map(corner => {
+      const newPointsAreInBoundaryLeft = truthChecker(tempBuildingCornersBufferForParking.map(corner => {
         const point: Point = [corner.x, corner.y];
         return truthChecker(parking.parkingStalls.left.map(stall => {
           return pointsAreInBoundary(stall.stallCorners, point) === 1
@@ -968,7 +982,21 @@ class Building extends SitePlanElement {
       }));
 
 
-      if (newPointsAreInBoundary && newPointsAreOutOfParking && newPointsAreInBoundaryRight && newPointsAreInBoundaryLeft) {
+      const newPointsAreInBoundaryRight2 = truthChecker(parking.parkingStalls.right.map(stall => {
+        return truthChecker(stall.stallCorners.map(corner => {
+          const point: Point = [corner.x, corner.y];
+          return pointsAreInBoundary(tempBuildingCornersBufferForParking, point) === 1
+        }))
+      }));
+
+      const newPointsAreInBoundaryLeft2 = truthChecker(parking.parkingStalls.left.map(stall => {
+        return truthChecker(stall.stallCorners.map(corner => {
+          const point: Point = [corner.x, corner.y];
+          return pointsAreInBoundary(tempBuildingCornersBufferForParking, point) === 1
+        }))
+      }));
+
+      if (newPointsAreInBoundary && newPointsAreOutOfParking && newPointsAreInBoundaryRight && newPointsAreInBoundaryLeft && newPointsAreInBoundaryRight2 && newPointsAreInBoundaryLeft2) {
         possibleDimensions[i] = {
           ...possibleDimensions[i],
           ...newDimension
@@ -985,13 +1013,10 @@ class Building extends SitePlanElement {
 
 
 
-    // this.updateAngle(possibleDimensions[bestAreaIndex].angle)
+    this.updateAngle(possibleDimensions[bestAreaIndex].angle)
     this.updateCenter(possibleDimensions[bestAreaIndex].x, possibleDimensions[bestAreaIndex].y)
     this.updateheight(possibleDimensions[bestAreaIndex].height);
     this.updateWidth(possibleDimensions[bestAreaIndex].width)
-
-    // console.log(`bestAreaIndex`, possibleDimensions[bestAreaIndex].x, possibleDimensions[0].x)
-
   }
 
 }
@@ -1015,9 +1040,9 @@ export class AdjacencyGraphVisualizer2 {
     const propertyCorners = [
       p.createVector(80, 40),
       p.createVector(p.width - 120, 10),
-      p.createVector(p.width - 10, p.height / 2 + 10),
+      // p.createVector(p.width - 10, p.height / 2 + 10),
       p.createVector(p.width - 75, p.height - 40),
-      p.createVector(p.width / 2 - 140, p.height - 80),
+      // p.createVector(p.width / 2 - 140, p.height - 80),
       p.createVector(40, p.height - 180),
     ];
 
@@ -1099,8 +1124,9 @@ export class AdjacencyGraphVisualizer2 {
           approach.updateCenter(_center.x, _center.y);
           parking.updateParkingHeight(propertyCorners);
         }
+      } else {
+        building.reset();
       }
-
 
       // Only hovering in the offset
       if ((isHoveredParkingOffset && !isHoveredParking) || isDraggingParkingOffset) {
@@ -1120,9 +1146,7 @@ export class AdjacencyGraphVisualizer2 {
         building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
 
       }
-
-
-
+      
       if ((isHoveredParking || isDraggingParking) && !isDraggingParkingOffset) {
         isDraggingParking = true;
 
@@ -1146,7 +1170,7 @@ export class AdjacencyGraphVisualizer2 {
           parking.calculateNumberOfFittableStalls(propertyCorners);
           parking.updateStallCorners();
           parking.updateParkingHeight(propertyCorners);
-        building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
+          building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
 
 
           // building.updateCenter();
@@ -1155,13 +1179,17 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-        } else {
+        }
+        else {
           parking.updateParkingHeight(propertyCorners);
 
           // parking.updateCenter(_center.x, _center.y);
 
         }
 
+      }
+      else {
+        building.reset();
       }
 
     };
