@@ -1,6 +1,7 @@
 import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
+import { IPoint, Line } from "../pages/SitePlanDesigner";
 
 type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
@@ -14,8 +15,8 @@ enum ESitePlanObjects {
   Garbage = "Garbage",
   Building = "Building"
 }
-const stallWidth = 85;
-const stallHeight = 45;
+const stallWidth = 17;
+const stallHeight = 8.5;
 
 class Edge {
   public point1: p5.Vector;
@@ -106,7 +107,7 @@ class ParkingStall {
 
     this.stallCorners.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
-      p.text(i, corner.x, corner.y)
+      // p.text(i, corner.x, corner.y)
     });
     p.endShape(p.CLOSE); // Close the polygon
   }
@@ -128,19 +129,28 @@ class Property {
   public propertyEdges: Edge[] = [];
   public propertyCorners: p5.Vector[];
   public approachEdge: Edge | null = null;
-  public approachEdgeIndex = 2;
+  public approachEdgeIndex: number;
   public approachAngle: number = 15;
   public propertyQuadrants: p5.Vector[][] = [];
   public maxAreaIndex: number = 0;
+  public isClockwise: boolean;
 
 
-  constructor(p: p5, propertyCorners: p5.Vector[]) {
+  constructor(p: p5, propertyCorners: p5.Vector[], approachIndex: number, isClockwise: boolean) {
     this.p = p;
     this.propertyCorners = propertyCorners;
+    this.approachEdgeIndex = approachIndex;
+    this.isClockwise = isClockwise;
   }
 
   initialize() {
     const p = this.p;
+
+    console.log(`this.isClockwise`, this.isClockwise)
+    if (this.isClockwise) {
+      this.propertyCorners = this.propertyCorners.reverse()
+    }
+
     const propertyCorners = this.propertyCorners;
 
     const propertyEdges: Edge[] = [];
@@ -511,6 +521,7 @@ class Parking extends SitePlanElement {
     left: ParkingStall[];
     right: ParkingStall[];
   };
+  public scale: number;
 
   constructor(
     p: p5,
@@ -519,6 +530,7 @@ class Parking extends SitePlanElement {
     height: number,
     angle: number,
     elementType: SitePlanObjects,
+    scale: number,
     // additionalProperty: string // New property specific to this class
   ) {
     // Call the parent class constructor to initialize all inherited variables
@@ -527,6 +539,7 @@ class Parking extends SitePlanElement {
     this.entranceEdgeIndex = null;
     this.parkingStalls = { left: [], right: [] };
     this.entranceEdgeIndex = 2;
+    this.scale = scale;
 
   }
 
@@ -576,7 +589,7 @@ class Parking extends SitePlanElement {
 
 
         // const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p,  this.entranceEdge, this.angle, this.parkingStalls);
-        const updatedPoints = calculateStallPosition(this.p, this.entranceEdge, this.angle, this.parkingStalls.left, "left", i)
+        const updatedPoints = calculateStallPosition(this.p, this.entranceEdge, this.angle, this.parkingStalls.left, "left", i, this.scale)
 
         this.parkingStalls.left[i].stallCorners[0] = updatedPoints[0]
         this.parkingStalls.left[i].stallCorners[1] = updatedPoints[1]
@@ -588,7 +601,7 @@ class Parking extends SitePlanElement {
       for (let i = 0; i < this.parkingStalls.right.length; i++) {
         // update the points
 
-        const updatedPoints = calculateStallPosition(this.p, this.entranceEdge, this.angle, this.parkingStalls.right, "right", i)
+        const updatedPoints = calculateStallPosition(this.p, this.entranceEdge, this.angle, this.parkingStalls.right, "right", i, this.scale)
 
         this.parkingStalls.right[i].stallCorners[0] = updatedPoints[0]
         this.parkingStalls.right[i].stallCorners[1] = updatedPoints[1]
@@ -606,15 +619,12 @@ class Parking extends SitePlanElement {
   }
 
   updateParkingHeight(propertyCorners: p5.Vector[]) {
-    const stallHeight = 45;
+
 
     // Take a snapshot to revert
-
-
-
     const maxParkingStalls = Math.max(this.parkingStalls.left.length, this.parkingStalls.right.length);
 
-    this.updateheight(maxParkingStalls * stallHeight);
+    this.updateheight(maxParkingStalls * stallHeight / this.scale);
 
 
     let parkingNotFit = true;
@@ -641,7 +651,7 @@ class Parking extends SitePlanElement {
           this.parkingStalls.right.pop();
         }
 
-        this.updateheight((maxParkingStalls - recalcCount) * stallHeight);
+        this.updateheight((maxParkingStalls - recalcCount) * stallHeight / this.scale);
         recalcCount++
       }
     }
@@ -690,7 +700,7 @@ class Parking extends SitePlanElement {
 
 
 
-    const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p, entranceEdge, parkingAngle, this.parkingStalls);
+    const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p, entranceEdge, parkingAngle, this.parkingStalls, this.scale);
 
 
 
@@ -934,12 +944,12 @@ class Building extends SitePlanElement {
       const tempBuildingCornersBufferForBorder = expandPolygon(this.p, tempBuildingCorners, 100);
 
       /* HIDE, only used to show the offsets  */
-      
+
       // this.p.beginShape();
       // this.p.fill(150, 240, 55, 50); // Fill color with transparency
       // this.p.stroke(0); // Outline color
       // this.p.strokeWeight(2);
-  
+
       // tempBuildingCornersBufferForParking.forEach((corner, i) => {
       //   this.p.vertex(corner.x, corner.y);
       //   this.p.text(i, corner.x, corner.y)
@@ -950,7 +960,7 @@ class Building extends SitePlanElement {
       // this.p.fill(250, 130, 55, 50); // Fill color with transparency
       // this.p.stroke(0); // Outline color
       // this.p.strokeWeight(2);
-  
+
       // tempBuildingCornersBufferForBorder .forEach((corner, i) => {
       //   this.p.vertex(corner.x, corner.y);
       //   this.p.text(i, corner.x, corner.y)
@@ -1027,34 +1037,56 @@ class Building extends SitePlanElement {
 export class AdjacencyGraphVisualizer2 {
   private graph: AdjacencyGraph;
   private iteration: number;
+  public points: IPoint[];
+  public lines: Line[];
+  public scale: number;
 
 
-  constructor(graph: AdjacencyGraph) {
+  constructor(graph: AdjacencyGraph, points: IPoint[], lines: Line[], scale: number) {
     this.graph = graph;
     this.iteration = 0;
+    this.points = points;
+    this.lines = lines;
+    this.scale = scale
   }
 
   visualize2(p: p5): void {
+    p.clear(); // Clear the canvas
     p.angleMode(p.DEGREES);
 
-    const propertyCorners = [
-      p.createVector(80, 40),
-      p.createVector(p.width - 120, 10),
-      // p.createVector(p.width - 10, p.height / 2 + 10),
-      p.createVector(p.width - 75, p.height - 40),
-      // p.createVector(p.width / 2 - 140, p.height - 80),
-      p.createVector(40, p.height - 180),
-    ];
 
 
-    const property = new Property(p, propertyCorners);
+    const propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
+    const approachIndex = this.lines.findIndex(line => line.isApproach);
+    // [
+    //   p.createVector(80, 40),
+    //   p.createVector(p.width - 120, 10),
+    //   // p.createVector(p.width - 10, p.height / 2 + 10),
+    //   p.createVector(p.width - 75, p.height - 40),
+    //   // p.createVector(p.width / 2 - 140, p.height - 80),
+    //   p.createVector(40, p.height - 180),
+    // ];
+
+
+    const isClockwise = getIsClockwise(propertyCorners)
+
+    const property = new Property(p, propertyCorners, approachIndex, isClockwise);
     property.initialize()
 
+    const approachAngle = (property.approachEdge?.calculateAngle() || 0)+ 180;
+
+
+    const approachWidth = 20 / this.scale;
+    const parkingWidth = 24 / this.scale;
+
+    const buildingDefaut = 20 / this.scale;
+    const centerOfProperty = calculateCentroid(property.propertyCorners)
 
     const defaultVector = p.createVector(0, 0)
-    const approach = new SitePlanElement(p, getCenterPoint(p, property.approachEdge?.point1 || defaultVector, property.approachEdge?.point2 || defaultVector), 100, 30, 180 + property.approachAngle, ESitePlanObjects.Approach);
-    const parking = new Parking(p, p.createVector(488, 308), 120, 350, 15, ESitePlanObjects.ParkingWay);
-    const building = new Building(p, p.createVector(p.width / 2, p.height / 2), 100, 100, 15, ESitePlanObjects.Building);
+
+    const approach = new SitePlanElement(p, getCenterPoint(p, property.approachEdge?.point1 || defaultVector, property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach);
+    const parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
+    const building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefaut, buildingDefaut, approachAngle, ESitePlanObjects.Building);
 
 
 
@@ -1062,9 +1094,9 @@ export class AdjacencyGraphVisualizer2 {
     approach.initialize()
     parking.initializeParking()
 
-    parking.calculateNumberOfFittableStalls(propertyCorners);
+    parking.calculateNumberOfFittableStalls(property.propertyCorners);
     parking.updateStallCorners();
-    parking.updateParkingHeight(propertyCorners);
+    parking.updateParkingHeight(property.propertyCorners);
 
     building.initialize();
 
@@ -1095,7 +1127,7 @@ export class AdjacencyGraphVisualizer2 {
 
         approach.updateCenter(newX, newY);
 
-        const allPointsInBoundary = allPointsInPolygon(propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
+        const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
 
         if (truthChecker(allPointsInBoundary)) {
           // If rotating the parking is going to push the parking outside the boundary, then update the center of the parking
@@ -1115,14 +1147,14 @@ export class AdjacencyGraphVisualizer2 {
 
 
           parking.updateStallCorners();
-          parking.updateParkingHeight(propertyCorners);
+          parking.updateParkingHeight(property.propertyCorners);
           building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
 
 
         }
         else {
           approach.updateCenter(_center.x, _center.y);
-          parking.updateParkingHeight(propertyCorners);
+          parking.updateParkingHeight(property.propertyCorners);
         }
       } else {
         building.reset();
@@ -1140,13 +1172,13 @@ export class AdjacencyGraphVisualizer2 {
         const newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
 
         parking.updateAngle(newAngle);
-        parking.calculateNumberOfFittableStalls(propertyCorners);
+        parking.calculateNumberOfFittableStalls(property.propertyCorners);
         parking.updateStallCorners();
-        parking.updateParkingHeight(propertyCorners);
+        parking.updateParkingHeight(property.propertyCorners);
         building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
 
       }
-      
+
       if ((isHoveredParking || isDraggingParking) && !isDraggingParkingOffset) {
         isDraggingParking = true;
 
@@ -1154,7 +1186,7 @@ export class AdjacencyGraphVisualizer2 {
         const newX = p.mouseX;
         const newY = p.mouseY;
 
-        const centerInBoundary = allPointsInPolygon(propertyCorners, [p.createVector(newX, newY)]);
+        const centerInBoundary = allPointsInPolygon(property.propertyCorners, [p.createVector(newX, newY)]);
 
         if (!truthChecker(centerInBoundary)) { return }
 
@@ -1164,12 +1196,12 @@ export class AdjacencyGraphVisualizer2 {
         parking.updateAngle(normalizeAngle(angle2 - 90))
         building.updateAngle(normalizeAngle(angle2 - 90))
 
-        const allPointsInBoundary = allPointsInPolygon(propertyCorners, parking.sitePlanElementCorners);
+        const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, parking.sitePlanElementCorners);
 
         if (truthChecker(allPointsInBoundary)) {
-          parking.calculateNumberOfFittableStalls(propertyCorners);
+          parking.calculateNumberOfFittableStalls(property.propertyCorners);
           parking.updateStallCorners();
-          parking.updateParkingHeight(propertyCorners);
+          parking.updateParkingHeight(property.propertyCorners);
           building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
 
 
@@ -1181,7 +1213,7 @@ export class AdjacencyGraphVisualizer2 {
 
         }
         else {
-          parking.updateParkingHeight(propertyCorners);
+          parking.updateParkingHeight(property.propertyCorners);
 
           // parking.updateCenter(_center.x, _center.y);
 
@@ -1216,11 +1248,11 @@ export class AdjacencyGraphVisualizer2 {
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
       parking.drawParkingStalls();
-      building.drawSitePlanElement();
+      // building.drawSitePlanElement();
 
       createDriveway(p, approach, parking);
       property.propertyQuadrant(property, parking, building);
-      building.buildingGrower(property, parking);
+      // building.buildingGrower(property, parking);
     };
   }
 }
@@ -1421,7 +1453,11 @@ function pointsAreInBoundary(points: p5.Vector[], point: Point) {
 function calculatePointPosition(p: p5, entranceEdge: Edge, parkingAngle: number, parkingStalls: {
   left: ParkingStall[];
   right: ParkingStall[];
-}) {
+},
+  scale: number) {
+
+  const _stallHeight = stallHeight / scale;
+  const _stallWidth = stallWidth / scale;
   // Get the enterance points and the direction they are pointing.
 
   // Expand the parking size
@@ -1429,19 +1465,19 @@ function calculatePointPosition(p: p5, entranceEdge: Edge, parkingAngle: number,
   const currentNumberOfStallsLeft = parkingStalls.left.length;
 
   const firstPointRight = currentNumberOfStallsRight === 0 ? entranceEdge.point1 : parkingStalls.right[currentNumberOfStallsRight - 1].stallCorners[1];
-  const secondPointRight = [firstPointRight.x + p.cos(parkingAngle - 90) * stallHeight, firstPointRight.y + p.sin(parkingAngle - 90) * stallHeight]
+  const secondPointRight = [firstPointRight.x + p.cos(parkingAngle - 90) * _stallHeight, firstPointRight.y + p.sin(parkingAngle - 90) * _stallHeight]
 
   const firstPointLeft = currentNumberOfStallsLeft === 0 ? entranceEdge.point2 : parkingStalls.left[currentNumberOfStallsLeft - 1].stallCorners[1];
-  const secondPointLeft = [firstPointLeft.x + p.cos(parkingAngle - 90) * stallHeight, firstPointLeft.y + p.sin(parkingAngle - 90) * stallHeight];
+  const secondPointLeft = [firstPointLeft.x + p.cos(parkingAngle - 90) * _stallHeight, firstPointLeft.y + p.sin(parkingAngle - 90) * _stallHeight];
 
 
   const thirdAndFourthPointRight = [ // pointing to the right
-    [firstPointRight.x + p.cos(parkingAngle) * stallWidth, firstPointRight.y + p.sin(parkingAngle) * stallWidth],
-    [secondPointRight[0] + p.cos(parkingAngle) * stallWidth, secondPointRight[1] + p.sin(parkingAngle) * stallWidth],
+    [firstPointRight.x + p.cos(parkingAngle) * _stallWidth, firstPointRight.y + p.sin(parkingAngle) * _stallWidth],
+    [secondPointRight[0] + p.cos(parkingAngle) * _stallWidth, secondPointRight[1] + p.sin(parkingAngle) * _stallWidth],
   ];
   const thirdAndFourthPointLeft = [ // pointing to the right
-    [firstPointLeft.x - p.cos(parkingAngle) * stallWidth, firstPointLeft.y - p.sin(parkingAngle) * stallWidth],
-    [secondPointLeft[0] - p.cos(parkingAngle) * stallWidth, secondPointLeft[1] - p.sin(parkingAngle) * stallWidth],
+    [firstPointLeft.x - p.cos(parkingAngle) * _stallWidth, firstPointLeft.y - p.sin(parkingAngle) * _stallWidth],
+    [secondPointLeft[0] - p.cos(parkingAngle) * _stallWidth, secondPointLeft[1] - p.sin(parkingAngle) * _stallWidth],
   ];
 
   const stallCornerRight = [
@@ -1460,8 +1496,10 @@ function calculatePointPosition(p: p5, entranceEdge: Edge, parkingAngle: number,
   return { left: stallCornerLeft, right: stallCornerRight }
 }
 
-function calculateStallPosition(p: p5, entranceEdge: Edge, angle: number, parkingStallsOnSide: ParkingStall[], side: "left" | "right", stallIndex: number) {
+function calculateStallPosition(p: p5, entranceEdge: Edge, angle: number, parkingStallsOnSide: ParkingStall[], side: "left" | "right", stallIndex: number, scale: number) {
   // Get the enterance points and the direction they are pointing.
+  const _stallHeight = stallHeight / scale;
+  const _stallWidth = stallWidth / scale;
 
   const currentNumberOfStalls = parkingStallsOnSide.length;
 
@@ -1470,16 +1508,16 @@ function calculateStallPosition(p: p5, entranceEdge: Edge, angle: number, parkin
   let firstPoint = currentNumberOfStalls === 0 ?
     entrancePoint :
     p.createVector(
-      entrancePoint.x + p.cos(angle - 90) * stallHeight * stallIndex,
-      entrancePoint.y + p.sin(angle - 90) * stallHeight * stallIndex
+      entrancePoint.x + p.cos(angle - 90) * _stallHeight * stallIndex,
+      entrancePoint.y + p.sin(angle - 90) * _stallHeight * stallIndex
     );
   const secondPoint = [
-    firstPoint.x + p.cos(angle - 90) * stallHeight, firstPoint.y + p.sin(angle - 90) * stallHeight]
+    firstPoint.x + p.cos(angle - 90) * _stallHeight, firstPoint.y + p.sin(angle - 90) * _stallHeight]
 
 
   const thirdAndFourthPoint = [ // pointing to the right
-    [firstPoint.x + sideMultiplier * p.cos(angle) * stallWidth, firstPoint.y + sideMultiplier * p.sin(angle) * stallWidth],
-    [secondPoint[0] + sideMultiplier * p.cos(angle) * stallWidth, secondPoint[1] + sideMultiplier * p.sin(angle) * stallWidth],
+    [firstPoint.x + sideMultiplier * p.cos(angle) * _stallWidth, firstPoint.y + sideMultiplier * p.sin(angle) * _stallWidth],
+    [secondPoint[0] + sideMultiplier * p.cos(angle) * _stallWidth, secondPoint[1] + sideMultiplier * p.sin(angle) * _stallWidth],
   ];
 
 
@@ -1674,3 +1712,13 @@ function createSitePlanElementCorners(p: p5, x: number, y: number, width: number
   })
   )
 }
+
+const getIsClockwise = (polygon: p5.Vector[]): boolean => {
+  let sum = 0;
+  for (let i = 0; i < polygon.length; i++) {
+    const current = polygon[i];
+    const next = polygon[(i + 1) % polygon.length];
+    sum += (next.x - current.x) * (next.y + current.y);
+  }
+  return sum > 0;
+};

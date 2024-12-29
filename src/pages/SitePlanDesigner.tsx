@@ -10,12 +10,12 @@ import LotLineDrawer from '../futureItems/LotLineDrawerOld';
 // import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
 
 
-interface Point {
+export interface IPoint {
   x: number;
   y: number;
 }
 
-interface Line {
+export interface Line {
   start: number;
   end: number;
   // selected: boolean;
@@ -40,18 +40,19 @@ const SitePlanDesigner: React.FC = () => {
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const pointsRef = useRef<Point[]>([]);
+  const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
   const isPolygonClosedRef = useRef<boolean>(false);
   const isSelectingApproachRef = useRef<boolean>(false);
   const isDefiningScaleRef = useRef<boolean>(false);
   const inputScaleRef = useRef<number | null>(null);
-  const scaleRef = useRef<number | null>(null);
+  const scaleRef = useRef<number | null>( null);
 
 
   const draggingPointIndexRef = useRef<number | null>(null);
   const selectedLineIndexRef = useRef<number | null>(null);
 
+  let visualizer = useRef<AdjacencyGraphVisualizer2 | null>(null)// new AdjacencyGraphVisualizer2(graph );
 
   // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,75 +75,98 @@ const SitePlanDesigner: React.FC = () => {
     };
 
     p.setup = () => {
+
+      // const subdivisionGenerator = new SubdivisionGenerator();
+      p.setup = () => {
+        p.createCanvas(800, 800).parent(canvasRef.current!);
+
+
+        // visualizer.visualize2(p);
+        // subdivisionGenerator.subdivide(p);
+        p.frameRate(8);
+
+
+      };
+
+
       const canvas = p.createCanvas(800, 600);
       if (canvasRef.current) {
         canvas.parent(canvasRef.current);
       }
     };
 
+
+
     p.draw = () => {
-      calculateScale()
-      const scale = scaleRef.current || .5;
 
-
-      if (img) {
-
-        // Resize the image, keeping the aspect ratio.
-        if (img.width > img.height) {
-          img.resize(0, p.height);
-
-        } else {
-          img.resize(p.width, 0);
-
-        }
-
-        // Display the resized image.
-        p.image(img, 0, 0);
-
-
-        // p.image(img, 0, 0, img.width, img.height); // Draw the image as the background
+      if (visualizer.current) {
+        visualizer.current.visualize2(p); // Delegate drawing to the visualizer
       } else {
-        p.background(200); // Default background
-      }
-
-      // Draw lines connecting points
-      const points = pointsRef.current;
-      const lines = linesRef.current;
-      // const isPolygonClosed = isPolygonClosedRef.current;
 
 
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+        calculateScale()
+        const scale = scaleRef.current;
 
-        if (line.isApproach) {
-          p.stroke(20, 230, 120);
+
+        if (img) {
+
+          // Resize the image, keeping the aspect ratio.
+          if (img.width > img.height) {
+            img.resize(0, p.height);
+
+          } else {
+            img.resize(p.width, 0);
+
+          }
+
+          // Display the resized image.
+          p.image(img, 0, 0);
+
+
+          // p.image(img, 0, 0, img.width, img.height); // Draw the image as the background
+        } else {
+          p.background(200); // Default background
         }
-        else if (line.isScale) {
-          p.stroke(230, 120, 20);
 
+        // Draw lines connecting points
+        const points = pointsRef.current;
+        const lines = linesRef.current;
+        // const isPolygonClosed = isPolygonClosedRef.current;
+
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+
+          if (line.isApproach) {
+            p.stroke(20, 230, 120);
+          }
+          else if (line.isScale) {
+            p.stroke(230, 120, 20);
+
+          }
+          else {
+            p.stroke(0, 20, 220);
+          }
+          // p.stroke(line.color);
+          p.strokeWeight(2);
+          const midX = (points[line.start].x + points[line.end].x) / 2;
+          const midY = (points[line.start].y + points[line.end].y) / 2;
+          const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .5);
+
+          p.text(`${length.toFixed(1)} ft ${i}`, midX, midY);
+          p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
         }
-        else {
-          p.stroke(0, 20, 220);
+
+        for (const point of points) {
+          p.fill(255, 0, 0);
+          p.noStroke();
+          p.ellipse(point.x, point.y, 10, 10);
         }
-        // p.stroke(line.color);
-        p.strokeWeight(2);
-        const midX = (points[line.start].x + points[line.end].x) / 2;
-        const midY = (points[line.start].y + points[line.end].y) / 2;
-        const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * scale;
 
-        p.text(`${length.toFixed(1)} ft ${i}`, midX, midY);
-        p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
+
+
+        drawArea(p, isPolygonClosedRef.current, points, scale || .5);
       }
-
-      for (const point of points) {
-        p.fill(255, 0, 0);
-        p.noStroke();
-        p.ellipse(point.x, point.y, 10, 10);
-      }
-
-
-
-      drawArea(p, isPolygonClosedRef.current, points, scale);
     };
 
     p.mousePressed = () => {
@@ -246,6 +270,7 @@ const SitePlanDesigner: React.FC = () => {
       selectedLineIndexRef.current = null;
     };
 
+
     const calculateScale = () => {
       const inputScale = inputScaleRef.current;
       const points = pointsRef.current;
@@ -260,6 +285,8 @@ const SitePlanDesigner: React.FC = () => {
         }
       }
     }
+
+    
   };
 
 
@@ -275,6 +302,7 @@ const SitePlanDesigner: React.FC = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
   }
+
   const clearCanvas = () => {
     setImageFile(null);
     setImageURL(null);
@@ -292,6 +320,7 @@ const SitePlanDesigner: React.FC = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
   }
+
   const defineScale = () => {
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
@@ -302,7 +331,10 @@ const SitePlanDesigner: React.FC = () => {
     const lines = linesRef.current;
     const scale = scaleRef.current;
 
-    console.log(`points, lines, scale`, points, lines, scale)
+    // console.log(`points, lines, scale`, points, lines, scale)
+    const graph = new AdjacencyGraph();
+    visualizer.current = new AdjacencyGraphVisualizer2(graph, points, lines, scale || .5)
+    // Now pass this all on to the solver
 
 
   }
@@ -370,7 +402,6 @@ const SitePlanDesigner: React.FC = () => {
 
 
     //   {/* <VoronoiSubdivision/> */}
-    //   <input type="file" accept="image/*" onChange={handleFileUpload} />
     //   <LotLineDrawer imageURL={imageURL}/>
 
     //   <div ref={canvasRef} style={{ marginTop: '20px' }}>
@@ -384,7 +415,7 @@ export default SitePlanDesigner;
 
 
 
-const calculateArea = (polygon: Point[]): number => {
+const calculateArea = (polygon: IPoint[]): number => {
   let total = 0;
   for (let i = 0; i < polygon.length; i++) {
     const next = (i + 1) % polygon.length;
@@ -397,7 +428,7 @@ const calculateArea = (polygon: Point[]): number => {
 function drawArea(
   p: p5,
   isPolygonClosed: boolean,
-  points: Point[],
+  points: IPoint[],
   scale: number,
 ) {
   if (!isPolygonClosed || points.length < 3) return;
@@ -430,19 +461,7 @@ function drawArea(
 //     }
 //   };
 
-//   const visualizer = new AdjacencyGraphVisualizer2(graph);
-//   // const subdivisionGenerator = new SubdivisionGenerator();
 
-//   p.setup = () => {
-//     p.createCanvas(800, 800).parent(canvasRef.current!);
-
-
-//     visualizer.visualize2(p);
-//     // subdivisionGenerator.subdivide(p);
-//     p.frameRate(8);
-
-
-//   };
 
 {/* <LotLineDrawerOld onFinalize={handleFinalize} /> */ }
 
