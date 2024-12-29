@@ -88,10 +88,10 @@ const SitePlanDesigner: React.FC = () => {
       if (img) {
 
         // Resize the image, keeping the aspect ratio.
-        if(img.width >  img.height){
+        if (img.width > img.height) {
           img.resize(0, p.height);
 
-        }else{
+        } else {
           img.resize(p.width, 0);
 
         }
@@ -127,9 +127,10 @@ const SitePlanDesigner: React.FC = () => {
         // p.stroke(line.color);
         p.strokeWeight(2);
         const midX = (points[line.start].x + points[line.end].x) / 2;
-        const midY = (points[line.start].y +  points[line.end].y) / 2;
-        const length = Math.hypot( points[line.end].x - points[line.start].x,  points[line.end].y - points[line.start].y) * scale;
-        p.text(`${length.toFixed(1)} ft`, midX, midY);
+        const midY = (points[line.start].y + points[line.end].y) / 2;
+        const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * scale;
+
+        p.text(`${length.toFixed(1)} ft ${i}`, midX, midY);
         p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
       }
 
@@ -139,7 +140,7 @@ const SitePlanDesigner: React.FC = () => {
         p.ellipse(point.x, point.y, 10, 10);
       }
 
-    
+
 
       drawArea(p, isPolygonClosedRef.current, points, scale);
     };
@@ -174,7 +175,7 @@ const SitePlanDesigner: React.FC = () => {
             start: points.length - 2,
             end: points.length - 1,
             color: "#000000", // Default line color
-            index: lines.length - 1,
+            index: lines.length,
             selected: false,
             isApproach: false,
             isScale: false,
@@ -195,7 +196,7 @@ const SitePlanDesigner: React.FC = () => {
           start: points.length - 1,
           end: 0,
           color: "#000000", // Default line color
-          index: lines.length - 1,
+          index: lines.length,
           selected: false,
           isApproach: false,
           isScale: false
@@ -217,7 +218,6 @@ const SitePlanDesigner: React.FC = () => {
         // Set line to be an approach
         if (lineIndex !== -1) {
           selectedLineIndexRef.current = lineIndex;
-
 
           if (isSelectingApproach) {
             lines[lineIndex].isApproach = !lines[lineIndex].isApproach
@@ -246,8 +246,6 @@ const SitePlanDesigner: React.FC = () => {
       selectedLineIndexRef.current = null;
     };
 
-
-
     const calculateScale = () => {
       const inputScale = inputScaleRef.current;
       const points = pointsRef.current;
@@ -255,9 +253,6 @@ const SitePlanDesigner: React.FC = () => {
       const lineIndex = lines.find(line => line.isScale)?.index;
 
       if (lineIndex && lineIndex !== -1) {
-
-
-       
         const lineLength = p.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
 
         if (inputScale && lineLength) {
@@ -266,7 +261,6 @@ const SitePlanDesigner: React.FC = () => {
       }
     }
   };
-
 
 
   useEffect(() => {
@@ -308,8 +302,8 @@ const SitePlanDesigner: React.FC = () => {
     const lines = linesRef.current;
     const scale = scaleRef.current;
 
+    console.log(`points, lines, scale`, points, lines, scale)
 
-    console.log(`points`, points, scale, lines)
 
   }
 
