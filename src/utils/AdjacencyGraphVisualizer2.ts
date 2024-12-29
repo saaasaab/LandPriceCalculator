@@ -107,7 +107,6 @@ class ParkingStall {
 
     this.stallCorners.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
-      // p.text(i, corner.x, corner.y)
     });
     p.endShape(p.CLOSE); // Close the polygon
   }
@@ -242,9 +241,8 @@ class Property {
 
 
     edgeIntersections.forEach((intersection, i) => {
-      p.ellipse(intersection?.intersection?.x || 0, intersection?.intersection?.y || 0, 40.40)
+      p.ellipse(intersection?.intersection?.x || 0, intersection?.intersection?.y || 0, 10, 10)
       p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + intersection.offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + intersection.offset[1]) * crossSize)
-      // p.text(i, intersection.intersection.x, intersection.intersection.y)
     })
 
     const totalEdges = edgeIntersections.length;
@@ -493,20 +491,20 @@ class SitePlanElement {
 
     p.endShape(p.CLOSE); // Close the polygon
 
-    p.ellipse(this.center.x, this.center.y, 50, 50);
+    p.ellipse(this.center.x, this.center.y, 10, 10);
 
 
-    p.text(p.round(this.angle), this.center.x, this.center.y);
+    // p.text(p.round(this.angle), this.center.x, this.center.y);
 
     this.sitePlanElementEdges.forEach(edge => {
       const center = getCenterPoint(this.p, edge.point1, edge.point2);
       p.fill(200, 20, 40);
-      p.ellipse(center.x, center.y, 20, 20);
+      p.ellipse(center.x, center.y, 10, 10);
       p.strokeWeight(1)
       p.fill(40, 200, 20);
 
 
-      p.text(p.round(edge.calculateAngle()), center.x, center.y);
+      // p.text(p.round(edge.calculateAngle()), center.x, center.y);
     })
 
 
@@ -952,7 +950,6 @@ class Building extends SitePlanElement {
 
       // tempBuildingCornersBufferForParking.forEach((corner, i) => {
       //   this.p.vertex(corner.x, corner.y);
-      //   this.p.text(i, corner.x, corner.y)
       // });
       // this.p.endShape(this.p.CLOSE); // Close the polygon
 
@@ -963,7 +960,6 @@ class Building extends SitePlanElement {
 
       // tempBuildingCornersBufferForBorder .forEach((corner, i) => {
       //   this.p.vertex(corner.x, corner.y);
-      //   this.p.text(i, corner.x, corner.y)
       // });
       // this.p.endShape(this.p.CLOSE); // Close the polygon
 
@@ -1070,10 +1066,10 @@ export class AdjacencyGraphVisualizer2 {
 
     const isClockwise = getIsClockwise(propertyCorners)
 
-    const property = new Property(p, propertyCorners, approachIndex, isClockwise);
+    const property = new Property(p, propertyCorners, approachIndex === -1 ? 0 : approachIndex, isClockwise);
     property.initialize()
 
-    const approachAngle = (property.approachEdge?.calculateAngle() || 0)+ 180;
+    const approachAngle = (property.approachEdge?.calculateAngle() || 0) + 180;
 
 
     const approachWidth = 20 / this.scale;
@@ -1248,11 +1244,11 @@ export class AdjacencyGraphVisualizer2 {
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
       parking.drawParkingStalls();
-      // building.drawSitePlanElement();
+      building.drawSitePlanElement();
 
       createDriveway(p, approach, parking);
       property.propertyQuadrant(property, parking, building);
-      // building.buildingGrower(property, parking);
+      building.buildingGrower(property, parking);
     };
   }
 }
