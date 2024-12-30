@@ -138,7 +138,7 @@ const SitePlanDesigner: React.FC = () => {
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
 
-        
+
 
           if (line.isApproach) {
             p.stroke(20, 230, 120);
@@ -151,21 +151,21 @@ const SitePlanDesigner: React.FC = () => {
             p.stroke(0, 20, 220);
           }
           // p.stroke(line.color);
-         
+
           p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
-        
-        
+
+
           p.strokeWeight(2);
           p.noStroke();
           p.fill(0, 20, 220)
           const midX = (points[line.start].x + points[line.end].x) / 2;
           const midY = (points[line.start].y + points[line.end].y) / 2;
-          const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .5);
+          const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .25);
 
           p.text(`${length.toFixed(1)} ft`, midX, midY);
-        
-        
-        
+
+
+
         }
 
         for (const point of points) {
@@ -176,7 +176,7 @@ const SitePlanDesigner: React.FC = () => {
 
 
 
-        drawArea(p, isPolygonClosedRef.current, points, scale || .5);
+        drawArea(p, isPolygonClosedRef.current, points, scale || .25);
       }
     };
 
@@ -355,7 +355,7 @@ const SitePlanDesigner: React.FC = () => {
 
     // console.log(`points, lines, scale`, points, lines, scale)
     const graph = new AdjacencyGraph();
-    visualizer.current = new AdjacencyGraphVisualizer2(graph, points, lines, scale || .5)
+    visualizer.current = new AdjacencyGraphVisualizer2(graph, points, lines, scale || .25)
     // Now pass this all on to the solver
 
 
