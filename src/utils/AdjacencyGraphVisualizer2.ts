@@ -144,12 +144,6 @@ class Property {
 
   initialize() {
     const p = this.p;
-
-    console.log(`this.isClockwise`, this.isClockwise)
-    if (this.isClockwise) {
-      this.propertyCorners = this.propertyCorners.reverse()
-    }
-
     const propertyCorners = this.propertyCorners;
 
     const propertyEdges: Edge[] = [];
@@ -1052,8 +1046,26 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-    const propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
-    const approachIndex = this.lines.findIndex(line => line.isApproach);
+
+    let propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
+    const isClockwise = getIsClockwise(propertyCorners)
+
+    let approachIndex = this.lines.findIndex(line => line.isApproach);
+
+
+    if (isClockwise) {
+      const _approachIndex = approachIndex;
+      propertyCorners = propertyCorners.reverse()
+      // const newIndex = getReversedIndex(approachIndex , this.lines.length);
+
+      // approachIndex = newIndex;
+
+
+    }
+
+
+
+
     // [
     //   p.createVector(80, 40),
     //   p.createVector(p.width - 120, 10),
@@ -1064,7 +1076,8 @@ export class AdjacencyGraphVisualizer2 {
     // ];
 
 
-    const isClockwise = getIsClockwise(propertyCorners)
+
+
 
     const property = new Property(p, propertyCorners, approachIndex === -1 ? 0 : approachIndex, isClockwise);
     property.initialize()
@@ -1117,9 +1130,24 @@ export class AdjacencyGraphVisualizer2 {
         const _center = p.createVector(approach.center.x, approach.center.y);
 
         const approachEdgeAngle = property.approachEdge?.calculateAngle()
+
+
+
         // Follow along the line
-        const newX = p.mouseX;
-        const newY = approach.center.y + (newX - approach.center.x) * p.tan(approachEdgeAngle || 0); //Need to update based on the actual angle of approach edge.
+        let newX = p.mouseX;
+        let newY = p.mouseY;
+
+        const isVertical = isMoreVertical(approachEdgeAngle || 0, true)
+
+        console.log(`isVertical `, isVertical)
+        if (isVertical) {
+          newX = approach.center.x + (newY - approach.center.y) / p.tan(approachEdgeAngle || 0);
+          newY = p.mouseY;
+        }
+        else {
+          newX = p.mouseX;
+          newY = approach.center.y + (newX - approach.center.x) * p.tan(approachEdgeAngle || 0);
+        }
 
         approach.updateCenter(newX, newY);
 
@@ -1717,4 +1745,40 @@ const getIsClockwise = (polygon: p5.Vector[]): boolean => {
     sum += (next.x - current.x) * (next.y + current.y);
   }
   return sum > 0;
+};
+
+
+function getReversedIndex(oldIndex: number, listLength: number): number {
+
+  // 0 -> 4
+  // 1 -> 3
+  // 2 -> 2
+  // 3 -> 1
+  // 4 -> 0
+
+
+
+  return listLength - oldIndex - 1;
+};
+
+
+
+const isMoreVertical = (angle: number, inDegrees: boolean = true): boolean => {
+  // Convert angle to radians if it's in degrees
+  if (inDegrees) {
+    angle = (angle * Math.PI) / 180; // Convert degrees to radians
+  }
+
+  // Normalize the angle to [0, 2 * PI)
+  angle = angle % (2 * Math.PI);
+  if (angle < 0) {
+    angle += 2 * Math.PI;
+  }
+
+  // Determine if the angle is more vertical
+  // Vertical regions: (PI/4 <= angle <= 3PI/4) OR (5PI/4 <= angle <= 7PI/4)
+  const isVertical = (angle >= Math.PI / 4 && angle <= (3 * Math.PI) / 4) ||
+    (angle >= (5 * Math.PI) / 4 && angle <= (7 * Math.PI) / 4);
+
+  return isVertical;
 };

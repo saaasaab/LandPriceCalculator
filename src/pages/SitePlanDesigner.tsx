@@ -153,7 +153,7 @@ const SitePlanDesigner: React.FC = () => {
           const midY = (points[line.start].y + points[line.end].y) / 2;
           const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .5);
 
-          p.text(`${length.toFixed(1)} ft ${i}`, midX, midY);
+          p.text(`${length.toFixed(1)} ft line#: ${i}`, midX, midY);
           p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
         }
 
@@ -245,6 +245,8 @@ const SitePlanDesigner: React.FC = () => {
 
           if (isSelectingApproach) {
             lines[lineIndex].isApproach = !lines[lineIndex].isApproach
+
+            console.log(`lineIndex`, lineIndex)
           }
 
           if (isDefiningScale && !inputScaleRef.current && !scale) {
