@@ -333,8 +333,9 @@ class SitePlanElement {
   public sitePlanElementCorners: p5.Vector[];
   public sitePlanElementEdges: Edge[];
   public width: number;
+  public scale: number;
 
-  constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects) {
+  constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number) {
     this.angle = angle;
     this.center = center;
     this.elementType = elementType;
@@ -346,15 +347,14 @@ class SitePlanElement {
     this.previousEntranceEdge = null;
     this.sitePlanElementCorners = [];
     this.sitePlanElementEdges = [];
-    this.width = width
+    this.width = width;
+    this.scale = scale;
   }
 
   initialize() {
     this.createSitePlanElementCorners();
     this.setSitePlanElementEdges();
   }
-
-
 
   setSitePlanElementEdges() {
     const sitePlanElementCorners = this.sitePlanElementCorners;
@@ -526,7 +526,7 @@ class Parking extends SitePlanElement {
     // additionalProperty: string // New property specific to this class
   ) {
     // Call the parent class constructor to initialize all inherited variables
-    super(p, center, width, height, angle, elementType);
+    super(p, center, width, height, angle, elementType, scale);
 
     this.entranceEdgeIndex = null;
     this.parkingStalls = { left: [], right: [] };
@@ -815,7 +815,6 @@ class Parking extends SitePlanElement {
 
 }
 
-
 class Building extends SitePlanElement {
   // public additionalProperty: string; // Example of a new property
 
@@ -826,10 +825,11 @@ class Building extends SitePlanElement {
     height: number,
     angle: number,
     elementType: SitePlanObjects,
+    scale: number
     // additionalProperty: string // New property specific to this class
   ) {
     // Call the parent class constructor to initialize all inherited variables
-    super(p, center, width, height, angle, elementType);
+    super(p, center, width, height, angle, elementType, scale);
   }
 
   buildingLocator(p: p5, polys: p5.Vector[][], maxAreaIndex: number, building: Building, totalEdges: number,) {
@@ -840,23 +840,23 @@ class Building extends SitePlanElement {
     // p.ellipse(building.center.x, building.center.y, 30, 30)
 
 
-    // // Draw the polygon using the corner vectors
-    // p.beginShape();
-    // const r = p.map(2, 0, totalEdges, 0, 255)
-    // const g = p.map(2, 0, totalEdges, 255, 50)
+    // Draw the polygon using the corner vectors
+    p.beginShape();
+    const r = p.map(2, 0, totalEdges, 0, 255)
+    const g = p.map(2, 0, totalEdges, 255, 50)
 
-    // p.fill(r, g, 225, 50); // Fill color with transparency
-    // p.stroke(0); // Outline color
-    // p.strokeWeight(2);
+    p.fill(r, g, 225, 50); // Fill color with transparency
+    p.stroke(0); // Outline color
+    p.strokeWeight(2);
 
-    // polys[maxAreaIndex].forEach((corner, i) => {
+    polys[maxAreaIndex].forEach((corner, i) => {
+      p.vertex(corner.x, corner.y);
+    });
+
+    // polys[neighboringMaxIndex].forEach((corner, i) => {
     //   p.vertex(corner.x, corner.y);
     // });
-
-    // // polys[neighboringMaxIndex].forEach((corner, i) => {
-    // //   p.vertex(corner.x, corner.y);
-    // // });
-    // p.endShape(p.CLOSE); // Close the polygon
+    p.endShape(p.CLOSE); // Close the polygon
   }
 
   reset() {
@@ -932,8 +932,8 @@ class Building extends SitePlanElement {
 
       // check if new points are inside the boundary;
 
-      const tempBuildingCornersBufferForParking = expandPolygon(this.p, tempBuildingCorners, 50);
-      const tempBuildingCornersBufferForBorder = expandPolygon(this.p, tempBuildingCorners, 100);
+      const tempBuildingCornersBufferForParking = expandPolygon(this.p, tempBuildingCorners, 10/this.scale);
+      const tempBuildingCornersBufferForBorder = expandPolygon(this.p, tempBuildingCorners, 20/this.scale);
 
       /* HIDE, only used to show the offsets  */
 
@@ -1048,6 +1048,22 @@ export class AdjacencyGraphVisualizer2 {
 
 
     let propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
+
+
+    if(!this.points.length){
+      propertyCorners =[
+      p.createVector(80, 40),
+      p.createVector(p.width - 120, 10),
+      // p.createVector(p.width - 10, p.height / 2 + 10),
+      p.createVector(p.width - 75, p.height - 40),
+      // p.createVector(p.width / 2 - 140, p.height - 80),
+      p.createVector(40, p.height - 180),
+    ];
+
+
+    }
+
+
     const isClockwise = getIsClockwise(propertyCorners)
 
     let approachIndex = this.lines.findIndex(line => line.isApproach);
@@ -1059,23 +1075,12 @@ export class AdjacencyGraphVisualizer2 {
       // const newIndex = getReversedIndex(approachIndex , this.lines.length);
 
       // approachIndex = newIndex;
-
-
     }
 
 
 
 
-    // [
-    //   p.createVector(80, 40),
-    //   p.createVector(p.width - 120, 10),
-    //   // p.createVector(p.width - 10, p.height / 2 + 10),
-    //   p.createVector(p.width - 75, p.height - 40),
-    //   // p.createVector(p.width / 2 - 140, p.height - 80),
-    //   p.createVector(40, p.height - 180),
-    // ];
-
-
+    
 
 
 
@@ -1093,9 +1098,9 @@ export class AdjacencyGraphVisualizer2 {
 
     const defaultVector = p.createVector(0, 0)
 
-    const approach = new SitePlanElement(p, getCenterPoint(p, property.approachEdge?.point1 || defaultVector, property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach);
+    const approach = new SitePlanElement(p, getCenterPoint(p, property.approachEdge?.point1 || defaultVector, property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach, this.scale);
     const parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
-    const building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefaut, buildingDefaut, approachAngle, ESitePlanObjects.Building);
+    const building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefaut, buildingDefaut, approachAngle, ESitePlanObjects.Building, this.scale);
 
 
 
@@ -1139,7 +1144,6 @@ export class AdjacencyGraphVisualizer2 {
 
         const isVertical = isMoreVertical(approachEdgeAngle || 0, true)
 
-        console.log(`isVertical `, isVertical)
         if (isVertical) {
           newX = approach.center.x + (newY - approach.center.y) / p.tan(approachEdgeAngle || 0);
           newY = p.mouseY;

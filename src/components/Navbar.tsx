@@ -18,7 +18,6 @@ export const routes = {
   LENDING_COST: "/lending-costs",
   WATERFALL: "/waterfall-generator",
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
-  LOT_LINE_DRAWER: "/lot-line-drawer",
   SITE_PLAN_BUILDER: "/site-plan-builder",
   
 }
@@ -64,7 +63,6 @@ const Navbar = () => {
             <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
             {/* <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link> */}
             {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
-            <Link onClick={handleToggleMenu} to={routes.LOT_LINE_DRAWER}>{EPageTitles.LOT_LINE_DRAWER}</Link>
             <Link onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link>
 
             

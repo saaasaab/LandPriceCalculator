@@ -36,6 +36,7 @@ interface FinalizedData {
 const SitePlanDesigner: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
+  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
   // const [isPolygonClosed, setIsPolygonClosed] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ const SitePlanDesigner: React.FC = () => {
   const isSelectingApproachRef = useRef<boolean>(false);
   const isDefiningScaleRef = useRef<boolean>(false);
   const inputScaleRef = useRef<number | null>(null);
-  const scaleRef = useRef<number | null>( null);
+  const scaleRef = useRef<number | null>(null);
 
 
   const draggingPointIndexRef = useRef<number | null>(null);
@@ -137,6 +138,8 @@ const SitePlanDesigner: React.FC = () => {
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
 
+        
+
           if (line.isApproach) {
             p.stroke(20, 230, 120);
           }
@@ -148,13 +151,21 @@ const SitePlanDesigner: React.FC = () => {
             p.stroke(0, 20, 220);
           }
           // p.stroke(line.color);
+         
+          p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
+        
+        
           p.strokeWeight(2);
+          p.noStroke();
+          p.fill(0, 20, 220)
           const midX = (points[line.start].x + points[line.end].x) / 2;
           const midY = (points[line.start].y + points[line.end].y) / 2;
           const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .5);
 
-          p.text(`${length.toFixed(1)} ft line#: ${i}`, midX, midY);
-          p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
+          p.text(`${length.toFixed(1)} ft`, midX, midY);
+        
+        
+        
         }
 
         for (const point of points) {
@@ -288,7 +299,7 @@ const SitePlanDesigner: React.FC = () => {
       }
     }
 
-    
+
   };
 
 
@@ -303,6 +314,7 @@ const SitePlanDesigner: React.FC = () => {
   const createPoints = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
+    setMode('adjust')
   }
 
   const clearCanvas = () => {
@@ -316,22 +328,30 @@ const SitePlanDesigner: React.FC = () => {
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
     inputScaleRef.current = null;
+    setMode('adjust')
+
   };
 
   const selectApproach = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
+    setMode('approach')
+
   }
 
   const defineScale = () => {
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
+    setMode('scale')
+
   }
 
   const generateSitePlan = () => {
     const points = pointsRef.current;
     const lines = linesRef.current;
     const scale = scaleRef.current;
+    setMode('generate')
+
 
     // console.log(`points, lines, scale`, points, lines, scale)
     const graph = new AdjacencyGraph();
@@ -343,45 +363,47 @@ const SitePlanDesigner: React.FC = () => {
 
   return (
     <div>
-      <h1>Polygon Editor</h1>
-      <button
-        onClick={clearCanvas}
-        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-      >
-        Clear
-      </button>
+      <h1>Site Plan Generator</h1>
 
-      <button
-        onClick={createPoints}
-        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-      >
-        Create Points
-      </button>
+      <div>
+        <button
+          onClick={clearCanvas}
+          style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+        >
+          Clear
+        </button>
 
-      <button
-        onClick={selectApproach}
-        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-      >
-        Select approach
-      </button>
+        <button
+          onClick={createPoints}
+          style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+        >
+          Create Points
+        </button>
 
-      <button
-        onClick={defineScale}
-        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-      >
-        Define Scale
-      </button>
+        <button
+          onClick={selectApproach}
+          style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+        >
+          Select approach
+        </button>
 
-      <button
-        onClick={generateSitePlan}
-        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-      >
-        Generate Site Plan
-      </button>
+        <button
+          onClick={defineScale}
+          style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+        >
+          Define Scale
+        </button>
+
+        <button
+          onClick={generateSitePlan}
+          style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+        >
+          Generate Site Plan
+        </button>
+      </div>
 
 
-
-      <div style={{ marginTop: '10px' }}>
+      {mode === "scale" ? <div style={{ marginTop: '10px' }}>
         <label>Edge Length (ft): </label>
         <input
           // ref={setbackInputRef} // Attach ref for auto-focus
@@ -390,13 +412,15 @@ const SitePlanDesigner: React.FC = () => {
           onChange={(e) => { inputScaleRef.current = Number(e.target.value) }}
           autoFocus
         />
-      </div>
+      </div> : <></>}
 
 
 
 
 
-      <input type="file" accept="image/*" onChange={handleFileUpload} />
+      {mode === "adjust" ? <input type="file" accept="image/*" onChange={handleFileUpload} /> : <></>}
+
+
       <div ref={canvasRef} />
     </div>
 

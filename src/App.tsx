@@ -10,7 +10,7 @@ import { EPageNames } from './utils/types';
 import './App.css'
 import BlogPost from './futureItems/BlogPost';
 import SitePlanDesigner from './pages/SitePlanDesigner';
-import RealEstatePolygon from './pages/LotLineDrawerP5';
+// import RealEstatePolygon from './pages/LotLineDrawerP5';
 import LotLineDrawer from './futureItems/LotLineDrawerOld';
 
 
@@ -51,7 +51,6 @@ function App() {
           <Route path={routes.LENDING_COST} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.LENDING_COST} />} />
           <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL} />} />
           <Route path={routes.CONSTRUCTION_BUDGET} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_BUDGET} />} />
-          {/* <Route path={routes.LOT_LINE_DRAWER} element={<LotLineDrawer/>} /> */}
           <Route path={routes.SITE_PLAN_BUILDER} element={<SitePlanDesigner/>} />
 
           <Route path="*" element={<NotFound />} />
