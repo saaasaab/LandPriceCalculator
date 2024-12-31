@@ -85,7 +85,7 @@ class ParkingStall {
   public previousAngle: number;
   public entranceEdge: Edge;
   public previousEntranceEdge: Edge;
-
+  public isEmptySlot: boolean;
   constructor(p: p5, side: number, stallNumber: number, angle: number, stallCorners: p5.Vector[], entranceEdge: Edge) {
     this.p = p;
     this.side = side;
@@ -96,6 +96,7 @@ class ParkingStall {
     this.previousAngle = angle;
     this.entranceEdge = entranceEdge;
     this.previousEntranceEdge = entranceEdge;
+    this.isEmptySlot = false;
   }
 
   initialize() {
@@ -112,7 +113,9 @@ class ParkingStall {
     p.strokeWeight(2);
 
     this.stallCorners.forEach((corner, i) => {
-      p.vertex(corner.x, corner.y);
+      if (!this.isEmptySlot) {
+        p.vertex(corner.x, corner.y);
+      }
     });
     p.endShape(p.CLOSE); // Close the polygon
   }
@@ -129,7 +132,6 @@ class ParkingStall {
 }
 
 class Property {
-
   private p: p5;
   public propertyEdges: Edge[] = [];
   public propertyCorners: p5.Vector[];
@@ -550,8 +552,8 @@ class Parking extends SitePlanElement {
     left: ParkingStall[];
     right: ParkingStall[];
   };
-  public scale: number;
 
+  public scale: number;
   constructor(
     p: p5,
     center: p5.Vector,
@@ -600,7 +602,9 @@ class Parking extends SitePlanElement {
       if (truthChecker(allPointsInBoundary)) {
 
         this.calculateNumberOfFittableStalls(property.propertyCorners);
+
         this.updateStallCorners(true);
+
         this.updateParkingHeight(property.propertyCorners);
 
       }
@@ -612,6 +616,7 @@ class Parking extends SitePlanElement {
 
       previousParkingCount = parkingCount;
       parkingCount = this.parkingStalls.left.length + this.parkingStalls.right.length
+
 
     }
 
@@ -630,13 +635,20 @@ class Parking extends SitePlanElement {
 
   drawParkingStalls() {
     this.parkingStalls.right.forEach((stall, i) => {
-      stall.drawParkingStall();
+      if (!stall.isEmptySlot) {
+        stall.drawParkingStall();
+      }
     })
 
     this.parkingStalls.left.forEach(stall => {
-      stall.drawParkingStall();
+      if (!stall.isEmptySlot) {
+        stall.drawParkingStall();
+      }
     })
   }
+
+
+
 
   updateStallCorners(isInit = false) {
     if (!this.entranceEdge || !this.previousEntranceEdge) return;
@@ -691,7 +703,7 @@ class Parking extends SitePlanElement {
     const maxParkingStalls = Math.max(this.parkingStalls.left.length, this.parkingStalls.right.length);
 
     const garbageHeight = 10 / this.scale / 2;
-    
+
     this.updateheight(maxParkingStalls * stallHeight / this.scale + garbageHeight);
 
 
@@ -704,7 +716,7 @@ class Parking extends SitePlanElement {
         const point: Point = [corner.x, corner.y];
         return pointsAreInBoundary(propertyCorners, point) === -1
       });
-      
+
 
       if (truthChecker(allIn)) {
         parkingNotFit = false;
@@ -712,7 +724,6 @@ class Parking extends SitePlanElement {
 
 
       else {
-
         if (this.parkingStalls.left.length >= maxParkingStalls - recalcCount) {
           this.parkingStalls.left.pop();
         }
@@ -726,7 +737,6 @@ class Parking extends SitePlanElement {
     }
   }
 
-
   calculateNumberOfFittableStalls(propertyCorners: p5.Vector[]) {
     const maxNumStalls = 10;
 
@@ -734,36 +744,50 @@ class Parking extends SitePlanElement {
     const parkingAngle = this.angle;
 
 
-    const leftStallsToRemove: number[] = []
-    const rightStallsToRemove: number[] = []
+    const leftStallsToEmpty: number[] = []
+    const rightStallsToEmpty: number[] = []
+
+
+
+
+
 
 
     // When a parking stall goes out of bounds, remove that stall
     Object.keys(this.parkingStalls).forEach(side =>
       this.parkingStalls[side as ("left" | "right")].forEach((stall, i) => {
+
+        // Just reset the slots since we're checking anyway.
+        stall.isEmptySlot = false;
         const allIn = stall.stallCorners.map(corner => {
           const point: Point = [corner.x, corner.y];
           return pointsAreInBoundary(propertyCorners, point) === -1
         });
 
+
         if (!truthChecker(allIn)) {
-
-          if (side === "left") leftStallsToRemove.push(i);
-          if (side === "right") rightStallsToRemove.push(i);
-
-
+          if (side === "left") leftStallsToEmpty.push(i);
+          if (side === "right") rightStallsToEmpty.push(i);
         }
       })
     )
 
+    if (leftStallsToEmpty.length > 0 || rightStallsToEmpty.length > 0) {
+      leftStallsToEmpty.forEach(indexToBeEmptied => {
+        this.parkingStalls.left[indexToBeEmptied].isEmptySlot = true;
+      })
+      rightStallsToEmpty.forEach(indexToBeEmptied => {
+        this.parkingStalls.right[indexToBeEmptied].isEmptySlot = true;
+      })
 
-    if (leftStallsToRemove.length > 0 || rightStallsToRemove.length > 0) {
-      const _removedLeft = removeItemsByIndices(this.parkingStalls.left, leftStallsToRemove)
-      const _removedRight = removeItemsByIndices(this.parkingStalls.right, rightStallsToRemove)
-      this.parkingStalls.left = _removedLeft
-      this.parkingStalls.right = _removedRight
-      return
+
+      // const _removedLeft = removeItemsByIndices(this.parkingStalls.left, leftStallsToEmpty);
+      // const _removedRight = removeItemsByIndices(this.parkingStalls.right, rightStallsToEmpty);
+
+      // this.parkingStalls.left = _removedLeft;
+      // this.parkingStalls.right = _removedRight;
     }
+
 
 
     const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p, entranceEdge, parkingAngle, this.parkingStalls, this.scale);
@@ -834,16 +858,8 @@ class Parking extends SitePlanElement {
     }
     this.p.ellipse(stallCornerLeft[2].x, stallCornerLeft[2].y, 10, 10)
     this.p.ellipse(stallCornerLeft[3].x, stallCornerLeft[3].y, 10, 10)
-
-
-
-
-    // check if each parking spot fits inside the boundary.
-    // If it fits, then create a new parking stall instance. 
-
-    // Go through all the parking stalls and determine if they all fit in the boundary
-    // Remove those that don't fit. 
   }
+
 
   createParkingOutline(parking: Parking, garbage: Gargage) {
 
@@ -1462,7 +1478,8 @@ export class AdjacencyGraphVisualizer2 {
       building.drawSitePlanElement();
       property.propertyQuadrant(property, parking);
       createDriveway(p, approach, parking);
-      building.buildingGrower(property, parking);
+
+      // building.buildingGrower(property, parking);
       garbage.drawSitePlanElement();
 
 
@@ -1678,7 +1695,7 @@ function calculatePointPosition(p: p5, entranceEdge: Edge, parkingAngle: number,
 
   const _stallHeight = stallHeight / scale;
   const _stallWidth = stallWidth / scale;
-  // Get the enterance points and the direction they are pointing.
+
 
   // Expand the parking size
   const currentNumberOfStallsRight = parkingStalls.right.length;
