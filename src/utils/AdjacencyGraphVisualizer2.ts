@@ -154,6 +154,8 @@ class Property {
     const p = this.p;
     const propertyCorners = this.propertyCorners;
 
+
+    console.log(`propertyCorners`, propertyCorners)
     const propertyEdges: Edge[] = [];
 
     for (let i = 0; i < propertyCorners.length; i++) {
@@ -177,7 +179,7 @@ class Property {
   drawProperty() {
 
 
-    this.propertyEdges.forEach(edge => {
+    this.propertyEdges.forEach((edge, i) => {
 
 
       edge.drawLine()
@@ -192,7 +194,7 @@ class Property {
       this.p.translate(midX, midY)
       this.p.rotate(edge.calculateAngle())
       this.p.textSize(14);
-      this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+      this.p.text(`#${i} ${length.toFixed(1)} ft`, 0, 0);
       this.p.pop();
 
     })
@@ -355,8 +357,6 @@ class Property {
 
 
   }
-
-
 }
 
 class SitePlanElement {
@@ -692,7 +692,8 @@ class Parking extends SitePlanElement {
     // Take a snapshot to revert
     const maxParkingStalls = Math.max(this.parkingStalls.left.length, this.parkingStalls.right.length);
 
-    this.updateheight(maxParkingStalls * stallHeight / this.scale);
+    const garbageHeight = 10/this.scale/2;
+    this.updateheight(maxParkingStalls * stallHeight / this.scale + garbageHeight);
 
 
     let parkingNotFit = true;
@@ -719,7 +720,7 @@ class Parking extends SitePlanElement {
           this.parkingStalls.right.pop();
         }
 
-        this.updateheight((maxParkingStalls - recalcCount) * stallHeight / this.scale);
+        this.updateheight((maxParkingStalls - recalcCount) * stallHeight / this.scale+garbageHeight);
         recalcCount++
       }
     }
@@ -847,6 +848,10 @@ class Parking extends SitePlanElement {
 
     // Go through all the parking stalls and determine if they all fit in the boundary
     // Remove those that don't fit. 
+  }
+
+  createParkingOutline(parking: Parking, garbage: Gargage){
+    
   }
 
 
@@ -1174,7 +1179,6 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-
     let propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
 
 
@@ -1192,18 +1196,17 @@ export class AdjacencyGraphVisualizer2 {
 
     const isClockwise = getIsClockwise(propertyCorners)
 
+
     let approachIndex = this.lines.findIndex(line => line.isApproach);
-
-
+    
+    approachIndex = approachIndex === -1 ? 0 :approachIndex;
     if (isClockwise) {
-      const _approachIndex = approachIndex;
-      propertyCorners = propertyCorners.reverse()
-      // const newIndex = getReversedIndex(approachIndex , this.lines.length);
-
-      // approachIndex = newIndex;
+      const first = propertyCorners[0];
+      const rest =  propertyCorners.slice(1,propertyCorners.length).reverse()
+      propertyCorners = [first,...rest]
+      const newIndex = getReversedIndex(approachIndex , this.lines.length);
+      approachIndex = newIndex;
     }
-
-
 
 
     const property = new Property(p, propertyCorners, approachIndex === -1 ? 0 : approachIndex, isClockwise, this.scale);
@@ -1264,8 +1267,6 @@ export class AdjacencyGraphVisualizer2 {
 
         const approachEdgeAngle = property.approachEdge?.calculateAngle()
 
-
-
         // Follow along the line
         let newX = p.mouseX;
         let newY = p.mouseY;
@@ -1299,14 +1300,11 @@ export class AdjacencyGraphVisualizer2 {
           parking.updateAngle(angle); // +90 to get the perpendicular angle
           garbage.updateAngle(angle)
           building.updateAngle(angle); // +90 to get the perpendicular angle
-
-
           parking.calculateNumberOfFittableStalls(propertyCorners);
-
-
           parking.updateStallCorners();
           parking.updateParkingHeight(property.propertyCorners);
           building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length)
+          
           garbage.updateCenterGarbage(property,parking)
 
         }
@@ -1360,6 +1358,8 @@ export class AdjacencyGraphVisualizer2 {
         building.updateAngle(normalizeAngle(angle2 - 90))
 
         const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, parking.sitePlanElementCorners);
+        const garbageInBoundary = allPointsInPolygon(property.propertyCorners, garbage.sitePlanElementCorners);
+
 
         if (truthChecker(allPointsInBoundary)) {
           parking.calculateNumberOfFittableStalls(property.propertyCorners);
@@ -1372,9 +1372,8 @@ export class AdjacencyGraphVisualizer2 {
 
           // For all the points of the parking, find the point and edge that are closest. If they're 
 
-
-
         }
+
         else {
           parking.updateParkingHeight(property.propertyCorners);
 
@@ -1403,7 +1402,7 @@ export class AdjacencyGraphVisualizer2 {
       p.background(240);
       p.stroke(0);
 
-      property.drawProperty()
+      property.drawProperty();
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
       parking.drawParkingStalls();
@@ -1412,6 +1411,8 @@ export class AdjacencyGraphVisualizer2 {
       createDriveway(p, approach, parking);
       building.buildingGrower(property, parking);
       garbage.drawSitePlanElement();
+
+      
 
     };
   }

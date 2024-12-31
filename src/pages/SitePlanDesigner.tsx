@@ -162,7 +162,7 @@ const SitePlanDesigner: React.FC = () => {
           const midY = (points[line.start].y + points[line.end].y) / 2;
           const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .25);
 
-          p.text(`${length.toFixed(1)} ft`, midX, midY);
+          p.text(`#${i} ${length.toFixed(1)} ft`, midX, midY);
 
 
 
