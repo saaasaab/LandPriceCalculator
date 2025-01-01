@@ -194,7 +194,7 @@ class Property {
       this.p.translate(midX, midY)
       this.p.rotate(edge.calculateAngle())
       this.p.textSize(14);
-      this.p.text(`#${i} ${length.toFixed(1)} ft`, 0, 0);
+      this.p.text(`${length.toFixed(1)} ft`, 0, 0);
       this.p.pop();
 
     })
@@ -650,10 +650,13 @@ class Parking extends SitePlanElement {
 
 
 
-  updateStallCorners(isInit = false) {
+  updateStallCorners(isInit = false, isRotationFrozen = false) {
+
+
     if (!this.entranceEdge || !this.previousEntranceEdge) return;
 
     if (isInit || (
+      isRotationFrozen ||
       this.angle !== this.previousAngle ||
       this.entranceEdge.point1.x !== this.previousEntranceEdge.point1.x ||
       this.entranceEdge.point1.y !== this.previousEntranceEdge.point1.y ||
@@ -738,7 +741,7 @@ class Parking extends SitePlanElement {
   }
 
   calculateNumberOfFittableStalls(propertyCorners: p5.Vector[]) {
-    const maxNumStalls = 10;
+    const maxNumStalls = 7;
 
     const entranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0];
     const parkingAngle = this.angle;
@@ -746,9 +749,6 @@ class Parking extends SitePlanElement {
 
     const leftStallsToEmpty: number[] = []
     const rightStallsToEmpty: number[] = []
-
-
-
 
 
 
@@ -789,10 +789,7 @@ class Parking extends SitePlanElement {
     }
 
 
-
     const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p, entranceEdge, parkingAngle, this.parkingStalls, this.scale);
-
-
 
     // Expand the parking size
 
@@ -838,35 +835,9 @@ class Parking extends SitePlanElement {
 
 
 
-    if (truthChecker(newPointsAreInBoundaryRight)) {
-      this.p.fill(140, 200, 1);
-    }
-    else {
-      this.p.fill(200, 10, 140);
-    }
-    this.p.ellipse(stallCornerRight[2].x, stallCornerRight[2].y, 10, 10)
-    this.p.ellipse(stallCornerRight[3].x, stallCornerRight[3].y, 10, 10)
-
-
-
-    if (truthChecker(newPointsAreInBoundaryLeft)) {
-      this.p.fill(140, 200, 1);
-
-    }
-    else {
-      this.p.fill(200, 10, 140);
-    }
-    this.p.ellipse(stallCornerLeft[2].x, stallCornerLeft[2].y, 10, 10)
-    this.p.ellipse(stallCornerLeft[3].x, stallCornerLeft[3].y, 10, 10)
-  }
-
-
-  createParkingOutline(parking: Parking, garbage: Gargage) {
 
   }
-
-
-
+  createParkingOutline(parking: Parking, garbage: Gargage) { }
 }
 
 class Building extends SitePlanElement {
@@ -939,7 +910,6 @@ class Building extends SitePlanElement {
       })
     })
 
-    // console.log(`parkingRight`, parkingRight)
 
 
     // while (lookingForBuildingCenter) {
@@ -1322,6 +1292,9 @@ export class AdjacencyGraphVisualizer2 {
     let isDraggingApproach = false;
     let isDraggingParkingOffset = false;
 
+    let isRotationFrozen = false;
+
+
 
     p.mouseDragged = () => {
 
@@ -1365,12 +1338,13 @@ export class AdjacencyGraphVisualizer2 {
           const _angle = parking.angle;
 
           approach.updateCenter(newX, newY);
-          const angle = calculateAngle(parking.center, approach.center) - 90
+          const angle = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90
           parking.updateAngle(angle); // +90 to get the perpendicular angle
           garbage.updateAngle(angle)
           building.updateAngle(angle); // +90 to get the perpendicular angle
+
           parking.calculateNumberOfFittableStalls(propertyCorners);
-          parking.updateStallCorners();
+          parking.updateStallCorners(false, true);
           parking.updateParkingHeight(property.propertyCorners);
           building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length, parking)
 
@@ -1386,8 +1360,9 @@ export class AdjacencyGraphVisualizer2 {
       }
 
       // Only hovering in the offset
-      if ((isHoveredParkingOffset && !isHoveredParking) || isDraggingParkingOffset) {
+      if (((isHoveredParkingOffset && !isHoveredParking) || isDraggingParkingOffset) && !isDraggingApproach) {
         isDraggingParkingOffset = true;
+        isRotationFrozen = true;
 
         // const _center = p.createVector(parking.center.x, parking.center.y);
         const newX = p.mouseX;
@@ -1398,13 +1373,18 @@ export class AdjacencyGraphVisualizer2 {
 
         parking.updateAngle(newAngle);
         garbage.updateAngle(newAngle);
+
         parking.calculateNumberOfFittableStalls(property.propertyCorners);
         parking.updateStallCorners();
         parking.updateParkingHeight(property.propertyCorners);
+
         building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length, parking)
 
       }
 
+      
+      
+      // Dragging the parking lot
       if ((isHoveredParking || isDraggingParking) && !isDraggingParkingOffset) {
         isDraggingParking = true;
 
@@ -1416,23 +1396,27 @@ export class AdjacencyGraphVisualizer2 {
 
         if (!truthChecker(centerInBoundary)) { return }
 
+
         parking.updateCenter(newX, newY);
         garbage.updateCenterGarbage(property, parking);
 
 
-        const angle2 = calculateAngle(parking.center, approach.center);
-        parking.updateAngle(normalizeAngle(angle2 - 90))
-        garbage.updateAngle(normalizeAngle(angle2 - 90))
 
-        building.updateAngle(normalizeAngle(angle2 - 90))
+        const angle2 = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
+
+        parking.updateAngle(normalizeAngle(angle2))
+        garbage.updateAngle(normalizeAngle(angle2))
+        building.updateAngle(normalizeAngle(angle2))
+
 
         const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, parking.sitePlanElementCorners);
         const garbageInBoundary = allPointsInPolygon(property.propertyCorners, garbage.sitePlanElementCorners);
 
 
         if (truthChecker(allPointsInBoundary)) {
+
           parking.calculateNumberOfFittableStalls(property.propertyCorners);
-          parking.updateStallCorners();
+          parking.updateStallCorners(false, isRotationFrozen);
           parking.updateParkingHeight(property.propertyCorners);
           building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length, parking)
 
