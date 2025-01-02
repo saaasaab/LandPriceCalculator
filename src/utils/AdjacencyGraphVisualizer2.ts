@@ -242,9 +242,13 @@ class Property {
       const edgeIndecies: number[] = []
 
       property.propertyEdges.forEach((edge, edgeIndex) => {
+
         const intersect = getLineIntersection(
           p,
-          [p.createVector(parking.center.x, parking.center.y), p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)],
+          [
+            p.createVector(parking.center.x, parking.center.y),
+            p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)
+          ],
           [edge.point1, edge.point2]
         )
         if (intersect) {
@@ -837,12 +841,16 @@ class Parking extends SitePlanElement {
 
 
   }
-  createParkingOutline(parking: Parking, garbage: Gargage) { }
+  createParkingOutline(parking: Parking, garbage: Gargage) {
+
+
+  }
 }
 
 class Building extends SitePlanElement {
+  public isInitialized = false;
+  public frameCount = 0;
   // public additionalProperty: string; // Example of a new property
-
   constructor(
     p: p5,
     center: p5.Vector,
@@ -855,125 +863,142 @@ class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
+
   }
 
-  initializeBuilding(property: Property, parking: Parking) {
+  initializeBuilding(x: number, y: number,) {
+    this.isInitialized = true;
+
+    this.center.x = x;
+    this.center.y = y;
 
 
-    this.buildingLocator(this.p, property.propertyQuadrants, property.maxAreaIndex, this, property.propertyEdges.length, parking)
+    // this.buildingLocator(this.p, property.propertyQuadrants, property.maxAreaIndex, this, property.propertyEdges.length, parking)
     this.createSitePlanElementCorners();
-    this.setSitePlanElementEdges();
-
-
-    // const _x = newDimension.x
-    // const _y = newDimension.y
-    // const _width = newDimension.width
-    // const _height = newDimension.height
-    // const _angle = newDimension.angle
-
-
-    // const tempBuildingCorners = createSitePlanElementCorners(this.p, _x, _y, _width, _height, _angle)
-
-
-
-    // const newPointsAreInParking = truthChecker(tempBuildingCornersBufferForBorder.map(corner => {
-    //   const point: Point = [corner.x, corner.y];
-    //   return pointsAreInBoundary(parking.sitePlanElementCorners, point) === -1;
-    // }));
-
-
+    this.setSitePlanElementEdges()
 
   }
 
+  tempBuilding() {
 
-  buildingLocator(p: p5, polys: p5.Vector[][], maxAreaIndex: number, building: Building, totalEdges: number, parking: Parking) {
-    let center = calculateCentroid(polys[maxAreaIndex])
+    this.p.rectMode(this.p.CENTER);
 
-    let moveDistance = 10;
+    this.p.strokeWeight(2)
+    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount, this.frameCount, 4);
+    this.frameCount++;
 
-    const offsets = [
-      [moveDistance, 0],
-      [-moveDistance, 0],
-      [0, moveDistance],
-      [0, -moveDistance],
-      [moveDistance, moveDistance],
-      [-moveDistance, moveDistance],
-      [-moveDistance, moveDistance],
-      [-moveDistance, -moveDistance],
-    ]
+    if (this.frameCount > 50) this.frameCount = 0
 
-    let lookingForBuildingCenter = true;
+  }
 
-    const parkingRight = parking.parkingStalls.left.map(stall => {
-      return stall.stallCorners.map(corner => {
-        return p.dist(corner.x, corner.y, center.x, center.y)
-      })
-    })
+  drawBuilding() {
+    if (this.isInitialized) {
+      this.drawSitePlanElement()
+    }
+  }
 
 
+  buildingLocator(p: p5, building: Building, parking: Parking, property: Property, approach: SitePlanElement, garbage: Gargage) {
+    if (!this.isInitialized) return;
 
-    // while (lookingForBuildingCenter) {
-    //   for (let i = 0; i < offsets.length; i++) {
+    // If we are inside something, then move in the oppisite direction of its center.
 
-    //     const parkingRight = parking.parkingStalls.left.map(stall => {
-    //       return stall.stallCorners.map(corner => {
-    //         return p.dist(corner.x, corner.y, center.x, center.y)
-    //       }).findIndex(dist => dist < moveDistance)
-    //     }).findIndex(index => index !== -1)
+    // OR it should be a mix of the vectors. 
+    // const buildingBuffer = expandPolygon(this.p, tempBuildingCorners, 10 / this.scale);
 
 
-    //     const parkingLeft = parking.parkingStalls.left.map(stall => {
-    //       return stall.stallCorners.map(corner => {
-    //         return p.dist(corner.x, corner.y, center.x, center.y)
-    //       }).findIndex(dist => dist < moveDistance)
-    //     }).findIndex(index => index !== -1)
-
-    //     if (parkingLeft !== -1 && parkingRight !== -1) {
-    //       lookingForBuildingCenter = false;
-    //       break
-    //     }
-    //     else {
-    //       center.x += offsets[i][0]
-    //       center.y += offsets[i][1]
-    //     }
-    //     moveDistance += 5
-
-    //   }
-
-    // }
+    let isInsideParking = false;
+    let isOutsideBoundary = false;
+    let isInsideParkingStallsRight = false;
+    let isInsideParkingStallsLeft = false;
+    let isInsideApproach = false;
+    let isInsideGarbage = false;
+    let isInsideDriveway = false;
 
 
 
+    // const tempBuildingCornersBufferForBorder = expandPolygon(this.p, building.sitePlanElementCorners, 50 / this.scale);
 
 
 
-    // if(center is closer than X px from any corner){
-    //   move center down, left, right, up and then do the diagonal, then increase the move distance
-    // }
+    isInsideParking = building.sitePlanElementCorners.map(corner => {
+      const point: Point = [corner.x, corner.y];
+      return pointsAreInBoundary(parking.sitePlanElementCorners, point) === -1
+    }).some(el => el)
 
 
-    // Building
-    building.center = p.createVector(center.x, center.y);
+    isOutsideBoundary = building.sitePlanElementCorners.map(corner => {
+      const point: Point = [corner.x, corner.y];
+      return pointsAreInBoundary(property.propertyCorners, point) === 1
+    }).some(el => el)
+
+    isInsideApproach = building.sitePlanElementCorners.map(corner => {
+      const point: Point = [corner.x, corner.y];
+      return pointsAreInBoundary(approach.sitePlanElementCorners, point) === -1
+    }).some(el => el)
+
+    isInsideGarbage = building.sitePlanElementCorners.map(corner => {
+      const point: Point = [corner.x, corner.y];
+      return pointsAreInBoundary(garbage.sitePlanElementCorners, point) === -1
+    }).some(el => el)
+
+
+    isInsideParkingStallsLeft = building.sitePlanElementCorners.map(corner => {
+      const point: Point = [corner.x, corner.y];
+
+      const park = parking.parkingStalls.left.map(stall => {
+        return pointsAreInBoundary(stall.stallCorners, point) === -1
+      }).some(el => el);
+      return park
+    }).some(el => el);
+
+
+    isInsideParkingStallsRight = building.sitePlanElementCorners.map(corner => {
+      const point: Point = [corner.x, corner.y];
+
+      const park = parking.parkingStalls.right.map(stall => {
+        return pointsAreInBoundary(stall.stallCorners, point) === -1
+      }).some(el => el);
+      return park
+    }).some(el => el);
+
+
+
+
+
+
+    if (isInsideParking || isInsideParkingStallsRight || isInsideParkingStallsLeft) {
+      const newBuildingPosition = moveVector(parking.center, building.center, 1, true)
+      building.updateCenter(newBuildingPosition.x, newBuildingPosition.y)
+      building.reset();
+
+    }
+
+    if(isInsideGarbage){
+      const newBuildingPosition = moveVector(garbage.center, building.center, 1, true)
+      building.updateCenter(newBuildingPosition.x, newBuildingPosition.y)
+      building.reset();
+    }
+
+    if (isInsideApproach) {
+      const newBuildingPosition = moveVector(approach.center, building.center, 1, true)
+      building.updateCenter(newBuildingPosition.x, newBuildingPosition.y)
+      building.reset();
+    }
+
+    if (isOutsideBoundary) {
+      const propertyCenter = calculateCentroid(property.propertyCorners);
+      const propertyCenterVector = p.createVector(propertyCenter.x,propertyCenter.y)
+      const newBuildingPosition = moveVector(propertyCenterVector, building.center, 1, false)
+      building.updateCenter(newBuildingPosition.x, newBuildingPosition.y)
+      building.reset();
+    }
+
+
+
+    // building.center = p.createVector(center.x, center.y);
     p.ellipse(building.center.x, building.center.y, 30, 30)
 
-    // Draw the polygon using the corner vectors
-    p.beginShape();
-
-    const r = p.map(2, 0, totalEdges, 0, 255)
-    const g = p.map(2, 0, totalEdges, 255, 50)
-
-    p.fill(r, g, 225, 50); // Fill color with transparency
-    p.stroke(0); // Outline color
-    p.strokeWeight(2);
-
-    polys[maxAreaIndex].forEach((corner) => {
-      p.vertex(corner.x, corner.y);
-    });
-
-    // polys[neighboringMaxIndex].forEach((corner, i) => {
-    //   p.vertex(corner.x, corner.y);
-    // });
-    p.endShape(p.CLOSE); // Close the polygon
   }
 
   reset() {
@@ -991,7 +1016,10 @@ class Building extends SitePlanElement {
       corners: p5.Vector[];
     }
 
-    const nudgeStrength = 10;
+
+    if (!this.isInitialized) return;
+
+    const nudgeStrength = 3;
     const nudgeStrengthDimensions = 1;
     const angleNudge = 2;
     const possibleDimensions: DimensionValue[] = [];
@@ -1056,6 +1084,7 @@ class Building extends SitePlanElement {
 
       const tempBuildingCornersBufferForParking = expandPolygon(this.p, tempBuildingCorners, 10 / this.scale);
       const tempBuildingCornersBufferForBorder = expandPolygon(this.p, tempBuildingCorners, 20 / this.scale);
+
 
       /* HIDE, only used to show the offsets  */
 
@@ -1229,9 +1258,9 @@ export class AdjacencyGraphVisualizer2 {
       propertyCorners = [
         p.createVector(80, 40),
         p.createVector(p.width - 120, 10),
-        // p.createVector(p.width - 10, p.height / 2 + 10),
+        p.createVector(p.width - 120, p.height / 2 + 10),
         p.createVector(p.width - 75, p.height - 40),
-        // p.createVector(p.width / 2 - 140, p.height - 80),
+        p.createVector(p.width / 2 - 140, p.height - 80),
         p.createVector(40, p.height - 180),
       ];
     }
@@ -1279,9 +1308,6 @@ export class AdjacencyGraphVisualizer2 {
     property.propertyQuadrant(property, parking);
 
 
-    building.initializeBuilding(property, parking);
-
-
     const garbage = new Gargage(p, getCenterPoint(p, parking.sitePlanElementEdges[0].point1, parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 10 / this.scale, parking.angle, ESitePlanObjects.Garbage, this.scale);
 
 
@@ -1291,16 +1317,30 @@ export class AdjacencyGraphVisualizer2 {
     let isDraggingParking = false;
     let isDraggingApproach = false;
     let isDraggingParkingOffset = false;
-
     let isRotationFrozen = false;
+    let isDraggingBuilding = false;
 
 
 
     p.mouseDragged = () => {
-
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
+      const isHoveredBuilding = building.isMouseHovering();
+
+
+      const isHoveredBuildingOffset = building.isMouseHoveringOffset();
+      if (isHoveredBuildingOffset || isHoveredBuilding) {
+        isDraggingBuilding = true;
+
+        const newX = p.mouseX;
+        const newY = p.mouseY;
+
+        // const _center = p.createVector(building.center.x, building.center.y);
+
+       building.updateCenter(newX, newY);
+        
+      }
 
       if (isHoveredApproach || isDraggingApproach) {
         isDraggingApproach = true;
@@ -1346,7 +1386,7 @@ export class AdjacencyGraphVisualizer2 {
           parking.calculateNumberOfFittableStalls(propertyCorners);
           parking.updateStallCorners(false, true);
           parking.updateParkingHeight(property.propertyCorners);
-          building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length, parking)
+          building.buildingLocator(p, building, parking, property, approach, garbage)
 
           garbage.updateCenterGarbage(property, parking)
 
@@ -1378,12 +1418,12 @@ export class AdjacencyGraphVisualizer2 {
         parking.updateStallCorners();
         parking.updateParkingHeight(property.propertyCorners);
 
-        building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length, parking)
+        building.buildingLocator(p, building, parking, property, approach, garbage)
 
       }
 
-      
-      
+
+
       // Dragging the parking lot
       if ((isHoveredParking || isDraggingParking) && !isDraggingParkingOffset) {
         isDraggingParking = true;
@@ -1418,7 +1458,8 @@ export class AdjacencyGraphVisualizer2 {
           parking.calculateNumberOfFittableStalls(property.propertyCorners);
           parking.updateStallCorners(false, isRotationFrozen);
           parking.updateParkingHeight(property.propertyCorners);
-          building.buildingLocator(p, property.propertyQuadrants, property.maxAreaIndex, building, property.propertyEdges.length, parking)
+          building.buildingLocator(p, building, parking, property, approach, garbage);
+
 
 
           // building.updateCenter();
@@ -1438,9 +1479,27 @@ export class AdjacencyGraphVisualizer2 {
         building.reset();
       }
 
+
     };
 
-    p.mousePressed = () => { };
+    p.mousePressed = () => {
+      const isHoveredApproach = approach.isMouseHovering();
+      const isHoveredParkingOffset = parking.isMouseHoveringOffset();
+      const isHoveredParking = parking.isMouseHovering();
+
+
+      // if(!isDraggingParking && !isDraggingApproach)
+
+      if (!isHoveredApproach && !isHoveredParking && !isHoveredParkingOffset && !building.isInitialized) {
+        const posX = p.mouseX;
+        const posY = p.mouseY;
+
+
+        building.initializeBuilding(posX, posY);
+
+
+      }
+    };
 
     p.mouseReleased = () => {
       isDraggingParking = false;
@@ -1452,6 +1511,12 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.draw = () => {
+      const isHoveredApproach = approach.isMouseHovering();
+      const isHoveredParkingOffset = parking.isMouseHoveringOffset();
+      const isHoveredParking = parking.isMouseHovering();
+      const isHoveredBuilding = building.isMouseHovering();
+
+
       p.background(240);
       p.stroke(0);
 
@@ -1459,13 +1524,32 @@ export class AdjacencyGraphVisualizer2 {
       approach.drawSitePlanElement();
       parking.drawSitePlanElement();
       parking.drawParkingStalls();
-      building.drawSitePlanElement();
+
+
+      building.drawBuilding();
       property.propertyQuadrant(property, parking);
       createDriveway(p, approach, parking);
 
-      // building.buildingGrower(property, parking);
+
+      building.buildingLocator(p, building, parking, property, approach, garbage);
+
+
+      building.buildingGrower(property, parking);
       garbage.drawSitePlanElement();
 
+
+
+
+
+
+      const isInboundary = pointsAreInBoundary(property.propertyCorners, [p.mouseX, p.mouseY]) === -1
+
+
+      if (!isHoveredApproach && !isHoveredParkingOffset && !isHoveredParking && !building.isInitialized && isInboundary) {
+
+        // Show the building growing.
+        building.tempBuilding()
+      }
 
 
     };
@@ -1475,7 +1559,7 @@ export class AdjacencyGraphVisualizer2 {
 
 function setLineDash(p: p5, list: number[]) {
   p.drawingContext.setLineDash(list);
-  p.drawingContext
+  // p.drawingContext
 }
 
 
@@ -1752,6 +1836,37 @@ function calculateStallPosition(p: p5, entranceEdge: Edge, angle: number, parkin
   return stallCorners;
 }
 
+
+
+function moveVector(
+  vector1: p5.Vector,
+  vector2: p5.Vector,
+  distance: number,
+  moveAway: boolean = true
+): p5.Vector {
+  // Calculate the direction from vector1 to vector2
+  let direction = p5.Vector.sub(vector2, vector1);
+
+  // If moving toward vector1, reverse the direction
+  if (!moveAway) {
+    direction = direction.mult(-1);
+  }
+
+  // Normalize the direction (make it a unit vector)
+  direction.normalize();
+
+  // Scale the direction by the desired distance
+  const scaledDirection = direction.mult(distance);
+
+  // Move vector2 by adding the scaled direction
+  const newVector = p5.Vector.add(vector2, scaledDirection);
+
+  return newVector;
+}
+
+
+
+
 function removeItemsByIndices<T>(items: T[], indicesToRemove: number[]): T[] {
   // Convert indicesToRemove to a Set for faster lookups
   const indicesSet = new Set(indicesToRemove);
@@ -1797,9 +1912,11 @@ function getLineIntersection(
 
   const intersection = p.createVector(intersectX, intersectY);
 
+
   // Ensure the intersection is in the forward direction of line1
   const directionVector = p5.Vector.sub(line1[1], line1[0]); // Direction of line1
   const toIntersectionVector = p5.Vector.sub(intersection, line1[0]); // Vector to intersection
+
 
   if (toIntersectionVector.dot(directionVector) >= 0) {
     return intersection; // Valid intersection point
