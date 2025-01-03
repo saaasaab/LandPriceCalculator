@@ -18,7 +18,6 @@ export interface IPoint {
 export interface Line {
   start: number;
   end: number;
-  // selected: boolean;
   setback?: number;
   color: string;
   index: number;
@@ -104,6 +103,8 @@ const SitePlanDesigner: React.FC = () => {
         const isSelectingSetback = isSelectingSetbackRef.current;
         const setbackHasInput = setbackHasInputRef.current
 
+
+
         calculateScale()
         const scale = scaleRef.current;
 
@@ -138,7 +139,6 @@ const SitePlanDesigner: React.FC = () => {
           const line = lines[i];
 
 
-
           if (line.isApproach) {
             p.stroke(20, 230, 120);
           }
@@ -161,15 +161,8 @@ const SitePlanDesigner: React.FC = () => {
           const midY = (points[line.start].y + points[line.end].y) / 2;
           const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .25);
 
-          p.text(`#${i} ${length.toFixed(1)} ft`, midX, midY);
-
-
-          // ADD INPUT FOR EACH LINE FOR SETBACKS
-          // if (isSelectingSetback) {
-          //   setbackHasInput[0]
-          //   const rect = canvasRef.current?.getBoundingClientRect();
-          //   addInput((rect?.left || 0) + midX, (rect?.top || 0) + midY, setbackHasInput[i])
-          // }
+          p.textSize(14);
+          p.text(`${length.toFixed(1)} ft`, midX, midY);
         }
 
         for (const point of points) {
@@ -221,6 +214,7 @@ const SitePlanDesigner: React.FC = () => {
             isApproach: false,
             isScale: false,
             isSetback: false,
+            // setback: 0
           };
 
           setbacks.push(0);
@@ -244,7 +238,8 @@ const SitePlanDesigner: React.FC = () => {
           selected: false,
           isApproach: false,
           isScale: false,
-          isSetback: false
+          isSetback: false,
+          // setback: 5
         };
         setbacks.push(0);
         lines.push(newLine);
@@ -322,51 +317,17 @@ const SitePlanDesigner: React.FC = () => {
     };
   }, [imageURL]);
 
-    // Update setback for a specific line
-    const updateSetback = (index: number, value: string) => {
+  // Update setback for a specific line
+  const updateSetback = (index: number, value: string) => {
 
-      const lines = linesRef.current;
-      const newLines = [...lines];
-      newLines[index].setback = parseFloat(value) || 0;
+    const lines = linesRef.current;
+    const newLines = [...lines];
+    newLines[index].setback = parseFloat(value) || 0;
 
-      lines[index].setback = parseFloat(value) || 0
+    lines[index].setback = parseFloat(value) || 0
 
-      // setLines(newLines);
-    };
-
-
-
-
-  // function addInput(x: number, y: number, hasInput: boolean) {
-
-  //   var input = document.createElement('input');
-
-  //   input.type = 'text';
-  //   input.style.position = 'fixed';
-  //   input.style.left = (x - 4) + 'px';
-  //   input.style.top = (y - 4) + 'px';
-
-
-  //   // input.onkeydown = handleEnter;
-
-  //   document.body.appendChild(input);
-
-  //   input.focus();
-
-  //   // hasInput = true;
-  // }
-
-
-  // function handleEnter(e: KeyboardEvent) {
-  //   var keyCode = e.key;
-  //   console.log(`keyCode`, keyCode)
-  //   if (keyCode === "Enter") {
-  //     //     drawText(this.value, parseInt(this.style.left, 10), parseInt(this.style.top, 10));
-  //     //     document.body.removeChild(this);
-  //     //     hasInput = false;
-  //     console.log(`e`, e)
-  //   }
-  // }
+    // setLines(newLines);
+  };
 
 
   const createPoints = () => {
@@ -418,6 +379,10 @@ const SitePlanDesigner: React.FC = () => {
     const points = pointsRef.current;
     const lines = linesRef.current;
     const scale = scaleRef.current;
+
+    isSelectingSetbackRef.current = false;
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = false;
     setMode('generate')
 
     const graph = new AdjacencyGraph();
@@ -487,15 +452,9 @@ const SitePlanDesigner: React.FC = () => {
         />
       </div> : <></>}
 
-
-
-
-
       {mode === "adjust" ? <input type="file" accept="image/*" onChange={handleFileUpload} /> : <></>}
 
-
       <div ref={canvasRef} />
-
 
       {/* Render inputs over the canvas */}
       {isSelectingSetbackRef.current &&
@@ -504,8 +463,9 @@ const SitePlanDesigner: React.FC = () => {
           const end = pointsRef.current[line.end];
           if (!start || !end) return null;
 
-          const midX = (start.x + end.x) / 2;
-          const midY = (start.y + end.y) / 2;
+          const rect = canvasRef.current?.getBoundingClientRect();
+          const midX = (start.x + end.x) / 2 + (rect?.left || 0);
+          const midY = (start.y + end.y) / 2 + (rect?.top || 0);
 
           return (
             <input
@@ -565,7 +525,7 @@ function drawArea(
   p.stroke(0, 0, 0)
   p.strokeWeight(1)
 
-  p.textSize(24);
+  p.textSize(18);
   p.text(`Area: ${area.toFixed(2)} sq ft`, 10, p.height - 20);
 }
 
