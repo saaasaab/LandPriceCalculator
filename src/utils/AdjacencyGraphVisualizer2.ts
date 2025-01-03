@@ -166,7 +166,7 @@ class Property {
   public cornerOffsetsFromSetbacks: p5.Vector[] = [];
   public setbacks: number[];
 
-  constructor(p: p5, propertyCorners: p5.Vector[], approachIndex: number, isClockwise: boolean, scale: number, setbacks:number[]) {
+  constructor(p: p5, propertyCorners: p5.Vector[], approachIndex: number, isClockwise: boolean, scale: number, setbacks: number[]) {
     this.p = p;
     this.propertyCorners = propertyCorners;
     this.approachEdgeIndex = approachIndex;
@@ -186,7 +186,7 @@ class Property {
       let corner2 = i === propertyCorners.length - 1 ? propertyCorners[0] : propertyCorners[i + 1];
       const isApproach = i === this.approachEdgeIndex;
 
-      
+
       const newEdge = new Edge(p, corner1, corner2, isApproach, this.setbacks[i]);
       propertyEdges.push(newEdge);
     }
@@ -260,53 +260,53 @@ class Property {
   drawSetbackPolygon() {
     const p = this.p;
 
-  
+
     p.beginShape();
     p.fill(100, 200, 255, 150); // Fill color with transparency
     p.stroke(0); // Outline color
     p.strokeWeight(2);
-  
+
     this.cornerOffsetsFromSetbacks.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
     });
     p.endShape(p.CLOSE); // Close the polygon
-  
-  
+
+
   }
-  
+
 
   getIntersection(edge1: Edge, edge2: Edge): p5.Vector | null {
     const { p } = this;
-  
+
     const x1 = edge1.point1Offset.x;
     const y1 = edge1.point1Offset.y;
     const x2 = edge1.point2Offset.x;
     const y2 = edge1.point2Offset.y;
-  
+
     const x3 = edge2.point1Offset.x;
     const y3 = edge2.point1Offset.y;
     const x4 = edge2.point2Offset.x;
     const y4 = edge2.point2Offset.y;
-  
+
     // Calculate the denominator for the line intersection formula
     const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-  
+
     // If denom is 0, the lines are parallel or coincident
     if (Math.abs(denom) < 1e-6) {
       console.log("Lines are parallel or coincident:", { edge1, edge2 });
       return null;
     }
-  
+
     // Calculate the intersection point
     const intersectX =
       ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
     const intersectY =
       ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
-  
+
     const intersection = p.createVector(intersectX, intersectY);
-  
+
     // Debugging: Log the calculated intersection point
-  
+
     // Check if the intersection lies on both line segments
     const tolerance = 1e-6; // Increase tolerance to handle floating-point precision
     const isOnEdge1 =
@@ -314,21 +314,21 @@ class Property {
       intersectX <= Math.max(x1, x2) + tolerance &&
       Math.min(y1, y2) - tolerance <= intersectY &&
       intersectY <= Math.max(y1, y2) + tolerance;
-  
+
     const isOnEdge2 =
       Math.min(x3, x4) - tolerance <= intersectX &&
       intersectX <= Math.max(x3, x4) + tolerance &&
       Math.min(y3, y4) - tolerance <= intersectY &&
       intersectY <= Math.max(y3, y4) + tolerance;
-  
+
     if (isOnEdge1 && isOnEdge2) {
       return intersection;
     }
-  
-  
+
+
     return null; // Intersection is out of bounds
   }
-  
+
   // getIntersection(edge1: Edge, edge2: Edge): p5.Vector | null {
   //   const { p } = this;
 
@@ -1269,12 +1269,11 @@ class Building extends SitePlanElement {
     // Area needs to be closest to X
 
 
-    const targetArea = 5000 / (this.p.pow(this.scale, 2));
+    const targetArea = 2500 / (this.p.pow(this.scale, 2));
     let bestArea = calculateArea(this.sitePlanElementCorners);
 
     const error = Math.abs(targetArea - bestArea) / targetArea;
 
-    console.log(` error `,  error )
     if (error < .0005) return;
 
     let bestAreaIndex = 0;
@@ -1310,7 +1309,7 @@ class Building extends SitePlanElement {
       const tempBuildingCornersBufferForParking = expandPolygon(this.p, tempBuildingCorners, 5 / this.scale);
 
 
-      
+
       const tempBuildingCornersBufferForBorder = expandPolygon(this.p, tempBuildingCorners, 20 / this.scale);
 
 
@@ -1393,7 +1392,6 @@ class Building extends SitePlanElement {
       }
 
 
-      console.log(`bestArea`, bestArea)
       if (!newPointsAreInBoundaryRight) {
         // shoot out the opposite direction
       }
@@ -1480,7 +1478,7 @@ export class AdjacencyGraphVisualizer2 {
     let lines = [...this.lines];
     const userGeneratedPoints = !!this.points.length;
 
-    const setbacks = Array.apply(null, Array(this.lines.length)).map(Number.prototype.valueOf,0);  
+    const setbacks = Array.apply(null, Array(this.lines.length)).map(Number.prototype.valueOf, 0);
 
     if (!this.points.length) {
       propertyCorners = [
@@ -1509,27 +1507,29 @@ export class AdjacencyGraphVisualizer2 {
       // const firstLine = lines[0];
       // const restLine = lines.slice(1, lines.length).reverse()
       // lines = [firstLine, ...restLine]
+
+
+
+
     }
 
-
-
-    // this.lines = lines;
-
-    if (lines.length){
-
-      lines.forEach((line, index)=>
-        {
-          setbacks[line.index] = line.setback || 0
-        });
-    }
-
-
-
+ 
 
 
     const { scaledPolygon, scaleFactor } = scalePolygonToFitCanvas(p, propertyCorners, p.width, p.height, 40);
 
     this.scale = userGeneratedPoints ? this.scale / scaleFactor : this.scale / scaleFactor;
+
+
+    if (lines.length) {
+      lines.forEach((line, index) => {
+        let _i = index;
+        if (isClockwise) {
+          _i = getReversedIndex(index, this.lines.length);
+        }
+        setbacks[_i] = (line.setback || 0) / this.scale
+      });
+    }
 
 
     propertyCorners = scaledPolygon;
@@ -1614,7 +1614,7 @@ export class AdjacencyGraphVisualizer2 {
 
         approach.updateCenter(newX, newY);
 
-        const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
+        const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
 
         if (truthChecker(allPointsInBoundary)) {
           // If rotating the parking is going to push the parking outside the boundary, then update the center of the parking
@@ -1780,7 +1780,7 @@ export class AdjacencyGraphVisualizer2 {
       isDraggingParking = false;
       isDraggingApproach = false;
       isDraggingParkingOffset = false;
-      
+
     };
 
     p.draw = () => {

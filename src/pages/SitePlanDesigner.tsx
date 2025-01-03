@@ -78,10 +78,7 @@ const SitePlanDesigner: React.FC = () => {
 
       p.setup = () => {
         p.createCanvas(800, 800).parent(canvasRef.current!);
-
         p.frameRate(8);
-
-
       };
 
 
@@ -98,12 +95,7 @@ const SitePlanDesigner: React.FC = () => {
       if (visualizer.current) {
         visualizer.current.visualize2(p); // Delegate drawing to the visualizer
       } else {
-
-
-        const isSelectingSetback = isSelectingSetbackRef.current;
-        const setbackHasInput = setbackHasInputRef.current
-
-
+        const isPolygonClosed = isPolygonClosedRef.current;
 
         calculateScale()
         const scale = scaleRef.current;
@@ -161,15 +153,34 @@ const SitePlanDesigner: React.FC = () => {
           const midY = (points[line.start].y + points[line.end].y) / 2;
           const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .25);
 
+          // if is finished, make the text larger.
+
           p.textSize(14);
-          p.text(`${length.toFixed(1)} ft`, midX, midY);
+          p.text(`${i}  ${length.toFixed(1)} ft`, midX, midY);
         }
 
+
+
+
+        if (isPolygonClosed) {
+          p.fill(10, 20, 200, 20)
+          p.beginShape();
+          for (const point of points) {
+            p.vertex(point.x, point.y);
+          }
+          p.endShape();
+
+        }
+
+
+        p.fill(255, 0, 0);
         for (const point of points) {
-          p.fill(255, 0, 0);
           p.noStroke();
           p.ellipse(point.x, point.y, 10, 10);
         }
+
+
+
 
         drawArea(p, isPolygonClosedRef.current, points, scale || .25);
       }
