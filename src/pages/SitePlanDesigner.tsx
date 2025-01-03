@@ -25,26 +25,26 @@ export interface Line {
   selected: boolean;
   isApproach: boolean;
   isScale: boolean;
+  isSetback: boolean
 }
 
-interface FinalizedData {
-  lines: Line[]; // All line data
-  approachLines: Line[]; // Lines selected as approaches
-  setbacks: { lineIndex: number; setback: number }[]; // Setbacks for each line
-}
 
 const SitePlanDesigner: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
+
   // const [isPolygonClosed, setIsPolygonClosed] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
-
+  const setbacksRef = useRef<number[]>([]);
+  const setbackHasInputRef = useRef<boolean[]>([]);
   const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
   const isPolygonClosedRef = useRef<boolean>(false);
   const isSelectingApproachRef = useRef<boolean>(false);
+  const isSelectingSetbackRef = useRef<boolean>(false);
+
   const isDefiningScaleRef = useRef<boolean>(false);
   const inputScaleRef = useRef<number | null>(null);
   const scaleRef = useRef<number | null>(null);
@@ -77,13 +77,9 @@ const SitePlanDesigner: React.FC = () => {
 
     p.setup = () => {
 
-      // const subdivisionGenerator = new SubdivisionGenerator();
       p.setup = () => {
         p.createCanvas(800, 800).parent(canvasRef.current!);
 
-
-        // visualizer.visualize2(p);
-        // subdivisionGenerator.subdivide(p);
         p.frameRate(8);
 
 
@@ -104,6 +100,9 @@ const SitePlanDesigner: React.FC = () => {
         visualizer.current.visualize2(p); // Delegate drawing to the visualizer
       } else {
 
+
+        const isSelectingSetback = isSelectingSetbackRef.current;
+        const setbackHasInput = setbackHasInputRef.current
 
         calculateScale()
         const scale = scaleRef.current;
@@ -165,7 +164,12 @@ const SitePlanDesigner: React.FC = () => {
           p.text(`#${i} ${length.toFixed(1)} ft`, midX, midY);
 
 
-
+          // ADD INPUT FOR EACH LINE FOR SETBACKS
+          // if (isSelectingSetback) {
+          //   setbackHasInput[0]
+          //   const rect = canvasRef.current?.getBoundingClientRect();
+          //   addInput((rect?.left || 0) + midX, (rect?.top || 0) + midY, setbackHasInput[i])
+          // }
         }
 
         for (const point of points) {
@@ -174,8 +178,6 @@ const SitePlanDesigner: React.FC = () => {
           p.ellipse(point.x, point.y, 10, 10);
         }
 
-
-
         drawArea(p, isPolygonClosedRef.current, points, scale || .25);
       }
     };
@@ -183,8 +185,12 @@ const SitePlanDesigner: React.FC = () => {
     p.mousePressed = () => {
       const points = pointsRef.current;
       const lines = linesRef.current;
+      const setbacks = setbacksRef.current;
+      const setbackHasInput = setbackHasInputRef.current;
       const isPolygonClosed = isPolygonClosedRef.current;
       const isSelectingApproach = isSelectingApproachRef.current;
+      const isSelectingSetback = isSelectingSetbackRef.current;
+
       const isDefiningScale = isDefiningScaleRef.current;
       const scale = scaleRef.current;
 
@@ -214,7 +220,10 @@ const SitePlanDesigner: React.FC = () => {
             selected: false,
             isApproach: false,
             isScale: false,
+            isSetback: false,
           };
+
+          setbacks.push(0);
           lines.push(newLine);
         }
       }
@@ -234,8 +243,10 @@ const SitePlanDesigner: React.FC = () => {
           index: lines.length,
           selected: false,
           isApproach: false,
-          isScale: false
+          isScale: false,
+          isSetback: false
         };
+        setbacks.push(0);
         lines.push(newLine);
       }
 
@@ -255,12 +266,15 @@ const SitePlanDesigner: React.FC = () => {
           selectedLineIndexRef.current = lineIndex;
 
           if (isSelectingApproach) {
-            lines[lineIndex].isApproach = !lines[lineIndex].isApproach
+            lines[lineIndex].isApproach = !lines[lineIndex].isApproach;
+          }
 
+          if (isSelectingSetback) {
+            lines[lineIndex].isSetback = !lines[lineIndex].isSetback;
           }
 
           if (isDefiningScale && !inputScaleRef.current && !scale) {
-            lines[lineIndex].isScale = !lines[lineIndex].isScale
+            lines[lineIndex].isScale = !lines[lineIndex].isScale;
           }
 
           // lines[lineIndex].color = "#00FF00"; // Change color of the selected line to green
@@ -289,7 +303,7 @@ const SitePlanDesigner: React.FC = () => {
       const lines = linesRef.current;
       const lineIndex = lines.find(line => line.isScale)?.index;
 
-      if (typeof lineIndex !== 'undefined' &&  lineIndex !== -1) {
+      if (typeof lineIndex !== 'undefined' && lineIndex !== -1) {
         const lineLength = p.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
 
         if (inputScale && lineLength) {
@@ -307,6 +321,52 @@ const SitePlanDesigner: React.FC = () => {
       p5Instance.remove();
     };
   }, [imageURL]);
+
+    // Update setback for a specific line
+    const updateSetback = (index: number, value: string) => {
+
+      const lines = linesRef.current;
+      const newLines = [...lines];
+      newLines[index].setback = parseFloat(value) || 0;
+
+      lines[index].setback = parseFloat(value) || 0
+
+      // setLines(newLines);
+    };
+
+
+
+
+  // function addInput(x: number, y: number, hasInput: boolean) {
+
+  //   var input = document.createElement('input');
+
+  //   input.type = 'text';
+  //   input.style.position = 'fixed';
+  //   input.style.left = (x - 4) + 'px';
+  //   input.style.top = (y - 4) + 'px';
+
+
+  //   // input.onkeydown = handleEnter;
+
+  //   document.body.appendChild(input);
+
+  //   input.focus();
+
+  //   // hasInput = true;
+  // }
+
+
+  // function handleEnter(e: KeyboardEvent) {
+  //   var keyCode = e.key;
+  //   console.log(`keyCode`, keyCode)
+  //   if (keyCode === "Enter") {
+  //     //     drawText(this.value, parseInt(this.style.left, 10), parseInt(this.style.top, 10));
+  //     //     document.body.removeChild(this);
+  //     //     hasInput = false;
+  //     console.log(`e`, e)
+  //   }
+  // }
 
 
   const createPoints = () => {
@@ -333,6 +393,7 @@ const SitePlanDesigner: React.FC = () => {
   const selectApproach = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
+    isSelectingSetbackRef.current = false;
     setMode('approach')
 
   }
@@ -340,8 +401,17 @@ const SitePlanDesigner: React.FC = () => {
   const defineScale = () => {
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
+    isSelectingSetbackRef.current = false;
     setMode('scale')
 
+  }
+
+  const createSetbacks = () => {
+
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = false;
+    isSelectingSetbackRef.current = true;
+    setMode('setback')
   }
 
   const generateSitePlan = () => {
@@ -389,6 +459,13 @@ const SitePlanDesigner: React.FC = () => {
         </button>
 
         <button
+          onClick={createSetbacks}
+          style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+        >
+          Create Setbacks
+        </button>
+
+        <button
           onClick={generateSitePlan}
           style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
         >
@@ -403,8 +480,9 @@ const SitePlanDesigner: React.FC = () => {
           // ref={setbackInputRef} // Attach ref for auto-focus
           type="number"
           value={inputScaleRef.current || undefined}
-          onChange={(e) => { 
-            inputScaleRef.current = Number(e.target.value) }}
+          onChange={(e) => {
+            inputScaleRef.current = Number(e.target.value)
+          }}
           autoFocus
         />
       </div> : <></>}
@@ -417,6 +495,35 @@ const SitePlanDesigner: React.FC = () => {
 
 
       <div ref={canvasRef} />
+
+
+      {/* Render inputs over the canvas */}
+      {isSelectingSetbackRef.current &&
+        linesRef.current?.map((line, index) => {
+          const start = pointsRef.current[line.start];
+          const end = pointsRef.current[line.end];
+          if (!start || !end) return null;
+
+          const midX = (start.x + end.x) / 2;
+          const midY = (start.y + end.y) / 2;
+
+          return (
+            <input
+              key={index}
+              type="number"
+              value={line.setback}
+              onChange={(e) => updateSetback(index, e.target.value)}
+              style={{
+                position: "absolute",
+                left: `${midX}px`,
+                top: `${midY}px`,
+                width: "50px",
+              }}
+            />
+          );
+        })}
+
+
     </div>
 
     // <div>
@@ -464,7 +571,10 @@ function drawArea(
 
 
 
+// const subdivisionGenerator = new SubdivisionGenerator();
 
+// visualizer.visualize2(p);
+// subdivisionGenerator.subdivide(p);
 // const graph = new AdjacencyGraph();
 // graph.addEdges("Parking1", ["Driveway"]);
 // graph.addEdges("Parking2", ["Driveway"]);
