@@ -257,7 +257,6 @@ const SitePlanDesigner: React.FC = () => {
           if (isSelectingApproach) {
             lines[lineIndex].isApproach = !lines[lineIndex].isApproach
 
-            console.log(`lineIndex`, lineIndex)
           }
 
           if (isDefiningScale && !inputScaleRef.current && !scale) {
@@ -290,16 +289,15 @@ const SitePlanDesigner: React.FC = () => {
       const lines = linesRef.current;
       const lineIndex = lines.find(line => line.isScale)?.index;
 
-      if (lineIndex && lineIndex !== -1) {
+      if (typeof lineIndex !== 'undefined' &&  lineIndex !== -1) {
         const lineLength = p.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
 
         if (inputScale && lineLength) {
           scaleRef.current = inputScale / lineLength;
+
         }
       }
     }
-
-
   };
 
 
@@ -352,13 +350,9 @@ const SitePlanDesigner: React.FC = () => {
     const scale = scaleRef.current;
     setMode('generate')
 
-
-    // console.log(`points, lines, scale`, points, lines, scale)
     const graph = new AdjacencyGraph();
     visualizer.current = new AdjacencyGraphVisualizer2(graph, points, lines, scale || .25)
     // Now pass this all on to the solver
-
-
   }
 
   return (
@@ -409,7 +403,8 @@ const SitePlanDesigner: React.FC = () => {
           // ref={setbackInputRef} // Attach ref for auto-focus
           type="number"
           value={inputScaleRef.current || undefined}
-          onChange={(e) => { inputScaleRef.current = Number(e.target.value) }}
+          onChange={(e) => { 
+            inputScaleRef.current = Number(e.target.value) }}
           autoFocus
         />
       </div> : <></>}

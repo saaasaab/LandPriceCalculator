@@ -888,31 +888,6 @@ const calculateArea = (polygon: TPointObject[]): number => {
 
 
 
-function getBoundingBox(polygon: TPointObject[]): { width: number, height: number } {
-  if (polygon.length === 0) {
-    throw new Error("Polygon must have at least one point.");
-  }
-
-  // Initialize min and max values
-  let minX = Infinity, minY = Infinity;
-  let maxX = -Infinity, maxY = -Infinity;
-
-  // Iterate through each point to find min and max coordinates
-  for (const point of polygon) {
-    if (point.x < minX) minX = point.x;
-    if (point.x > maxX) maxX = point.x;
-    if (point.y < minY) minY = point.y;
-    if (point.y > maxY) maxY = point.y;
-  }
-
-  // Calculate width and height
-  const width = maxX - minX;
-  const height = maxY - minY;
-
-  return { width, height };
-}
-
-
 function isRectangleWithinBoundary(
   center: TPointObject,
   width: number,
