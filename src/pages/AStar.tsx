@@ -24,6 +24,7 @@ class Node {
   h: number = 0;
   neighbors: Node[] = [];
   previous: Node | null = null;
+  children: Node[] | null = null;
   wall: boolean = false;
 
   constructor(x: number, y: number) {
@@ -44,60 +45,41 @@ class Node {
     if (x < cols - 1 && y < rows - 1) this.neighbors.push(grid[x + 1][y + 1]);
   }
 }
+class AStar {
+  cols: number;
+  rows: number;
+  startPoints: Point[];
+  endPoints: Point[]
+  grid: Node[][];
+  pathStates:PathfindingState[];
 
-const AStarPathfinding = () => {
-  const sketchRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isRunning, setIsRunning] = useState(true);
-  const gridRef = useRef<Node[][]>();
-  const pathIndexRef = useRef<number[]>([]);
-  const animationSpeedRef = useRef(1);
-  const pathStatesRef = useRef<PathfindingState[]>([]);
+  constructor(cols: number, rows: number, startPoints: Point[], endPoints: Point[]) {
+    this.cols = cols;
+    this.rows = rows;
+    this.startPoints = startPoints;
+    this.endPoints = endPoints;
+    this.grid = [];
+    this.pathStates=[]
 
+  }
 
-  // Constants
-  const width = 600;
-  const height = 400;
-  const cols = 30;
-  const rows = 20;
-  const w = width / cols;
-  const h = height / rows;
-
-  // Starting and ending points
-  const startPoints = [
-    { x: 5, y: 5 },
-    { x: 10, y: 15 },
-    // { x: 25, y: 10 },
-    // { x: 13, y: 1 },
-    // { x: 2, y: 4 },
-  ];
-
-  const endPoints = [
-    { x: 24, y: 17 },
-    { x: 22, y: 5 },
-    { x: 20, y: 12 },
-    // { x: 23, y: 4 },
-    // { x: 29, y: 19 },
-  ];
-
-  const heuristic = (a: Node, b: Node) => {
+  heuristic = (a: Node, b: Node) => {
     const dx = Math.abs(a.x - b.x);
     const dy = Math.abs(a.y - b.y);
     return dx + dy + (Math.SQRT2 - 2) * Math.min(dx, dy);
   };
 
-  const areAllPointsConnected = (paths: PathfindingState[]): boolean => {
+  areAllPointsConnected = (paths: PathfindingState[]): boolean => {
     const adjacencyList = new Map<string, Set<string>>(); // Graph representation
 
     // Helper function to serialize a point as a string
-    const pointKey = (point: Point) => `${point.x},${point.y}`;
 
     // Build the adjacency list from paths
     paths.forEach((pathState) => {
       const path = pathState.path;
       for (let i = 0; i < path.length - 1; i++) {
-        const pointA = pointKey(path[i]);
-        const pointB = pointKey(path[i + 1]);
+        const pointA = this.pointKey(path[i]);
+        const pointB = this.pointKey(path[i + 1]);
 
         // Add the connection in both directions (undirected graph)
         if (!adjacencyList.has(pointA)) adjacencyList.set(pointA, new Set());
@@ -135,8 +117,7 @@ const AStarPathfinding = () => {
     return visited.size === allPoints.length;
   };
 
-
-  const findPathStep = (
+  findPathStep = (
     start: Node,
     end: Node,
     grid: Node[][],
@@ -197,7 +178,7 @@ const AStarPathfinding = () => {
           }
 
           if (newPath) {
-            neighbor.h = heuristic(neighbor, end);
+            neighbor.h = this.heuristic(neighbor, end);
             neighbor.f = neighbor.g + neighbor.h;
             neighbor.previous = current;
           }
@@ -226,9 +207,9 @@ const AStarPathfinding = () => {
     return null;
   };
 
-  const initializePathfinding = (start: Node, end: Node, grid: Node[][]) => {
-    for (let i = 0; i < cols; i++) {
-      for (let j = 0; j < rows; j++) {
+  initializePathfinding = (start: Node, end: Node, grid: Node[][]) => {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
         grid[i][j].f = 0;
         grid[i][j].g = 0;
         grid[i][j].h = 0;
@@ -248,30 +229,46 @@ const AStarPathfinding = () => {
     };
   };
 
-  const createGrid = () => {
-    const grid: Node[][] = new Array(cols);
-    for (let i = 0; i < cols; i++) {
-      grid[i] = new Array(rows);
-      for (let j = 0; j < rows; j++) {
+  pointKey = (point: Point) => `${point.x},${point.y}`;
+
+  sFact(num: number) {
+    var rval = 1;
+    for (var i = 2; i <= num; i++)
+      rval = rval * i;
+    return rval;
+  }
+
+  mergePaths = (paths: PathfindingState[]): PathfindingState[] => {
+    const visitedCells = new Set<string>(); // Tracks cells already included in a path
+    const mergedPaths: PathfindingState[] = [];
+    const segments: Point[] = [];
+    return mergedPaths;
+  };
+
+  createGrid = () => {
+    const grid: Node[][] = new Array(this.cols);
+    for (let i = 0; i < this.cols; i++) {
+      grid[i] = new Array(this.rows);
+      for (let j = 0; j < this.rows; j++) {
         grid[i][j] = new Node(i, j);
       }
     }
 
-    for (let i = 0; i < cols; i++) {
-      for (let j = 0; j < rows; j++) {
-        grid[i][j].addNeighbors(grid, cols, rows);
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        grid[i][j].addNeighbors(grid, this.cols, this.rows);
       }
     }
 
-    for (let i = 0; i < cols; i++) {
-      for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
         if (Math.random() < 0.3) {
           grid[i][j].wall = true;
         }
       }
     }
 
-    [...startPoints, ...endPoints].forEach(point => {
+    [...this.startPoints, ...this.endPoints].forEach(point => {
       if (grid[point.x] && grid[point.x][point.y]) {
         grid[point.x][point.y].wall = false;
         const clearRadius = 2;
@@ -279,7 +276,7 @@ const AStarPathfinding = () => {
           for (let dy = -clearRadius; dy <= clearRadius; dy++) {
             const nx = point.x + dx;
             const ny = point.y + dy;
-            if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+            if (nx >= 0 && nx < this.cols && ny >= 0 && ny < this.rows) {
               grid[nx][ny].wall = false;
             }
           }
@@ -290,80 +287,137 @@ const AStarPathfinding = () => {
     return grid;
   };
 
-  const mergePaths = (paths: PathfindingState[]): PathfindingState[] => {
-    const visitedCells = new Set<string>(); // Tracks cells already included in a path
-    const mergedPaths: PathfindingState[] = [];
-
-    // Helper function to serialize a point as a string
-    const pointKey = (point: Point) => `${point.x},${point.y}`;
+  // Helper function to serialize a point as a string
 
 
-    // Process each path
-    // console.log(`[...paths].length`, paths)
-    paths.forEach((currentPath) => {
-      let merged = false;
+  checkPair(mainArray: string[][], inputArray: string[]) {
+    // Sort the input array for comparison
+    const sortedInputArray = inputArray.slice().sort();
 
-
-
-      // Check for overlap with existing merged paths
-      for (let i = 0; i < mergedPaths.length; i++) {
-        const mergedPath = mergedPaths[i];
-
-
-        // Find overlap
-        const overlap = currentPath.path.some((point) =>
-          visitedCells.has(pointKey(point))
-        );
-
-        if (overlap) {
-          // Merge non-overlapping points into the existing path
-          const nonOverlappingPoints = currentPath.path.filter(
-            (point) => !visitedCells.has(pointKey(point))
-          );
-          mergedPath.path.push(...nonOverlappingPoints);
-
-          // Add the new points to the visited set
-          nonOverlappingPoints.forEach((point) =>
-            visitedCells.add(pointKey(point))
-          );
-
-          merged = true;
-          break; // Stop checking other paths once merged
-        }
+    // Loop through the main array and check if any pair matches the input pair
+    for (let pair of mainArray) {
+      if (pair.slice().sort().toString() === sortedInputArray.toString()) {
+        return true;
       }
-
-      // If not merged, add it as a new path
-      if (!merged) {
-        mergedPaths.push(currentPath);
-
-        // Add all points in this path to the visited set
-        currentPath.path.forEach((point) => visitedCells.add(pointKey(point)));
-      }
-    });
-
-    return mergedPaths;
-  };
+    }
+    return false;
+  }
 
 
-
-  const startNewPathfinding = () => {
-    const grid = createGrid(); // Generate a new grid
-    gridRef.current = grid;
+  startNewPathfinding = () => {
+    const grid = this.createGrid(); // Generate a new grid
+    this.grid = grid;
 
     const newPathStates: PathfindingState[] = [];
 
+
     // Loop through all combinations of start and end points
-    for (let startIndex = 0; startIndex < startPoints.length; startIndex++) {
-      for (let endIndex = 0; endIndex < endPoints.length; endIndex++) {
-        const start = grid[startPoints[startIndex].x][startPoints[startIndex].y];
-        const end = grid[endPoints[endIndex].x][endPoints[endIndex].y];
+    for (let startIndex = 0; startIndex < this.startPoints.length; startIndex++) {
+      for (let endIndex = 0; endIndex < this.endPoints.length; endIndex++) {
+        // if(startIndex === startIndex2 || endIndex === endIndex2 ) continue;
+
+        const start = grid[this.startPoints[startIndex].x][this.startPoints[startIndex].y];
+        const end = grid[this.endPoints[endIndex].x][this.endPoints[endIndex].y];
 
         // Initialize the pathfinding state for the current pair
-        let state: PathfindingState = initializePathfinding(start, end, grid);
+        let state: PathfindingState = this.initializePathfinding(start, end, grid);
 
         // Solve A* for this start-end pair
         while (!state.done) {
-          const result = findPathStep(
+          const result = this.findPathStep(
+            start,
+            end,
+            grid,
+            state.openSet,
+            state.closedSet
+          );
+
+          if (result) {
+            state = result; // Update state
+          } else {
+            break; // Exit if no valid path found
+          }
+        }
+
+
+
+        // Store the result of this pair
+        newPathStates.push(state);
+      }
+    }
+
+    const startEndPairs: string[][] = []
+
+
+
+    for (let startIndex = 0; startIndex < this.startPoints.length; startIndex++) {
+      for (let startIndex2 = 0; startIndex2 < this.startPoints.length; startIndex2++) {
+
+        if (startIndex === startIndex2) continue;
+
+
+        const start = grid[this.startPoints[startIndex].x][this.startPoints[startIndex].y];
+        const end = grid[this.startPoints[startIndex2].x][this.startPoints[startIndex2].y];
+        const pair = [this.pointKey(start), this.pointKey(end)]
+
+        if (this.checkPair(startEndPairs, pair)) {
+          continue
+        }
+        else {
+          startEndPairs.push(pair)
+        }
+
+        // Initialize the pathfinding state for the current pair
+        let state: PathfindingState = this.initializePathfinding(start, end, grid);
+
+        // Solve A* for this start-end pair
+        while (!state.done) {
+          const result = this.findPathStep(
+            start,
+            end,
+            grid,
+            state.openSet,
+            state.closedSet
+          );
+
+          if (result) {
+            state = result; // Update state
+          } else {
+            break; // Exit if no valid path found
+          }
+        }
+
+
+
+        // Store the result of this pair
+        newPathStates.push(state);
+      }
+    }
+
+
+    for (let endIndex = 0; endIndex < this.endPoints.length; endIndex++) {
+      for (let endIndex2 = 0; endIndex2 < this.endPoints.length; endIndex2++) {
+
+        if (endIndex === endIndex2) continue;
+
+        const start = grid[this.endPoints[endIndex].x][this.endPoints[endIndex].y];
+        const end = grid[this.endPoints[endIndex2].x][this.endPoints[endIndex2].y];
+        const pair = [this.pointKey(start), this.pointKey(end)]
+
+        if (this.checkPair(startEndPairs, pair)) {
+          continue
+        }
+        else {
+          startEndPairs.push(pair)
+        }
+
+
+        // Initialize the pathfinding state for the current pair
+        let state: PathfindingState = this.initializePathfinding(start, end, grid);
+
+        // Solve A* for this start-end pair
+        while (!state.done) {
+          const result = this.findPathStep(
             start,
             end,
             grid,
@@ -388,14 +442,54 @@ const AStarPathfinding = () => {
 
 
 
+
+
     // Update the reference to all pathfinding states
-    pathStatesRef.current = newPathStates;
+    this.pathStates = newPathStates;
 
-    // mergePaths(pathStatesRef.current)
-    
-
+    this.mergePaths(this.pathStates);
 
   };
+
+
+}
+
+
+
+
+const AStarPathfinding = () => {
+  const sketchRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isRunning, setIsRunning] = useState(true);
+  const animationSpeedRef = useRef(1);
+
+
+  // Constants
+  const width = 600;
+  const height = 400;
+  const cols = 30;
+  const rows = 20;
+  const w = width / cols;
+  const h = height / rows;
+
+  // Starting and ending points
+  const startPoints = [
+    { x: 5, y: 5 },
+    { x: 10, y: 15 },
+    // { x: 25, y: 10 },
+    // { x: 13, y: 1 },
+    // { x: 2, y: 4 },
+  ];
+
+  const endPoints = [
+    { x: 24, y: 17 },
+    { x: 22, y: 5 },
+    // { x: 20, y: 12 },
+    // { x: 23, y: 4 },
+    // { x: 29, y: 19 },
+  ];
+
+  const Astar = new AStar(cols, rows, startPoints, endPoints);
 
   const sketch = (p: p5) => {
 
@@ -405,14 +499,17 @@ const AStarPathfinding = () => {
       if (containerRef.current) {
         canvas.parent(containerRef.current);
       }
-      startNewPathfinding();
+      p.frameRate(10)
+      Astar.startNewPathfinding();
     };
 
-    p.draw = () => {
-      if (!gridRef.current) return;
 
-      const grid = gridRef.current;
-      const pathStates = pathStatesRef.current;
+    let pathCellIndex = 0
+    p.draw = () => {
+      if (!Astar.grid) return;
+
+      const grid = Astar.grid;
+      const pathStates = Astar.pathStates;
 
       p.background(255);
 
@@ -434,10 +531,17 @@ const AStarPathfinding = () => {
       const maxThickness = 10; // Thickest line
       const minThickness = 2; // Thinnest line
       let totalPathLength = 0; // Keep track of the total path length
+      let maxLengthPath = 0
+
 
       pathStates.forEach((state, index) => {
         const colorHue = (index * 60) % 360; // Unique hue for each path
         const lineThickness = maxThickness - (index * (maxThickness - minThickness) / pathStates.length);
+        if (state.path.length > maxLengthPath) {
+          maxLengthPath = state.path.length;
+
+
+        }
 
         // Add this path's length to the total
         totalPathLength += state.path.length;
@@ -448,13 +552,30 @@ const AStarPathfinding = () => {
           p.noFill();
           p.strokeWeight(lineThickness); // Set line thickness
           p.stroke(p.color(`hsl(${colorHue}, 100%, 50%)`)); // Set color using HSL
-          state.path.forEach(point => {
-            p.vertex(point.x * w + w / 2, point.y * h + h / 2);
-          });
+          // state.path[pathCellIndex]
+
+          for (let i = 0; i < pathCellIndex; i++) {
+
+            if (i < state.path.length) {
+              const point = state.path[i];
+              p.vertex(point.x * w + w / 2, point.y * h + h / 2);
+            }
+          }
+          // state.path.forEach(point => {
+
+          // });
           p.endShape();
         }
       });
 
+
+
+      pathCellIndex++
+
+
+      if (pathCellIndex > maxLengthPath + 10) {
+        pathCellIndex = 0
+      }
       // Draw start points
       startPoints.forEach(point => {
         p.fill(0, 255, 0);
@@ -477,12 +598,7 @@ const AStarPathfinding = () => {
       p.textAlign(p.CENTER, p.BOTTOM);
       p.text(`Total Path Length: ${totalPathLength}`, p.width / 2, p.height - 10);
     };
-
-
-
   };
-
-
 
 
   useEffect(() => {
@@ -507,7 +623,7 @@ const AStarPathfinding = () => {
           {isRunning ? 'Pause' : 'Play'}
         </button>
         <button
-          onClick={() => startNewPathfinding()}
+          onClick={() => Astar.startNewPathfinding()}
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
         >
           Regenerate
