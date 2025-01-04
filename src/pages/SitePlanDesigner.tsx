@@ -85,7 +85,7 @@ const SitePlanDesigner: React.FC = () => {
       if (canvasRef.current) {
         canvas.parent(canvasRef.current);
       }
-      p.frameRate(8);
+      // p.frameRate(8);
 
     };
 

@@ -45,21 +45,32 @@ class Node {
     if (x < cols - 1 && y < rows - 1) this.neighbors.push(grid[x + 1][y + 1]);
   }
 }
-class AStar {
+
+export class AStar {
   cols: number;
   rows: number;
   startPoints: Point[];
   endPoints: Point[]
   grid: Node[][];
-  pathStates:PathfindingState[];
+  pathStates: PathfindingState[];
+  width: number;
+  height: number;
+  w: number;
+  h: number;
 
-  constructor(cols: number, rows: number, startPoints: Point[], endPoints: Point[]) {
-    this.cols = cols;
-    this.rows = rows;
+  constructor(cols: number, rows: number, startPoints: Point[], endPoints: Point[], width: number, height: number) {
+    this.cols = Math.round(cols);
+    this.rows = Math.round(rows);
     this.startPoints = startPoints;
     this.endPoints = endPoints;
     this.grid = [];
-    this.pathStates=[]
+    this.pathStates = []
+    this.width = width;
+    this.height = height;
+    this.w = Math.round(width / cols);
+    this.h = Math.round(height / rows);
+
+
 
   }
 
@@ -271,7 +282,7 @@ class AStar {
     [...this.startPoints, ...this.endPoints].forEach(point => {
       if (grid[point.x] && grid[point.x][point.y]) {
         grid[point.x][point.y].wall = false;
-        const clearRadius = 2;
+        const clearRadius = 1;
         for (let dx = -clearRadius; dx <= clearRadius; dx++) {
           for (let dy = -clearRadius; dy <= clearRadius; dy++) {
             const nx = point.x + dx;
@@ -287,9 +298,6 @@ class AStar {
     return grid;
   };
 
-  // Helper function to serialize a point as a string
-
-
   checkPair(mainArray: string[][], inputArray: string[]) {
     // Sort the input array for comparison
     const sortedInputArray = inputArray.slice().sort();
@@ -302,7 +310,6 @@ class AStar {
     }
     return false;
   }
-
 
   startNewPathfinding = () => {
     const grid = this.createGrid(); // Generate a new grid
@@ -451,7 +458,106 @@ class AStar {
 
   };
 
+  displaySolutions(p: p5, pathCellIndex: number, showGrid = false) {
 
+
+
+
+    if (!this.grid) return;
+
+    const grid = this.grid;
+    const pathStates = this.pathStates;
+
+
+    if (showGrid) {
+      // Draw grid and walls
+      for (let i = 0; i < this.cols; i++) {
+        for (let j = 0; j < this.rows; j++) {
+          p.stroke(0);
+          p.strokeWeight(0.5);
+          if (grid[i][j].wall) {
+            p.fill(0);
+          } else {
+            p.fill(255);
+          }
+          p.rect(i * this.w, j * this.h, this.w, this.h);
+        }
+      }
+    }
+
+    // Draw all paths with unique colors and thicknesses
+    const maxThickness = 10; // Thickest line
+    const minThickness = 2; // Thinnest line
+    let totalPathLength = 0; // Keep track of the total path length
+    let maxLengthPath = 0
+
+    let animate = true
+    pathStates.forEach((state, index) => {
+      const colorHue = (index * 60) % 360; // Unique hue for each path
+      const lineThickness = maxThickness - (index * (maxThickness - minThickness) / pathStates.length);
+      if (state.path.length > maxLengthPath) {
+        maxLengthPath = state.path.length;
+      }
+
+      // Add this path's length to the total
+      totalPathLength += state.path.length;
+
+      // Draw the final path
+      if (state.path.length > 0) {
+        p.beginShape();
+        p.noFill();
+        p.strokeWeight(lineThickness); // Set line thickness
+        p.stroke(p.color(`hsl(${colorHue}, 100%, 50%)`)); // Set color using HSL
+        // state.path[pathCellIndex]
+
+        if (!animate) {
+          pathCellIndex = state.path.length
+        }
+        for (let i = 0; i < pathCellIndex; i++) {
+
+          if (i < state.path.length) {
+            const point = state.path[i];
+            p.vertex(point.x * this.w + this.w / 2, point.y * this.h + this.h / 2);
+          }
+        }
+
+        p.endShape();
+      }
+    });
+
+
+
+
+
+
+    if (pathCellIndex > maxLengthPath + 10) {
+      pathCellIndex = 0
+    }
+    // Draw start points
+    this.startPoints.forEach(point => {
+      p.fill(0, 255, 0);
+      p.noStroke();
+      p.circle(point.x * this.w + this.w / 2, point.y * this.h + this.h / 2, this.w * 0.8);
+    });
+
+    // Draw end points
+    this.endPoints.forEach(point => {
+      p.fill(255, 0, 0);
+      p.noStroke();
+      p.circle(point.x * this.w + this.w / 2, point.y * this.h + this.h / 2, this.w * 0.8);
+    });
+
+    // Display total path length at the bottom of the screen
+    p.fill(0); // Black text
+    p.noStroke();
+    p.fill(10, 120, 230);
+    p.textSize(24);
+    p.textAlign(p.CENTER, p.BOTTOM);
+    p.text(`Total Path Length: ${totalPathLength}`, p.width / 2, p.height - 10);
+
+
+
+  }
 }
 
 
@@ -489,7 +595,37 @@ const AStarPathfinding = () => {
     // { x: 29, y: 19 },
   ];
 
-  const Astar = new AStar(cols, rows, startPoints, endPoints);
+
+
+
+
+
+  // const width = 600;
+  // const height = 400;
+  // const cols = 300;
+  // const rows = 200;
+  // const w = width / cols;
+  // const h = height / rows;
+
+  // // Starting and ending points
+  // const startPoints = [
+  //   { x: 5, y: 5 },
+  //   { x: 10, y: 15 },
+  //   { x: 25, y: 10 },
+  //   { x: 13, y: 1 },
+  //   { x: 2, y: 4 },
+  // ];
+
+  // const endPoints = [
+  //   { x: 124, y: 170 },
+  //   { x: 222, y: 50 },
+  //   { x: 120, y: 112 },
+  //   { x: 230, y: 40 },
+  //   { x: 291, y: 190 },
+  // ];
+
+
+  const Astar = new AStar(cols, rows, startPoints, endPoints, width, height);
 
   const sketch = (p: p5) => {
 
@@ -503,101 +639,14 @@ const AStarPathfinding = () => {
       Astar.startNewPathfinding();
     };
 
+    let pathCellIndex = 0;
 
-    let pathCellIndex = 0
     p.draw = () => {
-      if (!Astar.grid) return;
-
-      const grid = Astar.grid;
-      const pathStates = Astar.pathStates;
-
-      p.background(255);
-
-      // Draw grid and walls
-      for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-          p.stroke(0);
-          p.strokeWeight(0.5);
-          if (grid[i][j].wall) {
-            p.fill(0);
-          } else {
-            p.fill(255);
-          }
-          p.rect(i * w, j * h, w, h);
-        }
-      }
-
-      // Draw all paths with unique colors and thicknesses
-      const maxThickness = 10; // Thickest line
-      const minThickness = 2; // Thinnest line
-      let totalPathLength = 0; // Keep track of the total path length
-      let maxLengthPath = 0
-
-
-      pathStates.forEach((state, index) => {
-        const colorHue = (index * 60) % 360; // Unique hue for each path
-        const lineThickness = maxThickness - (index * (maxThickness - minThickness) / pathStates.length);
-        if (state.path.length > maxLengthPath) {
-          maxLengthPath = state.path.length;
-
-
-        }
-
-        // Add this path's length to the total
-        totalPathLength += state.path.length;
-
-        // Draw the final path
-        if (state.path.length > 0) {
-          p.beginShape();
-          p.noFill();
-          p.strokeWeight(lineThickness); // Set line thickness
-          p.stroke(p.color(`hsl(${colorHue}, 100%, 50%)`)); // Set color using HSL
-          // state.path[pathCellIndex]
-
-          for (let i = 0; i < pathCellIndex; i++) {
-
-            if (i < state.path.length) {
-              const point = state.path[i];
-              p.vertex(point.x * w + w / 2, point.y * h + h / 2);
-            }
-          }
-          // state.path.forEach(point => {
-
-          // });
-          p.endShape();
-        }
-      });
+      Astar.displaySolutions(p, pathCellIndex)
+    }
 
 
 
-      pathCellIndex++
-
-
-      if (pathCellIndex > maxLengthPath + 10) {
-        pathCellIndex = 0
-      }
-      // Draw start points
-      startPoints.forEach(point => {
-        p.fill(0, 255, 0);
-        p.noStroke();
-        p.circle(point.x * w + w / 2, point.y * h + h / 2, w * 0.8);
-      });
-
-      // Draw end points
-      endPoints.forEach(point => {
-        p.fill(255, 0, 0);
-        p.noStroke();
-        p.circle(point.x * w + w / 2, point.y * h + h / 2, w * 0.8);
-      });
-
-      // Display total path length at the bottom of the screen
-      p.fill(0); // Black text
-      p.noStroke();
-      p.fill(10, 120, 230);
-      p.textSize(24);
-      p.textAlign(p.CENTER, p.BOTTOM);
-      p.text(`Total Path Length: ${totalPathLength}`, p.width / 2, p.height - 10);
-    };
   };
 
 

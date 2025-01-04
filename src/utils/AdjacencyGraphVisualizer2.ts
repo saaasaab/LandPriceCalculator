@@ -1,7 +1,8 @@
 import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
-import { IPoint, Line } from "../pages/SitePlanDesigner";
+import { Line } from "../pages/SitePlanDesigner";
+import { AStar } from "../pages/AStar";
 
 type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
@@ -1086,10 +1087,11 @@ class Building extends SitePlanElement {
     this.p.rectMode(this.p.CENTER);
 
     this.p.strokeWeight(2)
-    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount, this.frameCount, 4);
+    const speed = 1
+    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount*speed, this.frameCount*speed, 4);
     this.frameCount++;
 
-    if (this.frameCount > 50) this.frameCount = 0
+    if (this.frameCount*speed > 50) this.frameCount = 0
 
   }
 
@@ -1473,10 +1475,11 @@ export class AdjacencyGraphVisualizer2 {
   visualize2(p: p5): void {
     p.clear(); // Clear the canvas
     p.angleMode(p.DEGREES);
-
+    // p.frameRate(10);
     let propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
     let lines = [...this.lines];
     const userGeneratedPoints = !!this.points.length;
+    let pathCellIndex = 0;
 
     const setbacks = Array.apply(null, Array(this.lines.length)).map(Number.prototype.valueOf, 0);
 
@@ -1513,7 +1516,7 @@ export class AdjacencyGraphVisualizer2 {
 
     }
 
- 
+
 
 
     const { scaledPolygon, scaleFactor } = scalePolygonToFitCanvas(p, propertyCorners, p.width, p.height, 40);
@@ -1559,6 +1562,9 @@ export class AdjacencyGraphVisualizer2 {
 
     const garbage = new Gargage(p, getCenterPoint(p, parking.sitePlanElementEdges[0].point1, parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 10 / this.scale, parking.angle, ESitePlanObjects.Garbage, this.scale);
     garbage.initialize();
+
+
+    let AStarSolver: AStar;
 
 
     let isDraggingParking = false;
@@ -1770,6 +1776,37 @@ export class AdjacencyGraphVisualizer2 {
 
           const entrance = new Entrance(p, this.scale, pos, intersection, angle, closestEdgeIndex);
           building.entrances.push(entrance)
+
+          const solverScale = 2 / this.scale; //each block is 1 foot
+
+          const cols = Math.round(p.width / solverScale)
+          const rows = Math.round(p.height / solverScale)
+
+
+
+
+          // Starting and ending points
+
+
+          const endPoints = [
+            { x: 15, y: 5 },
+            { x: 1, y: 9 },
+            // { x: 20, y: 12 },
+            // { x: 23, y: 4 },
+            // { x: 29, y: 19 },
+          ];
+
+          const inputStartPoints = building.entrances.map(entrance => {
+            return { x: entrance.intersection.x, y: entrance.intersection.y }
+          });
+
+
+
+          console.log(`cols, rows`, cols, rows)
+          const startPoints = findGridCells(inputStartPoints, solverScale, cols, rows)
+
+          AStarSolver = new AStar(cols, rows, startPoints, endPoints, p.width, p.height)
+          AStarSolver.startNewPathfinding();
         }
 
 
@@ -1866,6 +1903,17 @@ export class AdjacencyGraphVisualizer2 {
           p.rotate(angle - 180)
           p.textSize(14);
           p.arc(0, 0, enteranceWidth / this.scale, enteranceWidth / this.scale, 0, 90, p.PIE);
+        }
+      }
+
+      if (AStarSolver) {
+        const showGrid = false;
+        AStarSolver.displaySolutions(p,pathCellIndex, showGrid);
+        pathCellIndex++
+
+        const maxPathStatesLength = Math.max( ...AStarSolver.pathStates.map(state=>state.path.length)) 
+        if (pathCellIndex >  maxPathStatesLength + 10) {
+          pathCellIndex = 0
         }
       }
     };
@@ -2068,6 +2116,27 @@ function drawPerpendicularBezier(
   // p.ellipse(controlPoint1.x, controlPoint1.y, 8, 8); // Control point 1
   // p.ellipse(controlPoint2.x, controlPoint2.y, 8, 8); // Control point 2
 }
+interface IPoint {
+  x: number;
+  y: number;
+}
+
+
+function findGridCells(inputArray: IPoint[], solverScale: number, cols: number, rows: number): IPoint[] {
+  // Array to store the grid cell results
+  return inputArray.map((point) => {
+    // Calculate the grid cell indices
+    const col = Math.floor(point.x / solverScale);
+    const row = Math.floor(point.y / solverScale);
+
+    // Ensure the indices are within bounds
+    const boundedCol = Math.min(Math.max(col, 0), cols - 1);
+    const boundedRow = Math.min(Math.max(row, 0), rows - 1);
+
+    return { x: boundedCol, y: boundedRow };
+  });
+}
+
 
 function truthChecker(arr: boolean[]) { return arr.every(v => v === true) };
 
