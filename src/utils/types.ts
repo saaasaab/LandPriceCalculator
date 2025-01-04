@@ -30,7 +30,7 @@ export enum EPageNames {
     LENDING_COST = "LENDING_COST",
     WATERFALL = "WATERFALL",
     CONSTRUCTION_BUDGET = "CONSTRUCTION_BUDGET",
-    INDUSTRIAL_PRICE_PER_SQFT="INDUSTRIAL_PRICE_PER_SQFT",
+    INDUSTRIAL_PRICE_PER_SQFT = "INDUSTRIAL_PRICE_PER_SQFT",
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
@@ -46,7 +46,8 @@ export enum EPageTitles {
     LENDING_COST = "Lending Cost Estimator",
     WATERFALL = "Waterfall Distribution Generator",
     CONSTRUCTION_BUDGET = "Construction Budget Generator",
-    SITE_PLAN_BUILDER="Site Plan Builder",
+    SITE_PLAN_BUILDER = "Site Plan Builder",
+    ASTAR = "A*"
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 
@@ -81,9 +82,9 @@ export enum EAllStates {
     unbuildableAcres = "unbuildableAcres",
     unitsPerAcre = "unitsPerAcre",
     multifamilyPricePerUnit = "multifamilyPricePerUnit",
-    annualLeaseRatesPerSQFT="annualLeaseRatesPerSQFT",
-    percentageOfIncomeToExpenses="percentageOfIncomeToExpenses",
-    leasableSQFT="leasableSQFT",
+    annualLeaseRatesPerSQFT = "annualLeaseRatesPerSQFT",
+    percentageOfIncomeToExpenses = "percentageOfIncomeToExpenses",
+    leasableSQFT = "leasableSQFT",
 
 
     // FOR THE PRICE CALCULATOR
@@ -93,8 +94,8 @@ export enum EAllStates {
     cashOnCashReturn = "cashOnCashReturn",
     expensePercentage = "expensePercentage",
     downPayment = "downPayment",
-    buyersAgentFee="buyersAgentFee",
-    clostingCostsFee="clostingCostsFee",
+    buyersAgentFee = "buyersAgentFee",
+    clostingCostsFee = "clostingCostsFee",
 
 
     //   FOR THE MULTI FAMILY ANALYSIS

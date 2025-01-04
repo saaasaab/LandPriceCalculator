@@ -12,6 +12,7 @@ import BlogPost from './futureItems/BlogPost';
 import SitePlanDesigner from './pages/SitePlanDesigner';
 // import RealEstatePolygon from './pages/LotLineDrawerP5';
 import LotLineDrawer from './futureItems/LotLineDrawerOld';
+import AStar from './pages/AStar';
 
 
 function App() {
@@ -52,6 +53,8 @@ function App() {
           <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL} />} />
           <Route path={routes.CONSTRUCTION_BUDGET} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_BUDGET} />} />
           <Route path={routes.SITE_PLAN_BUILDER} element={<SitePlanDesigner/>} />
+          <Route path={routes.ASTAR} element={<AStar/>} />
+
 
           <Route path="*" element={<NotFound />} />
           {/* <Route path="/contact" element={<Contact />} /> */}

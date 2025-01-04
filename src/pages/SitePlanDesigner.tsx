@@ -27,11 +27,13 @@ export interface Line {
   isSetback: boolean
 }
 
-
 const SitePlanDesigner: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
+
+  const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
+
 
   // const [isPolygonClosed, setIsPolygonClosed] = useState(false);
 
@@ -76,16 +78,15 @@ const SitePlanDesigner: React.FC = () => {
 
     p.setup = () => {
 
-      p.setup = () => {
-        p.createCanvas(800, 800).parent(canvasRef.current!);
-        p.frameRate(8);
-      };
+      // p.createCanvas(800, 800).parent(canvasRef.current!);
 
 
       const canvas = p.createCanvas(800, 600);
       if (canvasRef.current) {
         canvas.parent(canvasRef.current);
       }
+      p.frameRate(8);
+
     };
 
 
@@ -149,6 +150,7 @@ const SitePlanDesigner: React.FC = () => {
           p.strokeWeight(2);
           p.noStroke();
           p.fill(0, 20, 220)
+
           const midX = (points[line.start].x + points[line.end].x) / 2;
           const midY = (points[line.start].y + points[line.end].y) / 2;
           const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .25);
@@ -156,7 +158,7 @@ const SitePlanDesigner: React.FC = () => {
           // if is finished, make the text larger.
 
           p.textSize(14);
-          p.text(`${i}  ${length.toFixed(1)} ft`, midX, midY);
+          p.text(`${length.toFixed(1)} ft`, midX, midY);
         }
 
 
@@ -322,6 +324,14 @@ const SitePlanDesigner: React.FC = () => {
 
 
   useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect()
+    setOffsetHeight({ x: rect.left || 0, y: rect.top || 0 })
+  }, [canvasRef?.current])
+
+
+  useEffect(() => {
     const p5Instance = new p5(sketch);
     return () => {
       p5Instance.remove();
@@ -474,10 +484,8 @@ const SitePlanDesigner: React.FC = () => {
           const end = pointsRef.current[line.end];
           if (!start || !end) return null;
 
-          const rect = canvasRef.current?.getBoundingClientRect();
-          const midX = (start.x + end.x) / 2 + (rect?.left || 0);
-          const midY = (start.y + end.y) / 2 + (rect?.top || 0);
-
+          const midX = (start.x + end.x) / 2 + offsetHeight.x;
+          const midY = (start.y + end.y) / 2 + offsetHeight.y;
           return (
             <input
               key={index}

@@ -216,7 +216,7 @@ class Property {
       this.p.translate(midX, midY)
       this.p.rotate(edge.calculateAngle())
       this.p.textSize(14);
-      this.p.text(`#${i} ${length.toFixed(1)} ft`, 0, 0);
+      this.p.text(`${length.toFixed(1)} ft`, 0, 0);
       this.p.pop();
 
     })
