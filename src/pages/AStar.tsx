@@ -461,8 +461,6 @@ export class AStar {
   displaySolutions(p: p5, pathCellIndex: number, showGrid = false) {
 
 
-
-
     if (!this.grid) return;
 
     const grid = this.grid;
@@ -510,11 +508,12 @@ export class AStar {
         p.stroke(p.color(`hsl(${colorHue}, 100%, 50%)`)); // Set color using HSL
         // state.path[pathCellIndex]
 
+
+        
         if (!animate) {
           pathCellIndex = state.path.length
         }
         for (let i = 0; i < pathCellIndex; i++) {
-
           if (i < state.path.length) {
             const point = state.path[i];
             p.vertex(point.x * this.w + this.w / 2, point.y * this.h + this.h / 2);
@@ -527,12 +526,6 @@ export class AStar {
 
 
 
-
-
-
-    if (pathCellIndex > maxLengthPath + 10) {
-      pathCellIndex = 0
-    }
     // Draw start points
     this.startPoints.forEach(point => {
       p.fill(0, 255, 0);
@@ -642,7 +635,16 @@ const AStarPathfinding = () => {
     let pathCellIndex = 0;
 
     p.draw = () => {
-      Astar.displaySolutions(p, pathCellIndex)
+
+      p.background(220)
+      Astar.displaySolutions(p, pathCellIndex,)
+      pathCellIndex++
+      const maxPathStatesLength = Math.max( ...Astar.pathStates.map(state=>state.path.length)) 
+
+
+      if (pathCellIndex > maxPathStatesLength  + 10) {
+        pathCellIndex = 0
+      }
     }
 
 

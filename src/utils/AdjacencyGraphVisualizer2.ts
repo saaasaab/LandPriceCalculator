@@ -1788,6 +1788,8 @@ export class AdjacencyGraphVisualizer2 {
           // Starting and ending points
 
 
+          console.log(`property, parking, building, garbage`, property, parking, building, garbage)
+
           const endPoints = [
             { x: 15, y: 5 },
             { x: 1, y: 9 },
@@ -1799,6 +1801,8 @@ export class AdjacencyGraphVisualizer2 {
           const inputStartPoints = building.entrances.map(entrance => {
             return { x: entrance.intersection.x, y: entrance.intersection.y }
           });
+
+
 
 
 
