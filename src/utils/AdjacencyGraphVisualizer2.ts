@@ -82,7 +82,10 @@ class Edge {
     const perpendicular = this.p.createVector(-direction.y, direction.x);
 
     // Scale the perpendicular vector by the setback
-    const offset = perpendicular.mult(this.setback);
+
+    // p5.Vector.prototype.mult: x, y, or z arguments are either undefined or not a finite number
+
+    const offset = perpendicular.mult(this.setback || 0);
 
     // Calculate the offset points for the new parallel edge
     const point1Offset = p5.Vector.add(this.point1, offset).add(direction.copy().mult(-100)); // Extend 100px backward
@@ -294,7 +297,7 @@ class Property {
 
     // If denom is 0, the lines are parallel or coincident
     if (Math.abs(denom) < 1e-6) {
-      console.log("Lines are parallel or coincident:", { edge1, edge2 });
+      console.warn("Lines are parallel or coincident:", { edge1, edge2 });
       return null;
     }
 
@@ -1246,7 +1249,7 @@ class Building extends SitePlanElement {
 
     const nudgeStrength = 2;
     const nudgeStrengthDimensions = 1;
-    const angleNudge = .5;
+    const angleNudge = .1;
     const possibleDimensions: DimensionValue[] = [];
     const numChildren = 10;
 
@@ -1777,40 +1780,137 @@ export class AdjacencyGraphVisualizer2 {
           const entrance = new Entrance(p, this.scale, pos, intersection, angle, closestEdgeIndex);
           building.entrances.push(entrance)
 
-          const solverScale = 2 / this.scale; //each block is 1 foot
+          const solverScale = 2 / this.scale; //each block is 1/2 foot
 
           const cols = Math.round(p.width / solverScale)
           const rows = Math.round(p.height / solverScale)
 
 
 
+          // interface Point {
+          //   x: number;
+          //   y: number;
+          // }
+          
+          // interface GridCell {
+          //   col: number;
+          //   row: number;
+          // }
+          
+          // /**
+          //  * Determines if a point lies inside a polygon using the Ray-Casting algorithm.
+          //  * @param point - The point to test.
+          //  * @param polygon - The polygon defined by an array of points.
+          //  * @returns True if the point is inside the polygon, false otherwise.
+          //  */
+          // function isPointInPolygon(point: Point, polygon: p5.Vector[]): boolean {
+          //   let isInside = false;
+          //   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+          //     const xi = polygon[i].x, yi = polygon[i].y;
+          //     const xj = polygon[j].x, yj = polygon[j].y;
+          
+          //     const intersect =
+          //       yi > point.y !== yj > point.y &&
+          //       point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
+          
+          //     if (intersect) isInside = !isInside;
+          //   }
+          //   return isInside;
+          // }
+          
+          // /**
+          //  * Marks grid cells that lie within the polygons of objects.
+          //  * @param grid - A 2D array of grid cells.
+          //  * @param objects - An array of objects, each defined by its polygon (array of points).
+          //  * @param solverScale - The scale factor for grid size.
+          //  * @returns The updated grid with marked cells.
+          //  */
+          // function markGridCells(grid: boolean[][], objects: p5.Vector[][], solverScale: number): boolean[][] {
+          //   const cols = grid.length;
+          //   const rows = grid[0].length;
+          
+          //   for (let col = 0; col < cols; col++) {
+          //     for (let row = 0; row < rows; row++) {
+          //       // Calculate the center point of the current grid cell
+          //       const cellCenter: Point = {
+          //         x: (col + 0.5) * solverScale,
+          //         y: (row + 0.5) * solverScale,
+          //       };
+          
+          //       // Check if the center point is within any of the polygons
+          //       for (const polygon of objects) {
+          //         if (isPointInPolygon(cellCenter, polygon)) {
+          //           grid[col][row] = true; // Mark the cell
+          //           break;
+          //         }
+          //       }
+          //     }
+          //   }
+          
+          //   return grid;
+          // }
+          
+          // // Example usage:
+          // // const solverScale = 20; // Example scale (px per grid cell)
+          // // const cols = 50; // Example grid width
+          // // const rows = 40; // Example grid height
+          
+          // // Initialize the grid (all cells initially unmarked as `false`)
+          // const grid: boolean[][] = Array.from({ length: cols }, () => Array(rows).fill(false));
+          
+          // // Define objects as polygons
+          // const objects: p5.Vector[][] = [
+          //  parking.sitePlanElementCorners,
+          //  garbage.sitePlanElementCorners,
+          //  building.sitePlanElementCorners
+          //   // Add more polygons for other objects here
+          // ];
+          
+          // // Mark the grid cells
+          // const updatedGrid = markGridCells(grid, objects, solverScale);
+          
+          // // Print the updated grid (example visualization)
+
+
 
           // Starting and ending points
 
+          // Create Grid of obsticles based on the existing elements.
 
-          console.log(`property, parking, building, garbage`, property, parking, building, garbage)
 
-          const endPoints = [
-            { x: 15, y: 5 },
-            { x: 1, y: 9 },
+          const _endPoints = [
+            { x: approach.sitePlanElementCorners[0].x, y: approach.sitePlanElementCorners[0].y },
+            { x: garbage.sitePlanElementCorners[0].x, y: garbage.sitePlanElementCorners[0].y },
+
+
+            // { x: 1, y: 9 },
             // { x: 20, y: 12 },
             // { x: 23, y: 4 },
             // { x: 29, y: 19 },
           ];
 
+          const left = parking.parkingStalls.left.map(stall=>calculateCentroid(stall.stallCorners))
+          const right = parking.parkingStalls.right.map(stall=>calculateCentroid(stall.stallCorners))
+
+         _endPoints.push(...left, ...right)
+
+
+
+
+          
           const inputStartPoints = building.entrances.map(entrance => {
             return { x: entrance.intersection.x, y: entrance.intersection.y }
           });
-
-
-
+          
 
 
           console.log(`cols, rows`, cols, rows)
           const startPoints = findGridCells(inputStartPoints, solverScale, cols, rows)
+          const endPoints = findGridCells(_endPoints, solverScale, cols, rows)
 
           AStarSolver = new AStar(cols, rows, startPoints, endPoints, p.width, p.height)
           AStarSolver.startNewPathfinding();
+          
         }
 
 
@@ -1907,6 +2007,8 @@ export class AdjacencyGraphVisualizer2 {
           p.rotate(angle - 180)
           p.textSize(14);
           p.arc(0, 0, enteranceWidth / this.scale, enteranceWidth / this.scale, 0, 90, p.PIE);
+
+          p.pop();
         }
       }
 
@@ -1914,7 +2016,6 @@ export class AdjacencyGraphVisualizer2 {
         const showGrid = false;
         AStarSolver.displaySolutions(p,pathCellIndex, showGrid);
         pathCellIndex++
-
         const maxPathStatesLength = Math.max( ...AStarSolver.pathStates.map(state=>state.path.length)) 
         if (pathCellIndex >  maxPathStatesLength + 10) {
           pathCellIndex = 0
@@ -2614,3 +2715,6 @@ function scalePolygonToFitCanvas(
 
   return { scaledPolygon, scaleFactor };
 }
+
+
+

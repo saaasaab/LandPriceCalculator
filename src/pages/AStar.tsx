@@ -57,6 +57,7 @@ export class AStar {
   height: number;
   w: number;
   h: number;
+  
 
   constructor(cols: number, rows: number, startPoints: Point[], endPoints: Point[], width: number, height: number) {
     this.cols = Math.round(cols);
@@ -69,9 +70,6 @@ export class AStar {
     this.height = height;
     this.w = Math.round(width / cols);
     this.h = Math.round(height / rows);
-
-
-
   }
 
   heuristic = (a: Node, b: Node) => {
