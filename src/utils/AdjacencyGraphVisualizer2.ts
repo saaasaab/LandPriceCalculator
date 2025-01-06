@@ -140,6 +140,7 @@ class ParkingStall {
     this.stallCorners.forEach((corner, i) => {
       if (!this.isEmptySlot) {
         p.vertex(corner.x, corner.y);
+        // p.text(i, corner.x, corner.y)
       }
     });
     p.endShape(p.CLOSE); // Close the polygon
@@ -1091,10 +1092,10 @@ class Building extends SitePlanElement {
 
     this.p.strokeWeight(2)
     const speed = 1
-    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount*speed, this.frameCount*speed, 4);
+    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);
     this.frameCount++;
 
-    if (this.frameCount*speed > 50) this.frameCount = 0
+    if (this.frameCount * speed > 50) this.frameCount = 0
 
   }
 
@@ -1274,7 +1275,7 @@ class Building extends SitePlanElement {
     // Area needs to be closest to X
 
 
-    const targetArea = 2500 / (this.p.pow(this.scale, 2));
+    const targetArea = 500 / (this.p.pow(this.scale, 2));
     let bestArea = calculateArea(this.sitePlanElementCorners);
 
     const error = Math.abs(targetArea - bestArea) / targetArea;
@@ -1780,128 +1781,64 @@ export class AdjacencyGraphVisualizer2 {
           const entrance = new Entrance(p, this.scale, pos, intersection, angle, closestEdgeIndex);
           building.entrances.push(entrance)
 
-          const solverScale = 2 / this.scale; //each block is 1/2 foot
+          const solverScale = 4 / this.scale; //each block is 1 foot
 
+          console.log(`solverScale`, solverScale)
           const cols = Math.round(p.width / solverScale)
           const rows = Math.round(p.height / solverScale)
 
 
+          // Initialize the grid (all cells initially unmarked as `false`)
+          const grid: boolean[][] = Array.from({ length: cols }, () => Array(rows).fill(false));
 
-          // interface Point {
-          //   x: number;
-          //   y: number;
-          // }
-          
-          // interface GridCell {
-          //   col: number;
-          //   row: number;
-          // }
-          
-          // /**
-          //  * Determines if a point lies inside a polygon using the Ray-Casting algorithm.
-          //  * @param point - The point to test.
-          //  * @param polygon - The polygon defined by an array of points.
-          //  * @returns True if the point is inside the polygon, false otherwise.
-          //  */
-          // function isPointInPolygon(point: Point, polygon: p5.Vector[]): boolean {
-          //   let isInside = false;
-          //   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-          //     const xi = polygon[i].x, yi = polygon[i].y;
-          //     const xj = polygon[j].x, yj = polygon[j].y;
-          
-          //     const intersect =
-          //       yi > point.y !== yj > point.y &&
-          //       point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
-          
-          //     if (intersect) isInside = !isInside;
-          //   }
-          //   return isInside;
-          // }
-          
-          // /**
-          //  * Marks grid cells that lie within the polygons of objects.
-          //  * @param grid - A 2D array of grid cells.
-          //  * @param objects - An array of objects, each defined by its polygon (array of points).
-          //  * @param solverScale - The scale factor for grid size.
-          //  * @returns The updated grid with marked cells.
-          //  */
-          // function markGridCells(grid: boolean[][], objects: p5.Vector[][], solverScale: number): boolean[][] {
-          //   const cols = grid.length;
-          //   const rows = grid[0].length;
-          
-          //   for (let col = 0; col < cols; col++) {
-          //     for (let row = 0; row < rows; row++) {
-          //       // Calculate the center point of the current grid cell
-          //       const cellCenter: Point = {
-          //         x: (col + 0.5) * solverScale,
-          //         y: (row + 0.5) * solverScale,
-          //       };
-          
-          //       // Check if the center point is within any of the polygons
-          //       for (const polygon of objects) {
-          //         if (isPointInPolygon(cellCenter, polygon)) {
-          //           grid[col][row] = true; // Mark the cell
-          //           break;
-          //         }
-          //       }
-          //     }
-          //   }
-          
-          //   return grid;
-          // }
-          
-          // // Example usage:
-          // // const solverScale = 20; // Example scale (px per grid cell)
-          // // const cols = 50; // Example grid width
-          // // const rows = 40; // Example grid height
-          
-          // // Initialize the grid (all cells initially unmarked as `false`)
-          // const grid: boolean[][] = Array.from({ length: cols }, () => Array(rows).fill(false));
-          
-          // // Define objects as polygons
-          // const objects: p5.Vector[][] = [
-          //  parking.sitePlanElementCorners,
-          //  garbage.sitePlanElementCorners,
-          //  building.sitePlanElementCorners
-          //   // Add more polygons for other objects here
-          // ];
-          
+
+
+          // Define objects as polygons
+          const objects: p5.Vector[][] = [
+            parking.sitePlanElementCorners,
+            garbage.sitePlanElementCorners,
+            building.sitePlanElementCorners,
+            ...parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
+            ...parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
+            // Add more polygons for other objects here
+          ];
+
           // // Mark the grid cells
-          // const updatedGrid = markGridCells(grid, objects, solverScale);
-          
+          const obstacleGridNoBoundary = markGridCells(p, grid, objects, solverScale, true);
+          const obstacleGrid = markGridCells(p, obstacleGridNoBoundary, [property.propertyCorners], solverScale, false);
+
+
+
           // // Print the updated grid (example visualization)
-
-
 
           // Starting and ending points
 
           // Create Grid of obsticles based on the existing elements.
-
-
+          
+          
           const _endPoints = [
             { x: approach.sitePlanElementCorners[0].x, y: approach.sitePlanElementCorners[0].y },
             { x: garbage.sitePlanElementCorners[0].x, y: garbage.sitePlanElementCorners[0].y },
-
-
-            // { x: 1, y: 9 },
-            // { x: 20, y: 12 },
-            // { x: 23, y: 4 },
-            // { x: 29, y: 19 },
           ];
 
-          const left = parking.parkingStalls.left.map(stall=>calculateCentroid(stall.stallCorners))
-          const right = parking.parkingStalls.right.map(stall=>calculateCentroid(stall.stallCorners))
+          const left = parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => {
+            const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
+            const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
+            return { x: midX, y: midY };
+          })
+          const right = parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => {
+            const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
+            const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
+            return { x: midX, y: midY };
+          })
 
-         _endPoints.push(...left, ...right)
+          _endPoints.push(...left, ...right);
 
 
-
-
-          
           const inputStartPoints = building.entrances.map(entrance => {
             return { x: entrance.intersection.x, y: entrance.intersection.y }
           });
-          
+
 
 
           console.log(`cols, rows`, cols, rows)
@@ -1909,8 +1846,8 @@ export class AdjacencyGraphVisualizer2 {
           const endPoints = findGridCells(_endPoints, solverScale, cols, rows)
 
           AStarSolver = new AStar(cols, rows, startPoints, endPoints, p.width, p.height)
-          AStarSolver.startNewPathfinding();
-          
+          AStarSolver.startNewPathfinding(obstacleGrid);
+
         }
 
 
@@ -2013,11 +1950,11 @@ export class AdjacencyGraphVisualizer2 {
       }
 
       if (AStarSolver) {
-        const showGrid = false;
-        AStarSolver.displaySolutions(p,pathCellIndex, showGrid);
+        const showGrid = false ;
+        AStarSolver.displaySolutions(p, pathCellIndex, showGrid);
         pathCellIndex++
-        const maxPathStatesLength = Math.max( ...AStarSolver.pathStates.map(state=>state.path.length)) 
-        if (pathCellIndex >  maxPathStatesLength + 10) {
+        const maxPathStatesLength = Math.max(...AStarSolver.pathStates.map(state => state.path.length))
+        if (pathCellIndex > maxPathStatesLength + 10) {
           pathCellIndex = 0
         }
       }
@@ -2717,4 +2654,23 @@ function scalePolygonToFitCanvas(
 }
 
 
+function markGridCells(p: p5, grid: boolean[][], objects: p5.Vector[][], solverScale: number, lookInide: boolean): boolean[][] {
+  const cols = grid.length;
+  const rows = grid[0].length;
 
+  for (let col = 0; col < cols; col++) {
+    for (let row = 0; row < rows; row++) {
+      // Calculate the center point of the current grid cell
+      const cellCenter = [(col + 0.5) * solverScale, (row + 0.5) * solverScale] as Point;
+      // Check if the center point is within any of the polygons
+      for (const polygon of objects) {
+        if (pointsAreInBoundary(polygon, cellCenter) === (lookInide ? -1  : 1)) {
+          grid[col][row] = true; // Mark the cell
+          break;
+        }
+      }
+    }
+  }
+
+  return grid;
+}

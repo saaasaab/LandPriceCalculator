@@ -57,7 +57,8 @@ export class AStar {
   height: number;
   w: number;
   h: number;
-  
+  obstacleGrid: boolean[][];
+
 
   constructor(cols: number, rows: number, startPoints: Point[], endPoints: Point[], width: number, height: number) {
     this.cols = Math.round(cols);
@@ -70,6 +71,7 @@ export class AStar {
     this.height = height;
     this.w = Math.round(width / cols);
     this.h = Math.round(height / rows);
+    this.obstacleGrid=[];
   }
 
   heuristic = (a: Node, b: Node) => {
@@ -254,7 +256,7 @@ export class AStar {
     return mergedPaths;
   };
 
-  createGrid = () => {
+  createGrid = (obstacleGrid?: boolean[][]) => {
     const grid: Node[][] = new Array(this.cols);
     for (let i = 0; i < this.cols; i++) {
       grid[i] = new Array(this.rows);
@@ -269,9 +271,16 @@ export class AStar {
       }
     }
 
+
+    
+
     for (let i = 0; i < this.cols; i++) {
       for (let j = 0; j < this.rows; j++) {
-        if (Math.random() < 0.3) {
+        if(obstacleGrid){
+          grid[i][j].wall = obstacleGrid[i][j]
+        }
+
+        else if (Math.random() < 0.3) {
           grid[i][j].wall = true;
         }
       }
@@ -309,8 +318,8 @@ export class AStar {
     return false;
   }
 
-  startNewPathfinding = () => {
-    const grid = this.createGrid(); // Generate a new grid
+  startNewPathfinding =  (obstacleGrid?: boolean[][]) => {
+    const grid = this.createGrid(obstacleGrid); // Generate a new grid
     this.grid = grid;
 
     const newPathStates: PathfindingState[] = [];
@@ -490,7 +499,8 @@ export class AStar {
     let animate = true
     pathStates.forEach((state, index) => {
       const colorHue = (index * 60) % 360; // Unique hue for each path
-      const lineThickness = maxThickness - (index * (maxThickness - minThickness) / pathStates.length);
+      
+      const lineThickness = 2//maxThickness - (index * (maxThickness - minThickness) / pathStates.length);
       if (state.path.length > maxLengthPath) {
         maxLengthPath = state.path.length;
       }
@@ -503,7 +513,9 @@ export class AStar {
         p.beginShape();
         p.noFill();
         p.strokeWeight(lineThickness); // Set line thickness
-        p.stroke(p.color(`hsl(${colorHue}, 100%, 50%)`)); // Set color using HSL
+        // p.stroke(p.color(`hsl(${colorHue}, 100%, 50%)`)); // Set color using HSL
+        p.stroke(p.color(`hsl(30, 100%, 50%)`)); // Set color using HSL
+
         // state.path[pathCellIndex]
 
 
@@ -614,6 +626,8 @@ const AStarPathfinding = () => {
   //   { x: 230, y: 40 },
   //   { x: 291, y: 190 },
   // ];
+
+
 
 
   const Astar = new AStar(cols, rows, startPoints, endPoints, width, height);
