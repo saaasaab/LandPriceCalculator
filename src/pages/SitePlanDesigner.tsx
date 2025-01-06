@@ -32,9 +32,11 @@ const SitePlanDesigner: React.FC = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
 
+  const [parkingNumber, setParkingNumber] = useState(10);
   const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
 
 
+  const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   // const [isPolygonClosed, setIsPolygonClosed] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -44,6 +46,7 @@ const SitePlanDesigner: React.FC = () => {
   const linesRef = useRef<Line[]>([]);
   const isPolygonClosedRef = useRef<boolean>(false);
   const isSelectingApproachRef = useRef<boolean>(false);
+  const isGeneratingSitePlanRef = useRef<boolean>(false);
   const isSelectingSetbackRef = useRef<boolean>(false);
 
   const isDefiningScaleRef = useRef<boolean>(false);
@@ -86,6 +89,8 @@ const SitePlanDesigner: React.FC = () => {
         canvas.parent(canvasRef.current);
       }
       // p.frameRate(8);
+
+      
 
     };
 
@@ -354,6 +359,7 @@ const SitePlanDesigner: React.FC = () => {
   const createPoints = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
+    setIsGeneratingSitePlan(false);
     setMode('adjust')
   }
 
@@ -364,6 +370,7 @@ const SitePlanDesigner: React.FC = () => {
     linesRef.current = [];
     isPolygonClosedRef.current = false;
     isSelectingApproachRef.current = false;
+    setIsGeneratingSitePlan(false);
     isDefiningScaleRef.current = false;
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
@@ -373,6 +380,7 @@ const SitePlanDesigner: React.FC = () => {
   };
 
   const selectApproach = () => {
+    setIsGeneratingSitePlan(false)
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
     isSelectingSetbackRef.current = false;
@@ -381,6 +389,7 @@ const SitePlanDesigner: React.FC = () => {
   }
 
   const defineScale = () => {
+    setIsGeneratingSitePlan(false);
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
     isSelectingSetbackRef.current = false;
@@ -390,6 +399,7 @@ const SitePlanDesigner: React.FC = () => {
 
   const createSetbacks = () => {
 
+    setIsGeneratingSitePlan(false);
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingSetbackRef.current = true;
@@ -401,21 +411,34 @@ const SitePlanDesigner: React.FC = () => {
     const lines = linesRef.current;
     const scale = scaleRef.current;
 
+    setIsGeneratingSitePlan(true)
     isSelectingSetbackRef.current = false;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
-    setMode('generate')
+
 
     const graph = new AdjacencyGraph();
     visualizer.current = new AdjacencyGraphVisualizer2(graph, points, lines, scale || .25)
     // Now pass this all on to the solver
   }
 
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+    // const rawValue = removeNonNumeric(e.target.value); // Ensure only numbers
+
+    // const formattedValue = formatNumberWithCommas(rawValue);
+    setParkingNumber(Number(e.target.value));//  ${inputUnits?inputUnits:""}
+    // setInput && setInput(formattedValue);
+  };
+
+
+
   return (
     <div>
       <h1>Site Plan Generator</h1>
 
-      <div>
+      {!isGeneratingSitePlan ? <div>
         <button
           onClick={clearCanvas}
           style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
@@ -457,7 +480,7 @@ const SitePlanDesigner: React.FC = () => {
         >
           Generate Site Plan
         </button>
-      </div>
+      </div> : <></>}
 
 
       {mode === "scale" ? <div style={{ marginTop: '10px' }}>
@@ -473,7 +496,7 @@ const SitePlanDesigner: React.FC = () => {
         />
       </div> : <></>}
 
-      {mode === "adjust" ? <input type="file" accept="image/*" onChange={handleFileUpload} /> : <></>}
+      {mode === "adjust" && !isGeneratingSitePlan ? <input type="file" accept="image/*" onChange={handleFileUpload} /> : <></>}
 
       <div ref={canvasRef} />
 
@@ -503,17 +526,31 @@ const SitePlanDesigner: React.FC = () => {
         })}
 
 
+
+      {isGeneratingSitePlan ?
+        <div className="siteplan-inputs">
+
+          {/* <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}> */}
+          <input
+            id={"parking"}
+            className="centered"
+            type={"number"}
+            value={parkingNumber}
+            onChange={e => {
+              setParkingNumber(Number(e.target.value))
+              visualizer.current?.updateGlobalVariables((Number(e.target.value)))
+            }}
+          // onWheel={(value) => (value.target as HTMLElement).blur()}
+          // onFocus={(value) => value.target.select()} // Select the input text on focus
+          />
+          {/* </label> */}
+
+        </div> : <></>}
+
+
     </div>
 
-    // <div>
 
-
-    //   {/* <VoronoiSubdivision/> */}
-    //   <LotLineDrawer imageURL={imageURL}/>
-
-    //   <div ref={canvasRef} style={{ marginTop: '20px' }}>
-    //   </div>
-    // </div>
   );
 };
 

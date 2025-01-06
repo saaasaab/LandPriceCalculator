@@ -717,6 +717,7 @@ class Parking extends SitePlanElement {
     right: ParkingStall[];
   };
   public scale: number;
+  public parkingStallsNumber: number;
 
   constructor(
     p: p5,
@@ -735,6 +736,7 @@ class Parking extends SitePlanElement {
     this.parkingStalls = { left: [], right: [] };
     this.entranceEdgeIndex = 2;
     this.scale = scale;
+    this.parkingStallsNumber = 7;
 
   }
 
@@ -904,8 +906,18 @@ class Parking extends SitePlanElement {
     }
   }
 
+  updateParkingStallsNumber(property: Property,parkingNum:number) {
+
+    this.parkingStallsNumber = parkingNum
+    console.log(`parkingNum`, parkingNum)
+    this.calculateNumberOfFittableStalls(property.propertyCorners)
+    this.updateStallCorners();
+    this.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+
+  }
+
   calculateNumberOfFittableStalls(propertyCorners: p5.Vector[]) {
-    const maxNumStalls = 7;
+    const maxNumStalls = this.parkingStallsNumber;
 
     const entranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0];
     const parkingAngle = this.angle;
@@ -913,9 +925,6 @@ class Parking extends SitePlanElement {
 
     const leftStallsToEmpty: number[] = []
     const rightStallsToEmpty: number[] = []
-
-
-
 
     // When a parking stall goes out of bounds, remove that stall
     Object.keys(this.parkingStalls).forEach(side =>
@@ -1001,7 +1010,7 @@ class Parking extends SitePlanElement {
 
 
   }
-  createParkingOutline(parking: Parking, garbage: Gargage) {
+  createParkingOutline(parking: Parking, garbage: Garbage) {
   }
 }
 
@@ -1127,7 +1136,7 @@ class Building extends SitePlanElement {
 
   }
 
-  buildingLocator(p: p5, building: Building, parking: Parking, property: Property, approach: SitePlanElement, garbage: Gargage) {
+  buildingLocator(p: p5, building: Building, parking: Parking, property: Property, approach: SitePlanElement, garbage: Garbage) {
     if (!this.isInitialized) return;
     // If we are inside something, then move in the oppisite direction of its center.
 
@@ -1413,7 +1422,7 @@ class Building extends SitePlanElement {
 
 }
 
-class Gargage extends SitePlanElement {
+class Garbage extends SitePlanElement {
   // public additionalProperty: string; // Example of a new property
 
   constructor(
@@ -1465,25 +1474,43 @@ export class AdjacencyGraphVisualizer2 {
   public points: IPoint[];
   public lines: Line[];
   public scale: number;
+  public parkingNum: number;
+  public property: Property | null;
+  public parking: Parking | null;
+  public building: Building | null;
+  public garbage: Garbage | null;
+  public approach: SitePlanElement | null;
+  public pathCellIndex: number;
+  // public p: p5;
+
+
+
+
 
   constructor(graph: AdjacencyGraph, points: IPoint[], lines: Line[], scale: number) {
     this.graph = graph;
     this.iteration = 0;
     this.points = points;
     this.lines = lines;
-    this.scale = scale
-
+    this.scale = scale;
+    this.parkingNum = 10;
+    this.property = null;
+    this.parking = null;
+    this.building = null;
+    this.garbage = null;
+    this.approach = null;
+    this.pathCellIndex = 0;
 
   }
 
-  visualize2(p: p5): void {
+
+  initialize(p: p5) {
     p.clear(); // Clear the canvas
     p.angleMode(p.DEGREES);
     // p.frameRate(10);
     let propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
     let lines = [...this.lines];
     const userGeneratedPoints = !!this.points.length;
-    let pathCellIndex = 0;
 
     const setbacks = Array.apply(null, Array(this.lines.length)).map(Number.prototype.valueOf, 0);
 
@@ -1508,23 +1535,12 @@ export class AdjacencyGraphVisualizer2 {
       propertyCorners = [first, ...rest]
       const newIndex = getReversedIndex(approachIndex, this.lines.length);
       approachIndex = newIndex;
-
-
-
-      // const firstLine = lines[0];
-      // const restLine = lines.slice(1, lines.length).reverse()
-      // lines = [firstLine, ...restLine]
-
-
-
-
     }
 
 
 
 
     const { scaledPolygon, scaleFactor } = scalePolygonToFitCanvas(p, propertyCorners, p.width, p.height, 40);
-
     this.scale = userGeneratedPoints ? this.scale / scaleFactor : this.scale / scaleFactor;
 
 
@@ -1540,32 +1556,53 @@ export class AdjacencyGraphVisualizer2 {
 
 
     propertyCorners = scaledPolygon;
-    const property = new Property(p, propertyCorners, approachIndex === -1 ? 0 : approachIndex, isClockwise, this.scale, setbacks);
-    property.initialize()
-    const approachAngle = (property.approachEdge?.calculateAngle() || 0) + 180;
+    this.property = new Property(p, propertyCorners, approachIndex === -1 ? 0 : approachIndex, isClockwise, this.scale, setbacks);
+    this.property.initialize()
+    const approachAngle = (this.property.approachEdge?.calculateAngle() || 0) + 180;
 
 
 
     const approachWidth = 20 / this.scale;
     const parkingWidth = 24 / this.scale;
     const buildingDefault = 1;
-    const centerOfProperty = calculateCentroid(property.cornerOffsetsFromSetbacks)
+    const centerOfProperty = calculateCentroid(this.property.cornerOffsetsFromSetbacks)
     const defaultVector = p.createVector(0, 0)
 
-    const approach = new SitePlanElement(p, getCenterPoint(p, property.approachEdge?.point1 || defaultVector, property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach, this.scale);
-    const parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
-    const building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale);
+    this.approach = new SitePlanElement(p, getCenterPoint(p, this.property.approachEdge?.point1 || defaultVector, this.property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach, this.scale);
+    this.parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
+    this.building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale);
 
-    approach.initialize()
-    parking.initializeParking(property, approach)
+    this.approach.initialize()
+    this.parking.initializeParking(this.property, this.approach)
 
-    parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-    parking.updateStallCorners();
-    parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-    property.propertyQuadrant(property, parking);
+    this.parking.calculateNumberOfFittableStalls(this.property.cornerOffsetsFromSetbacks);
+    this.parking.updateStallCorners();
+    this.parking.updateParkingHeight(this.property.cornerOffsetsFromSetbacks);
+    this.property.propertyQuadrant(this.property, this.parking);
 
-    const garbage = new Gargage(p, getCenterPoint(p, parking.sitePlanElementEdges[0].point1, parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 10 / this.scale, parking.angle, ESitePlanObjects.Garbage, this.scale);
-    garbage.initialize();
+    this.garbage = new Garbage(p, getCenterPoint(p, this.parking.sitePlanElementEdges[0].point1, this.parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 10 / this.scale, this.parking.angle, ESitePlanObjects.Garbage, this.scale);
+    this.garbage.initialize();
+
+
+  }
+
+  updateGlobalVariables(parkingNum: number) {
+    if (!this.parking || !this.property) return
+    this.parking.updateParkingStallsNumber(this.property,parkingNum)
+  }
+
+
+  visualize2(p: p5): void {
+    this.initialize(p)
+
+    const property = this.property;
+    const approach = this.approach;
+    const parking = this.parking;
+    const building = this.building;
+    const garbage = this.garbage;
+
+
+
 
 
     let AStarSolver: AStar;
@@ -1579,6 +1616,11 @@ export class AdjacencyGraphVisualizer2 {
 
 
     p.mouseDragged = () => {
+
+      if(!property || !approach || !parking || !building || !garbage ) return;      
+
+
+
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
@@ -1623,7 +1665,6 @@ export class AdjacencyGraphVisualizer2 {
 
 
         approach.updateCenter(newX, newY);
-
         const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
 
         if (truthChecker(allPointsInBoundary)) {
@@ -1640,7 +1681,7 @@ export class AdjacencyGraphVisualizer2 {
           garbage.updateAngle(angle)
           building.updateAngle(angle); // +90 to get the perpendicular angle
 
-          parking.calculateNumberOfFittableStalls(propertyCorners);
+          parking.calculateNumberOfFittableStalls(property.propertyCorners);
           parking.updateStallCorners(false, true);
           parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
           building.buildingLocator(p, building, parking, property, approach, garbage)
@@ -1714,6 +1755,8 @@ export class AdjacencyGraphVisualizer2 {
           building.buildingLocator(p, building, parking, property, approach, garbage);
 
 
+          // AStarSolver = runAStar(p, this.scale, parking, building, property, garbage, approach, AStarSolver );
+
           // building.updateBuildingCenter();
 
           // For all the points of the parking, find the point and edge that are closest. If they're 
@@ -1732,6 +1775,7 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.mousePressed = () => {
+      if(!property || !approach || !parking || !building || !garbage ) return;
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
@@ -1781,72 +1825,11 @@ export class AdjacencyGraphVisualizer2 {
           const entrance = new Entrance(p, this.scale, pos, intersection, angle, closestEdgeIndex);
           building.entrances.push(entrance)
 
-          const solverScale = 4 / this.scale; //each block is 1 foot
-
-          console.log(`solverScale`, solverScale)
-          const cols = Math.round(p.width / solverScale)
-          const rows = Math.round(p.height / solverScale)
 
 
-          // Initialize the grid (all cells initially unmarked as `false`)
-          const grid: boolean[][] = Array.from({ length: cols }, () => Array(rows).fill(false));
+          AStarSolver = runAStar(p, this.scale, parking, building, property, garbage, approach, AStarSolver);
 
 
-
-          // Define objects as polygons
-          const objects: p5.Vector[][] = [
-            parking.sitePlanElementCorners,
-            garbage.sitePlanElementCorners,
-            building.sitePlanElementCorners,
-            ...parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
-            ...parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
-            // Add more polygons for other objects here
-          ];
-
-          // // Mark the grid cells
-          const obstacleGridNoBoundary = markGridCells(p, grid, objects, solverScale, true);
-          const obstacleGrid = markGridCells(p, obstacleGridNoBoundary, [property.propertyCorners], solverScale, false);
-
-
-
-          // // Print the updated grid (example visualization)
-
-          // Starting and ending points
-
-          // Create Grid of obsticles based on the existing elements.
-          
-          
-          const _endPoints = [
-            { x: approach.sitePlanElementCorners[0].x, y: approach.sitePlanElementCorners[0].y },
-            { x: garbage.sitePlanElementCorners[0].x, y: garbage.sitePlanElementCorners[0].y },
-          ];
-
-          const left = parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => {
-            const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
-            const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
-            return { x: midX, y: midY };
-          })
-          const right = parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => {
-            const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
-            const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
-            return { x: midX, y: midY };
-          })
-
-          _endPoints.push(...left, ...right);
-
-
-          const inputStartPoints = building.entrances.map(entrance => {
-            return { x: entrance.intersection.x, y: entrance.intersection.y }
-          });
-
-
-
-          console.log(`cols, rows`, cols, rows)
-          const startPoints = findGridCells(inputStartPoints, solverScale, cols, rows)
-          const endPoints = findGridCells(_endPoints, solverScale, cols, rows)
-
-          AStarSolver = new AStar(cols, rows, startPoints, endPoints, p.width, p.height)
-          AStarSolver.startNewPathfinding(obstacleGrid);
 
         }
 
@@ -1855,6 +1838,7 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.mouseReleased = () => {
+      if(!property || !approach || !parking || !building || !garbage ) return;
       isDraggingParking = false;
       isDraggingApproach = false;
       isDraggingParkingOffset = false;
@@ -1862,6 +1846,7 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.draw = () => {
+      if(!property || !approach || !parking || !building || !garbage ) return;
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
@@ -1950,17 +1935,89 @@ export class AdjacencyGraphVisualizer2 {
       }
 
       if (AStarSolver) {
-        const showGrid = false ;
-        AStarSolver.displaySolutions(p, pathCellIndex, showGrid);
-        pathCellIndex++
+        const showGrid = false;
+
+        AStarSolver.displaySolutions(p, this.pathCellIndex, showGrid);
+        this.pathCellIndex++
         const maxPathStatesLength = Math.max(...AStarSolver.pathStates.map(state => state.path.length))
-        if (pathCellIndex > maxPathStatesLength + 10) {
-          pathCellIndex = 0
+        if (this.pathCellIndex > maxPathStatesLength + 10) {
+          this.pathCellIndex= 0
         }
       }
     };
   }
 }
+
+
+function runAStar(p: p5, scale: number, parking: Parking, building: Building, property: Property, garbage: Garbage, approach: SitePlanElement, AStarSolver: AStar) {
+
+  const solverScale = 4 / scale; //each block is 1 foot
+
+  const cols = Math.round(p.width / solverScale)
+  const rows = Math.round(p.height / solverScale)
+
+
+  // Initialize the grid (all cells initially unmarked as `false`)
+  const grid: boolean[][] = Array.from({ length: cols }, () => Array(rows).fill(false));
+
+  // Define objects as polygons
+  const objects: p5.Vector[][] = [
+    parking.sitePlanElementCorners,
+    garbage.sitePlanElementCorners,
+    building.sitePlanElementCorners,
+    ...parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
+    ...parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
+    // Add more polygons for other objects here
+  ];
+
+  // // Mark the grid cells
+  const obstacleGridNoBoundary = markGridCells(p, grid, objects, solverScale, true);
+  const obstacleGrid = markGridCells(p, obstacleGridNoBoundary, [property.propertyCorners], solverScale, false);
+
+
+
+  // // Print the updated grid (example visualization)
+
+  // Starting and ending points
+
+  // Create Grid of obsticles based on the existing elements.
+
+
+  const _endPoints = [
+    { x: approach.sitePlanElementCorners[0].x, y: approach.sitePlanElementCorners[0].y },
+    { x: garbage.sitePlanElementCorners[0].x, y: garbage.sitePlanElementCorners[0].y },
+  ];
+
+  const left = parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => {
+    const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
+    const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
+    return { x: midX, y: midY };
+  })
+  const right = parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => {
+    const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
+    const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
+    return { x: midX, y: midY };
+  })
+
+  _endPoints.push(...left, ...right);
+
+
+  const inputStartPoints = building.entrances.map(entrance => {
+    return { x: entrance.intersection.x, y: entrance.intersection.y }
+  });
+
+
+
+
+  const startPoints = findGridCells(inputStartPoints, solverScale, cols, rows)
+  const endPoints = findGridCells(_endPoints, solverScale, cols, rows)
+
+  AStarSolver = new AStar(cols, rows, startPoints, endPoints, p.width, p.height)
+  AStarSolver.startNewPathfinding(obstacleGrid);
+
+  return AStarSolver;
+}
+
 
 
 function getIntersectionPercentage(
@@ -2664,7 +2721,7 @@ function markGridCells(p: p5, grid: boolean[][], objects: p5.Vector[][], solverS
       const cellCenter = [(col + 0.5) * solverScale, (row + 0.5) * solverScale] as Point;
       // Check if the center point is within any of the polygons
       for (const polygon of objects) {
-        if (pointsAreInBoundary(polygon, cellCenter) === (lookInide ? -1  : 1)) {
+        if (pointsAreInBoundary(polygon, cellCenter) === (lookInide ? -1 : 1)) {
           grid[col][row] = true; // Mark the cell
           break;
         }
