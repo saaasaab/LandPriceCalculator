@@ -131,19 +131,66 @@ class ParkingStall {
 
   drawParkingStall() {
     const p = this.p;
+
+
+    // let radius = 150;
+    // let x1 =     p.width/2 - radius;
+    // let y1 =     p.height/2 - radius;
+
+    // let x2 =     p.width/2 + radius;
+    // let y2 =     p.height/2 + radius
+
+    // // define the gradient with the points we calculated
+
+
+
+
+    // let g = p.drawingContext.createRadialGradient(x1, y1, radius, x2, y2, radius) //(x1,y1, x2,y2);
+
+    // // add colors – we can also do this with p5.js color variables!
+    // // we just have to convert them to a string that <canvas> understands
+    // let c1 = p.color(220, 20, 60);
+    // let c2 = p.color(218,165,32);
+    // g.addColorStop(0,   c1.toString());
+    // g.addColorStop(0.5, c2.toString());
+    // g.addColorStop(1,   c1.toString());
+
+    // // then draw a shape with this gradient
+    // p.drawingContext.fillStyle = g;
+
+
+    // // if we want to use normal fill() we need to
+    // // reset the fillStyle – any color will work
+    // // here, now it can be changed again with fill()
+
+
+
     // Draw the polygon using the corner vectors
     p.beginShape();
-    p.fill(100, 200, 255, 150); // Fill color with transparency
+    // p.fill(100, 200, 255, 150); // Fill color with transparency
     p.stroke(0); // Outline color
     p.strokeWeight(2);
 
-    this.stallCorners.forEach((corner, i) => {
+    const reorderCorners = [...this.stallCorners]
+
+
+
+    // Needed to not show the parking lines inside the parkint lot.
+    reorderCorners.push(...reorderCorners.splice(0, 1));
+
+    reorderCorners .forEach((corner, i) => {
+      // if (i === 0) return;
+
       if (!this.isEmptySlot) {
         p.vertex(corner.x, corner.y);
         // p.text(i, corner.x, corner.y)
       }
     });
-    p.endShape(p.CLOSE); // Close the polygon
+    p.endShape(); // Close the polygon
+
+
+    // p.drawingContext.fillStyle = 'white';
+
   }
 
   setParkingStallEdges() {
@@ -218,7 +265,7 @@ class Property {
       this.p.noStroke()
       this.p.fill('black')
       this.p.push();
-      this.p.translate(midX, midY)
+      this.p.translate(midX, midY);
       this.p.rotate(edge.calculateAngle())
       this.p.textSize(14);
       this.p.text(`${length.toFixed(1)} ft`, 0, 0);
@@ -266,6 +313,7 @@ class Property {
     const p = this.p;
 
 
+    p.push()
     p.beginShape();
     p.fill(100, 200, 255, 150); // Fill color with transparency
     p.stroke(0); // Outline color
@@ -277,6 +325,7 @@ class Property {
     p.endShape(p.CLOSE); // Close the polygon
 
 
+    p.pop();
   }
 
 
@@ -622,6 +671,8 @@ class SitePlanElement {
 
   drawSitePlanElement() {
     const p = this.p;
+    p.push()
+
     p.angleMode(p.DEGREES);
 
     // Draw the polygon using the corner vectors
@@ -630,8 +681,11 @@ class SitePlanElement {
     p.stroke(0); // Outline color
     p.strokeWeight(2);
 
-    this.sitePlanElementCorners.forEach((corner) => {
+
+
+    this.sitePlanElementCorners.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
+      p.text(i, corner.x, corner.y)
     });
 
 
@@ -652,6 +706,8 @@ class SitePlanElement {
 
       // p.text(p.round(edge.calculateAngle()), center.x, center.y);
     })
+
+    p.pop()
 
 
   }
@@ -755,7 +811,7 @@ class Parking extends SitePlanElement {
       }
     })
 
-    this.parkingStalls.left.forEach(stall => {
+    this.parkingStalls.left.forEach((stall, i) => {
       if (!stall.isEmptySlot) {
         stall.drawParkingStall();
       }
@@ -957,7 +1013,137 @@ class Parking extends SitePlanElement {
 
 
   }
-  createParkingOutline(parking: Parking, garbage: Garbage) {
+  createParkingOutline(p: p5, parking: Parking, garbage: Garbage, approach: SitePlanElement) {
+
+    // This is going counter clockwise
+
+    const rightStalls = parking.parkingStalls.right.filter(stall => !stall.isEmptySlot);
+    const leftStalls = parking.parkingStalls.left.filter(stall => !stall.isEmptySlot);
+
+    const firstRightStall = rightStalls[0]
+    const lastRightStall = rightStalls[rightStalls.length - 1]
+
+    const firstLeftStall = leftStalls[0]
+    const lastLeftStall = leftStalls[leftStalls.length - 1];
+
+    const parkingOutline = [
+      approach.sitePlanElementCorners[2],
+      approach.sitePlanElementCorners[1],
+      parking.sitePlanElementCorners[2],
+
+    ]
+
+    if (rightStalls.length > 0) {
+      parkingOutline.push(
+        firstRightStall.stallCorners[0],
+        firstRightStall.stallCorners[3],
+        lastRightStall.stallCorners[2],
+        lastRightStall.stallCorners[1],
+      )
+    }
+
+
+    parkingOutline.push(
+      parking.sitePlanElementCorners[1],
+      parking.sitePlanElementCorners[0],
+    )
+
+
+    if (leftStalls.length > 0) {
+      parkingOutline.push(
+        lastLeftStall.stallCorners[1],
+        lastLeftStall.stallCorners[2],
+        firstLeftStall.stallCorners[3],
+        firstLeftStall.stallCorners[0],
+      )
+    }
+
+    parkingOutline.push(
+      parking.sitePlanElementCorners[3],
+      approach.sitePlanElementCorners[0],
+      approach.sitePlanElementCorners[3],
+    )
+
+
+
+    const offsetParking = expandPolygon(this.p, parkingOutline, -5);
+    // Double stroke
+
+
+
+
+
+
+    
+    p.beginShape();
+    p.fill(120, 220, 40, 150); // Fill color with transparency
+    p.stroke(0); // Outline color
+    p.strokeWeight(1);
+
+
+
+
+
+
+
+
+    // p.vertex(approach.sitePlanElementCorners[0].x, approach.sitePlanElementCorners[0].y);
+
+    // p.vertex(approach.sitePlanElementCorners[1].x, approach.sitePlanElementCorners[1].y);
+  
+  
+    // // defaultVector
+  
+  
+    // drawPerpendicularBezier(
+    //   p,
+    //   approach.sitePlanElementCorners[1],
+    //   parking.entranceEdge.point1,
+    //   approach.sitePlanElementEdges[2],
+    //   parking.entranceEdge,
+    //   true
+    // );
+  
+  
+    // p.vertex(parking.entranceEdge?.point2.x || 0, parking.entranceEdge?.point2.y || 0);
+  
+    // // // Center line
+    // // drawPerpendicularBezier(
+    // //   p,
+    // //   approach.center,
+    // //   getCenterPoint(p, parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0].point1, parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0].point2),
+    // //   approach.sitePlanElementEdges[2],
+    // //   parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0]
+    // // );
+  
+    // // Right Line
+  
+    // // p.vertex(parking.entranceEdge?.point1.x || 0, parking.entranceEdge?.point1.y || 0);
+  
+  
+    // drawPerpendicularBezier(
+    //   p,
+    //   parking.entranceEdge.point2,
+    //   approach.sitePlanElementCorners[0],
+    //   parking.entranceEdge,
+    //   approach.sitePlanElementEdges[2],
+    //   false
+    // );
+
+
+    [...offsetParking, ...parkingOutline.reverse()].forEach((corner, i) => {
+      p.vertex(corner.x, corner.y);
+    });
+    p.endShape(p.CLOSE); // Close the polygon
+
+
+
+
+    p.fill('purple')
+    const c = [...offsetParking, ...parkingOutline][0];
+    p.ellipse(c.x,c.y,10,10);
+
+
   }
 }
 
@@ -1030,7 +1216,6 @@ class Building extends SitePlanElement {
 
     this.center.x = x;
     this.center.y = y;
-
 
     this.createSitePlanElementCorners();
     this.setSitePlanElementEdges()
@@ -1817,6 +2002,9 @@ export class AdjacencyGraphVisualizer2 {
 
     p.draw = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
+
+      p.background(240);
+
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
@@ -1825,13 +2013,12 @@ export class AdjacencyGraphVisualizer2 {
 
 
       p.noFill()
-      p.background(240);
       p.stroke(0);
 
       property.drawProperty();
       property.drawSetbackPolygon()
       approach.drawSitePlanElement();
-      parking.drawSitePlanElement();
+      // parking.drawSitePlanElement();
       parking.drawParkingStalls();
 
 
@@ -1839,12 +2026,8 @@ export class AdjacencyGraphVisualizer2 {
       building.drawBuilding();
 
 
-
-
       property.propertyQuadrant(property, parking);
       createDriveway(p, approach, parking);
-
-
 
       building.buildingLocator(p, building, parking, property, approach, garbage);
 
@@ -1914,6 +2097,10 @@ export class AdjacencyGraphVisualizer2 {
           this.pathCellIndex = 0
         }
       }
+
+
+
+      parking.createParkingOutline(p, parking, garbage, approach)
     };
   }
 }
@@ -2032,9 +2219,9 @@ function createDriveway(p: p5, approach: SitePlanElement, parking: Parking) {
 
 
 
-  p.fill(15, 200, 15);
+  // p.fill(15, 200, 15);
 
-  p.stroke('red')
+  // p.stroke('red')
   p.beginShape();
 
   // p.vertex(p.width/2, p.height/2);
