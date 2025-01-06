@@ -334,57 +334,6 @@ class Property {
     return null; // Intersection is out of bounds
   }
 
-  // getIntersection(edge1: Edge, edge2: Edge): p5.Vector | null {
-  //   const { p } = this;
-
-  //   const x1 = edge1.point1Offset.x;
-  //   const y1 = edge1.point1Offset.y;
-  //   const x2 = edge1.point2Offset.x;
-  //   const y2 = edge1.point2Offset.y;
-
-  //   const x3 = edge2.point1Offset.x;
-  //   const y3 = edge2.point1Offset.y;
-  //   const x4 = edge2.point2Offset.x;
-  //   const y4 = edge2.point2Offset.y;
-
-  //   // Calculate the denominator for the line intersection formula
-  //   const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-
-  //   // If denom is 0, the lines are parallel or coincident
-  //   if (denom === 0) {
-  //     return null;
-  //   }
-
-  //   // Calculate the intersection point
-  //   const intersectX =
-  //     ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
-  //   const intersectY =
-  //     ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
-
-  //   const intersection = p.createVector(intersectX, intersectY);
-
-  //   // Check if the intersection lies on both line segments
-  //   const isOnEdge1 =
-  //     Math.min(x1, x2) <= intersectX &&
-  //     intersectX <= Math.max(x1, x2) &&
-  //     Math.min(y1, y2) <= intersectY &&
-  //     intersectY <= Math.max(y1, y2);
-
-  //   const isOnEdge2 =
-  //     Math.min(x3, x4) <= intersectX &&
-  //     intersectX <= Math.max(x3, x4) &&
-  //     Math.min(y3, y4) <= intersectY &&
-  //     intersectY <= Math.max(y3, y4);
-
-  //   if (isOnEdge1 && isOnEdge2) {
-  //     return intersection;
-  //   }
-
-  //   return null; // Intersection is out of bounds
-  // }
-
-
-
 
   propertyQuadrant(property: Property, parking: SitePlanElement) {
     const p = this.p;
@@ -906,14 +855,12 @@ class Parking extends SitePlanElement {
     }
   }
 
-  updateParkingStallsNumber(property: Property,parkingNum:number) {
-
+  updateParkingStallsNumber(property: Property, parkingNum: number) {
     this.parkingStallsNumber = parkingNum
-    console.log(`parkingNum`, parkingNum)
-    this.calculateNumberOfFittableStalls(property.propertyCorners)
-    this.updateStallCorners();
-    this.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
+    this.calculateNumberOfFittableStalls(property.propertyCorners)
+    this.updateStallCorners(true);
+    this.updateParkingHeight(property.cornerOffsetsFromSetbacks);
   }
 
   calculateNumberOfFittableStalls(propertyCorners: p5.Vector[]) {
@@ -1059,6 +1006,7 @@ class Building extends SitePlanElement {
   public isInitialized = false;
   public frameCount = 0;
   public entrances: Entrance[] = [];
+  public buildingArea: number;
 
 
   // public additionalProperty: string; // Example of a new property
@@ -1074,7 +1022,7 @@ class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
-
+    this.buildingArea = 1500;
   }
 
   initializeBuilding(x: number, y: number,) {
@@ -1093,6 +1041,10 @@ class Building extends SitePlanElement {
 
     this.updateCenter(newX, newY);
     this.updateEntrances();
+  }
+
+  updateBuildingArea(area: number) {
+    this.buildingArea = area;
   }
 
   tempBuilding() {
@@ -1284,7 +1236,7 @@ class Building extends SitePlanElement {
     // Area needs to be closest to X
 
 
-    const targetArea = 500 / (this.p.pow(this.scale, 2));
+    const targetArea = this.buildingArea / (this.p.pow(this.scale, 2));
     let bestArea = calculateArea(this.sitePlanElementCorners);
 
     const error = Math.abs(targetArea - bestArea) / targetArea;
@@ -1586,9 +1538,31 @@ export class AdjacencyGraphVisualizer2 {
 
   }
 
-  updateGlobalVariables(parkingNum: number) {
-    if (!this.parking || !this.property) return
-    this.parking.updateParkingStallsNumber(this.property,parkingNum)
+  updateGlobalVariables(updatedGlobals: {
+    approachWidth: string | number;
+    parkingNumber: string | number;
+    parkingDrivewayWidth: string | number;
+    buildingArea: string | number;
+
+  }) {
+
+    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingArea } = updatedGlobals;
+
+    if (!this.parking || !this.property || !this.approach || !this.building) return
+
+    // Update all things PARKING
+    this.parking.updateWidth(Number(parkingDrivewayWidth) / this.scale);
+    this.parking.updateParkingStallsNumber(this.property, Number(parkingNumber));
+
+
+    // Update all things APPROACH
+    // Scale up the approach witht he scale
+    this.approach.updateWidth(Number(approachWidth) / this.scale)
+
+
+
+    // Update all this BUILDING
+    this.building.updateBuildingArea(Number(buildingArea))
   }
 
 
@@ -1603,11 +1577,7 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-
-
     let AStarSolver: AStar;
-
-
     let isDraggingParking = false;
     let isDraggingApproach = false;
     let isDraggingParkingOffset = false;
@@ -1617,7 +1587,7 @@ export class AdjacencyGraphVisualizer2 {
 
     p.mouseDragged = () => {
 
-      if(!property || !approach || !parking || !building || !garbage ) return;      
+      if (!property || !approach || !parking || !building || !garbage) return;
 
 
 
@@ -1775,7 +1745,7 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.mousePressed = () => {
-      if(!property || !approach || !parking || !building || !garbage ) return;
+      if (!property || !approach || !parking || !building || !garbage) return;
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
@@ -1838,7 +1808,7 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.mouseReleased = () => {
-      if(!property || !approach || !parking || !building || !garbage ) return;
+      if (!property || !approach || !parking || !building || !garbage) return;
       isDraggingParking = false;
       isDraggingApproach = false;
       isDraggingParkingOffset = false;
@@ -1846,7 +1816,7 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.draw = () => {
-      if(!property || !approach || !parking || !building || !garbage ) return;
+      if (!property || !approach || !parking || !building || !garbage) return;
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
@@ -1941,7 +1911,7 @@ export class AdjacencyGraphVisualizer2 {
         this.pathCellIndex++
         const maxPathStatesLength = Math.max(...AStarSolver.pathStates.map(state => state.path.length))
         if (this.pathCellIndex > maxPathStatesLength + 10) {
-          this.pathCellIndex= 0
+          this.pathCellIndex = 0
         }
       }
     };

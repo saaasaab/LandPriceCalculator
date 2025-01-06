@@ -8,7 +8,7 @@ import LotLineDrawer from '../futureItems/LotLineDrawerOld';
 // import LotLineDrawerOld from '../futureItems/LotLineDrawerOld';
 // import { SubdivisionGenerator } from './SubdivisionGenerator';
 // import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
-
+import './SitePlanDesigner.scss';
 
 export interface IPoint {
   x: number;
@@ -32,7 +32,15 @@ const SitePlanDesigner: React.FC = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
 
-  const [parkingNumber, setParkingNumber] = useState(10);
+  const [parkingNumber, setParkingNumber] = useState<string | number>(7);
+  const [parkingDrivewayWidth, setParkingDrivewayWidth] = useState<string | number>(24);
+  const [buildingArea, setBuildingArea] = useState<string | number>(1500);
+
+  const [approachWidth, setApproachWidth] = useState<string | number>(20);
+
+
+
+
   const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
 
 
@@ -80,18 +88,11 @@ const SitePlanDesigner: React.FC = () => {
     };
 
     p.setup = () => {
-
-      // p.createCanvas(800, 800).parent(canvasRef.current!);
-
-
       const canvas = p.createCanvas(800, 600);
       if (canvasRef.current) {
         canvas.parent(canvasRef.current);
       }
       // p.frameRate(8);
-
-      
-
     };
 
 
@@ -343,6 +344,20 @@ const SitePlanDesigner: React.FC = () => {
     };
   }, [imageURL]);
 
+
+
+  useEffect(() => {
+    const updatedGlobals = {
+      approachWidth,
+      parkingNumber,
+      parkingDrivewayWidth,
+      buildingArea
+    }
+    visualizer.current?.updateGlobalVariables(updatedGlobals)
+  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingArea])
+
+
+
   // Update setback for a specific line
   const updateSetback = (index: number, value: string) => {
 
@@ -423,14 +438,7 @@ const SitePlanDesigner: React.FC = () => {
   }
 
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
-    // const rawValue = removeNonNumeric(e.target.value); // Ensure only numbers
-
-    // const formattedValue = formatNumberWithCommas(rawValue);
-    setParkingNumber(Number(e.target.value));//  ${inputUnits?inputUnits:""}
-    // setInput && setInput(formattedValue);
-  };
 
 
 
@@ -530,20 +538,53 @@ const SitePlanDesigner: React.FC = () => {
       {isGeneratingSitePlan ?
         <div className="siteplan-inputs">
 
-          {/* <label htmlFor={`${(cellValues[0] || "undefined").toString().replace(/[^A-Z0-9]/ig, "_")}`}> */}
-          <input
-            id={"parking"}
-            className="centered"
-            type={"number"}
-            value={parkingNumber}
-            onChange={e => {
-              setParkingNumber(Number(e.target.value))
-              visualizer.current?.updateGlobalVariables((Number(e.target.value)))
-            }}
-          // onWheel={(value) => (value.target as HTMLElement).blur()}
-          // onFocus={(value) => value.target.select()} // Select the input text on focus
-          />
-          {/* </label> */}
+          <label htmlFor={'parking'}>
+            <input
+              id={"parking"}
+              className="centered"
+              type={"number"}
+              value={parkingNumber}
+              onChange={(e) => setParkingNumber(e.target.value)}
+
+            />
+            Parking Stalls
+          </label>
+          <label htmlFor={'approach_width'}>
+            <input
+              id={"approach_width"}
+              className="centered"
+              type={"number"}
+              value={approachWidth}
+              onChange={(e) => setApproachWidth(e.target.value)}
+
+            />
+            Approach Width
+          </label>
+
+          <label htmlFor={'driveway_width'}>
+            <input
+              id={"driveway_width"}
+              className="centered"
+              type={"number"}
+              value={parkingDrivewayWidth}
+              onChange={(e) => setParkingDrivewayWidth(e.target.value)}
+            />
+            Driveway Width
+          </label>
+
+          <label htmlFor={'building_size'}>
+            <input
+              id={"building_size"}
+              className="centered"
+              type={"number"}
+              value={buildingArea}
+              onChange={(e) => setBuildingArea(e.target.value)}
+            />
+            Building Area
+          </label>
+
+
+
 
         </div> : <></>}
 
