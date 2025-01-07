@@ -178,7 +178,7 @@ class ParkingStall {
     // Needed to not show the parking lines inside the parkint lot.
     reorderCorners.push(...reorderCorners.splice(0, 1));
 
-    reorderCorners .forEach((corner, i) => {
+    reorderCorners.forEach((corner, i) => {
       // if (i === 0) return;
 
       if (!this.isEmptySlot) {
@@ -312,12 +312,12 @@ class Property {
   drawSetbackPolygon() {
     const p = this.p;
 
-
     p.push()
     p.beginShape();
     p.fill(100, 200, 255, 150); // Fill color with transparency
     p.stroke(0); // Outline color
-    p.strokeWeight(2);
+    p.strokeWeight(1);
+
 
     this.cornerOffsetsFromSetbacks.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
@@ -714,6 +714,67 @@ class SitePlanElement {
 
 }
 
+class Approach extends SitePlanElement {
+
+  constructor(
+    p: p5,
+    center: p5.Vector,
+    width: number,
+    height: number,
+    angle: number,
+    elementType: SitePlanObjects,
+    scale: number
+  ) {
+    super(p, center, width, height, angle, elementType, scale);
+  }
+
+  drawApproach() {
+    const p = this.p;
+    p.push()
+
+    p.angleMode(p.DEGREES);
+
+    // Draw the polygon using the corner vectors
+    p.beginShape();
+    p.fill(100, 200, 255, 150); // Fill color with transparency
+    p.stroke(0); // Outline color
+    p.strokeWeight(2);
+
+
+
+    this.sitePlanElementCorners.forEach((corner, i) => {
+      p.vertex(corner.x, corner.y);
+      p.text(i, corner.x, corner.y)
+    });
+
+
+    p.endShape(p.CLOSE); // Close the polygon
+
+    p.ellipse(this.center.x, this.center.y, 10, 10);
+
+
+    // p.text(p.round(this.angle), this.center.x, this.center.y);
+
+    this.sitePlanElementEdges.forEach(edge => {
+      const center = getCenterPoint(this.p, edge.point1, edge.point2);
+      p.fill(200, 20, 40);
+      p.ellipse(center.x, center.y, 10, 10);
+      p.strokeWeight(1)
+      p.fill(40, 200, 20);
+
+
+      // p.text(p.round(edge.calculateAngle()), center.x, center.y);
+    })
+
+    p.pop()
+
+
+  }
+
+
+
+}
+
 class Parking extends SitePlanElement {
   // public additionalProperty: string; // Example of a new property
   public entranceEdgeIndex: number | null;
@@ -745,7 +806,7 @@ class Parking extends SitePlanElement {
 
   }
 
-  initializeParking(property: Property, approach: SitePlanElement) {
+  initializeParking(property: Property, approach: Approach) {
     this.createSitePlanElementCorners();
     this.setSitePlanElementEdges();
     this.entranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0]
@@ -1013,8 +1074,8 @@ class Parking extends SitePlanElement {
 
 
   }
-  createParkingOutline(p: p5, parking: Parking, garbage: Garbage, approach: SitePlanElement) {
-
+  createParkingOutline(p: p5, parking: Parking, garbage: Garbage, approach: Approach) {
+    if (!parking.entranceEdge) return;
     // This is going counter clockwise
 
     const rightStalls = parking.parkingStalls.right.filter(stall => !stall.isEmptySlot);
@@ -1048,7 +1109,6 @@ class Parking extends SitePlanElement {
       parking.sitePlanElementCorners[0],
     )
 
-
     if (leftStalls.length > 0) {
       parkingOutline.push(
         lastLeftStall.stallCorners[1],
@@ -1056,7 +1116,10 @@ class Parking extends SitePlanElement {
         firstLeftStall.stallCorners[3],
         firstLeftStall.stallCorners[0],
       )
+
     }
+
+
 
     parkingOutline.push(
       parking.sitePlanElementCorners[3],
@@ -1065,16 +1128,11 @@ class Parking extends SitePlanElement {
     )
 
 
-
     const offsetParking = expandPolygon(this.p, parkingOutline, -5);
     // Double stroke
 
 
 
-
-
-
-    
     p.beginShape();
     p.fill(120, 220, 40, 150); // Fill color with transparency
     p.stroke(0); // Outline color
@@ -1083,65 +1141,65 @@ class Parking extends SitePlanElement {
 
 
 
-
-
-
-
-    // p.vertex(approach.sitePlanElementCorners[0].x, approach.sitePlanElementCorners[0].y);
-
-    // p.vertex(approach.sitePlanElementCorners[1].x, approach.sitePlanElementCorners[1].y);
-  
-  
-    // // defaultVector
-  
-  
-    // drawPerpendicularBezier(
-    //   p,
-    //   approach.sitePlanElementCorners[1],
-    //   parking.entranceEdge.point1,
-    //   approach.sitePlanElementEdges[2],
-    //   parking.entranceEdge,
-    //   true
-    // );
-  
-  
     // p.vertex(parking.entranceEdge?.point2.x || 0, parking.entranceEdge?.point2.y || 0);
-  
-    // // // Center line
-    // // drawPerpendicularBezier(
-    // //   p,
-    // //   approach.center,
-    // //   getCenterPoint(p, parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0].point1, parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0].point2),
-    // //   approach.sitePlanElementEdges[2],
-    // //   parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0]
-    // // );
-  
-    // // Right Line
-  
-    // // p.vertex(parking.entranceEdge?.point1.x || 0, parking.entranceEdge?.point1.y || 0);
-  
-  
-    // drawPerpendicularBezier(
-    //   p,
-    //   parking.entranceEdge.point2,
-    //   approach.sitePlanElementCorners[0],
-    //   parking.entranceEdge,
-    //   approach.sitePlanElementEdges[2],
-    //   false
-    // );
 
 
-    [...offsetParking, ...parkingOutline.reverse()].forEach((corner, i) => {
-      p.vertex(corner.x, corner.y);
+
+    p.textSize(10)
+
+
+    const points = [...offsetParking, ...parkingOutline.reverse()];
+
+
+    const offsetEntranceEdge = new Edge(p, offsetParking[1], offsetParking[offsetParking.length-2], false, 0)
+    const offsetParkingEdge = new Edge(p, offsetParking[3], offsetParking[offsetParking.length-3], false, 0)
+
+    // const offsetEntranceEdge = new Edge(p, offsetParking[0], offsetParking[1], false, 0)
+
+    points.forEach((corner, i) => {
+    //  if (i === 1 && parking.entranceEdge) {
+    //     drawPerpendicularBezier(
+    //       p,
+    //       offsetParking[1],
+    //       offsetParking[2],
+    //       offsetParkingEdge,
+    //       offsetEntranceEdge,
+    //       true
+    //     );
+    //   }
+
+    //   else if (i === points.length - 3 && parking.entranceEdge) {
+    //     drawPerpendicularBezier(
+    //       p,
+    //       parking.entranceEdge.point1,
+    //       approach.sitePlanElementCorners[1],
+    //       parking.entranceEdge,
+    //       approach.sitePlanElementEdges[2],
+    //       false
+    //     );
+    //   }
+
+    //   else if (i === points.length / 2 + 2 && parking.entranceEdge) {
+    //     drawPerpendicularBezier(
+    //       p,
+    //       approach.sitePlanElementCorners[0],
+    //       parking.entranceEdge.point2,
+    //       approach.sitePlanElementEdges[2],
+    //       parking.entranceEdge,
+    //       true
+    //     );
+    //   }
+
+    //   else {
+        p.vertex(corner.x, corner.y);
+        p.text(i, corner.x, corner.y);
+      // }
+
+
+
+
     });
     p.endShape(p.CLOSE); // Close the polygon
-
-
-
-
-    p.fill('purple')
-    const c = [...offsetParking, ...parkingOutline][0];
-    p.ellipse(c.x,c.y,10,10);
 
 
   }
@@ -1176,13 +1234,17 @@ class Entrance {
     const isInwardEnterance = true;
 
     const enteranceWidth = 8;
-    p.stroke('red')
-    p.strokeWeight(2)
+   
 
     p.push();
+    p.stroke('black')
+
+
     p.translate(this.intersection.x, this.intersection.y)
     p.rotate(this.angle - 180)
-    p.textSize(14);
+    p.strokeWeight(2)
+    p.line(0,0,enteranceWidth / this.scale / 2,0);
+    p.strokeWeight(1)
     p.arc(0, 0, enteranceWidth / this.scale, enteranceWidth / this.scale, 0, 90, p.PIE);
     p.pop()
   }
@@ -1273,7 +1335,7 @@ class Building extends SitePlanElement {
 
   }
 
-  buildingLocator(p: p5, building: Building, parking: Parking, property: Property, approach: SitePlanElement, garbage: Garbage) {
+  buildingLocator(p: p5, building: Building, parking: Parking, property: Property, approach: Approach, garbage: Garbage) {
     if (!this.isInitialized) return;
     // If we are inside something, then move in the oppisite direction of its center.
 
@@ -1616,7 +1678,7 @@ export class AdjacencyGraphVisualizer2 {
   public parking: Parking | null;
   public building: Building | null;
   public garbage: Garbage | null;
-  public approach: SitePlanElement | null;
+  public approach: Approach | null;
   public pathCellIndex: number;
   // public p: p5;
 
@@ -1705,7 +1767,7 @@ export class AdjacencyGraphVisualizer2 {
     const centerOfProperty = calculateCentroid(this.property.cornerOffsetsFromSetbacks)
     const defaultVector = p.createVector(0, 0)
 
-    this.approach = new SitePlanElement(p, getCenterPoint(p, this.property.approachEdge?.point1 || defaultVector, this.property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach, this.scale);
+    this.approach = new Approach(p, getCenterPoint(p, this.property.approachEdge?.point1 || defaultVector, this.property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach, this.scale);
     this.parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
     this.building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale);
 
@@ -2017,7 +2079,8 @@ export class AdjacencyGraphVisualizer2 {
 
       property.drawProperty();
       property.drawSetbackPolygon()
-      approach.drawSitePlanElement();
+      approach.drawApproach();
+
       // parking.drawSitePlanElement();
       parking.drawParkingStalls();
 
@@ -2030,8 +2093,6 @@ export class AdjacencyGraphVisualizer2 {
       createDriveway(p, approach, parking);
 
       building.buildingLocator(p, building, parking, property, approach, garbage);
-
-
       building.buildingGrower(property, parking);
       garbage.drawSitePlanElement();
 
@@ -2106,7 +2167,7 @@ export class AdjacencyGraphVisualizer2 {
 }
 
 
-function runAStar(p: p5, scale: number, parking: Parking, building: Building, property: Property, garbage: Garbage, approach: SitePlanElement, AStarSolver: AStar) {
+function runAStar(p: p5, scale: number, parking: Parking, building: Building, property: Property, garbage: Garbage, approach: Approach, AStarSolver: AStar) {
 
   const solverScale = 4 / scale; //each block is 1 foot
 
@@ -2213,7 +2274,7 @@ function setLineDash(p: p5, list: number[]) {
   // p.drawingContext
 }
 
-function createDriveway(p: p5, approach: SitePlanElement, parking: Parking) {
+function createDriveway(p: p5, approach: Approach, parking: Parking) {
 
   if (!parking.entranceEdge) return;
 
@@ -2253,20 +2314,6 @@ function createDriveway(p: p5, approach: SitePlanElement, parking: Parking) {
 
 
   p.vertex(parking.entranceEdge?.point2.x || 0, parking.entranceEdge?.point2.y || 0);
-
-  // // Center line
-  // drawPerpendicularBezier(
-  //   p,
-  //   approach.center,
-  //   getCenterPoint(p, parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0].point1, parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0].point2),
-  //   approach.sitePlanElementEdges[2],
-  //   parking.sitePlanElementEdges[parking.entranceEdgeIndex || 0]
-  // );
-
-  // Right Line
-
-  // p.vertex(parking.entranceEdge?.point1.x || 0, parking.entranceEdge?.point1.y || 0);
-
 
   drawPerpendicularBezier(
     p,
@@ -2355,15 +2402,7 @@ function drawPerpendicularBezier(
     point2.x,
     point2.y
   );
-  // p.bezier(
-  //   point1.x,
-  //   point1.y,
-  //   controlPoint1.x,
-  //   controlPoint1.y,
-  //   controlPoint2.x,
-  //   controlPoint2.y,
-  //   point2.x,
-  //   point2.y);
+
 
   // // Optional: Draw the line segment and control points for visualization
   // p.stroke(0);
