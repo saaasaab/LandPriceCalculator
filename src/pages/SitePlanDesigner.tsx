@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 // import LotLineDrawer from './LotLineDrawerP5';
 // import VoronoiDiagram from '../futureItems/VoronoiDiagram';
 import { AdjacencyGraph } from '../utils/AdjacencyGraph';
 import p5 from 'p5';
-import { AdjacencyGraphVisualizer2 } from '../utils/AdjacencyGraphVisualizer2';
+import { AdjacencyGraphVisualizer2, countParkingStalls } from '../utils/AdjacencyGraphVisualizer2';
 import LotLineDrawer from '../futureItems/LotLineDrawerOld';
 // import LotLineDrawerOld from '../futureItems/LotLineDrawerOld';
 // import { SubdivisionGenerator } from './SubdivisionGenerator';
@@ -34,17 +34,33 @@ const SitePlanDesigner: React.FC = () => {
 
   const [parkingNumber, setParkingNumber] = useState<string | number>(7);
   const [parkingDrivewayWidth, setParkingDrivewayWidth] = useState<string | number>(24);
-  const [buildingArea, setBuildingArea] = useState<string | number>(1500);
+  const [buildingAreaTarget, setbuildingAreaTarget] = useState<string | number>(1500);
 
   const [approachWidth, setApproachWidth] = useState<string | number>(20);
-
-
-
-
   const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
 
-
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
+
+
+
+
+  // Property Outputs
+  const [areaOfProperty, setAreaOfProperty] = useState<number | null>(null);
+  const [imperviousSurface, setImperviousSurface] = useState<number | null>(null);
+  const [drivewayArea, setDrivewayArea] = useState<number | null>(null);
+  const [parkingArea, setParkingArea] = useState<number | null>(null);
+  const [parkingStallsArea, setParkingStallsArea] = useState<number | null>(null);
+  const [handicappedStalls, setHandicappedStalls] = useState<number | null>(null);
+  const [parkingStalls, setParkingStalls] = useState<number | null>(null);
+  const [sidewalkArea, setSidewalkArea] = useState<number | null>(null);
+  const [garbageArea, setGarbageArea] = useState<number | null>(null);
+  const [actualBuildingArea, setActualBuildingArea] = useState<number | null>(null);
+  const [approachArea, setApproachArea] = useState<number | null>(null);
+  const [bikeParkingArea, setBikeParkingArea] = useState<number | null>(null);
+
+
+
+
   // const [isPolygonClosed, setIsPolygonClosed] = useState(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -66,6 +82,7 @@ const SitePlanDesigner: React.FC = () => {
   const selectedLineIndexRef = useRef<number | null>(null);
 
   let visualizer = useRef<AdjacencyGraphVisualizer2 | null>(null)// new AdjacencyGraphVisualizer2(graph );
+
 
   // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -346,15 +363,52 @@ const SitePlanDesigner: React.FC = () => {
 
 
 
+
+  useEffect(() => {
+
+
+
+    const updateVariables = () => {
+      console.log("There be danger here")
+      const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
+
+
+
+      setAreaOfProperty(visualizer.current?.property?.areaOfProperty || 0);
+      setImperviousSurface(visualizer.current?.property?.areaOfProperty || 0);
+      setDrivewayArea(visualizer.current?.drivewayArea || 0);
+      setParkingArea(visualizer.current?.parking?.parkingArea || 0);
+      setParkingStallsArea(visualizer.current?.parking?.parkingStallsArea || 0);
+      setHandicappedStalls(visualizer.current?.parking?.handicappedParkingNum || 0);
+      setParkingStalls(leftStalls + rightStalls);
+      setSidewalkArea(visualizer.current?.sidewalkArea || 0);
+      setGarbageArea(visualizer.current?.garbage?.area || 0);
+      setActualBuildingArea(visualizer.current?.building?.buildingAreaActual || 0);
+      setApproachArea(visualizer.current?.approach?.approachArea || 0);
+      setBikeParkingArea(visualizer.current?.bikeParkingArea || 0);
+    };
+
+
+
+    if (visualizer.current) {
+      const interval = setInterval(updateVariables, 500); // Check for changes periodically
+
+      return () => clearInterval(interval);
+    }
+
+  }, [visualizer?.current]);
+
+
   useEffect(() => {
     const updatedGlobals = {
       approachWidth,
       parkingNumber,
       parkingDrivewayWidth,
-      buildingArea
+      buildingAreaTarget
     }
+
     visualizer.current?.updateGlobalVariables(updatedGlobals)
-  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingArea])
+  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingAreaTarget])
 
 
 
@@ -369,7 +423,6 @@ const SitePlanDesigner: React.FC = () => {
 
     // setLines(newLines);
   };
-
 
   const createPoints = () => {
     isDefiningScaleRef.current = false;
@@ -535,58 +588,82 @@ const SitePlanDesigner: React.FC = () => {
 
 
 
+
       {isGeneratingSitePlan ?
-        <div className="siteplan-inputs">
+        <>
+          {/* <MapWithCompass/> */}
+          <div className="siteplan-outputs">
+            <div className="siteplan-data">
+              <div className="siteplan-element">Area of Property: {areaOfProperty ?? "Loading..."}</div>
 
-          <label htmlFor={'parking'}>
-            <input
-              id={"parking"}
-              className="centered"
-              type={"number"}
-              value={parkingNumber}
-              onChange={(e) => setParkingNumber(e.target.value)}
+              <div className="siteplan-element">Impervious Surface: {imperviousSurface ?? "Loading..."}</div>
+              <div className="siteplan-element">Driveway Area: {drivewayArea ?? "Loading..."}</div>
+              <div className="siteplan-element">Parking Area: {parkingArea ?? "Loading..."}</div>
+              <div className="siteplan-element">Parking Stalls Area: {parkingStallsArea ?? "Loading..."}</div>
+              <div className="siteplan-element">Handicapped Stalls Count: {handicappedStalls ?? "Loading..."}</div>
+              <div className="siteplan-element">Total Parking Stalls Count: {parkingStalls ?? "Loading..."}</div>
+              <div className="siteplan-element">Sidewalk Area: {sidewalkArea ?? "Loading..."}</div>
+              <div className="siteplan-element">Garbage Area: {garbageArea ?? "Loading..."}</div>
+              <div className="siteplan-element">Actual Building Area: {actualBuildingArea ?? "Loading..."}</div>
+              <div className="siteplan-element">Approach Area: {approachArea ?? "Loading..."}</div>
+              <div className="siteplan-element">Bike Parking Area: {bikeParkingArea ?? "Loading..."}</div>
 
-            />
-            Parking Stalls
-          </label>
-          <label htmlFor={'approach_width'}>
-            <input
-              id={"approach_width"}
-              className="centered"
-              type={"number"}
-              value={approachWidth}
-              onChange={(e) => setApproachWidth(e.target.value)}
+            </div>
+          </div>
+          <div className="siteplan-inputs">
 
-            />
-            Approach Width
-          </label>
+            <label htmlFor={'parking'}>
+              <input
+                id={"parking"}
+                className="centered"
+                type={"number"}
+                value={parkingNumber}
+                onChange={(e) => setParkingNumber(e.target.value)}
 
-          <label htmlFor={'driveway_width'}>
-            <input
-              id={"driveway_width"}
-              className="centered"
-              type={"number"}
-              value={parkingDrivewayWidth}
-              onChange={(e) => setParkingDrivewayWidth(e.target.value)}
-            />
-            Driveway Width
-          </label>
+              />
+              Parking Stalls
+            </label>
 
-          <label htmlFor={'building_size'}>
-            <input
-              id={"building_size"}
-              className="centered"
-              type={"number"}
-              value={buildingArea}
-              onChange={(e) => setBuildingArea(e.target.value)}
-            />
-            Building Area
-          </label>
+            <label htmlFor={'approach_width'}>
+              <input
+                id={"approach_width"}
+                className="centered"
+                type={"number"}
+                value={approachWidth}
+                onChange={(e) => setApproachWidth(e.target.value)}
+
+              />
+              Approach Width
+            </label>
+
+            <label htmlFor={'driveway_width'}>
+              <input
+                id={"driveway_width"}
+                className="centered"
+                type={"number"}
+                value={parkingDrivewayWidth}
+                onChange={(e) => setParkingDrivewayWidth(e.target.value)}
+              />
+              Driveway Width
+            </label>
+
+            <label htmlFor={'building_size'}>
+              <input
+                id={"building_size"}
+                className="centered"
+                type={"number"}
+                value={buildingAreaTarget}
+                onChange={(e) => setbuildingAreaTarget(e.target.value)}
+              />
+              Building Area
+            </label>
 
 
 
 
-        </div> : <></>}
+          </div>
+        </>
+        : <></>}
 
 
     </div>

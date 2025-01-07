@@ -3,6 +3,7 @@ import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 import { Line } from "../pages/SitePlanDesigner";
 import { AStar } from "../pages/AStar";
+import { geoDistance } from "d3";
 
 type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
@@ -217,6 +218,7 @@ class Property {
   public scale: number;
   public cornerOffsetsFromSetbacks: p5.Vector[] = [];
   public setbacks: number[];
+  public areaOfProperty: number;
 
   constructor(p: p5, propertyCorners: p5.Vector[], approachIndex: number, isClockwise: boolean, scale: number, setbacks: number[]) {
     this.p = p;
@@ -225,6 +227,7 @@ class Property {
     this.isClockwise = isClockwise;
     this.scale = scale;
     this.setbacks = setbacks;
+    this.areaOfProperty = 0;
   }
 
   initialize() {
@@ -252,7 +255,20 @@ class Property {
     this.approachAngle = initialApproachAngle;
     this.calculatecornerOffsetsFromSetbacks();
 
+    this.areaOfProperty = Math.round(calculateArea(propertyCorners) * this.scale * this.scale)
+
   }
+
+  isMouseHovering(): boolean {
+    return polyPoint(this.propertyCorners, this.p.mouseX, this.p.mouseY);
+  }
+
+  isMouseHoveringOffset(): boolean {
+    const offset = expandPolygon(this.p, this.propertyCorners, 30);
+    return polyPoint(offset, this.p.mouseX, this.p.mouseY);
+  }
+
+  
 
   drawProperty() {
     this.propertyEdges.forEach((edge, i) => {
@@ -531,6 +547,7 @@ class SitePlanElement {
   public sitePlanElementEdges: Edge[];
   public width: number;
   public scale: number;
+  public area: number;
 
   constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number) {
     this.angle = angle;
@@ -547,12 +564,17 @@ class SitePlanElement {
     this.width = width;
     this.scale = scale;
     this.previousCenter = center;
+    this.area = Math.round(width * height);
 
   }
 
   initialize() {
     this.createSitePlanElementCorners();
     this.setSitePlanElementEdges();
+  }
+
+  calculateArea() {
+    this.area = Math.round(calculateArea(this.sitePlanElementCorners));
   }
 
   setSitePlanElementEdges() {
@@ -590,6 +612,8 @@ class SitePlanElement {
     this.updateSitePlanElementCorners();
     this.setSitePlanElementEdges();
     this.createOffsetPolygon();
+
+    this.calculateArea();
   }
 
   updateAngle(angle: number) {
@@ -716,6 +740,7 @@ class SitePlanElement {
 
 class Approach extends SitePlanElement {
 
+  public approachArea: number
   constructor(
     p: p5,
     center: p5.Vector,
@@ -726,6 +751,7 @@ class Approach extends SitePlanElement {
     scale: number
   ) {
     super(p, center, width, height, angle, elementType, scale);
+    this.approachArea = width * height / 2
   }
 
   drawApproach() {
@@ -776,7 +802,7 @@ class Approach extends SitePlanElement {
 }
 
 class Parking extends SitePlanElement {
-  // public additionalProperty: string; // Example of a new property
+
   public entranceEdgeIndex: number | null;
   public parkingStalls: {
     left: ParkingStall[];
@@ -784,6 +810,11 @@ class Parking extends SitePlanElement {
   };
   public scale: number;
   public parkingStallsNumber: number;
+  public parkingArea: number;
+  public parkingStallsArea: number;
+  public handicappedParkingNum: number;
+
+
 
   constructor(
     p: p5,
@@ -803,6 +834,9 @@ class Parking extends SitePlanElement {
     this.entranceEdgeIndex = 2;
     this.scale = scale;
     this.parkingStallsNumber = 7;
+    this.parkingArea = Math.round(width * height);
+    this.parkingStallsArea = 0;
+    this.handicappedParkingNum = 0;
 
   }
 
@@ -863,6 +897,10 @@ class Parking extends SitePlanElement {
 
     this.entranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0]
     this.previousEntranceEdge = this.sitePlanElementEdges[this.entranceEdgeIndex || 0]
+    this.parkingArea = Math.round(this.width * this.height * this.scale * this.scale);
+
+
+    this.parkingStallsArea = getParkingStallArea(this)
   }
 
   drawParkingStalls() {
@@ -883,8 +921,6 @@ class Parking extends SitePlanElement {
 
 
   updateStallCorners(isInit = false, isRotationFrozen = false) {
-
-
     if (!this.entranceEdge || !this.previousEntranceEdge) return;
 
     if (isInit || (
@@ -1151,48 +1187,48 @@ class Parking extends SitePlanElement {
     const points = [...offsetParking, ...parkingOutline.reverse()];
 
 
-    const offsetEntranceEdge = new Edge(p, offsetParking[1], offsetParking[offsetParking.length-2], false, 0)
-    const offsetParkingEdge = new Edge(p, offsetParking[3], offsetParking[offsetParking.length-3], false, 0)
+    const offsetEntranceEdge = new Edge(p, offsetParking[1], offsetParking[offsetParking.length - 2], false, 0)
+    const offsetParkingEdge = new Edge(p, offsetParking[3], offsetParking[offsetParking.length - 3], false, 0)
 
     // const offsetEntranceEdge = new Edge(p, offsetParking[0], offsetParking[1], false, 0)
 
     points.forEach((corner, i) => {
-    //  if (i === 1 && parking.entranceEdge) {
-    //     drawPerpendicularBezier(
-    //       p,
-    //       offsetParking[1],
-    //       offsetParking[2],
-    //       offsetParkingEdge,
-    //       offsetEntranceEdge,
-    //       true
-    //     );
-    //   }
+      //  if (i === 1 && parking.entranceEdge) {
+      //     drawPerpendicularBezier(
+      //       p,
+      //       offsetParking[1],
+      //       offsetParking[2],
+      //       offsetParkingEdge,
+      //       offsetEntranceEdge,
+      //       true
+      //     );
+      //   }
 
-    //   else if (i === points.length - 3 && parking.entranceEdge) {
-    //     drawPerpendicularBezier(
-    //       p,
-    //       parking.entranceEdge.point1,
-    //       approach.sitePlanElementCorners[1],
-    //       parking.entranceEdge,
-    //       approach.sitePlanElementEdges[2],
-    //       false
-    //     );
-    //   }
+      //   else if (i === points.length - 3 && parking.entranceEdge) {
+      //     drawPerpendicularBezier(
+      //       p,
+      //       parking.entranceEdge.point1,
+      //       approach.sitePlanElementCorners[1],
+      //       parking.entranceEdge,
+      //       approach.sitePlanElementEdges[2],
+      //       false
+      //     );
+      //   }
 
-    //   else if (i === points.length / 2 + 2 && parking.entranceEdge) {
-    //     drawPerpendicularBezier(
-    //       p,
-    //       approach.sitePlanElementCorners[0],
-    //       parking.entranceEdge.point2,
-    //       approach.sitePlanElementEdges[2],
-    //       parking.entranceEdge,
-    //       true
-    //     );
-    //   }
+      //   else if (i === points.length / 2 + 2 && parking.entranceEdge) {
+      //     drawPerpendicularBezier(
+      //       p,
+      //       approach.sitePlanElementCorners[0],
+      //       parking.entranceEdge.point2,
+      //       approach.sitePlanElementEdges[2],
+      //       parking.entranceEdge,
+      //       true
+      //     );
+      //   }
 
-    //   else {
-        p.vertex(corner.x, corner.y);
-        p.text(i, corner.x, corner.y);
+      //   else {
+      p.vertex(corner.x, corner.y);
+      p.text(i, corner.x, corner.y);
       // }
 
 
@@ -1234,7 +1270,7 @@ class Entrance {
     const isInwardEnterance = true;
 
     const enteranceWidth = 8;
-   
+
 
     p.push();
     p.stroke('black')
@@ -1243,7 +1279,7 @@ class Entrance {
     p.translate(this.intersection.x, this.intersection.y)
     p.rotate(this.angle - 180)
     p.strokeWeight(2)
-    p.line(0,0,enteranceWidth / this.scale / 2,0);
+    p.line(0, 0, enteranceWidth / this.scale / 2, 0);
     p.strokeWeight(1)
     p.arc(0, 0, enteranceWidth / this.scale, enteranceWidth / this.scale, 0, 90, p.PIE);
     p.pop()
@@ -1254,10 +1290,12 @@ class Building extends SitePlanElement {
   public isInitialized = false;
   public frameCount = 0;
   public entrances: Entrance[] = [];
-  public buildingArea: number;
+  public buildingAreaTarget: number;
+  public buildingAreaActual: number;
 
 
-  // public additionalProperty: string; // Example of a new property
+
+
   constructor(
     p: p5,
     center: p5.Vector,
@@ -1266,11 +1304,11 @@ class Building extends SitePlanElement {
     angle: number,
     elementType: SitePlanObjects,
     scale: number,
-    // additionalProperty: string // New property specific to this class
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
-    this.buildingArea = 1500;
+    this.buildingAreaTarget = 1500;
+    this.buildingAreaActual = 0;
   }
 
   initializeBuilding(x: number, y: number,) {
@@ -1282,16 +1320,17 @@ class Building extends SitePlanElement {
     this.createSitePlanElementCorners();
     this.setSitePlanElementEdges()
 
+    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale);
+
   }
 
   updateBuildingCenter(newX: number, newY: number) {
-
     this.updateCenter(newX, newY);
     this.updateEntrances();
   }
 
   updateBuildingArea(area: number) {
-    this.buildingArea = area;
+    this.buildingAreaTarget = area;
   }
 
   tempBuilding() {
@@ -1433,7 +1472,7 @@ class Building extends SitePlanElement {
 
     // building.center = p.createVector(center.x, center.y);
     p.ellipse(building.center.x, building.center.y, 30, 30)
-
+    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners))
   }
 
   reset() {
@@ -1483,7 +1522,7 @@ class Building extends SitePlanElement {
     // Area needs to be closest to X
 
 
-    const targetArea = this.buildingArea / (this.p.pow(this.scale, 2));
+    const targetArea = this.buildingAreaTarget / (this.p.pow(this.scale, 2));
     let bestArea = calculateArea(this.sitePlanElementCorners);
 
     const error = Math.abs(targetArea - bestArea) / targetArea;
@@ -1617,12 +1656,15 @@ class Building extends SitePlanElement {
     this.updateWidth(possibleDimensions[bestAreaIndex].width)
 
     this.updateEntrances()
+
+    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners));
+
   }
 
 }
 
 class Garbage extends SitePlanElement {
-  // public additionalProperty: string; // Example of a new property
+
 
   constructor(
     p: p5,
@@ -1632,7 +1674,6 @@ class Garbage extends SitePlanElement {
     angle: number,
     elementType: SitePlanObjects,
     scale: number
-    // additionalProperty: string // New property specific to this class
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
@@ -1674,12 +1715,18 @@ export class AdjacencyGraphVisualizer2 {
   public lines: Line[];
   public scale: number;
   public parkingNum: number;
+  public drivewayArea: number;
+
   public property: Property | null;
   public parking: Parking | null;
   public building: Building | null;
   public garbage: Garbage | null;
   public approach: Approach | null;
   public pathCellIndex: number;
+  public sidewalkArea: number;
+  public bikeParkingArea: number;
+
+  public globalAngle: number;
   // public p: p5;
 
 
@@ -1687,6 +1734,8 @@ export class AdjacencyGraphVisualizer2 {
 
 
   constructor(graph: AdjacencyGraph, points: IPoint[], lines: Line[], scale: number) {
+    this.globalAngle = 15;
+
     this.graph = graph;
     this.iteration = 0;
     this.points = points;
@@ -1699,9 +1748,11 @@ export class AdjacencyGraphVisualizer2 {
     this.garbage = null;
     this.approach = null;
     this.pathCellIndex = 0;
+    this.drivewayArea = 0;
+    this.sidewalkArea = 0;
+    this.bikeParkingArea = 0;
 
   }
-
 
   initialize(p: p5) {
     p.clear(); // Clear the canvas
@@ -1714,6 +1765,8 @@ export class AdjacencyGraphVisualizer2 {
     const setbacks = Array.apply(null, Array(this.lines.length)).map(Number.prototype.valueOf, 0);
 
     if (!this.points.length) {
+
+
       propertyCorners = [
         p.createVector(140, 80),
         p.createVector(p.width - 180, 50),
@@ -1722,7 +1775,10 @@ export class AdjacencyGraphVisualizer2 {
         p.createVector(p.width / 2 - 140, p.height - 150),
         p.createVector(108, p.height - 220),
       ];
+
+      // propertyCorners = rotateCorners(p, propertyCorners, this.globalAngle);
     }
+
 
     let approachIndex = this.lines.findIndex(line => line.isApproach);
     approachIndex = approachIndex === -1 ? 0 : approachIndex;
@@ -1783,17 +1839,25 @@ export class AdjacencyGraphVisualizer2 {
     this.garbage.initialize();
 
 
+
+
+    // Update driveway area
+    if (this.approach !== null && this.parking !== null) {
+      this.drivewayArea = calculateDrivewayArea(this.approach.p, this.approach, this.parking)
+    }
+
+
   }
 
   updateGlobalVariables(updatedGlobals: {
     approachWidth: string | number;
     parkingNumber: string | number;
     parkingDrivewayWidth: string | number;
-    buildingArea: string | number;
+    buildingAreaTarget: string | number;
 
   }) {
 
-    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingArea } = updatedGlobals;
+    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget } = updatedGlobals;
 
     if (!this.parking || !this.property || !this.approach || !this.building) return
 
@@ -1809,7 +1873,7 @@ export class AdjacencyGraphVisualizer2 {
 
 
     // Update all this BUILDING
-    this.building.updateBuildingArea(Number(buildingArea))
+    this.building.updateBuildingArea(Number(buildingAreaTarget))
   }
 
 
@@ -1831,6 +1895,8 @@ export class AdjacencyGraphVisualizer2 {
     let isRotationFrozen = false;
     let isDraggingBuilding = false;
 
+    let isRotatingPropertyOffset = false;
+
 
     p.mouseDragged = () => {
 
@@ -1845,6 +1911,26 @@ export class AdjacencyGraphVisualizer2 {
 
 
       const isHoveredBuildingOffset = building.isMouseHoveringOffset();
+      const isHoveredProperty = property.isMouseHovering();
+
+      const isHoveredPropertyOffset = property.isMouseHoveringOffset();
+      if (((isHoveredPropertyOffset && !isHoveredProperty) || isRotatingPropertyOffset) && !isDraggingApproach) {
+
+
+        if(this.property === null) return;
+        isRotatingPropertyOffset  = true;
+        const newX = p.mouseX;
+        const newY = p.mouseY;
+
+        const centroid = calculateCentroid(property.propertyCorners)
+
+        const newAngle = calculateAngle(p.createVector(centroid.x,centroid.y), p.createVector(newX, newY));
+        this.globalAngle = newAngle
+
+        this.property.propertyCorners = rotateCorners(p, this.property.propertyCorners, this.globalAngle);
+      }
+
+
       if (isHoveredBuildingOffset || isHoveredBuilding) {
 
         isDraggingBuilding = true;
@@ -1989,25 +2075,33 @@ export class AdjacencyGraphVisualizer2 {
       }
 
 
+
+      // Update driveway area
+      if (this.approach !== null && this.parking !== null) {
+        this.drivewayArea = calculateDrivewayArea(this.approach.p, this.approach, this.parking)
+        this.parking.parkingArea = Math.round(parking.width * parking.height * this.scale * this.scale);
+        this.approach.approachArea = calculateApproachArea(approach)
+
+        this.parking.parkingStallsArea = getParkingStallArea(this.parking)
+      }
+
+
     };
 
     p.mousePressed = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
+      const posX = p.mouseX;
+      const posY = p.mouseY;
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
+      const clickIsInProperty = allPointsInPolygon(property.propertyCorners, [p.createVector(posX, posY)]);
 
-
-      // if(!isDraggingParking && !isDraggingApproach)
-      if (!isHoveredApproach && !isHoveredParking && !isHoveredParkingOffset && !building.isInitialized) {
+      if (!isHoveredApproach && !isHoveredParking && !isHoveredParkingOffset && !building.isInitialized && truthChecker(clickIsInProperty)) {
         const posX = p.mouseX;
         const posY = p.mouseY;
-
-
         building.initializeBuilding(posX, posY);
       }
-
-
       if (building.isInitialized) {
 
         const mouse = p.createVector(p.mouseX, p.mouseY)
@@ -2063,7 +2157,10 @@ export class AdjacencyGraphVisualizer2 {
     };
 
     p.draw = () => {
+
       if (!property || !approach || !parking || !building || !garbage) return;
+
+
 
       p.background(240);
 
@@ -2162,6 +2259,59 @@ export class AdjacencyGraphVisualizer2 {
 
 
       parking.createParkingOutline(p, parking, garbage, approach)
+
+
+
+
+
+
+
+
+
+
+      // // DRAW THE COMPASS
+      // const centerX = p.width - 100;
+      // const centerY = p.height - 100;
+      // const compassSize = 100;
+
+      // // Draw the compass circle
+      // p.stroke(0);
+      // p.strokeWeight(2);
+      // p.noFill();
+      // p.ellipse(centerX, centerY, compassSize * 2);
+
+      // // Draw the compass arrow
+      // p.push();
+      // p.translate(centerX, centerY);
+      // p.rotate(p.radians(this.globalAngle));
+
+      // // Architect arrow
+      // p.stroke(0);
+      // p.fill(200, 50, 50);
+      // p.strokeWeight(2);
+      // p.beginShape();
+      // p.vertex(0, -compassSize); // Arrow tip
+      // p.vertex(-10, -compassSize + 20);
+      // p.vertex(10, -compassSize + 20);
+      // p.endShape(p.CLOSE);
+
+      // // Add North and Project North Labels
+      // p.fill(0);
+      // p.textAlign(p.CENTER, p.CENTER);
+      // p.textSize(14);
+      // p.text("N", 0, -compassSize - 15); // North Label
+      // p.text("Project N", 0, compassSize + 25); // Project North Label
+
+      // p.pop();
+
+      // // Show the current angle
+      // p.fill(0);
+      // p.textAlign(p.CENTER, p.CENTER);
+      // p.textSize(12);
+      // p.text(`Angle: ${this.globalAngle.toFixed(1)}°`, centerX, centerY + 60);
+
+
+
     };
   }
 }
@@ -2416,6 +2566,26 @@ interface IPoint {
   y: number;
 }
 
+
+function calculateDrivewayArea(p: p5, approach: Approach, parking: Parking) {
+
+  const defaultVector = p.createVector(0, 0);
+
+
+  const driveWayPoints = [
+    approach?.sitePlanElementCorners[1] || defaultVector,
+    parking?.sitePlanElementCorners[2] || defaultVector,
+    parking?.sitePlanElementCorners[3] || defaultVector,
+    approach?.sitePlanElementCorners[0] || defaultVector,
+  ]
+
+
+  return Math.round((calculateArea(driveWayPoints)) * approach.scale * approach.scale)
+}
+
+function calculateApproachArea(approach: Approach) {
+  return Math.round((approach?.width || 0) * (approach?.height || 0) / 2 * approach.scale * approach.scale)
+}
 
 function findGridCells(inputArray: IPoint[], solverScale: number, cols: number, rows: number): IPoint[] {
   // Array to store the grid cell results
@@ -2807,6 +2977,23 @@ function createSitePlanElementCorners(p: p5, x: number, y: number, width: number
   )
 }
 
+
+function rotateCorners(p: p5, corners: p5.Vector[], angle: number) {
+
+
+  // Convert the angle to radians
+  const _angle = normalizeAngle(angle);
+
+  // Rotate each corner around the center and compute its absolute position
+
+  return (corners.map((corner) => {
+    const rotatedX = corner.x * p.cos(_angle) - corner.y * p.sin(_angle);
+    const rotatedY = corner.x * p.sin(_angle) + corner.y * p.cos(_angle);
+    return p.createVector(rotatedX, rotatedY);
+  })
+  )
+}
+
 const getIsClockwise = (polygon: p5.Vector[]): boolean => {
   let sum = 0;
   for (let i = 0; i < polygon.length; i++) {
@@ -2926,4 +3113,24 @@ function markGridCells(p: p5, grid: boolean[][], objects: p5.Vector[][], solverS
   }
 
   return grid;
+}
+
+
+export function countParkingStalls(parking: Parking | null | undefined) {
+  let leftStalls = 0
+  let rightStalls = 0
+
+
+  if (parking && parking !== null) {
+    leftStalls = parking.parkingStalls.left.filter(stall => !stall.isEmptySlot).length;
+    rightStalls = parking.parkingStalls.right.filter(stall => !stall.isEmptySlot).length;
+
+  }
+  return { leftStalls, rightStalls }
+
+}
+
+function getParkingStallArea(parking: Parking) {
+  const { leftStalls, rightStalls } = countParkingStalls(parking)
+  return Math.round((leftStalls + rightStalls) * stallHeight * stallWidth)
 }
