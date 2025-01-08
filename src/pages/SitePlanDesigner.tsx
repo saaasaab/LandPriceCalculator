@@ -9,6 +9,7 @@ import LotLineDrawer from '../futureItems/LotLineDrawerOld';
 // import { SubdivisionGenerator } from './SubdivisionGenerator';
 // import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
 import './SitePlanDesigner.scss';
+import ArchitectCompass from '../components/ArchitectCompass';
 
 export interface IPoint {
   x: number;
@@ -57,7 +58,7 @@ const SitePlanDesigner: React.FC = () => {
   const [actualBuildingArea, setActualBuildingArea] = useState<number | null>(null);
   const [approachArea, setApproachArea] = useState<number | null>(null);
   const [bikeParkingArea, setBikeParkingArea] = useState<number | null>(null);
-
+  const [globalAngle,setGlobalAngle] = useState<number>(0);
 
 
 
@@ -203,9 +204,6 @@ const SitePlanDesigner: React.FC = () => {
           p.noStroke();
           p.ellipse(point.x, point.y, 10, 10);
         }
-
-
-
 
         drawArea(p, isPolygonClosedRef.current, points, scale || .25);
       }
@@ -404,13 +402,19 @@ const SitePlanDesigner: React.FC = () => {
       approachWidth,
       parkingNumber,
       parkingDrivewayWidth,
-      buildingAreaTarget
+      buildingAreaTarget,
+      globalAngle
     }
 
     visualizer.current?.updateGlobalVariables(updatedGlobals)
-  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingAreaTarget])
+  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingAreaTarget,globalAngle])
 
 
+  const onRotationChange = (value:number)=>{
+
+    setGlobalAngle(value)
+
+  }
 
   // Update setback for a specific line
   const updateSetback = (index: number, value: string) => {
@@ -561,6 +565,8 @@ const SitePlanDesigner: React.FC = () => {
 
       <div ref={canvasRef} />
 
+
+
       {/* Render inputs over the canvas */}
       {isSelectingSetbackRef.current &&
         linesRef.current?.map((line, index) => {
@@ -591,6 +597,13 @@ const SitePlanDesigner: React.FC = () => {
 
       {isGeneratingSitePlan ?
         <>
+
+<ArchitectCompass
+  initialRotation={0}
+  size={200}
+  onRotationChange={onRotationChange} />
+
+
           {/* <MapWithCompass/> */}
           <div className="siteplan-outputs">
             <div className="siteplan-data">

@@ -268,7 +268,7 @@ class Property {
     return polyPoint(offset, this.p.mouseX, this.p.mouseY);
   }
 
-  
+
 
   drawProperty() {
     this.propertyEdges.forEach((edge, i) => {
@@ -1727,6 +1727,8 @@ export class AdjacencyGraphVisualizer2 {
   public bikeParkingArea: number;
 
   public globalAngle: number;
+  public globalAnglePrev: number;
+
   // public p: p5;
 
 
@@ -1735,7 +1737,7 @@ export class AdjacencyGraphVisualizer2 {
 
   constructor(graph: AdjacencyGraph, points: IPoint[], lines: Line[], scale: number) {
     this.globalAngle = 15;
-
+    this.globalAnglePrev = 0;
     this.graph = graph;
     this.iteration = 0;
     this.points = points;
@@ -1751,6 +1753,7 @@ export class AdjacencyGraphVisualizer2 {
     this.drivewayArea = 0;
     this.sidewalkArea = 0;
     this.bikeParkingArea = 0;
+    this
 
   }
 
@@ -1776,7 +1779,7 @@ export class AdjacencyGraphVisualizer2 {
         p.createVector(108, p.height - 220),
       ];
 
-      // propertyCorners = rotateCorners(p, propertyCorners, this.globalAngle);
+      propertyCorners = rotateCorners(p, propertyCorners, this.globalAngle);
     }
 
 
@@ -1854,12 +1857,15 @@ export class AdjacencyGraphVisualizer2 {
     parkingNumber: string | number;
     parkingDrivewayWidth: string | number;
     buildingAreaTarget: string | number;
+    globalAngle: number;
 
   }) {
 
-    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget } = updatedGlobals;
+    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget, globalAngle } = updatedGlobals;
 
     if (!this.parking || !this.property || !this.approach || !this.building) return
+
+
 
     // Update all things PARKING
     this.parking.updateWidth(Number(parkingDrivewayWidth) / this.scale);
@@ -1874,6 +1880,54 @@ export class AdjacencyGraphVisualizer2 {
 
     // Update all this BUILDING
     this.building.updateBuildingArea(Number(buildingAreaTarget))
+
+
+
+
+
+
+
+
+    // // NEED TO ROTATE AND TRANSLATE BASED OFF THE CENTROID. 
+    // // Update the HIGH LEVEL
+    // this.globalAnglePrev = this.globalAngle;
+    // this.globalAngle = globalAngle;
+
+
+    // const p = this.approach.p;
+
+    // const { scaledPolygon, scaleFactor } = scalePolygonToFitCanvas(p, this.property.propertyCorners, p.width, p.height, 40);
+    // // this.scale = this.scale / scaleFactor 
+    // this.property.propertyCorners = scaledPolygon;
+
+
+
+
+
+    // this.property.propertyCorners = rotateCorners(this.approach.p, this.property.propertyCorners, this.globalAngle);
+
+
+    // const deltaAngle = this.globalAnglePrev - this.globalAngle;
+    // this.approach.updateAngle(this.approach.angle + deltaAngle);
+    // this.building.updateAngle(this.building.angle + deltaAngle);
+    // this.garbage?.updateAngle(this.garbage.angle + deltaAngle);
+    // this.parking.updateAngle(this.parking.angle + deltaAngle);
+
+    // // let approachIndex = this.lines.findIndex(line => line.isApproach);
+
+
+
+
+    // // approachIndex = approachIndex === -1 ? 0 : approachIndex;
+
+
+
+
+
+
+
+
+
   }
 
 
@@ -1911,24 +1965,8 @@ export class AdjacencyGraphVisualizer2 {
 
 
       const isHoveredBuildingOffset = building.isMouseHoveringOffset();
-      const isHoveredProperty = property.isMouseHovering();
-
-      const isHoveredPropertyOffset = property.isMouseHoveringOffset();
-      if (((isHoveredPropertyOffset && !isHoveredProperty) || isRotatingPropertyOffset) && !isDraggingApproach) {
 
 
-        if(this.property === null) return;
-        isRotatingPropertyOffset  = true;
-        const newX = p.mouseX;
-        const newY = p.mouseY;
-
-        const centroid = calculateCentroid(property.propertyCorners)
-
-        const newAngle = calculateAngle(p.createVector(centroid.x,centroid.y), p.createVector(newX, newY));
-        this.globalAngle = newAngle
-
-        this.property.propertyCorners = rotateCorners(p, this.property.propertyCorners, this.globalAngle);
-      }
 
 
       if (isHoveredBuildingOffset || isHoveredBuilding) {
@@ -2160,8 +2198,6 @@ export class AdjacencyGraphVisualizer2 {
 
       if (!property || !approach || !parking || !building || !garbage) return;
 
-
-
       p.background(240);
 
       const isHoveredApproach = approach.isMouseHovering();
@@ -2262,60 +2298,14 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-
-
-
-
-
-
-
-      // // DRAW THE COMPASS
-      // const centerX = p.width - 100;
-      // const centerY = p.height - 100;
-      // const compassSize = 100;
-
-      // // Draw the compass circle
-      // p.stroke(0);
-      // p.strokeWeight(2);
-      // p.noFill();
-      // p.ellipse(centerX, centerY, compassSize * 2);
-
-      // // Draw the compass arrow
-      // p.push();
-      // p.translate(centerX, centerY);
-      // p.rotate(p.radians(this.globalAngle));
-
-      // // Architect arrow
-      // p.stroke(0);
-      // p.fill(200, 50, 50);
-      // p.strokeWeight(2);
-      // p.beginShape();
-      // p.vertex(0, -compassSize); // Arrow tip
-      // p.vertex(-10, -compassSize + 20);
-      // p.vertex(10, -compassSize + 20);
-      // p.endShape(p.CLOSE);
-
-      // // Add North and Project North Labels
-      // p.fill(0);
-      // p.textAlign(p.CENTER, p.CENTER);
-      // p.textSize(14);
-      // p.text("N", 0, -compassSize - 15); // North Label
-      // p.text("Project N", 0, compassSize + 25); // Project North Label
-
-      // p.pop();
-
-      // // Show the current angle
-      // p.fill(0);
-      // p.textAlign(p.CENTER, p.CENTER);
-      // p.textSize(12);
-      // p.text(`Angle: ${this.globalAngle.toFixed(1)}°`, centerX, centerY + 60);
+      // DRAW THE COMPASS
+      // drawCompass(p, this.globalAngle)
 
 
 
     };
   }
 }
-
 
 function runAStar(p: p5, scale: number, parking: Parking, building: Building, property: Property, garbage: Garbage, approach: Approach, AStarSolver: AStar) {
 
@@ -2374,9 +2364,6 @@ function runAStar(p: p5, scale: number, parking: Parking, building: Building, pr
     return { x: entrance.intersection.x, y: entrance.intersection.y }
   });
 
-
-
-
   const startPoints = findGridCells(inputStartPoints, solverScale, cols, rows)
   const endPoints = findGridCells(_endPoints, solverScale, cols, rows)
 
@@ -2421,38 +2408,16 @@ function getIntersectionPercentage(
 
 function setLineDash(p: p5, list: number[]) {
   p.drawingContext.setLineDash(list);
-  // p.drawingContext
 }
 
 function createDriveway(p: p5, approach: Approach, parking: Parking) {
 
   if (!parking.entranceEdge) return;
 
-
-
-  // p.fill(15, 200, 15);
-
-  // p.stroke('red')
   p.beginShape();
 
-  // p.vertex(p.width/2, p.height/2);
-
-
-  // // Add the first anchor point.
-  // 
-
-  // // Add the Bézier vertex.
-  // p.bezierVertex(80, 0, 80, 75, 30, 75);
-
-  // // Stop drawing the shape.
   p.vertex(approach.sitePlanElementCorners[0].x, approach.sitePlanElementCorners[0].y);
-
   p.vertex(approach.sitePlanElementCorners[1].x, approach.sitePlanElementCorners[1].y);
-
-
-  // defaultVector
-
-
   drawPerpendicularBezier(
     p,
     approach.sitePlanElementCorners[1],
@@ -2462,9 +2427,7 @@ function createDriveway(p: p5, approach: Approach, parking: Parking) {
     true
   );
 
-
   p.vertex(parking.entranceEdge?.point2.x || 0, parking.entranceEdge?.point2.y || 0);
-
   drawPerpendicularBezier(
     p,
     parking.entranceEdge.point2,
@@ -2473,9 +2436,6 @@ function createDriveway(p: p5, approach: Approach, parking: Parking) {
     approach.sitePlanElementEdges[2],
     false
   );
-
-
-
 
   p.endShape();
 
@@ -2990,6 +2950,23 @@ function rotateCorners(p: p5, corners: p5.Vector[], angle: number) {
     const rotatedX = corner.x * p.cos(_angle) - corner.y * p.sin(_angle);
     const rotatedY = corner.x * p.sin(_angle) + corner.y * p.cos(_angle);
     return p.createVector(rotatedX, rotatedY);
+  })
+  )
+}
+
+
+function rotateAndTranslateCorners(p: p5, x: number, y: number, corners: p5.Vector[], angle: number) {
+
+
+  // Convert the angle to radians
+  const _angle = normalizeAngle(angle);
+
+  // Rotate each corner around the center and compute its absolute position
+
+  return (corners.map((corner) => {
+    const rotatedX = corner.x * p.cos(_angle) - corner.y * p.sin(_angle);
+    const rotatedY = corner.x * p.sin(_angle) + corner.y * p.cos(_angle);
+    return p.createVector(x + rotatedX, y + rotatedY);
   })
   )
 }
