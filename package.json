@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@types/robust-point-in-polygon": "^1.0.4",
+    "@types/robust-segment-intersect": "^1.0.2",
     "d3": "^7.9.0",
     "p5": "^1.11.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
     "robust-point-in-polygon": "^1.0.3",
+    "robust-segment-intersect": "^1.0.1",
     "sass": "^1.79.4"
   },
   "devDependencies": {

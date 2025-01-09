@@ -10,6 +10,7 @@ import LotLineDrawer from '../futureItems/LotLineDrawerOld';
 // import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
 import './SitePlanDesigner.scss';
 import ArchitectCompass from '../components/ArchitectCompass';
+import VisibilityGraphComponent from './VisibilityGraph';
 
 export interface IPoint {
   x: number;
@@ -58,7 +59,7 @@ const SitePlanDesigner: React.FC = () => {
   const [actualBuildingArea, setActualBuildingArea] = useState<number | null>(null);
   const [approachArea, setApproachArea] = useState<number | null>(null);
   const [bikeParkingArea, setBikeParkingArea] = useState<number | null>(null);
-  const [globalAngle,setGlobalAngle] = useState<number>(0);
+  const [globalAngle, setGlobalAngle] = useState<number>(0);
 
 
 
@@ -363,9 +364,6 @@ const SitePlanDesigner: React.FC = () => {
 
 
   useEffect(() => {
-
-
-
     const updateVariables = () => {
       console.log("There be danger here")
       const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
@@ -407,10 +405,10 @@ const SitePlanDesigner: React.FC = () => {
     }
 
     visualizer.current?.updateGlobalVariables(updatedGlobals)
-  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingAreaTarget,globalAngle])
+  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingAreaTarget, globalAngle])
 
 
-  const onRotationChange = (value:number)=>{
+  const onRotationChange = (value: number) => {
 
     setGlobalAngle(value)
 
@@ -502,6 +500,8 @@ const SitePlanDesigner: React.FC = () => {
   return (
     <div>
       <h1>Site Plan Generator</h1>
+
+      {/* <VisibilityGraphComponent/> */}
 
       {!isGeneratingSitePlan ? <div>
         <button
@@ -598,10 +598,10 @@ const SitePlanDesigner: React.FC = () => {
       {isGeneratingSitePlan ?
         <>
 
-<ArchitectCompass
-  initialRotation={0}
-  size={200}
-  onRotationChange={onRotationChange} />
+          <ArchitectCompass
+            initialRotation={0}
+            size={200}
+            onRotationChange={onRotationChange} />
 
 
           {/* <MapWithCompass/> */}

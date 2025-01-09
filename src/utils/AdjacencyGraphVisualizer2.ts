@@ -2,8 +2,8 @@ import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 import { Line } from "../pages/SitePlanDesigner";
-import { AStar } from "../pages/AStar";
 import { geoDistance } from "d3";
+import { TPoint, VisibilityGraph } from "../pages/VisibilityGraph";
 
 type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
@@ -577,6 +577,25 @@ class SitePlanElement {
     this.area = Math.round(calculateArea(this.sitePlanElementCorners));
   }
 
+  pointIsInPolygon(corners: p5.Vector[], point: p5.Vector) {
+    // 1 = outside
+    // 0 = on the border
+    // -1 = inside
+    const searchPoint = [point.x, point.y]
+    const pointClassification = classifyPoint(corners.map(corner => [corner.x, corner.y]) as Point[], searchPoint as Point)
+    return pointClassification === -1
+  }
+
+
+  pointIsOutOfPolygon(corners: p5.Vector[], point: p5.Vector) {
+    // 1 = outside
+    // 0 = on the border
+    // -1 = inside
+    const searchPoint = [point.x, point.y]
+    const pointClassification = classifyPoint(corners.map(corner => [corner.x, corner.y]) as Point[], searchPoint as Point)
+    return pointClassification === 1
+  }
+
   setSitePlanElementEdges() {
     const sitePlanElementCorners = this.sitePlanElementCorners;
 
@@ -589,7 +608,6 @@ class SitePlanElement {
       const newEdge = new Edge(this.p, corner1, corner2, isApproach, 0);
       edges.push(newEdge);
     }
-
     this.sitePlanElementEdges = edges
 
   }
@@ -813,7 +831,7 @@ class Parking extends SitePlanElement {
   public parkingArea: number;
   public parkingStallsArea: number;
   public handicappedParkingNum: number;
-
+  public parkingOutline: p5.Vector[]
 
 
   constructor(
@@ -837,6 +855,7 @@ class Parking extends SitePlanElement {
     this.parkingArea = Math.round(width * height);
     this.parkingStallsArea = 0;
     this.handicappedParkingNum = 0;
+    this.parkingOutline = []
 
   }
 
@@ -1163,12 +1182,16 @@ class Parking extends SitePlanElement {
       approach.sitePlanElementCorners[3],
     )
 
+    // Set the this.parkingOutline to the inner layer before the offset is created. 
+    this.parkingOutline = parkingOutline;
+
 
     const offsetParking = expandPolygon(this.p, parkingOutline, -5);
+    const points = [...offsetParking, ...parkingOutline.reverse()];
+
+
+
     // Double stroke
-
-
-
     p.beginShape();
     p.fill(120, 220, 40, 150); // Fill color with transparency
     p.stroke(0); // Outline color
@@ -1184,7 +1207,7 @@ class Parking extends SitePlanElement {
     p.textSize(10)
 
 
-    const points = [...offsetParking, ...parkingOutline.reverse()];
+
 
 
     const offsetEntranceEdge = new Edge(p, offsetParking[1], offsetParking[offsetParking.length - 2], false, 0)
@@ -1753,7 +1776,6 @@ export class AdjacencyGraphVisualizer2 {
     this.drivewayArea = 0;
     this.sidewalkArea = 0;
     this.bikeParkingArea = 0;
-    this
 
   }
 
@@ -1848,8 +1870,6 @@ export class AdjacencyGraphVisualizer2 {
     if (this.approach !== null && this.parking !== null) {
       this.drivewayArea = calculateDrivewayArea(this.approach.p, this.approach, this.parking)
     }
-
-
   }
 
   updateGlobalVariables(updatedGlobals: {
@@ -1877,13 +1897,8 @@ export class AdjacencyGraphVisualizer2 {
     this.approach.updateWidth(Number(approachWidth) / this.scale)
 
 
-
     // Update all this BUILDING
     this.building.updateBuildingArea(Number(buildingAreaTarget))
-
-
-
-
 
 
 
@@ -1942,7 +1957,7 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-    let AStarSolver: AStar;
+    let VisibilityGraphSolver: VisibilityGraph;
     let isDraggingParking = false;
     let isDraggingApproach = false;
     let isDraggingParkingOffset = false;
@@ -2096,7 +2111,12 @@ export class AdjacencyGraphVisualizer2 {
           building.buildingLocator(p, building, parking, property, approach, garbage);
 
 
-          // AStarSolver = runAStar(p, this.scale, parking, building, property, garbage, approach, AStarSolver );
+
+
+
+          if (VisibilityGraphSolver) {
+            VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
+          }
 
           // building.updateBuildingCenter();
 
@@ -2176,7 +2196,7 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-          AStarSolver = runAStar(p, this.scale, parking, building, property, garbage, approach, AStarSolver);
+          VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
 
 
 
@@ -2281,18 +2301,17 @@ export class AdjacencyGraphVisualizer2 {
         }
       }
 
-      if (AStarSolver) {
-        const showGrid = false;
+      if (VisibilityGraphSolver) {
+        // const showGrid = false;
 
-        AStarSolver.displaySolutions(p, this.pathCellIndex, showGrid);
-        this.pathCellIndex++
-        const maxPathStatesLength = Math.max(...AStarSolver.pathStates.map(state => state.path.length))
-        if (this.pathCellIndex > maxPathStatesLength + 10) {
-          this.pathCellIndex = 0
-        }
+        VisibilityGraphSolver.displaySolution(p)
+        // AStarSolver.displaySolutions(p, this.pathCellIndex, showGrid);
+        // this.pathCellIndex++
+        // const maxPathStatesLength = Math.max(...AStarSolver.pathStates.map(state => state.path.length))
+        // if (this.pathCellIndex > maxPathStatesLength + 10) {
+        //   this.pathCellIndex = 0
+        // }
       }
-
-
 
       parking.createParkingOutline(p, parking, garbage, approach)
 
@@ -2307,72 +2326,43 @@ export class AdjacencyGraphVisualizer2 {
   }
 }
 
-function runAStar(p: p5, scale: number, parking: Parking, building: Building, property: Property, garbage: Garbage, approach: Approach, AStarSolver: AStar) {
+const p5VectorToTPoint = (vectors: p5.Vector[]): TPoint[] => {
+  return vectors.map(vertex => {
+    return {
+      x: vertex.x,
+      y: vertex.y,
+    }
+  })
+}
 
-  const solverScale = 4 / scale; //each block is 1 foot
-
-  const cols = Math.round(p.width / solverScale)
-  const rows = Math.round(p.height / solverScale)
+function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
 
 
-  // Initialize the grid (all cells initially unmarked as `false`)
-  const grid: boolean[][] = Array.from({ length: cols }, () => Array(rows).fill(false));
+  const obstacles: TPoint[][] = [
+    p5VectorToTPoint(parking.parkingOutline),
+    p5VectorToTPoint(garbage.sitePlanElementCorners),
+    p5VectorToTPoint(building.sitePlanElementCorners),
 
-  // Define objects as polygons
-  const objects: p5.Vector[][] = [
-    parking.sitePlanElementCorners,
-    garbage.sitePlanElementCorners,
-    building.sitePlanElementCorners,
-    ...parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
-    ...parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => stall.stallCorners),
-    // Add more polygons for other objects here
   ];
 
-  // // Mark the grid cells
-  const obstacleGridNoBoundary = markGridCells(p, grid, objects, solverScale, true);
-  const obstacleGrid = markGridCells(p, obstacleGridNoBoundary, [property.propertyCorners], solverScale, false);
 
 
+  const startPoints: TPoint[] = building.entrances.map(entrance => {
+    return {
+      x: entrance.intersection.x,
+      y: entrance.intersection.y,
+    }
+  })
 
-  // // Print the updated grid (example visualization)
-
-  // Starting and ending points
-
-  // Create Grid of obsticles based on the existing elements.
-
-
-  const _endPoints = [
+  const endPoints = [
     { x: approach.sitePlanElementCorners[0].x, y: approach.sitePlanElementCorners[0].y },
     { x: garbage.sitePlanElementCorners[0].x, y: garbage.sitePlanElementCorners[0].y },
   ];
 
-  const left = parking.parkingStalls.left.filter(stall => !(stall.isEmptySlot)).map(stall => {
-    const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
-    const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
-    return { x: midX, y: midY };
-  })
-  const right = parking.parkingStalls.right.filter(stall => !(stall.isEmptySlot)).map(stall => {
-    const midX = (stall.stallCorners[2].x + stall.stallCorners[3].x) / 2;
-    const midY = (stall.stallCorners[2].y + stall.stallCorners[3].y) / 2;
-    return { x: midX, y: midY };
-  })
 
-  _endPoints.push(...left, ...right);
-
-
-  const inputStartPoints = building.entrances.map(entrance => {
-    return { x: entrance.intersection.x, y: entrance.intersection.y }
-  });
-
-  const startPoints = findGridCells(inputStartPoints, solverScale, cols, rows)
-  const endPoints = findGridCells(_endPoints, solverScale, cols, rows)
-
-  AStarSolver = new AStar(cols, rows, startPoints, endPoints, p.width, p.height)
-  AStarSolver.startNewPathfinding(obstacleGrid);
-
-  return AStarSolver;
+  VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles)
+  return VisibilityGraphSolver
 }
-
 
 
 function getIntersectionPercentage(
@@ -2776,7 +2766,7 @@ function allPointsInPolygon(boundary: p5.Vector[], poly: p5.Vector[]) {
   return allPointsInPolygon
 }
 
-function getLineIntersection(
+export function getLineIntersection(
   p: p5, // p5 instance
   line1: p5.Vector[], // Array of two p5.Vector points [start, end]
   line2: p5.Vector[] // Array of two p5.Vector points [start, end]
