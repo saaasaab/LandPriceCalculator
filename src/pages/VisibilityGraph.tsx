@@ -3,12 +3,13 @@ import React, { useEffect, useRef } from "react";
 import p5 from "p5";
 
 import crosses from "robust-segment-intersect"
-
+import classifyPoint from "robust-point-in-polygon"
 
 
 
 
 export type TPoint = { x: number; y: number };
+type Point = [number, number];
 
 export class Node {
   x: number;
@@ -16,14 +17,16 @@ export class Node {
   parent: Node | null;
   children: Node[];
   index: number;
+  isOutsideBoundary: boolean;
 
 
-  constructor(x: number, y: number, index: number) {
+  constructor(x: number, y: number, index: number, isOutsideBoundary = false) {
     this.x = x;
     this.y = y;
     this.parent = null;
     this.children = [];
-    this.index = index
+    this.index = index;
+    this.isOutsideBoundary = isOutsideBoundary
   }
 
   // Adds a child node to this node
@@ -36,22 +39,37 @@ export class VisibilityGraph {
   nodes: Node[];
   edges: [Node, Node][];
   obstaclesOffset: Node[][]
-  obstacles:  TPoint[][]
+  obstacles: TPoint[][]
+  boundary: TPoint[]
 
 
-  constructor(startPoints: TPoint[], endPoints: TPoint[], obstacles: TPoint[][]) {
+
+
+  constructor(startPoints: TPoint[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[]) {
     // Initialize nodes
     this.nodes = [];
     this.obstaclesOffset = [];
     this.obstacles = obstacles;
+    this.boundary = boundary;
+
+
+    const _boundary: Point[] = boundary.map(point => [point.x, point.y]);
 
     // Convert startPoints and endPoints to nodes
     for (const point of [...startPoints, ...endPoints]) {
-      this.nodes.push(new Node(point.x, point.y, this.nodes.length));
+
+      // If new node is in Boundary
+
+      const isOutsideBoundary = classifyPoint(_boundary, [point.x, point.y]) === 1 || boundary.length === 0
+
+     
+      this.nodes.push(new Node(point.x, point.y, this.nodes.length, isOutsideBoundary));
     }
-    for (const obstacle of this.obstacles ) {
+
+    for (const obstacle of this.obstacles) {
       const _obstacle = []
       for (const vertex of obstacle) {
+
         const newNode = new Node(vertex.x, vertex.y, this.nodes.length)
         // this.nodes.push(newNode);
         _obstacle.push(newNode);
@@ -63,8 +81,10 @@ export class VisibilityGraph {
 
 
     // Convert obstacle vertices to nodes
-    this.obstaclesOffset.forEach(obstacle=>{
-      obstacle.forEach(vertex=>{
+    this.obstaclesOffset.forEach(obstacle => {
+      obstacle.forEach(vertex => {
+
+
         this.nodes.push(vertex)
       })
     })
@@ -76,7 +96,7 @@ export class VisibilityGraph {
     // Build the visibility graph
     this.calculateEdges();
   }
-  
+
 
   calculateEdgeNormal(p1: Node, p2: Node) {
     const dx = p2.x - p1.x;
@@ -91,6 +111,7 @@ export class VisibilityGraph {
   expandPolygon(polygon: Node[], offset: number): Node[] {
     const expandedPolygon: Node[] = [];
     const totalVertices = polygon.length;
+    const _boundary: Point[] = this.boundary.map(point => [point.x, point.y]);
 
     for (let i = 0; i < totalVertices; i++) {
       // Get current, previous, and next points
@@ -104,7 +125,7 @@ export class VisibilityGraph {
 
       // Calculate the offset direction by averaging the normals
       const offsetNormal = {
-       x: normalPrev.x + normalNext.x,
+        x: normalPrev.x + normalNext.x,
         y: normalPrev.y + normalNext.y,
       }
 
@@ -114,8 +135,14 @@ export class VisibilityGraph {
       offsetNormal.y /= length;
 
       // Calculate the expanded vertex
-      
-      const newNode = new Node(current.x + offsetNormal.x * offset,  current.y + offsetNormal.y * offset, this.nodes.length)
+
+
+      const newX = current.x + offsetNormal.x * offset
+      const newY =  current.y + offsetNormal.y * offset
+      const isOutsideBoundary = classifyPoint(_boundary, [newX, newY]) === 1 || this.boundary.length === 0
+
+
+      const newNode = new Node( newX , newY , this.nodes.length, isOutsideBoundary)
 
       expandedPolygon.push(newNode);
     }
@@ -127,7 +154,7 @@ export class VisibilityGraph {
   isLineSegmentBlocked(p1: Node, p2: Node): boolean {
 
     let isBlocked = false;
-    for (const polygon of this.obstacles ) {
+    for (const polygon of this.obstacles) {
       const numVertices = polygon.length;
       for (let i = 0; i < numVertices; i++) {
         const p3 = polygon[i];
@@ -135,7 +162,7 @@ export class VisibilityGraph {
 
         //Check if line segment a0, a1  crosses segment b0, b1
 
-        if (crosses([p1.x, p1.y], [p2.x, p2.y], [p3.x, p3.y], [p4.x, p4.y]) ) {
+        if (crosses([p1.x, p1.y], [p2.x, p2.y], [p3.x, p3.y], [p4.x, p4.y])) {
           isBlocked = true
         }
       }
@@ -145,8 +172,8 @@ export class VisibilityGraph {
   }
 
   // Calculate visibility edges
-calculateEdges(): void {
-    this.edges=[]
+  calculateEdges(): void {
+    this.edges = []
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = i + 1; j < this.nodes.length; j++) {
 
@@ -157,7 +184,7 @@ calculateEdges(): void {
 
         // Loop through all the possible edges to make sure it doesn't cross it. 
 
-        const isConnects = !this.isLineSegmentBlocked(node1, node2 )
+        const isConnects = !this.isLineSegmentBlocked(node1, node2)
         if (isConnects) {
           // Add edge to edges array
           this.edges.push([node1, node2]);
@@ -170,8 +197,23 @@ calculateEdges(): void {
   }
 
 
-  displaySolution(p: p5,){
-    p.fill(200, 100, 100,20);
+
+
+
+  displaySolution(p: p5, pathCellIndex: number) {
+    const animate = false;
+
+    if (!animate) {
+      pathCellIndex = this.edges.length
+    }
+
+    if (pathCellIndex >= this.edges.length) {
+      pathCellIndex = this.edges.length
+    }
+
+
+
+    p.fill(200, 100, 100, 20);
     for (const polygon of this.obstacles) {
       p.beginShape();
       for (const vertex of polygon) {
@@ -183,13 +225,21 @@ calculateEdges(): void {
     // Draw nodes
     p.fill(0);
     for (const node of this.nodes) {
-      p.ellipse(node.x, node.y, 10, 10);
+      if (!node.isOutsideBoundary) {
+        p.ellipse(node.x, node.y, 10, 10);
+      }
     }
 
     // Draw edges
     p.stroke(0, 0, 255);
-    for (const [node1, node2] of this.edges) {
-      p.line(node1.x, node1.y, node2.x, node2.y);
+
+    for (let i = 0; i < pathCellIndex; i++) {
+      const [node1, node2] = this.edges[i];
+
+      if (!node1.isOutsideBoundary && !node2.isOutsideBoundary) {
+
+        p.line(node1.x, node1.y, node2.x, node2.y);
+      }
     }
   }
 }
@@ -227,7 +277,8 @@ const VisibilityGraphComponent: React.FC<Props> = () => {
   ];
 
   const canvasRef = useRef<HTMLDivElement>(null);
-  const visibilityGraph = new VisibilityGraph(startPoints, endPoints, obstacles);
+  const boundary: TPoint[] = []; //NO LIMITS
+  const visibilityGraph = new VisibilityGraph(startPoints, endPoints, obstacles, boundary);
 
   const sketch = (p: p5) => {
     // const 
@@ -243,9 +294,9 @@ const VisibilityGraphComponent: React.FC<Props> = () => {
 
 
     p.draw = () => {
-     visibilityGraph.displaySolution(p);
+      visibilityGraph.displaySolution(p, visibilityGraph.edges.length - 1);
     }
-    p.mousePressed = () => { 
+    p.mousePressed = () => {
       const newX = p.mouseX;
       const newY = p.mouseY;
       const newEdge = new Node(newX, newY, visibilityGraph.nodes.length);

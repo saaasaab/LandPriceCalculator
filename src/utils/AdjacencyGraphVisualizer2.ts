@@ -1520,7 +1520,7 @@ class Building extends SitePlanElement {
 
     const nudgeStrength = 2;
     const nudgeStrengthDimensions = 1;
-    const angleNudge = .1;
+    const angleNudge = .5;
     const possibleDimensions: DimensionValue[] = [];
     const numChildren = 10;
 
@@ -1759,7 +1759,7 @@ export class AdjacencyGraphVisualizer2 {
 
 
   constructor(graph: AdjacencyGraph, points: IPoint[], lines: Line[], scale: number) {
-    this.globalAngle = 15;
+    this.globalAngle = 0;
     this.globalAnglePrev = 0;
     this.graph = graph;
     this.iteration = 0;
@@ -1995,6 +1995,10 @@ export class AdjacencyGraphVisualizer2 {
 
         building.updateBuildingCenter(newX, newY);
 
+        if (VisibilityGraphSolver) {
+          VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
+        }
+
       }
 
       if (isHoveredApproach || isDraggingApproach) {
@@ -2044,6 +2048,10 @@ export class AdjacencyGraphVisualizer2 {
 
           garbage.updateCenterGarbage(property, parking)
 
+          if (VisibilityGraphSolver) {
+            VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
+          }
+
         }
         else {
           approach.updateCenter(_center.x, _center.y);
@@ -2070,7 +2078,13 @@ export class AdjacencyGraphVisualizer2 {
         parking.updateStallCorners();
         parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
-        building.buildingLocator(p, building, parking, property, approach, garbage)
+        building.buildingLocator(p, building, parking, property, approach, garbage);
+        garbage.updateCenterGarbage(property, parking)
+
+        if (VisibilityGraphSolver) {
+          VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
+        }
+
 
       }
 
@@ -2148,6 +2162,9 @@ export class AdjacencyGraphVisualizer2 {
 
     p.mousePressed = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
+    
+    
+    
       const posX = p.mouseX;
       const posY = p.mouseY;
       const isHoveredApproach = approach.isMouseHovering();
@@ -2160,6 +2177,8 @@ export class AdjacencyGraphVisualizer2 {
         const posY = p.mouseY;
         building.initializeBuilding(posX, posY);
       }
+     
+     
       if (building.isInitialized) {
 
         const mouse = p.createVector(p.mouseX, p.mouseY)
@@ -2304,24 +2323,16 @@ export class AdjacencyGraphVisualizer2 {
       if (VisibilityGraphSolver) {
         // const showGrid = false;
 
-        VisibilityGraphSolver.displaySolution(p)
-        // AStarSolver.displaySolutions(p, this.pathCellIndex, showGrid);
-        // this.pathCellIndex++
-        // const maxPathStatesLength = Math.max(...AStarSolver.pathStates.map(state => state.path.length))
-        // if (this.pathCellIndex > maxPathStatesLength + 10) {
-        //   this.pathCellIndex = 0
-        // }
+        this.pathCellIndex++
+
+        VisibilityGraphSolver.displaySolution(p,this.pathCellIndex)
+        const maxPathStatesLength =  VisibilityGraphSolver.edges.length;
+        if (this.pathCellIndex > maxPathStatesLength + 30) {
+          this.pathCellIndex = 0
+        }
       }
 
       parking.createParkingOutline(p, parking, garbage, approach)
-
-
-
-      // DRAW THE COMPASS
-      // drawCompass(p, this.globalAngle)
-
-
-
     };
   }
 }
@@ -2360,7 +2371,7 @@ function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, buildi
   ];
 
 
-  VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles)
+  VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles,property.propertyCorners)
   return VisibilityGraphSolver
 }
 
