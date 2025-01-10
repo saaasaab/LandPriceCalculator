@@ -577,6 +577,15 @@ class SitePlanElement {
     this.area = Math.round(calculateArea(this.sitePlanElementCorners));
   }
 
+
+  projectFromCenter(position: p5.Vector, distance: number) {
+    const _angle = calculateAngle(this.center, position);
+
+    const newX = position.x + this.p.cos(_angle) * distance;
+    const newY = position.y + this.p.sin(_angle) * distance;
+
+    return { x: newX, y: newY }
+  }
   pointIsInPolygon(corners: p5.Vector[], point: p5.Vector) {
     // 1 = outside
     // 0 = on the border
@@ -851,7 +860,7 @@ class Parking extends SitePlanElement {
     this.parkingStalls = { left: [], right: [] };
     this.entranceEdgeIndex = 2;
     this.scale = scale;
-    this.parkingStallsNumber = 7;
+    this.parkingStallsNumber = 4;
     this.parkingArea = Math.round(width * height);
     this.parkingStallsArea = 0;
     this.handicappedParkingNum = 0;
@@ -1267,23 +1276,33 @@ class Parking extends SitePlanElement {
 class Entrance {
   private p: p5;
   private scale: number;
-  public pos: number;
+  public lerpPos: number;
   public intersection: p5.Vector;
   public angle: number;
   public angleToParent: number;
   public edgeIndex: number;
+  public buildingCenter: p5.Vector;
   // public buildingCenter: p5.Vector;
 
 
-  constructor(p: p5, scale: number, pos: number, intersection: p5.Vector, angle: number, edgeIndex: number) {
+  constructor(p: p5, scale: number, lerpPos: number, intersection: p5.Vector, angle: number, edgeIndex: number, buildingCenter: p5.Vector) {
     this.p = p;
     this.scale = scale;
-    this.pos = pos;
+    this.lerpPos = lerpPos;
     this.intersection = intersection;
     this.angle = angle;
     this.angleToParent = angle;
     this.edgeIndex = edgeIndex;
-    // this.buildingCenter = buildingCenter;
+    this.buildingCenter = buildingCenter;
+  }
+
+  projectFromCenter(position: p5.Vector, distance: number) {
+    const _angle = calculateAngle(this.buildingCenter, position);
+
+    const newX = position.x + this.p.cos(_angle) * distance;
+    const newY = position.y + this.p.sin(_angle) * distance;
+
+    return { x: newX, y: newY }
   }
 
 
@@ -1293,7 +1312,6 @@ class Entrance {
     const isInwardEnterance = true;
 
     const enteranceWidth = 8;
-
 
     p.push();
     p.stroke('black')
@@ -1330,7 +1348,7 @@ class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
-    this.buildingAreaTarget = 1500;
+    this.buildingAreaTarget = 500;
     this.buildingAreaActual = 0;
   }
 
@@ -1383,16 +1401,20 @@ class Building extends SitePlanElement {
 
 
 
+
   updateEntrances() {
     this.entrances.forEach(entrance => {
       const edge = this.sitePlanElementEdges[entrance.edgeIndex];
 
-      const newX = this.p.lerp(edge.point1.x, edge.point2.x, entrance.pos);
-      const newY = this.p.lerp(edge.point1.y, edge.point2.y, entrance.pos);
+      const newX = this.p.lerp(edge.point1.x, edge.point2.x, entrance.lerpPos)
+      const newY = this.p.lerp(edge.point1.y, edge.point2.y, entrance.lerpPos)
 
-      entrance.intersection = this.p.createVector(newX, newY)
+      const newVector = entrance.projectFromCenter(this.p.createVector(newX, newY), 10)
+
+
+
+      entrance.intersection = this.p.createVector(newVector.x, newVector.y);
       entrance.angle = edge.calculateAngle() - 90;
-
     })
 
   }
@@ -1966,7 +1988,7 @@ export class AdjacencyGraphVisualizer2 {
 
     let isRotatingPropertyOffset = false;
 
-
+    // Convert nodes to a graph
     p.mouseDragged = () => {
 
       if (!property || !approach || !parking || !building || !garbage) return;
@@ -1997,6 +2019,7 @@ export class AdjacencyGraphVisualizer2 {
 
         if (VisibilityGraphSolver) {
           VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
+
         }
 
       }
@@ -2162,9 +2185,9 @@ export class AdjacencyGraphVisualizer2 {
 
     p.mousePressed = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
-    
-    
-    
+
+
+
       const posX = p.mouseX;
       const posY = p.mouseY;
       const isHoveredApproach = approach.isMouseHovering();
@@ -2177,8 +2200,8 @@ export class AdjacencyGraphVisualizer2 {
         const posY = p.mouseY;
         building.initializeBuilding(posX, posY);
       }
-     
-     
+
+
       if (building.isInitialized) {
 
         const mouse = p.createVector(p.mouseX, p.mouseY)
@@ -2199,26 +2222,31 @@ export class AdjacencyGraphVisualizer2 {
           const inOutSign = isHoveredBuildingOffset && !isHoveredBuilding ? -1 : 1;
           const moreVertSign = isMoreVertical(angle, true) ? -1 : 1;
 
-          const intersection = p.createVector(mouse.x + distance * p.cos(angle) * moreVertSign * inOutSign, mouse.y - distance * p.sin(angle) * moreVertSign * inOutSign);
+
+
+          const intersection = p.createVector(
+            mouse.x + distance * p.cos(angle) * moreVertSign * inOutSign,
+            mouse.y - distance * p.sin(angle) * moreVertSign * inOutSign);
+
 
 
           // Draw the entrance
-
-
-          const pos = getIntersectionPercentage(
+          let lerpPos = getIntersectionPercentage(
             closestEdge,
             intersection
           ) || 0;
 
-          const entrance = new Entrance(p, this.scale, pos, intersection, angle, closestEdgeIndex);
+
+
+
+
+
+
+          const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
+
           building.entrances.push(entrance)
 
-
-
           VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
-
-
-
         }
 
 
@@ -2325,14 +2353,31 @@ export class AdjacencyGraphVisualizer2 {
 
         this.pathCellIndex++
 
-        VisibilityGraphSolver.displaySolution(p,this.pathCellIndex)
-        const maxPathStatesLength =  VisibilityGraphSolver.edges.length;
+        VisibilityGraphSolver.displaySolution(p, this.pathCellIndex)
+
+
+
+        // Display the shortest path for a specific start-end pair
+        if (VisibilityGraphSolver.shortestPaths.length > 0) {
+          const path = VisibilityGraphSolver.shortestPaths[0].path; // Use the first calculated path
+          // Draw the shortest path in red
+          VisibilityGraphSolver.displayShortestPath(p, path);
+
+        }
+
+
+
+
+        const maxPathStatesLength = VisibilityGraphSolver.edges.length;
         if (this.pathCellIndex > maxPathStatesLength + 30) {
           this.pathCellIndex = 0
         }
       }
 
       parking.createParkingOutline(p, parking, garbage, approach)
+
+
+
     };
   }
 }
@@ -2365,13 +2410,18 @@ function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, buildi
     }
   })
 
+
+
   const endPoints = [
-    { x: approach.sitePlanElementCorners[0].x, y: approach.sitePlanElementCorners[0].y },
-    { x: garbage.sitePlanElementCorners[0].x, y: garbage.sitePlanElementCorners[0].y },
+    garbage.projectFromCenter(garbage.sitePlanElementCorners[0], 2),
+    approach.projectFromCenter(approach.sitePlanElementCorners[0], 2)
   ];
 
 
-  VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles,property.propertyCorners)
+  VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles, property.propertyCorners)
+  console.log(`object`, VisibilityGraphSolver)
+
+
   return VisibilityGraphSolver
 }
 

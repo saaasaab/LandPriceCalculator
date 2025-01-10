@@ -34,7 +34,7 @@ const SitePlanDesigner: React.FC = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
 
-  const [parkingNumber, setParkingNumber] = useState<string | number>(7);
+  const [parkingNumber, setParkingNumber] = useState<string | number>(4);
   const [parkingDrivewayWidth, setParkingDrivewayWidth] = useState<string | number>(24);
   const [buildingAreaTarget, setbuildingAreaTarget] = useState<string | number>(1500);
 
