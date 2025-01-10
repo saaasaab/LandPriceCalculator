@@ -10,23 +10,47 @@ export function findShortestPathsAstar(
     const paths: { start: CNode; end: CNode; path: CNode[] }[] = [];
 
     // verifyGraphConnectivity(nodes)
-
-
     for (const startIndex of startIndices) {
         for (const endIndex of endIndices) {
 
+            // if ((endIndex % 2 === 0 && needsBackupIndex) || !needsBackupIndex) {
+                const _path = aStar(nodes, startIndex, endIndex);
+                const path = _path.map(nodeIndex => nodes.find(node => node.index === nodeIndex.index) || nodes[0])
 
-            const _path = aStar(nodes, startIndex, endIndex);
+
+                // if (endIndex % 2 === 0 && !path) needsBackupIndex = true
 
 
-            const path = _path.map(nodeIndex => nodes.find(node => node.index === nodeIndex.index) || nodes[0])
-            paths.push({
-                start: nodes[startIndex],
-                end: nodes[endIndex],
-                path,
-            });
+                paths.push({
+                    start: nodes[startIndex],
+                    end: nodes[endIndex],
+                    path,
+                });
+            // }
         }
     }
+
+
+
+    // Now connect the starts with eachother.
+
+    if (startIndices.length > 1) {
+        for (const startIndex of startIndices) {
+            for (const startIndex2 of startIndices) {
+                if (startIndex2 <= startIndex) continue;
+                // if(startIndex2 === startIndex)
+                const _path = aStar(nodes, startIndex, startIndex2);
+                const path = _path.map(nodeIndex => nodes.find(node => node.index === nodeIndex.index) || nodes[0])
+                paths.push({
+                    start: nodes[startIndex],
+                    end: nodes[startIndex2],
+                    path,
+                });
+            }
+
+        }
+    }
+
 
     return paths;
 }
@@ -60,7 +84,7 @@ function aStar(nodes: CNode[], startIndex: number, endIndex: number): CNode[] {
             (fScore.get(a) || Infinity) < (fScore.get(b) || Infinity) ? a : b
         );
 
-    
+
         // If we reach the end node, reconstruct the path
         if (currentIndex === endIndex) {
             return reconstructPath(nodes, cameFrom, currentIndex);
@@ -77,21 +101,21 @@ function aStar(nodes: CNode[], startIndex: number, endIndex: number): CNode[] {
 
             // Tentative gScore
 
-            let currentGScore = gScore.get(currentIndex); 
+            let currentGScore = gScore.get(currentIndex);
             let childFScore = gScore.get(childIndex)
 
-            if( currentGScore=== undefined){
+            if (currentGScore === undefined) {
                 currentGScore = Infinity
             }
 
 
-            if( childFScore=== undefined){
+            if (childFScore === undefined) {
                 childFScore = Infinity
             }
-            const tentativeGScore =  currentGScore + distance(current, neighbor);
+            const tentativeGScore = currentGScore + distance(current, neighbor);
 
 
-            
+
             if (tentativeGScore < childFScore) {
                 // Update path and scores
                 cameFrom.set(childIndex, currentIndex);

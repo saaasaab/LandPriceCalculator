@@ -73,13 +73,13 @@ export class VisibilityGraph {
     const _boundary: Point[] = boundary.map(point => [point.x, point.y]);
     const startIndices: number[] = [];
     const endIndices: number[] = [];
+   
     for (const point of startPoints) {
       const isOutsideBoundary = classifyPoint(_boundary, [point.x, point.y]) === 1 || boundary.length === 0
       if (!isOutsideBoundary) {
         this.nodes.push(new CNode(point.x, point.y, this.nodeCount, "startNode"));
         startIndices.push(this.nodeCount)
         this.nodeCount++;
-
       }
     }
 
@@ -88,7 +88,6 @@ export class VisibilityGraph {
       if (!isOutsideBoundary) {
         this.nodes.push(new CNode(point.x, point.y, this.nodeCount, "endNode"));
         endIndices.push(this.nodeCount)
-
         this.nodeCount++;
       }
     }

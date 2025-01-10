@@ -10,7 +10,6 @@ import LotLineDrawer from '../futureItems/LotLineDrawerOld';
 // import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
 import './SitePlanDesigner.scss';
 import ArchitectCompass from '../components/ArchitectCompass';
-import VisibilityGraphComponent from './VisibilityGraph';
 
 export interface IPoint {
   x: number;
@@ -42,8 +41,6 @@ const SitePlanDesigner: React.FC = () => {
   const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
 
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
-
-
 
 
   // Property Outputs
@@ -111,7 +108,6 @@ const SitePlanDesigner: React.FC = () => {
       if (canvasRef.current) {
         canvas.parent(canvasRef.current);
       }
-      // p.frameRate(8);
     };
 
 
