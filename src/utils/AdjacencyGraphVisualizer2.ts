@@ -1348,7 +1348,7 @@ class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
-    this.buildingAreaTarget = 500;
+    this.buildingAreaTarget = 150;
     this.buildingAreaActual = 0;
   }
 
@@ -2358,12 +2358,9 @@ export class AdjacencyGraphVisualizer2 {
 
 
         // Display the shortest path for a specific start-end pair
-        if (VisibilityGraphSolver.shortestPaths.length > 0) {
-          const path = VisibilityGraphSolver.shortestPaths[0].path; // Use the first calculated path
-          // Draw the shortest path in red
-          VisibilityGraphSolver.displayShortestPath(p, path);
+      
+          VisibilityGraphSolver.displayShortestPaths(p);
 
-        }
 
 
 
@@ -2419,7 +2416,6 @@ function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, buildi
 
 
   VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles, property.propertyCorners)
-  console.log(`object`, VisibilityGraphSolver)
 
 
   return VisibilityGraphSolver

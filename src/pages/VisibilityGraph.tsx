@@ -4,7 +4,8 @@ import p5 from "p5";
 
 import crosses from "robust-segment-intersect"
 import classifyPoint from "robust-point-in-polygon"
-import { findShortestPaths, TNode } from "../utils/AstarBiDirectional";
+import { findShortestPaths, TNode } from "../utils/BreadthFirstSearchBiDirectional";
+import { findShortestPathsAstar } from "../utils/AStarBiDirectional";
 
 
 
@@ -12,7 +13,7 @@ import { findShortestPaths, TNode } from "../utils/AstarBiDirectional";
 export type TPoint = { x: number; y: number };
 type Point = [number, number];
 
-export class Node {
+export class CNode {
   x: number;
   y: number;
   parent: number | null;
@@ -37,17 +38,20 @@ export class Node {
 }
 
 export class VisibilityGraph {
-  nodes: Node[];
-  edges: [Node, Node][];
-  obstaclesOffset: Node[][];
+  nodes: CNode[];
+  edges: [CNode, CNode][];
+  obstaclesOffset: CNode[][];
   obstacles: TPoint[][];
   boundary: TPoint[];
   nodeCount: number;
   shortestPaths: {
-    start: TNode;
-    end: TNode;
-    path: TNode[];
-  }[]
+    start: CNode;
+    end: CNode;
+    path: CNode[];
+  }[];
+  startIndices: number[];
+  endIndices: number[];
+
 
 
 
@@ -61,6 +65,8 @@ export class VisibilityGraph {
     this.boundary = boundary;
     this.nodeCount = 0;
     this.shortestPaths = []
+    this.startIndices = [];
+    this.endIndices = [];
 
 
 
@@ -70,7 +76,7 @@ export class VisibilityGraph {
     for (const point of startPoints) {
       const isOutsideBoundary = classifyPoint(_boundary, [point.x, point.y]) === 1 || boundary.length === 0
       if (!isOutsideBoundary) {
-        this.nodes.push(new Node(point.x, point.y, this.nodeCount, "startNode"));
+        this.nodes.push(new CNode(point.x, point.y, this.nodeCount, "startNode"));
         startIndices.push(this.nodeCount)
         this.nodeCount++;
 
@@ -80,7 +86,7 @@ export class VisibilityGraph {
     for (const point of endPoints) {
       const isOutsideBoundary = classifyPoint(_boundary, [point.x, point.y]) === 1 || boundary.length === 0
       if (!isOutsideBoundary) {
-        this.nodes.push(new Node(point.x, point.y, this.nodeCount, "endNode"));
+        this.nodes.push(new CNode(point.x, point.y, this.nodeCount, "endNode"));
         endIndices.push(this.nodeCount)
 
         this.nodeCount++;
@@ -89,10 +95,10 @@ export class VisibilityGraph {
 
 
     for (const obstacle of this.obstacles) {
-      const _obstacle: Node[] = []
+      const _obstacle: CNode[] = []
       for (const vertex of obstacle) {
 
-        const newNode = new Node(vertex.x, vertex.y, Infinity)
+        const newNode = new CNode(vertex.x, vertex.y, Infinity)
         // this.nodes.push(newNode);
         _obstacle.push(newNode);
       }
@@ -113,15 +119,8 @@ export class VisibilityGraph {
     // Initialize edges array
     this.edges = [];
 
-    // Build the visibility graph
-    this.shortestPaths = findShortestPaths(
-      this.nodes as TNode[],
-      startIndices,
-      endIndices
-    )
-
-
-
+    this.startIndices = startIndices;
+    this.endIndices = endIndices;
 
     this.calculateEdges();
 
@@ -129,7 +128,7 @@ export class VisibilityGraph {
   }
 
 
-  calculateEdgeNormal(p1: Node, p2: Node) {
+  calculateEdgeNormal(p1: CNode, p2: CNode) {
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
     // Swap dx and dy and negate one to create a perpendicular vector
@@ -139,8 +138,8 @@ export class VisibilityGraph {
 
 
 
-  expandPolygon(polygon: Node[], offset: number): Node[] {
-    const expandedPolygon: Node[] = [];
+  expandPolygon(polygon: CNode[], offset: number): CNode[] {
+    const expandedPolygon: CNode[] = [];
     const totalVertices = polygon.length;
     const _boundary: Point[] = this.boundary.map(point => [point.x, point.y]);
 
@@ -174,7 +173,7 @@ export class VisibilityGraph {
 
 
       if (!isOutsideBoundary) {
-        const newNode = new Node(newX, newY, this.nodeCount)
+        const newNode = new CNode(newX, newY, this.nodeCount)
 
         this.nodeCount++;
         expandedPolygon.push(newNode);
@@ -185,7 +184,7 @@ export class VisibilityGraph {
   }
 
 
-  dfs(nodes: Node[], index: number, component: Set<number>, visited = new Set<number>()) {
+  dfs(nodes: TNode[], index: number, component: Set<number>, visited = new Set<number>()) {
     if (visited.has(index)) return;
     visited.add(index);
     component.add(index);
@@ -202,7 +201,7 @@ export class VisibilityGraph {
 
 
 
-  removeDeadEndMidNodes(nodes: Node[],) {
+  removeDeadEndMidNodes(nodes: CNode[],) {
 
 
 
@@ -215,7 +214,7 @@ export class VisibilityGraph {
 
 
 
-    // const queue: Node[] = [nodes[0]];
+    // const queue: TNode[] = [nodes[0]];
     // const nodesVisited = new Set();
     // // First go through all the nodes, create the graph and remove islands
     // while (queue.length > 0) {
@@ -272,7 +271,7 @@ export class VisibilityGraph {
 
 
   // Check if a line segment is blocked by any obstacle
-  isLineSegmentBlocked(p1: Node, p2: Node): boolean {
+  isLineSegmentBlocked(p1: CNode, p2: CNode): boolean {
 
     let isBlocked = false;
     for (const polygon of this.obstacles) {
@@ -315,6 +314,25 @@ export class VisibilityGraph {
       }
     }
 
+
+
+
+
+    // Build the visibility graph Breadth First
+    // this.shortestPaths = findShortestPaths(
+    //   this.nodes as TNode[],
+    //   this.startIndices,
+    //   this.endIndices
+    // )
+
+
+    // ASTAR
+
+    this.shortestPaths = findShortestPathsAstar(
+      this.nodes,
+      this.startIndices,
+      this.endIndices
+    )
 
 
 
@@ -387,16 +405,32 @@ export class VisibilityGraph {
   }
 
 
-  displayShortestPath(p: p5, path: TNode[], thickness = 3) {
-    // Draw the shortest path as lines connecting nodes
-    p.stroke(255, 0, 0); // Use the provided color (default is red)
-    p.strokeWeight(thickness); // Set line thickness
+  displayShortestPaths(p: p5, thickness = 3) {
+    // Display the shortest path for a specific start-end pair
+    if (this.shortestPaths.length > 0) {
+      this.shortestPaths.forEach(_path => {
+        const path = _path.path;
+        // Draw the shortest path as lines connecting nodes
+        p.stroke(255, 0, 0); // Use the provided color (default is red)
+        p.strokeWeight(thickness); // Set line thickness
 
-    for (let i = 0; i < path.length - 1; i++) {
-      const currentNode = path[i];
-      const nextNode = path[i + 1];
-      p.line(currentNode.x, currentNode.y, nextNode.x, nextNode.y);
+        for (let i = 0; i < path.length - 1; i++) {
+          const currentNode = path[i];
+          const nextNode = path[i + 1];
+          p.line(currentNode.x, currentNode.y, nextNode.x, nextNode.y);
+        }
+      })
+
+
+      // Draw the shortest path in red
+
+
+
     }
+
+
+
+
   }
 
 }
@@ -456,7 +490,7 @@ const VisibilityGraphComponent: React.FC<Props> = () => {
     p.mousePressed = () => {
       const newX = p.mouseX;
       const newY = p.mouseY;
-      const newEdge = new Node(newX, newY, visibilityGraph.nodes.length);
+      const newEdge = new CNode(newX, newY, visibilityGraph.nodes.length);
       visibilityGraph.nodes.push(newEdge)
       visibilityGraph.calculateEdges();
 
