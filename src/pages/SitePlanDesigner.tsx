@@ -598,10 +598,10 @@ const SitePlanDesigner: React.FC = () => {
       {isGeneratingSitePlan ?
         <>
 
-          <ArchitectCompass
+          {/* <ArchitectCompass
             initialRotation={0}
             size={200}
-            onRotationChange={onRotationChange} />
+            onRotationChange={onRotationChange} /> */}
 
 
           {/* <MapWithCompass/> */}

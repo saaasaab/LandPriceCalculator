@@ -1,14 +1,5 @@
 import { CNode } from "../pages/VisibilityGraph";
 
-export type TNode = {
-    x: number;
-    y: number;
-    parent: null;
-    children: number[]; // Indices of connected nodes
-    index: number;
-    nodeType: string;
-};
-
 
 
 export function findShortestPathsAstar(
@@ -16,9 +7,9 @@ export function findShortestPathsAstar(
     startIndices: number[],
     endIndices: number[]
 ): { start: CNode; end: CNode; path: CNode[] }[] {
-    const paths: { start: CNode; end:CNode; path: CNode[] }[] = [];
+    const paths: { start: CNode; end: CNode; path: CNode[] }[] = [];
 
-    verifyGraphConnectivity(nodes)
+    // verifyGraphConnectivity(nodes)
 
 
     for (const startIndex of startIndices) {
@@ -64,37 +55,48 @@ function aStar(nodes: CNode[], startIndex: number, endIndex: number): CNode[] {
 
     while (openSet.size > 0) {
         // Find node with the lowest fScore in the open set
+
         let currentIndex: number = Array.from(openSet).reduce((a, b) =>
             (fScore.get(a) || Infinity) < (fScore.get(b) || Infinity) ? a : b
         );
 
-        
-
+    
         // If we reach the end node, reconstruct the path
         if (currentIndex === endIndex) {
             return reconstructPath(nodes, cameFrom, currentIndex);
         }
 
+
         openSet.delete(currentIndex);
+
         const current = nodes[currentIndex];
-        console.log(`currentIndex`, current)
 
         for (const childIndex of current.children) {
-            console.log(`childIndex`, childIndex)
+
             const neighbor = nodes[childIndex];
 
             // Tentative gScore
-            const tentativeGScore =
-                (gScore.get(currentIndex) || Infinity) + distance(current, neighbor);
 
-            if (tentativeGScore < (gScore.get(childIndex) || Infinity)) {
+            let currentGScore = gScore.get(currentIndex); 
+            let childFScore = gScore.get(childIndex)
+
+            if( currentGScore=== undefined){
+                currentGScore = Infinity
+            }
+
+
+            if( childFScore=== undefined){
+                childFScore = Infinity
+            }
+            const tentativeGScore =  currentGScore + distance(current, neighbor);
+
+
+            
+            if (tentativeGScore < childFScore) {
                 // Update path and scores
                 cameFrom.set(childIndex, currentIndex);
                 gScore.set(childIndex, tentativeGScore);
-                fScore.set(
-                    childIndex,
-                    tentativeGScore + heuristic(neighbor, end)
-                );
+                fScore.set(childIndex, tentativeGScore + heuristic(neighbor, end));
 
                 // Add neighbor to the open set
                 if (!openSet.has(childIndex)) {
@@ -109,12 +111,12 @@ function aStar(nodes: CNode[], startIndex: number, endIndex: number): CNode[] {
 }
 
 // Heuristic: Euclidean distance
-function heuristic(node1:CNode, node2: CNode): number {
+function heuristic(node1: CNode, node2: CNode): number {
     return Math.sqrt((node1.x - node2.x) ** 2 + (node1.y - node2.y) ** 2);
 }
 
 // Distance between two nodes
-function distance(node1:CNode, node2: CNode): number {
+function distance(node1: CNode, node2: CNode): number {
     return Math.sqrt((node1.x - node2.x) ** 2 + (node1.y - node2.y) ** 2);
 }
 
