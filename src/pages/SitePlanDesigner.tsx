@@ -34,6 +34,7 @@ const SitePlanDesigner: React.FC = () => {
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
 
   const [parkingNumber, setParkingNumber] = useState<string | number>(4);
+  const [taperParking,setTaperParking] = useState<boolean>(true);
   const [parkingDrivewayWidth, setParkingDrivewayWidth] = useState<string | number>(24);
   const [buildingAreaTarget, setbuildingAreaTarget] = useState<string | number>(1500);
 
@@ -397,11 +398,12 @@ const SitePlanDesigner: React.FC = () => {
       parkingNumber,
       parkingDrivewayWidth,
       buildingAreaTarget,
-      globalAngle
+      globalAngle,
+      taperParking
     }
 
     visualizer.current?.updateGlobalVariables(updatedGlobals)
-  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingAreaTarget, globalAngle])
+  }, [parkingNumber, approachWidth, parkingDrivewayWidth, buildingAreaTarget, globalAngle,taperParking])
 
 
   const onRotationChange = (value: number) => {
@@ -631,6 +633,19 @@ const SitePlanDesigner: React.FC = () => {
 
               />
               Parking Stalls
+            </label>
+
+            <label htmlFor={'taper_driveway'}>
+
+            <input type="checkbox" 
+             id={"taper_driveway"}
+             className="centered"
+             checked={taperParking} 
+             onChange={(e) => {
+              setTaperParking(prev=>!prev)}}
+             
+             />
+              Tapered Driveway
             </label>
 
             <label htmlFor={'approach_width'}>

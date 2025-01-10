@@ -55,19 +55,26 @@ class Edge {
   }
 
 
-  drawLine() {
+  drawLine(index: number) {
     this.p.stroke(0);
     this.p.strokeWeight(3);
 
 
     if (this.isApproach) {
       this.p.stroke(45, 200, 30);
-
     }
 
     setLineDash(this.p, [5, 10, 30, 10, 5, 10])
     this.p.line(this.point1.x, this.point1.y, this.point2.x, this.point2.y);
+
+
     setLineDash(this.p, [])
+
+
+    const midpoint = this.getMidpoint();
+    this.p.textSize(24)
+
+    this.p.text(index, midpoint.x, midpoint.y)
   }
 
   calculateAngle(): number {
@@ -252,7 +259,7 @@ class Property {
 
   drawProperty() {
     this.propertyEdges.forEach((edge, i) => {
-      edge.drawLine()
+      edge.drawLine(i)
 
       const midX = (edge.point1.x + edge.point2.x) / 2;
       const midY = (edge.point1.y + edge.point2.y) / 2;
@@ -727,10 +734,12 @@ class SitePlanElement {
 
     // p.text(p.round(this.angle), this.center.x, this.center.y);
 
-    this.sitePlanElementEdges.forEach(edge => {
+    this.sitePlanElementEdges.forEach((edge, i) => {
       const center = getCenterPoint(this.p, edge.point1, edge.point2);
       p.fill(200, 20, 40);
       p.ellipse(center.x, center.y, 10, 10);
+
+      // p.text(i,center.x, center.y)
       p.strokeWeight(1)
       p.fill(40, 200, 20);
 
@@ -946,9 +955,6 @@ class Parking extends SitePlanElement {
       this.entranceEdge.point2.y !== this.previousEntranceEdge.point2.y)) {
 
       // OH NO, SOMETHING CHANGED
-
-
-      console.log(`1234`, 1234)
 
       for (let i = 0; i < this.parkingStalls.left.length; i++) {
         // Update the points
@@ -1745,6 +1751,7 @@ export class AdjacencyGraphVisualizer2 {
 
   public globalAngle: number;
   public globalAnglePrev: number;
+  public taperParking: boolean;
 
   // public p: p5;
 
@@ -1770,6 +1777,7 @@ export class AdjacencyGraphVisualizer2 {
     this.drivewayArea = 0;
     this.sidewalkArea = 0;
     this.bikeParkingArea = 0;
+    this.taperParking = true;
 
   }
 
@@ -1872,10 +1880,10 @@ export class AdjacencyGraphVisualizer2 {
     parkingDrivewayWidth: string | number;
     buildingAreaTarget: string | number;
     globalAngle: number;
-
+    taperParking: boolean;
   }) {
 
-    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget, globalAngle } = updatedGlobals;
+    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget, globalAngle, taperParking } = updatedGlobals;
 
     if (!this.parking || !this.property || !this.approach || !this.building) return
 
@@ -1895,6 +1903,11 @@ export class AdjacencyGraphVisualizer2 {
     this.building.updateBuildingArea(Number(buildingAreaTarget))
 
 
+
+
+    this.parking.entranceEdge?.point1
+
+    this.taperParking = taperParking
 
 
     // // NEED TO ROTATE AND TRANSLATE BASED OFF THE CENTROID. 
@@ -1967,8 +1980,6 @@ export class AdjacencyGraphVisualizer2 {
 
       if (!property || !approach || !parking || !building || !garbage) return;
 
-
-
       const isHoveredApproach = approach.isMouseHovering();
       const isHoveredParkingOffset = parking.isMouseHoveringOffset();
       const isHoveredParking = parking.isMouseHovering();
@@ -1986,15 +1997,10 @@ export class AdjacencyGraphVisualizer2 {
         const newX = p.mouseX;
         const newY = p.mouseY;
 
-
-
-
         const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
         // const notIntersectingWithParking = twoObjectsAreNotColliding(building.sitePlanElementCorners, parking.sitePlanElementCorners)
 
         // Check if building corners intersect with anythin and check if anything intersects with the building.
-
-
 
         // building.pointIsOutOfPolygon(building.sitePlanElementCorners,)
         // || !notIntersectingWithParking
@@ -2077,7 +2083,9 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-      // Only hovering in the offset
+
+
+      // Meant for rotating the parking lot
       if (((isHoveredParkingOffset && !isHoveredParking) || isDraggingParkingOffset) && !isDraggingApproach) {
         isDraggingParkingOffset = true;
         isRotationFrozen = true;
@@ -2087,7 +2095,9 @@ export class AdjacencyGraphVisualizer2 {
         const newY = p.mouseY;
 
 
-        const newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
+        let newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
+
+        newAngle  = calculateSnapToEdge (newAngle,parking, property);
 
         parking.updateAngle(newAngle);
         garbage.updateAngle(newAngle);
@@ -2100,6 +2110,10 @@ export class AdjacencyGraphVisualizer2 {
 
         building.buildingLocator(p, building, parking, property, approach, garbage);
         garbage.updateCenterGarbage(property, parking)
+
+
+
+
 
         if (VisibilityGraphSolver) {
           VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
@@ -2126,7 +2140,11 @@ export class AdjacencyGraphVisualizer2 {
 
 
 
-        const angle2 = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
+        let angle2 = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
+
+
+        angle2 = calculateSnapToEdge (angle2,parking, property);
+
 
         parking.updateAngle(normalizeAngle(angle2))
         garbage.updateAngle(normalizeAngle(angle2))
@@ -2281,16 +2299,14 @@ export class AdjacencyGraphVisualizer2 {
       // parking.drawSitePlanElement();
       parking.drawParkingStalls();
 
-
       building.drawBuilding();
 
       property.propertyQuadrant(property, parking);
-      createDriveway(p, approach, parking);
+      createDriveway(p, approach, parking, this.taperParking);
 
 
       if (!building.hasStopped && building.isInitialized) {
 
-        console.log(`building.hasStopped`, building.hasStopped)
         building.buildingLocator(p, building, parking, property, approach, garbage);
         building.buildingGrower(property, parking);
       }
@@ -2353,7 +2369,7 @@ export class AdjacencyGraphVisualizer2 {
 
         this.pathCellIndex++
 
-        VisibilityGraphSolver.displaySolution(p, this.pathCellIndex)
+        // VisibilityGraphSolver.displaySolution(p, this.pathCellIndex)
 
 
 
@@ -2361,6 +2377,32 @@ export class AdjacencyGraphVisualizer2 {
 
         VisibilityGraphSolver.displayShortestPaths(p);
 
+
+
+        VisibilityGraphSolver.sideWalkPolygons.forEach(polygon => {
+          p.push()
+          p.fill(150, 150, 200);
+          // p.noStroke()
+          p.beginShape()
+
+          polygon.forEach(ring => {
+
+
+            if (!ring) return
+
+
+            ring.forEach(pair => {
+              if (!pair) return
+              p.vertex(pair[0], pair[1])
+
+            })
+
+
+          })
+
+          p.endShape();
+          p.pop();
+        })
 
 
 
@@ -2379,6 +2421,60 @@ export class AdjacencyGraphVisualizer2 {
   }
 }
 
+
+const calculateSnapToEdge = (newAngle: number, element: SitePlanElement, property: Property) => {
+  let _newAngle = newAngle;
+
+  // Get the distance to each property edge for all sides of the parking
+  let shouldSnapToEdge = false;
+  let snappingOuterIndex = -1;
+  let snappingInnerIndex = -1;
+
+  let minDistance = Infinity
+
+
+  element.sitePlanElementEdges.forEach((edge, i) => {
+    // if (shouldSnapToEdge) return
+
+    const edgeMidpoint = edge.getMidpoint()
+
+    const closestEdge = findClosestEdge(property.propertyEdges, edgeMidpoint);
+    const distance = calculatePointToEdgeDistance(property.propertyEdges[closestEdge], edgeMidpoint);
+
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      snappingInnerIndex = i
+      snappingOuterIndex = closestEdge;
+    }
+  })
+
+  const snappingDistance = 25;
+  if (minDistance < (snappingDistance / property.scale)) {
+    shouldSnapToEdge = true
+  }
+  if (shouldSnapToEdge) {
+    let differenceBetween = 360;
+    const edgeAngle = property.propertyEdges[snappingOuterIndex].calculateAngle();
+
+    if (snappingInnerIndex === 3 || snappingInnerIndex === 1) {
+      differenceBetween = Math.abs(angularDistance(normalizeAngle180(edgeAngle - 90), normalizeAngle180(newAngle)))
+    }
+    else {
+      differenceBetween = Math.abs(angularDistance(normalizeAngle180(edgeAngle), normalizeAngle180(newAngle)))
+    }
+    if (differenceBetween < 3) {
+      _newAngle += differenceBetween
+    }
+  }
+
+
+
+  return _newAngle;
+
+
+}
+
 const p5VectorToTPoint = (vectors: p5.Vector[]): TPoint[] => {
   return vectors.map(vertex => {
     return {
@@ -2395,9 +2491,7 @@ function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, buildi
     p5VectorToTPoint(parking.parkingOutline),
     p5VectorToTPoint(garbage.sitePlanElementCorners),
     p5VectorToTPoint(building.sitePlanElementCorners),
-
   ];
-
 
 
   const startPoints: TPoint[] = building.entrances.map(entrance => {
@@ -2433,11 +2527,6 @@ function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, buildi
   const garbageEdgeIndex = garbageDists.indexOf(Math.min(...garbageDists));
   const garbageEndPoint = garbagePoints[garbageEdgeIndex]
 
-
-
-
-
-
   const endPoints = [
     garbage.projectFromCenter(garbageEndPoint, 2 / garbage.scale),
     garbage.projectFromCenter(approachBackupEndPoint, 2 / garbage.scale),
@@ -2447,7 +2536,7 @@ function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, buildi
 
   VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles, property.propertyCorners)
 
-
+  VisibilityGraphSolver.calculateSideWalkPolygons(property.scale)
   return VisibilityGraphSolver
 }
 
@@ -2488,7 +2577,8 @@ function setLineDash(p: p5, list: number[]) {
 }
 
 
-function createDriveway(p: p5, approach: Approach, parking: Parking) {
+function createDriveway(p: p5, approach: Approach, parking: Parking, taperParking: boolean) {
+
 
   if (!parking.entranceEdge) return;
 
@@ -2496,6 +2586,9 @@ function createDriveway(p: p5, approach: Approach, parking: Parking) {
 
   p.vertex(approach.sitePlanElementCorners[0].x, approach.sitePlanElementCorners[0].y);
   p.vertex(approach.sitePlanElementCorners[1].x, approach.sitePlanElementCorners[1].y);
+
+
+
   drawPerpendicularBezier(
     p,
     approach.sitePlanElementCorners[1],
@@ -2675,6 +2768,10 @@ function calculateAngle(point1: p5.Vector, point2: p5.Vector): number {
 
 function normalizeAngle(angle: number): number {
   return (angle + 360) % 360;
+}
+
+function normalizeAngle180(angle: number): number {
+  return (angle + 180) % 180;
 }
 
 function findClosestEdge(edges: Edge[], point: p5.Vector): number {
@@ -3115,6 +3212,11 @@ const isMoreVertical = (angle: number, inDegrees: boolean = true): boolean => {
   return isVertical;
 };
 
+
+function angularDistance(angle1: number, angle2: number): number {
+  const diff = Math.abs(angle1 - angle2);
+  return Math.min(diff, 180 - diff);
+}
 
 
 function getBoundingBox(points: p5.Vector[]) {

@@ -19,8 +19,6 @@ export function findShortestPathsAstar(
 
 
                 // if (endIndex % 2 === 0 && !path) needsBackupIndex = true
-
-
                 paths.push({
                     start: nodes[startIndex],
                     end: nodes[endIndex],
@@ -33,7 +31,6 @@ export function findShortestPathsAstar(
 
 
     // Now connect the starts with eachother.
-
     if (startIndices.length > 1) {
         for (const startIndex of startIndices) {
             for (const startIndex2 of startIndices) {

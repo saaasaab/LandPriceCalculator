@@ -1,16 +1,20 @@
 
-import React, { useEffect, useRef } from "react";
 import p5 from "p5";
 
 import crosses from "robust-segment-intersect"
 import classifyPoint from "robust-point-in-polygon"
 import { findShortestPaths, TNode } from "../utils/BreadthFirstSearchBiDirectional";
 import { findShortestPathsAstar } from "../utils/AStarBiDirectional";
+import polygonClipping from 'polygon-clipping';
 
 
-
+interface IPoint {
+  x: number;
+  y: number;
+}
 
 export type TPoint = { x: number; y: number };
+
 type Point = [number, number];
 
 export class CNode {
@@ -51,10 +55,7 @@ export class VisibilityGraph {
   }[];
   startIndices: number[];
   endIndices: number[];
-
-
-
-
+  sideWalkPolygons: polygonClipping.MultiPolygon
 
 
   constructor(startPoints: TPoint[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[]) {
@@ -67,13 +68,12 @@ export class VisibilityGraph {
     this.shortestPaths = []
     this.startIndices = [];
     this.endIndices = [];
-
-
+    this.sideWalkPolygons = []
 
     const _boundary: Point[] = boundary.map(point => [point.x, point.y]);
     const startIndices: number[] = [];
     const endIndices: number[] = [];
-   
+
     for (const point of startPoints) {
       const isOutsideBoundary = classifyPoint(_boundary, [point.x, point.y]) === 1 || boundary.length === 0
       if (!isOutsideBoundary) {
@@ -122,11 +122,143 @@ export class VisibilityGraph {
     this.endIndices = endIndices;
 
     this.calculateEdges();
-
-
   }
 
 
+  calculateSideWalkPolygons(scale: number) {
+
+
+    const line2Polygon = (points: [number, number][], thickness: number | number[]): [number, number][] => {
+      const getOffsets = (a: IPoint, b: IPoint, thickness: number): IPoint => {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const scale = thickness / (2 * len);
+        return {
+          x: -scale * dy,
+          y: scale * dx,
+        };
+      };
+
+      const getIntersection = (
+        a1: IPoint,
+        b1: IPoint,
+        a2: IPoint,
+        b2: IPoint,
+      ): IPoint | undefined => {
+        // directional constants
+        const k1 = (b1.y - a1.y) / (b1.x - a1.x);
+        const k2 = (b2.y - a2.y) / (b2.x - a2.x);
+
+        // if the directional constants are equal, the lines are parallel
+        if (Math.abs(k1 - k2) < 0.00001) {
+          return;
+        }
+
+        // y offset constants for both lines
+        const m1 = a1.y - k1 * a1.x;
+        const m2 = a2.y - k2 * a2.x;
+
+        // compute x
+        const x = (m1 - m2) / (k2 - k1);
+
+        // use y = k * x + m to get y coordinate
+        const y = k1 * x + m1;
+
+        return { x, y };
+      };
+
+      const isArray = (obj: any): obj is Array<any> => Array.isArray(obj);
+
+      // Convert points into json notation
+      const pointsJson: IPoint[] = points.map((pt) =>
+        isArray(pt) ? { x: pt[0], y: pt[1] } : pt,
+      );
+
+      // Convert thickness into an array as needed
+      const thicknesses: number[] = isArray(thickness)
+        ? thickness
+        : Array(pointsJson.length).fill(thickness);
+
+      const poly: IPoint[] = [];
+      let prevA: [IPoint, IPoint] | undefined;
+      let prevB: [IPoint, IPoint] | undefined;
+
+      for (let i = 0, il = pointsJson.length - 1; i < il; i++) {
+        const isFirst = i === 0;
+        const isLast = i === pointsJson.length - 2;
+
+        const off = getOffsets(pointsJson[i], pointsJson[i + 1], thicknesses[i]);
+        const off2 = getOffsets(
+          pointsJson[i],
+          pointsJson[i + 1],
+          thicknesses[i + 1],
+        );
+
+        const p0a = {
+          x: pointsJson[i].x + off.x,
+          y: pointsJson[i].y + off.y,
+        };
+        const p1a = {
+          x: pointsJson[i + 1].x + off2.x,
+          y: pointsJson[i + 1].y + off2.y,
+        };
+
+        const p0b = {
+          x: pointsJson[i].x - off.x,
+          y: pointsJson[i].y - off.y,
+        };
+        const p1b = {
+          x: pointsJson[i + 1].x - off2.x,
+          y: pointsJson[i + 1].y - off2.y,
+        };
+
+        if (!isFirst) {
+          const interA = getIntersection(prevA![0], prevA![1], p0a, p1a);
+          if (interA) {
+            poly.unshift(interA);
+          }
+          const interB = getIntersection(prevB![0], prevB![1], p0b, p1b);
+          if (interB) {
+            poly.push(interB);
+          }
+        }
+
+        if (isFirst) {
+          poly.unshift(p0a);
+          poly.push(p0b);
+        }
+
+        if (isLast) {
+          poly.unshift(p1a);
+          poly.push(p1b);
+        }
+
+        if (!isLast) {
+          prevA = [p0a, p1a];
+          prevB = [p0b, p1b];
+        }
+      }
+
+      // Convert back to array notation
+      const polyArray: [number, number][] = poly.map((pt) => [pt.x, pt.y]);
+      polyArray.push(polyArray[0]); // Close the polygon
+
+      return polyArray;
+    };
+    const _polys: [number, number][][] = []
+    this.shortestPaths.forEach(path => {
+
+      const points = path.path.map(point => [point.x, point.y] as [number, number]) as [number, number][];
+
+
+      let line = line2Polygon(points, 5 / scale);
+      _polys.push(line)
+    })
+    // this.sideWalkPolygons  = [polygonClipping.union(_polys)]
+
+
+  }
   calculateEdgeNormal(p1: CNode, p2: CNode) {
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
@@ -358,7 +490,7 @@ export class VisibilityGraph {
 
 
   displaySolution(p: p5, pathCellIndex: number) {
-    const animate = false;
+    const animate = true;
 
     if (!animate) {
       pathCellIndex = this.edges.length
@@ -419,12 +551,6 @@ export class VisibilityGraph {
           p.line(currentNode.x, currentNode.y, nextNode.x, nextNode.y);
         }
       })
-
-
-      // Draw the shortest path in red
-
-
-
     }
 
 
