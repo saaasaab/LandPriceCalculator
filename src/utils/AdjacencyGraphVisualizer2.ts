@@ -1962,6 +1962,9 @@ export class AdjacencyGraphVisualizer2 {
     const building = this.building;
     const garbage = this.garbage;
 
+    let lastMouseX = -1;
+    let lastMouseY = -1;
+    let lastRedrawState = "";
 
     let visibilityGraphSolver: VisibilityGraph;
 
@@ -1974,14 +1977,7 @@ export class AdjacencyGraphVisualizer2 {
       building: false,
     };
 
-
-
     let isRotationFrozen = false;
-
-
-
-
-
 
     const updateVisibilityGraph = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
@@ -2114,7 +2110,6 @@ export class AdjacencyGraphVisualizer2 {
 
       const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
 
-
       if (truthChecker(allPointsInBoundary)) {
 
         parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
@@ -2143,9 +2138,6 @@ export class AdjacencyGraphVisualizer2 {
         building: building.isMouseHovering(),
         buildingOffset: building.isMouseHoveringOffset(),
       };
-
-
-
 
 
       // Moving the building
@@ -2177,26 +2169,45 @@ export class AdjacencyGraphVisualizer2 {
         this.drivewayArea = calculateDrivewayArea(this.approach.p, this.approach, this.parking)
         this.parking.parkingArea = Math.round(parking.width * parking.height * this.scale * this.scale);
         this.approach.approachArea = calculateApproachArea(approach)
-
         this.parking.parkingStallsArea = getParkingStallArea(this.parking)
       }
-
-
-
-
     };
+
 
     p.mousePressed = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
 
       const posX = p.mouseX;
       const posY = p.mouseY;
-      const isHoveredApproach = approach.isMouseHovering();
-      const isHoveredParkingOffset = parking.isMouseHoveringOffset();
-      const isHoveredParking = parking.isMouseHovering();
+      const clickIsInProperty = allPointsInPolygon(
+          property.propertyCorners,
+          [p.createVector(posX, posY)]
+      );
+
+      if (!building.isInitialized && truthChecker(clickIsInProperty)) {
+          building.initializeBuilding(posX, posY);
+      }
+  };
+
+
+    p.mousePressed = () => {
+      if (!property || !approach || !parking || !building || !garbage) return;
+
+      const isHovered = {
+        approach: approach.isMouseHovering(),
+        parkingOffset: parking.isMouseHoveringOffset(),
+        parking: parking.isMouseHovering(),
+        building: building.isMouseHovering(),
+        buildingOffset: building.isMouseHoveringOffset(),
+      };
+
+      const posX = p.mouseX;
+      const posY = p.mouseY;
+
+
       const clickIsInProperty = allPointsInPolygon(property.propertyCorners, [p.createVector(posX, posY)]);
 
-      if (!isHoveredApproach && !isHoveredParking && !isHoveredParkingOffset && !building.isInitialized && truthChecker(clickIsInProperty)) {
+      if (!isHovered.approach && !isHovered.parking && !isHovered.parkingOffset && !building.isInitialized && truthChecker(clickIsInProperty)) {
         const posX = p.mouseX;
         const posY = p.mouseY;
         building.initializeBuilding(posX, posY);
@@ -2214,13 +2225,11 @@ export class AdjacencyGraphVisualizer2 {
 
 
         if (distance < 20 && area > 100 * building.scale) {
-          const isHoveredBuilding = building.isMouseHovering();
-          const isHoveredBuildingOffset = building.isMouseHoveringOffset();
-
+          
           // get the point on the line where the entrance should interesect
           const angle = closestEdge.calculateAngle() - 90;
 
-          const inOutSign = isHoveredBuildingOffset && !isHoveredBuilding ? -1 : 1;
+          const inOutSign = isHovered.buildingOffset && !isHovered.building ? -1 : 1;
           const moreVertSign = isMoreVertical(angle, true) ? -1 : 1;
 
 
@@ -2251,6 +2260,7 @@ export class AdjacencyGraphVisualizer2 {
       isDragging.parking = false;
       isDragging.approach = false;
       isDragging.parkingOffset = false;
+      isDragging.building = false;
     };
 
 
@@ -2258,14 +2268,42 @@ export class AdjacencyGraphVisualizer2 {
 
       if (!property || !approach || !parking || !building || !garbage) return;
 
+
+     
+
+    //   if (
+    //     p.mouseX === lastMouseX &&
+    //     p.mouseY === lastMouseY &&
+    //     !building.ismoving &&
+    //     !(!building.hasStopped && building.isInitialized) &&
+    //     !Object.values(isDragging).some((dragging) => dragging) &&
+    //     lastRedrawState === JSON.stringify({ isDragging })
+
+
+    //     // On entrance click, sidewalks not created
+    //     // On building pre-initialize, the temp building not growing
+
+    // ) {
+
+    //   console.log(`skip`)
+    //     return; // Skip redraw if nothing has changed
+    // }
+
+
+
+    lastMouseX = p.mouseX;
+    lastMouseY = p.mouseY;
+    lastRedrawState = JSON.stringify({ isDragging });
+
+      const isHovered = {
+        approach: approach.isMouseHovering(),
+        parkingOffset: parking.isMouseHoveringOffset(),
+        parking: parking.isMouseHovering(),
+        building: building.isMouseHovering(),
+        buildingOffset: building.isMouseHoveringOffset(),
+      };
+      
       p.background(240);
-
-      const isHoveredApproach = approach.isMouseHovering();
-      const isHoveredParkingOffset = parking.isMouseHoveringOffset();
-      const isHoveredParking = parking.isMouseHovering();
-      const isHoveredBuilding = building.isMouseHovering();
-      const isHoveredBuildingOffset = building.isMouseHoveringOffset();
-
       p.noFill()
       p.stroke(0);
 
@@ -2294,15 +2332,13 @@ export class AdjacencyGraphVisualizer2 {
       const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [p.mouseX, p.mouseY]) === -1
 
 
-      if (!isHoveredApproach && !isHoveredParkingOffset && !isHoveredParking && !building.isInitialized && isInboundary) {
+      if (!isHovered.approach && !isHovered.parkingOffset && !isHovered.parking && !building.isInitialized && isInboundary) {
 
         // Show the building growing.
         building.tempBuilding();
-
-
       }
 
-      if ((isHoveredBuilding || isHoveredBuildingOffset) && isInboundary && building.isInitialized) {
+      if ((isHovered.building || isHovered.buildingOffset) && isInboundary && building.isInitialized) {
 
         // ----  Show the entrance ----
         // Get the closest edge
@@ -2320,7 +2356,7 @@ export class AdjacencyGraphVisualizer2 {
           // get the point on the line where the entrance should interesect
           const angle = closestEdge.calculateAngle() - 90;
 
-          const inOutSign = isHoveredBuildingOffset && !isHoveredBuilding ? -1 : 1;
+          const inOutSign = isHovered.buildingOffset && !isHovered.building ? -1 : 1;
           const moreVertSign = isMoreVertical(angle, true) ? -1 : 1;
 
           const intersection = p.createVector(mouse.x + distance * p.cos(angle) * moreVertSign * inOutSign, mouse.y - distance * p.sin(angle) * moreVertSign * inOutSign);
