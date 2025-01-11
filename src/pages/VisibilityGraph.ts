@@ -55,7 +55,7 @@ export class VisibilityGraph {
   }[];
   startIndices: number[];
   endIndices: number[];
-  sideWalkPolygons: polygonClipping.MultiPolygon
+  sideWalkPolygons: [number, number][][];//polygonClipping.MultiPolygon
 
 
   constructor(startPoints: TPoint[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[]) {
@@ -252,10 +252,10 @@ export class VisibilityGraph {
       const points = path.path.map(point => [point.x, point.y] as [number, number]) as [number, number][];
 
 
-      let line = line2Polygon(points, 5 / scale);
+      let line = line2Polygon(points, 3 / scale);
       _polys.push(line)
     })
-    // this.sideWalkPolygons  = [polygonClipping.union(_polys)]
+    this.sideWalkPolygons  = _polys// [polygonClipping.union(_polys)]
 
 
   }
@@ -552,9 +552,33 @@ export class VisibilityGraph {
         }
       })
     }
+  }
+
+  displayPathsAsPolygons(p:p5){
+    this.sideWalkPolygons.forEach(polygon => {
+      p.push()
+      p.fill(150, 150, 150);
+      // p.noStroke()
+      p.beginShape()
+
+      polygon.forEach(ring => {
+
+        if(!ring) return
+        p.vertex(ring[0], ring[1])
+
+        // if (!ring) return
 
 
+        // ring.forEach(pair => {
+        //   if (!pair) return
+        //   p.vertex(pair[0], pair[1])
 
+        // })
+      })
+
+      p.endShape();
+      p.pop();
+    })
 
   }
 

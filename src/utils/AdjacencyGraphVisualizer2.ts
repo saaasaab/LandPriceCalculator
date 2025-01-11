@@ -1963,234 +1963,214 @@ export class AdjacencyGraphVisualizer2 {
     const garbage = this.garbage;
 
 
+    let visibilityGraphSolver: VisibilityGraph;
 
 
 
-    let VisibilityGraphSolver: VisibilityGraph;
-    let isDraggingParking = false;
-    let isDraggingApproach = false;
-    let isDraggingParkingOffset = false;
+    let isDragging = {
+      parking: false,
+      approach: false,
+      parkingOffset: false,
+      building: false,
+    };
+
+
+
     let isRotationFrozen = false;
-    let isDraggingBuilding = false;
 
-    let isRotatingPropertyOffset = false;
+
+
+
+
+
+    const updateVisibilityGraph = () => {
+      if (!property || !approach || !parking || !building || !garbage) return;
+
+      if (visibilityGraphSolver) {
+        visibilityGraphSolver = runVisibilityGraphSolver(
+          visibilityGraphSolver,
+          building,
+          parking,
+          property,
+          garbage,
+          approach
+        );
+      }
+    };
+
+    const handleBuildingDrag = () => {
+      if (!property || !approach || !parking || !building || !garbage) return;
+
+      building.hasStopped = false
+
+
+      const newX = p.mouseX;
+      const newY = p.mouseY;
+
+      const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
+
+      if (!truthChecker(centerInBoundary)) {
+        building.hasStopped = true;
+        return;
+      }
+
+      building.updateBuildingCenter(newX, newY);
+      updateVisibilityGraph();
+
+    };
+
+    const handleApproachDrag = () => {
+      if (!property || !approach || !parking || !building || !garbage) return;
+
+
+      const _center = p.createVector(approach.center.x, approach.center.y);
+      const approachEdgeAngle = property.approachEdge?.calculateAngle();
+
+      let newX = p.mouseX;
+      let newY = p.mouseY;
+      const isVertical = isMoreVertical(approachEdgeAngle || 0, true);
+
+      if (isVertical) {
+        newX = approach.center.x + (newY - approach.center.y) / p.tan(approachEdgeAngle || 0);
+        newY = p.mouseY;
+      }
+      else {
+        newX = p.mouseX;
+        newY = approach.center.y + (newX - approach.center.x) * p.tan(approachEdgeAngle || 0);
+      }
+
+      const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
+
+
+      if (truthChecker(allPointsInBoundary)) {
+        const angle = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90
+
+        approach.updateCenter(newX, newY);
+        parking.updateAngle(angle); // +90 to get the perpendicular angle
+        garbage.updateAngle(angle);
+        building.updateAngle(angle);
+        building.hasStopped = false
+
+        parking.calculateNumberOfFittableStalls(property.propertyCorners);
+        parking.updateStallCorners(false, true);
+        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+        building.buildingLocator(p, building, parking, property, approach, garbage);
+        garbage.updateCenterGarbage(property, parking);
+
+        updateVisibilityGraph();
+      } else {
+        building.hasStopped = true;
+        approach.updateCenter(_center.x, _center.y);
+        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+      }
+    };
+
+    const handleParkingOffsetDrag = () => {
+      if (!property || !approach || !parking || !building || !garbage) return;
+
+      isRotationFrozen = true;
+
+      const newX = p.mouseX;
+      const newY = p.mouseY;
+      let newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
+
+      newAngle = calculateSnapToEdge(newAngle, parking, property);
+      parking.updateAngle(newAngle);
+      garbage.updateAngle(newAngle);
+
+      parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+      parking.updateStallCorners();
+      parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+
+      building.hasStopped = false;
+      building.buildingLocator(p, building, parking, property, approach, garbage);
+      garbage.updateCenterGarbage(property, parking);
+
+      updateVisibilityGraph();
+    };
+
+    const handleParkingDrag = () => {
+      if (!property || !approach || !parking || !building || !garbage) return;
+
+      const newX = p.mouseX;
+      const newY = p.mouseY;
+      const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
+
+
+      if (!truthChecker(centerInBoundary)) return;
+
+      parking.updateCenter(newX, newY);
+      garbage.updateCenterGarbage(property, parking);
+
+      let angle = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
+
+      angle = calculateSnapToEdge(angle, parking, property);
+
+      parking.updateAngle(normalizeAngle(angle));
+      garbage.updateAngle(normalizeAngle(angle));
+      building.updateAngle(normalizeAngle(angle));
+
+      const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
+
+      const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
+
+
+      if (truthChecker(allPointsInBoundary)) {
+
+        parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+        parking.updateStallCorners(false, isRotationFrozen);
+        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+
+        building.hasStopped = false;
+        building.buildingLocator(p, building, parking, property, approach, garbage);
+        updateVisibilityGraph();
+      } else {
+        building.hasStopped = true;
+        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+      }
+
+    };
+
 
     // Convert nodes to a graph
     p.mouseDragged = () => {
 
       if (!property || !approach || !parking || !building || !garbage) return;
-
-      const isHoveredApproach = approach.isMouseHovering();
-      const isHoveredParkingOffset = parking.isMouseHoveringOffset();
-      const isHoveredParking = parking.isMouseHovering();
-
-
-      const isHoveredBuilding = building.isMouseHovering();
-      const isHoveredBuildingOffset = building.isMouseHoveringOffset();
-
-      // Move the building
-      if ((isHoveredBuildingOffset || isHoveredBuilding) && building.isInitialized) {
+      const isHovered = {
+        approach: approach.isMouseHovering(),
+        parkingOffset: parking.isMouseHoveringOffset(),
+        parking: parking.isMouseHovering(),
+        building: building.isMouseHovering(),
+        buildingOffset: building.isMouseHoveringOffset(),
+      };
 
 
-        building.hasStopped = false
-        isDraggingBuilding = true;
-        const newX = p.mouseX;
-        const newY = p.mouseY;
 
-        const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
-        // const notIntersectingWithParking = twoObjectsAreNotColliding(building.sitePlanElementCorners, parking.sitePlanElementCorners)
 
-        // Check if building corners intersect with anythin and check if anything intersects with the building.
 
-        // building.pointIsOutOfPolygon(building.sitePlanElementCorners,)
-        // || !notIntersectingWithParking
-        if (!truthChecker(centerInBoundary)) {
-          building.hasStopped = true
-          return
-        }
-
-        building.updateBuildingCenter(newX, newY);
-
-        if (VisibilityGraphSolver) {
-          VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
-
-        }
+      // Moving the building
+      if ((isHovered.building || isHovered.buildingOffset) && building.isInitialized) {
+        isDragging.building = true;
+        handleBuildingDrag();
       }
-
 
       // Move the approach
-      if (isHoveredApproach || isDraggingApproach) {
-        isDraggingApproach = true;
-
-        const _center = p.createVector(approach.center.x, approach.center.y);
-
-        const approachEdgeAngle = property.approachEdge?.calculateAngle()
-
-        // Follow along the line
-        let newX = p.mouseX;
-        let newY = p.mouseY;
-
-        const isVertical = isMoreVertical(approachEdgeAngle || 0, true)
-
-        if (isVertical) {
-          newX = approach.center.x + (newY - approach.center.y) / p.tan(approachEdgeAngle || 0);
-          newY = p.mouseY;
-        }
-        else {
-          newX = p.mouseX;
-          newY = approach.center.y + (newX - approach.center.x) * p.tan(approachEdgeAngle || 0);
-        }
-
-
-        approach.updateCenter(newX, newY);
-        const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
-
-        if (truthChecker(allPointsInBoundary)) {
-          // If rotating the parking is going to push the parking outside the boundary, then update the center of the parking
-          // in the opposite direction of the contact point. If that's going to cause a conflict, then move it reflected 90degrees
-
-          // Update the parking position and angle
-          // Take a snapshop
-          const _angle = parking.angle;
-
-          approach.updateCenter(newX, newY);
-          const angle = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90
-          parking.updateAngle(angle); // +90 to get the perpendicular angle
-          garbage.updateAngle(angle)
-          building.hasStopped = false
-
-          building.updateAngle(angle); // +90 to get the perpendicular angle
-
-          parking.calculateNumberOfFittableStalls(property.propertyCorners);
-          parking.updateStallCorners(false, true);
-          parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-          building.buildingLocator(p, building, parking, property, approach, garbage)
-
-          garbage.updateCenterGarbage(property, parking)
-
-          if (VisibilityGraphSolver) {
-            VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
-          }
-
-        }
-        else {
-          building.hasStopped = true
-
-          approach.updateCenter(_center.x, _center.y);
-          parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-        }
+      if (isHovered.approach || isDragging.approach) {
+        isDragging.approach = true;
+        handleApproachDrag();
       }
 
-
-
-
-
       // Meant for rotating the parking lot
-      if (((isHoveredParkingOffset && !isHoveredParking) || isDraggingParkingOffset) && !isDraggingApproach) {
-        isDraggingParkingOffset = true;
-        isRotationFrozen = true;
-
-        // const _center = p.createVector(parking.center.x, parking.center.y);
-        const newX = p.mouseX;
-        const newY = p.mouseY;
-
-
-        let newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
-
-        newAngle  = calculateSnapToEdge (newAngle,parking, property);
-
-        parking.updateAngle(newAngle);
-        garbage.updateAngle(newAngle);
-
-        parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-        parking.updateStallCorners();
-        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-
-        building.hasStopped = false
-
-        building.buildingLocator(p, building, parking, property, approach, garbage);
-        garbage.updateCenterGarbage(property, parking)
-
-
-
-
-
-        if (VisibilityGraphSolver) {
-          VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
-        }
-
-
+      if (((isHovered.parkingOffset && !isHovered.parking) || isDragging.parkingOffset) && !isDragging.approach) {
+        isDragging.parkingOffset = true;
+        handleParkingOffsetDrag();
       }
 
       // Dragging the parking lot
-      if ((isHoveredParking || isDraggingParking) && !isDraggingParkingOffset) {
-        isDraggingParking = true;
-
-        // const _center = p.createVector(parking.center.x, parking.center.y);
-        const newX = p.mouseX;
-        const newY = p.mouseY;
-
-        const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
-
-        if (!truthChecker(centerInBoundary)) { return }
-
-
-        parking.updateCenter(newX, newY);
-        garbage.updateCenterGarbage(property, parking);
-
-
-
-        let angle2 = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
-
-
-        angle2 = calculateSnapToEdge (angle2,parking, property);
-
-
-        parking.updateAngle(normalizeAngle(angle2))
-        garbage.updateAngle(normalizeAngle(angle2))
-        building.updateAngle(normalizeAngle(angle2))
-
-
-
-        const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
-        const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
-
-
-        if (truthChecker(allPointsInBoundary)) {
-
-
-          parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-          parking.updateStallCorners(false, isRotationFrozen);
-          parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-          building.hasStopped = false
-
-          building.buildingLocator(p, building, parking, property, approach, garbage);
-
-
-
-
-
-          if (VisibilityGraphSolver) {
-            VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
-          }
-
-          // building.updateBuildingCenter();
-
-          // For all the points of the parking, find the point and edge that are closest. If they're 
-
-        }
-
-        else {
-          building.hasStopped = true
-
-          parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-
-
-        }
-
+      if ((isHovered.parking || isDragging.parking) && !isDragging.parkingOffset) {
+        isDragging.parking = true;
+        handleParkingDrag();
       }
-
-
 
       // Update driveway area
       if (this.approach !== null && this.parking !== null) {
@@ -2202,12 +2182,12 @@ export class AdjacencyGraphVisualizer2 {
       }
 
 
+
+
     };
 
     p.mousePressed = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
-
-
 
       const posX = p.mouseX;
       const posY = p.mouseY;
@@ -2261,20 +2241,18 @@ export class AdjacencyGraphVisualizer2 {
 
           building.entrances.push(entrance)
 
-          VisibilityGraphSolver = runVisibilityGraphSolver(VisibilityGraphSolver, building, parking, property, garbage, approach);
+          visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
         }
-
-
       }
     };
 
     p.mouseReleased = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
-      isDraggingParking = false;
-      isDraggingApproach = false;
-      isDraggingParkingOffset = false;
-
+      isDragging.parking = false;
+      isDragging.approach = false;
+      isDragging.parkingOffset = false;
     };
+
 
     p.draw = () => {
 
@@ -2287,7 +2265,6 @@ export class AdjacencyGraphVisualizer2 {
       const isHoveredParking = parking.isMouseHovering();
       const isHoveredBuilding = building.isMouseHovering();
       const isHoveredBuildingOffset = building.isMouseHoveringOffset();
-
 
       p.noFill()
       p.stroke(0);
@@ -2364,50 +2341,22 @@ export class AdjacencyGraphVisualizer2 {
         }
       }
 
-      if (VisibilityGraphSolver) {
+      if (visibilityGraphSolver) {
         // const showGrid = false;
 
         this.pathCellIndex++
 
-        // VisibilityGraphSolver.displaySolution(p, this.pathCellIndex)
+        // visibilityGraphSolver.displaySolution(p, this.pathCellIndex)
 
 
 
         // Display the shortest path for a specific start-end pair
-
-        VisibilityGraphSolver.displayShortestPaths(p);
-
-
-
-        VisibilityGraphSolver.sideWalkPolygons.forEach(polygon => {
-          p.push()
-          p.fill(150, 150, 200);
-          // p.noStroke()
-          p.beginShape()
-
-          polygon.forEach(ring => {
-
-
-            if (!ring) return
-
-
-            ring.forEach(pair => {
-              if (!pair) return
-              p.vertex(pair[0], pair[1])
-
-            })
-
-
-          })
-
-          p.endShape();
-          p.pop();
-        })
+        visibilityGraphSolver.displayShortestPaths(p);
+        // visibilityGraphSolver.displayPathsAsPolygons(p);
 
 
 
-
-        const maxPathStatesLength = VisibilityGraphSolver.edges.length;
+        const maxPathStatesLength = visibilityGraphSolver.edges.length;
         if (this.pathCellIndex > maxPathStatesLength + 30) {
           this.pathCellIndex = 0
         }
@@ -2484,7 +2433,7 @@ const p5VectorToTPoint = (vectors: p5.Vector[]): TPoint[] => {
   })
 }
 
-function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
+function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
 
 
   const obstacles: TPoint[][] = [
@@ -2534,10 +2483,10 @@ function runVisibilityGraphSolver(VisibilityGraphSolver: VisibilityGraph, buildi
   ];
 
 
-  VisibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles, property.propertyCorners)
+  visibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles, property.propertyCorners)
 
-  VisibilityGraphSolver.calculateSideWalkPolygons(property.scale)
-  return VisibilityGraphSolver
+  visibilityGraphSolver.calculateSideWalkPolygons(property.scale)
+  return visibilityGraphSolver
 }
 
 
