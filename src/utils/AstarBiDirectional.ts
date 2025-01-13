@@ -5,12 +5,13 @@ import { CNode } from "../pages/VisibilityGraph";
 export function findShortestPathsAstar(
     nodes: CNode[],
     startIndices: number[],
+    startProjectionIndices: number[],
     endIndices: number[]
 ): { start: CNode; end: CNode; path: CNode[] }[] {
     const paths: { start: CNode; end: CNode; path: CNode[] }[] = [];
 
     // verifyGraphConnectivity(nodes)
-    for (const startIndex of startIndices) {
+    for (const startIndex of startProjectionIndices) {
         for (const endIndex of endIndices) {
 
             // if ((endIndex % 2 === 0 && needsBackupIndex) || !needsBackupIndex) {
@@ -31,9 +32,9 @@ export function findShortestPathsAstar(
 
 
     // Now connect the starts with eachother.
-    if (startIndices.length > 1) {
-        for (const startIndex of startIndices) {
-            for (const startIndex2 of startIndices) {
+    if (startProjectionIndices.length > 1) {
+        for (const startIndex of startProjectionIndices) {
+            for (const startIndex2 of startProjectionIndices) {
                 if (startIndex2 <= startIndex) continue;
                 // if(startIndex2 === startIndex)
                 const _path = aStar(nodes, startIndex, startIndex2);

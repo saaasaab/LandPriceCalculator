@@ -3,13 +3,14 @@ import React, { useEffect, useReducer, useRef, useState } from 'react';
 // import VoronoiDiagram from '../futureItems/VoronoiDiagram';
 import { AdjacencyGraph } from '../utils/AdjacencyGraph';
 import p5 from 'p5';
-import { AdjacencyGraphVisualizer2, countParkingStalls } from '../utils/AdjacencyGraphVisualizer2';
+import { SiteplanGenerator} from '../utils/SiteplanGenerator';
 import LotLineDrawer from '../futureItems/LotLineDrawerOld';
 // import LotLineDrawerOld from '../futureItems/LotLineDrawerOld';
 // import { SubdivisionGenerator } from './SubdivisionGenerator';
 // import VoronoiSubdivision from '../futureItems/VoronoiDiagram';
 import './SitePlanDesigner.scss';
 import ArchitectCompass from '../components/ArchitectCompass';
+import { countParkingStalls } from '../utils/SiteplanGeneratorUtils';
 
 export interface IPoint {
   x: number;
@@ -81,7 +82,7 @@ const SitePlanDesigner: React.FC = () => {
   const draggingPointIndexRef = useRef<number | null>(null);
   const selectedLineIndexRef = useRef<number | null>(null);
 
-  let visualizer = useRef<AdjacencyGraphVisualizer2 | null>(null)// new AdjacencyGraphVisualizer2(graph );
+  let visualizer = useRef<SiteplanGenerator | null>(null)// new SiteplanGenerator(graph );
 
 
   // Handle file upload
@@ -116,7 +117,7 @@ const SitePlanDesigner: React.FC = () => {
     p.draw = () => {
 
       if (visualizer.current) {
-        visualizer.current.visualize2(p); // Delegate drawing to the visualizer
+        visualizer.current.visualize(p); // Delegate drawing to the visualizer
       } else {
         const isPolygonClosed = isPolygonClosedRef.current;
 
@@ -486,7 +487,7 @@ const SitePlanDesigner: React.FC = () => {
 
 
     const graph = new AdjacencyGraph();
-    visualizer.current = new AdjacencyGraphVisualizer2(graph, points, lines, scale || .25)
+    visualizer.current = new SiteplanGenerator(graph, points, lines, scale || .25)
     // Now pass this all on to the solver
   }
 
@@ -731,7 +732,7 @@ function drawArea(
 
 // const subdivisionGenerator = new SubdivisionGenerator();
 
-// visualizer.visualize2(p);
+// visualizer.visualize(p);
 // subdivisionGenerator.subdivide(p);
 // const graph = new AdjacencyGraph();
 // graph.addEdges("Parking1", ["Driveway"]);

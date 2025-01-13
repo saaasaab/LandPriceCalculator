@@ -6,15 +6,11 @@ import classifyPoint from "robust-point-in-polygon"
 import { findShortestPaths, TNode } from "../utils/BreadthFirstSearchBiDirectional";
 import { findShortestPathsAstar } from "../utils/AStarBiDirectional";
 import polygonClipping from 'polygon-clipping';
+import { TTwoPoints } from "../utils/SiteplanGeneratorUtils";
 
 
-interface IPoint {
-  x: number;
-  y: number;
-}
-
+interface IPoint {x: number; y: number;}
 export type TPoint = { x: number; y: number };
-
 type Point = [number, number];
 
 export class CNode {
@@ -54,11 +50,13 @@ export class VisibilityGraph {
     path: CNode[];
   }[];
   startIndices: number[];
+  startProjectionIndices: number[];
   endIndices: number[];
   sideWalkPolygons: [number, number][][];//polygonClipping.MultiPolygon
 
+  
 
-  constructor(startPoints: TPoint[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[]) {
+  constructor(startPoints: TTwoPoints[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[]) {
     // Initialize nodes
     this.nodes = [];
     this.obstaclesOffset = [];
@@ -67,11 +65,14 @@ export class VisibilityGraph {
     this.nodeCount = 0;
     this.shortestPaths = []
     this.startIndices = [];
+    this.startProjectionIndices = []
     this.endIndices = [];
     this.sideWalkPolygons = []
 
     const _boundary: Point[] = boundary.map(point => [point.x, point.y]);
     const startIndices: number[] = [];
+
+    const startProjectionIndices: number[] = [];
     const endIndices: number[] = [];
 
     for (const point of startPoints) {
@@ -79,6 +80,12 @@ export class VisibilityGraph {
       if (!isOutsideBoundary) {
         this.nodes.push(new CNode(point.x, point.y, this.nodeCount, "startNode"));
         startIndices.push(this.nodeCount)
+        this.nodeCount++;
+
+
+        this.nodes.push(new CNode(point.x2, point.y2, this.nodeCount, "startProjectionNode"));
+        // create on that is pointed out. 
+        startProjectionIndices.push(this.nodeCount)
         this.nodeCount++;
       }
     }
@@ -119,6 +126,7 @@ export class VisibilityGraph {
     this.edges = [];
 
     this.startIndices = startIndices;
+    this.startProjectionIndices = startProjectionIndices;
     this.endIndices = endIndices;
 
     this.calculateEdges();
@@ -126,8 +134,6 @@ export class VisibilityGraph {
 
 
   calculateSideWalkPolygons(scale: number) {
-
-
     const line2Polygon = (points: [number, number][], thickness: number | number[]): [number, number][] => {
       const getOffsets = (a: IPoint, b: IPoint, thickness: number): IPoint => {
         const dx = b.x - a.x;
@@ -334,69 +340,6 @@ export class VisibilityGraph {
 
   removeDeadEndMidNodes(nodes: CNode[],) {
 
-
-
-
-
-
-
-
-    // const nodesToRemove = new Set();
-
-
-
-    // const queue: TNode[] = [nodes[0]];
-    // const nodesVisited = new Set();
-    // // First go through all the nodes, create the graph and remove islands
-    // while (queue.length > 0) {
-    //   const child = queue.shift();
-
-    //   if (!nodesVisited.has(child?.index)) {
-    //     nodesVisited.add(child?.index);
-    //     const children = this.nodes.filter(node => child?.children.includes(node.index))
-    //     queue.push(...children)
-    //   }
-    // }
-
-
-    // this.nodes = nodes.filter(node => nodesVisited.has(node.index));
-
-
-    // IF THERE IS ONE CHILD, THEN IT MAY BE AN ISLAND, If none of the children have an end
-
-
-
-    // // Iterate through the nodes to find dead-end midNodes
-    // for (let i = 0; i < nodes.length; i++) {
-    //   const node = nodes[i];
-    //   nodesVisited.add(node.index);
-
-
-    //   if (node.nodeType === "midNode" && node.children.length === 0) {
-    //     nodesToRemove.add(node.index);
-    //   }
-
-    //   else if (node.nodeType === "midNode" && node.children.length === 1) {
-    //     const childIndex = node.children[0];
-    //     const childNode = nodes[childIndex];
-
-    //     // Check if this node is the only child in the other node's children array
-    //     if (childNode && childNode.children.includes(node.index) && childNode.children.length >= 1) {
-    //       // Add this node to the removal set
-
-    //       nodesToRemove.add(node.index);
-    //       // Remove this node from the childNode's children array
-    //       childNode.children = childNode.children.filter(c => c !== node.index);
-    //     }
-    //   }
-    // };
-    // this.nodes = nodes.filter(node => !nodesToRemove.has(node.index));
-
-
-
-    // if (nodesToRemove.size > 0) {
-    //   this.removeDeadEndMidNodes(this.nodes)
-    // }
   }
 
 
@@ -462,6 +405,7 @@ export class VisibilityGraph {
     this.shortestPaths = findShortestPathsAstar(
       this.nodes,
       this.startIndices,
+      this.startProjectionIndices,
       this.endIndices
     )
 
