@@ -1,9 +1,15 @@
+.land-calculator-container:has(.site-plan-generator) {
+  overflow: hidden;
+}
 .site-plan-generator {
   $spacing-base: 1rem;
   $border-radius: 0.5rem;
   $transition-speed: 0.2s;
 
   width: 100%;
+  height: calc(100vh - 84px - 2 * 16px);
+
+  // overflow: hidden;
   // Layout
   &__container {
     display: grid;
@@ -12,19 +18,26 @@
     max-width: 1600px;
     margin: 0 auto;
     padding: $spacing-base;
-    min-height: 100vh;
     gap: 1.5rem;
+    height: 100%;
   }
 
   // Control Panel (Left Column)
   &__controls {
+    overflow: scroll;
     .card {
       height: 100%;
       background-color: white;
       border-radius: $border-radius;
-      overflow: hidden;
+      // overflow: hidden;
+
+
+      scroll-behavior: smooth;
+      overflow: scroll;
+      height: 100%;
+
     }
-    .pre-input-fields{
+    .pre-input-fields {
       display: flex;
       flex-direction: column;
       gap: 5px;
@@ -52,7 +65,7 @@
         justify-content: space-between;
         align-items: center;
         // grid-template-columns: 2fr 1fr;
-        margin-bottom: $spacing-base * .5;
+        margin-bottom: $spacing-base * 0.5;
 
         label {
           text-align: left;
@@ -111,23 +124,27 @@
 
   // Visualization Panel (Right Column)
   &__visualization {
+    .card {
+      height: 100%;
+
+      &__content {
+        height: 100%;
+        
+      }
+    }
     &-container {
-      height: calc(100vh - #{$spacing-base * 12});
+      // height:max-content;
+      // height: calc(100vh - #{$spacing-base * 12});
       background-color: #f9fafb;
       border: 2px dashed #e5e7eb;
       border-radius: $border-radius;
       display: flex;
       align-items: center;
       justify-content: center;
+      height: 100%;
 
-      .placeholder {
-        text-align: center;
-        color: #6b7280;
+     
 
-        svg {
-          margin-bottom: $spacing-base * 0.5;
-        }
-      }
     }
   }
 

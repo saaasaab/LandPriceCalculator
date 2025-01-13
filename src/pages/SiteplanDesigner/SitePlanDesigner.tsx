@@ -40,7 +40,7 @@ export interface Line {
 
 
 // SitePlanGenerator.tsx
-import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import './SitePlanDesigner.scss';
 import { Card, CardHeader, CardTitle, CardContent, Input } from '../../components/ui';
@@ -79,13 +79,12 @@ const SitePlanGenerator: React.FC = () => {
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
-  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
+  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('adjust'); // Interaction mode
 
   const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
-
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
 
-
+  const [isUploadingImage, setIsUploadingImage] = useState(true)
 
 
 
@@ -237,10 +236,21 @@ const SitePlanGenerator: React.FC = () => {
     // setLines(newLines);
   };
 
+  const startUploadingImage = () => {
+    setMode('upload')
+
+    setIsUploadingImage(true);
+    isSelectingSetbackRef.current = false;
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = false;
+
+  }
   const createPoints = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
     setIsGeneratingSitePlan(false);
+    setIsUploadingImage(false);
+
     setMode('adjust')
   }
 
@@ -252,6 +262,7 @@ const SitePlanGenerator: React.FC = () => {
     isPolygonClosedRef.current = false;
     isSelectingApproachRef.current = false;
     setIsGeneratingSitePlan(false);
+    setIsUploadingImage(false);
     isDefiningScaleRef.current = false;
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
@@ -262,6 +273,8 @@ const SitePlanGenerator: React.FC = () => {
 
   const selectApproach = () => {
     setIsGeneratingSitePlan(false)
+    setIsUploadingImage(false);
+
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
     isSelectingSetbackRef.current = false;
@@ -271,6 +284,8 @@ const SitePlanGenerator: React.FC = () => {
 
   const defineScale = () => {
     setIsGeneratingSitePlan(false);
+    setIsUploadingImage(false);
+
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
     isSelectingSetbackRef.current = false;
@@ -293,6 +308,7 @@ const SitePlanGenerator: React.FC = () => {
     const scale = scaleRef.current;
 
     setIsGeneratingSitePlan(true)
+    setIsUploadingImage(false);
     isSelectingSetbackRef.current = false;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
@@ -303,6 +319,39 @@ const SitePlanGenerator: React.FC = () => {
     // Now pass this all on to the solver
   }
 
+
+  const uploadStatus = () => {
+    if (!imageURL && isUploadingImage) {
+      return EStatus.notStarted
+    }
+    else if (!imageURL && isUploadingImage) {
+      return EStatus.inProgress
+    }
+    else {
+      return EStatus.complete;
+    }
+  };
+
+
+  const createPropertyLinesStatus = useMemo(
+    () => {
+
+      if (pointsRef.current.length > 0 && !isPolygonClosedRef.current) {
+        return EStatus.inProgress
+      }
+      else if (isPolygonClosedRef.current) {
+        return EStatus.complete
+      }
+      else {
+        return EStatus.notStarted
+      }
+    },
+    [isPolygonClosedRef.current, pointsRef.current],
+  )
+
+  const approachStatus = ""
+  const scaleStatus = ""
+  const setbacksStatus = ``
 
   return (
     <div className="site-plan-generator">
@@ -400,55 +449,31 @@ const SitePlanGenerator: React.FC = () => {
 
                 <button
                   onClick={clearCanvas}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px', marginRight: '10px', marginBottom: '10px' }}
                 >
                   Clear
                 </button>
 
-                <StepButton label="Upload Property Image" onClick={clearCanvas} status="complete" />
+                <StepButton label="Upload Property Image" onClick={startUploadingImage} status={uploadStatus()} isActive={mode==='upload'}/>
+                
+                
+                {mode === "upload" && !isGeneratingSitePlan ?
+                  <ImageUploader onFileUpload={setImageURL} /> : <></>}
 
-                <StepButton label="Create Points" onClick={createPoints} status="in-progress" />
-                <StepButton label="Select Approach" onClick={selectApproach} status="not-started" />
-                <StepButton label="Define Scale" onClick={defineScale} status="not-started" />
-                <StepButton label="Create Setbacks" onClick={createSetbacks} status="not-started" />
-                <StepButton label="Generate Site Plan" onClick={generateSitePlan} status="not-started" />
-
-
-
-                <button
-                  onClick={createPoints}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-                >
-                  Create Points
-                </button>
-
-                <button
-                  onClick={selectApproach}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-                >
-                  Select approach
-                </button>
-
-                <button
-                  onClick={defineScale}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-                >
-                  Define Scale
-                </button>
-
-                <button
-                  onClick={createSetbacks}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
-                >
-                  Create Setbacks
-                </button>
-
+                <StepButton label="Create Points" onClick={createPoints} status={createPropertyLinesStatus} isActive={mode==='adjust'}/>
+                <StepButton label="Select Approach" onClick={selectApproach} status="not-started" isActive={mode==='approach'}/>
+                <StepButton label="Define Scale" onClick={defineScale} status="not-started" isActive={mode==='scale'}/>
+                <StepButton label="Create Setbacks" onClick={createSetbacks} status="not-started" isActive={mode==='generate'}/>
                 <button
                   onClick={generateSitePlan}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }}
                 >
                   Generate Site Plan
                 </button>
+
+
+
+
 
                 {mode === "scale" ? <div style={{ marginTop: '10px' }}>
                   <label>Edge Length (ft): </label>
@@ -463,10 +488,8 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div> : <></>}
 
-                {mode === "adjust" && !isGeneratingSitePlan ?
 
-                  <ImageUploader onFileUpload={setImageURL} /> : <></>}
-                {/* <input type="file" accept="image/*" onChange={handleFileUpload} />  */}
+
               </div>
             }
           </Card>
@@ -475,9 +498,7 @@ const SitePlanGenerator: React.FC = () => {
         {/* Right Column - Visualization */}
         <div className="site-plan-generator__visualization">
           <Card>
-            <CardHeader>
-              <CardTitle>Site Plan Visualization</CardTitle>
-            </CardHeader>
+
             <CardContent>
               <div className="site-plan-generator__visualization-container" ref={canvasContainerRef}>
 
@@ -501,6 +522,7 @@ const SitePlanGenerator: React.FC = () => {
                         type="number"
                         value={line.setback}
                         onChange={(e) => updateSetback(index, e.target.value)}
+                        tabIndex={index}
                         style={{
                           position: "absolute",
                           left: `${midX + rect.left}px`,
@@ -604,21 +626,28 @@ export default SitePlanGenerator;
 
 
 type Status = 'not-started' | 'in-progress' | 'complete';
+enum EStatus {
+  notStarted = "not-started",
+  inProgress = "in-progress",
+  complete = "complete",
+}
+
 
 interface StepButtonProps {
   label: string;
   onClick: () => void;
   status: Status;
+  isActive?: boolean;
 }
 
-const StepButton: React.FC<StepButtonProps> = ({ label, onClick, status }) => {
+const StepButton: React.FC<StepButtonProps> = ({ label, onClick, status,isActive=false }) => {
   const getStatusIcon = () => {
     switch (status) {
-      case 'not-started':
+      case EStatus.notStarted:
         return '⏳'; // Hourglass icon for "not started"
-      case 'in-progress':
+      case EStatus.inProgress:
         return '🔄'; // Spinning arrows icon for "in progress"
-      case 'complete':
+      case EStatus.complete:
         return '✅'; // Checkmark icon for "complete"
       default:
         return '';
@@ -626,14 +655,27 @@ const StepButton: React.FC<StepButtonProps> = ({ label, onClick, status }) => {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-      <span style={{ marginRight: '10px', fontSize: '20px' }}>{getStatusIcon()}</span>
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }} >
+      {/* <span style={{ marginRight: '10px', fontSize: '20px' }}>{getStatusIcon()}</span> */}
       <button
         onClick={onClick}
-        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+        style={{
+          padding: '10px 20px',
+          cursor: 'pointer',
+          marginLeft: '10px',
+          marginRight: '10px',
+          width: '100%',
+          backgroundColor: isActive ? '#007bff' : '#f0f0f0', // Active state styling
+          color: isActive ? '#fff' : '#000', // Text color changes when active
+          border: isActive ? '2px solid #0056b3' : '2px solid #ccc', // Active border styling
+          transition: 'background-color 0.3s, color 0.3s, border 0.3s', // Smooth transitions
+        }}
       >
+      
         {label}
       </button>
+
+      
     </div>
   );
 };
