@@ -1,7 +1,6 @@
 import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
-import { Line } from "../pages/SitePlanDesigner";
 import { TPoint, VisibilityGraph } from "../pages/VisibilityGraph";
 import { Approach, Building, Edge, Garbage, Parking, ParkingStall, Property, SitePlanElement, stallHeight, stallWidth } from "./SiteplanGenerator";
 

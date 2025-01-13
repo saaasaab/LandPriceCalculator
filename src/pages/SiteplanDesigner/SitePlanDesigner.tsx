@@ -21,11 +21,35 @@ export interface SiteMetrics {
   bikeParkingArea: number;
 }
 
+export interface IPoint {
+  x: number;
+  y: number;
+}
+
+export interface Line {
+  start: number;
+  end: number;
+  setback?: number;
+  color: string;
+  index: number;
+  selected: boolean;
+  isApproach: boolean;
+  isScale: boolean;
+  isSetback: boolean
+}
+
+
 // SitePlanGenerator.tsx
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
 import './SitePlanDesigner.scss';
 import { Card, CardHeader, CardTitle, CardContent, Input } from '../../components/ui';
+import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
+import { sketchForSiteplan } from './sketchForSiteplan';
+import p5 from 'p5';
+import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
+import { AdjacencyGraph } from '../../utils/AdjacencyGraph';
+import ImageUploader from './ImageUploader';
 
 const initialFormData: FormData = {
   parkingStalls: 4,
@@ -53,6 +77,75 @@ const initialMetrics: SiteMetrics = {
 const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageURL, setImageURL] = useState<string | null>(null);
+  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate'>('adjust'); // Interaction mode
+
+  const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
+
+  const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
+
+
+
+
+
+  // Property Outputs
+  const [globalAngle, setGlobalAngle] = useState<number>(0);
+
+
+
+
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const setbacksRef = useRef<number[]>([]);
+  const setbackHasInputRef = useRef<boolean[]>([]);
+  const pointsRef = useRef<IPoint[]>([]);
+  const linesRef = useRef<Line[]>([]);
+  const isPolygonClosedRef = useRef<boolean>(false);
+  const isSelectingApproachRef = useRef<boolean>(false);
+  const isGeneratingSitePlanRef = useRef<boolean>(false);
+  const isSelectingSetbackRef = useRef<boolean>(false);
+
+  const isDefiningScaleRef = useRef<boolean>(false);
+  const inputScaleRef = useRef<number | null>(null);
+  const scaleRef = useRef<number | null>(null);
+
+
+  const draggingPointIndexRef = useRef<number | null>(null);
+  const selectedLineIndexRef = useRef<number | null>(null);
+
+  let visualizer = useRef<SiteplanGenerator | null>(null)// new SiteplanGenerator(graph );
+
+
+  // P5 sketch function
+
+
+  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isPolygonClosedRef, scaleRef, pointsRef, linesRef, setbacksRef, setbackHasInputRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect()
+    setOffsetHeight({ x: rect.left || 0, y: rect.top || 0 })
+  }, [canvasRef?.current])
+
+  useEffect(() => {
+    const p5Instance = new p5(sketch);
+    return () => {
+      p5Instance.remove();
+    };
+  }, [imageURL]);
+
+
+  // Handle file upload
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const url = URL.createObjectURL(file);
+      setImageURL(url);
+    }
+  };
 
   const handleInputChange = (field: keyof FormData, value: number | boolean): void => {
     setFormData(prev => ({
@@ -74,8 +167,142 @@ const SitePlanGenerator: React.FC = () => {
   };
 
   const formatMetricLabel = (key: string): string => {
-    return key.replace(/([A-Z])/g, ' $1').trim();
+    return key.replace(/([A-Z])/g, ' $1').trim().replace(/\b\w/g, (char) => char.toUpperCase());
   };
+
+
+
+  useEffect(() => {
+    const updateVariables = () => {
+      console.log("There be danger here")
+      const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
+
+
+      const _metrics: SiteMetrics = {
+        propertyArea: visualizer.current?.property?.areaOfProperty || 0,
+        imperviousSurface: visualizer.current?.property?.areaOfProperty || 0,
+        drivewayArea: visualizer.current?.drivewayArea || 0,
+        parkingArea: visualizer.current?.parking?.parkingArea || 0,
+        parkingStallsArea: visualizer.current?.parking?.parkingStallsArea || 0,
+        handicappedStallsCount: visualizer.current?.parking?.handicappedParkingNum || 0,
+        totalParkingStalls: leftStalls + rightStalls,
+        sidewalkArea: visualizer.current?.sidewalkArea || 0,
+        garbageArea: visualizer.current?.garbage?.area || 0,
+        actualBuildingArea: visualizer.current?.building?.buildingAreaActual || 0,
+        approachArea: visualizer.current?.approach?.approachArea || 0,
+        bikeParkingArea: visualizer.current?.bikeParkingArea || 0,
+      };
+      setMetrics(_metrics);
+    };
+
+
+    if (visualizer.current) {
+      const interval = setInterval(updateVariables, 500); // Check for changes periodically
+
+      return () => clearInterval(interval);
+    }
+
+  }, [visualizer?.current]);
+
+  useEffect(() => {
+
+    const updatedGlobals = {
+
+
+      approachWidth: formData.approachWidth,
+      parkingNumber: formData.parkingStalls,
+      parkingDrivewayWidth: formData.drivewayWidth,
+      buildingAreaTarget: formData.buildingArea,
+      globalAngle: globalAngle,
+      taperParking: formData.taperedDriveway
+    }
+
+    visualizer.current?.updateGlobalVariables(updatedGlobals)
+  }, [formData, globalAngle])
+
+
+  const onRotationChange = (value: number) => {
+    setGlobalAngle(value)
+  }
+
+  // Update setback for a specific line
+  const updateSetback = (index: number, value: string) => {
+
+    const lines = linesRef.current;
+    const newLines = [...lines];
+    newLines[index].setback = parseFloat(value) || 0;
+
+    lines[index].setback = parseFloat(value) || 0
+
+    // setLines(newLines);
+  };
+
+  const createPoints = () => {
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = false;
+    setIsGeneratingSitePlan(false);
+    setMode('adjust')
+  }
+
+  const clearCanvas = () => {
+    setImageFile(null);
+    setImageURL(null);
+    pointsRef.current = []
+    linesRef.current = [];
+    isPolygonClosedRef.current = false;
+    isSelectingApproachRef.current = false;
+    setIsGeneratingSitePlan(false);
+    isDefiningScaleRef.current = false;
+    draggingPointIndexRef.current = null;
+    selectedLineIndexRef.current = null;
+    inputScaleRef.current = null;
+    setMode('adjust')
+
+  };
+
+  const selectApproach = () => {
+    setIsGeneratingSitePlan(false)
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = true;
+    isSelectingSetbackRef.current = false;
+    setMode('approach')
+
+  }
+
+  const defineScale = () => {
+    setIsGeneratingSitePlan(false);
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = true;
+    isSelectingSetbackRef.current = false;
+    setMode('scale')
+
+  }
+
+  const createSetbacks = () => {
+
+    setIsGeneratingSitePlan(false);
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = false;
+    isSelectingSetbackRef.current = true;
+    setMode('setback')
+  }
+
+  const generateSitePlan = () => {
+    const points = pointsRef.current;
+    const lines = linesRef.current;
+    const scale = scaleRef.current;
+
+    setIsGeneratingSitePlan(true)
+    isSelectingSetbackRef.current = false;
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = false;
+
+
+    const graph = new AdjacencyGraph();
+    visualizer.current = new SiteplanGenerator(graph, points, lines, scale || .25)
+    // Now pass this all on to the solver
+  }
+
 
   return (
     <div className="site-plan-generator">
@@ -86,84 +313,162 @@ const SitePlanGenerator: React.FC = () => {
             <CardHeader>
               <CardTitle>Site Plan Generator</CardTitle>
             </CardHeader>
-            <CardContent>
-              {/* Input Controls */}
-              <div className="site-plan-generator__section-header">
-                <h3>Input Parameters</h3>
-              </div>
-              
-              <div className="site-plan-generator__input-group">
-                <label htmlFor="parkingStalls">Parking Stalls</label>
-                <Input 
-                  id="parkingStalls"
-                  type="number"
-                  min={0}
-                  value={formData.parkingStalls}
-                  onChange={(e) => handleNumberInput(e, 'parkingStalls')}
-                />
-              </div>
-              
-              <div className="site-plan-generator__input-group">
-                <label htmlFor="approachWidth">Approach Width (ft)</label>
-                <Input 
-                  id="approachWidth"
-                  type="number"
-                  min={0}
-                  value={formData.approachWidth}
-                  onChange={(e) => handleNumberInput(e, 'approachWidth')}
-                />
-              </div>
 
-              <div className="site-plan-generator__input-group">
-                <label htmlFor="drivewayWidth">Driveway Width (ft)</label>
-                <Input 
-                  id="drivewayWidth"
-                  type="number"
-                  min={0}
-                  value={formData.drivewayWidth}
-                  onChange={(e) => handleNumberInput(e, 'drivewayWidth')}
-                />
-              </div>
 
-              <div className="site-plan-generator__input-group">
-                <label htmlFor="buildingArea">Building Area (sq ft)</label>
-                <Input 
-                  id="buildingArea"
-                  type="number"
-                  min={0}
-                  value={formData.buildingArea}
-                  onChange={(e) => handleNumberInput(e, 'buildingArea')}
-                />
-              </div>
+            {isGeneratingSitePlan ?
+              <CardContent>
+                {/* Input Controls */}
+                <div className="site-plan-generator__section-header">
+                  <h3>Input Parameters</h3>
+                </div>
 
-              <div className="site-plan-generator__checkbox">
-                {/* <Checkbox 
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="parkingStalls">Parking Stalls</label>
+                  <Input
+                    id="parkingStalls"
+                    type="number"
+                    min={0}
+                    value={formData.parkingStalls}
+                    onChange={(e) => handleNumberInput(e, 'parkingStalls')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="approachWidth">Approach Width (ft)</label>
+                  <Input
+                    id="approachWidth"
+                    type="number"
+                    min={0}
+                    value={formData.approachWidth}
+                    onChange={(e) => handleNumberInput(e, 'approachWidth')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="drivewayWidth">Driveway Width (ft)</label>
+                  <Input
+                    id="drivewayWidth"
+                    type="number"
+                    min={0}
+                    value={formData.drivewayWidth}
+                    onChange={(e) => handleNumberInput(e, 'drivewayWidth')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="buildingArea">Building Area (sq ft)</label>
+                  <Input
+                    id="buildingArea"
+                    type="number"
+                    min={0}
+                    value={formData.buildingArea}
+                    onChange={(e) => handleNumberInput(e, 'buildingArea')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__checkbox">
+                  {/* <Checkbox 
                   id="taperedDriveway"
                   checked={formData.taperedDriveway}
                   onCheckedChange={(checked: boolean) => handleInputChange('taperedDriveway', checked)}
                 /> */}
-                <label htmlFor="taperedDriveway">Tapered Driveway</label>
-              </div>
+                  <label htmlFor="taperedDriveway">Tapered Driveway</label>
+                </div>
 
 
-              {/* Metrics Display */}
-              <div className="site-plan-generator__section-header">
-                <h3>Site Metrics</h3>
+                {/* Metrics Display */}
+                <div className="site-plan-generator__section-header">
+                  <h3>Site Metrics</h3>
+                </div>
+
+                <div className="site-plan-generator__metrics-container">
+                  {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
+                    <div key={key} className="site-plan-generator__metrics-item">
+                      <span className="label">
+                        {formatMetricLabel(key)}
+                      </span>
+                      <span className="value">
+                        {formatMetricValue(key, value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+              : <div className="pre-input-fields">
+
+
+
+                <button
+                  onClick={clearCanvas}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                >
+                  Clear
+                </button>
+
+                <StepButton label="Upload Property Image" onClick={clearCanvas} status="complete" />
+
+                <StepButton label="Create Points" onClick={createPoints} status="in-progress" />
+                <StepButton label="Select Approach" onClick={selectApproach} status="not-started" />
+                <StepButton label="Define Scale" onClick={defineScale} status="not-started" />
+                <StepButton label="Create Setbacks" onClick={createSetbacks} status="not-started" />
+                <StepButton label="Generate Site Plan" onClick={generateSitePlan} status="not-started" />
+
+
+
+                <button
+                  onClick={createPoints}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                >
+                  Create Points
+                </button>
+
+                <button
+                  onClick={selectApproach}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                >
+                  Select approach
+                </button>
+
+                <button
+                  onClick={defineScale}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                >
+                  Define Scale
+                </button>
+
+                <button
+                  onClick={createSetbacks}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                >
+                  Create Setbacks
+                </button>
+
+                <button
+                  onClick={generateSitePlan}
+                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+                >
+                  Generate Site Plan
+                </button>
+
+                {mode === "scale" ? <div style={{ marginTop: '10px' }}>
+                  <label>Edge Length (ft): </label>
+                  <input
+                    // ref={setbackInputRef} // Attach ref for auto-focus
+                    type="number"
+                    value={inputScaleRef.current || undefined}
+                    onChange={(e) => {
+                      inputScaleRef.current = Number(e.target.value)
+                    }}
+                    autoFocus
+                  />
+                </div> : <></>}
+
+                {mode === "adjust" && !isGeneratingSitePlan ?
+
+                  <ImageUploader onFileUpload={setImageURL} /> : <></>}
+                {/* <input type="file" accept="image/*" onChange={handleFileUpload} />  */}
               </div>
-              
-              <div className="site-plan-generator__metrics-container">
-                {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
-                  <div key={key} className="site-plan-generator__metrics-item">
-                    <span className="label">
-                      {formatMetricLabel(key)}
-                    </span>
-                    <span className="value">
-                      {formatMetricValue(key, value)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
+            }
           </Card>
         </div>
 
@@ -174,11 +479,38 @@ const SitePlanGenerator: React.FC = () => {
               <CardTitle>Site Plan Visualization</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="site-plan-generator__visualization-container">
-                <div className="placeholder">
-                  {/* <Info size={24} /> */}
-                  <span>Site plan visualization will render here</span>
-                </div>
+              <div className="site-plan-generator__visualization-container" ref={canvasContainerRef}>
+
+                <div ref={canvasRef} />
+
+                {/* Render inputs over the canvas */}
+                {isSelectingSetbackRef.current &&
+                  linesRef.current?.map((line, index) => {
+                    const start = pointsRef.current[line.start];
+                    const end = pointsRef.current[line.end];
+
+                    if (!start || !end || !canvasRef.current) return null;
+
+                    const midX = (start.x + end.x) / 2;
+                    const midY = (start.y + end.y) / 2;
+                    const rect = canvasRef.current.getBoundingClientRect();
+
+                    return (
+                      <input
+                        key={index}
+                        type="number"
+                        value={line.setback}
+                        onChange={(e) => updateSetback(index, e.target.value)}
+                        style={{
+                          position: "absolute",
+                          left: `${midX + rect.left}px`,
+                          top: `${midY + rect.top}px`,
+                          width: "50px",
+                        }}
+                      />
+                    );
+                  })}
+
               </div>
             </CardContent>
           </Card>
@@ -189,3 +521,119 @@ const SitePlanGenerator: React.FC = () => {
 };
 
 export default SitePlanGenerator;
+
+
+
+
+
+
+
+
+
+
+
+
+// const subdivisionGenerator = new SubdivisionGenerator();
+
+// visualizer.visualize(p);
+// subdivisionGenerator.subdivide(p);
+// const graph = new AdjacencyGraph();
+// graph.addEdges("Parking1", ["Driveway"]);
+// graph.addEdges("Parking2", ["Driveway"]);
+// graph.addEdges("Driveway", ["Bike Parking", "Approach", "Garbage"]);
+// graph.addEdges("Bike Parking", ["Approach", "Building"]);
+
+
+// const canvasRef = useRef<HTMLDivElement>(null);
+
+// const sketch = (p: p5) => {
+//   let img: p5.Image | null = null;
+//   p.preload = () => {
+//     if (imageURL) {
+//       img = p.loadImage(imageURL);
+//     }
+//   };
+
+
+
+{/* <LotLineDrawerOld onFinalize={handleFinalize} /> */ }
+
+// const handleFinalize = (data: FinalizedData) => {
+//   setFinalizedData(data); // Save the finalized data
+// };
+// const [finalizedData, setFinalizedData] = useState<FinalizedData | null>(null);
+{/* <VoronoiDiagram/> */ }
+{/* <PolygonDivider /> */ }
+{/* {!finalizedData ? (
+        
+        // <LotLineDrawer  />
+     
+
+      ) : (
+        <div>
+          <h2>Finalized Data</h2>
+          <pre>{JSON.stringify(finalizedData, null, 2)}</pre>
+          {/* Replace this with the next step in your workflow */}
+{/* </div> */ }
+{/* // )} */ }
+
+
+// // graph.addVertex("Property Line");
+// // graph.addVertex("Setback");
+// // graph.addVertex("Easement");
+// // graph.addVertex("Landscaping");
+// // graph.addVertex("Parking1");
+// // graph.addVertex("Parking2");
+// // graph.addVertex("Driveway");
+// // graph.addVertex("Bike Parking");
+// // graph.addVertex("Building");
+// // graph.addVertex("Approach");
+// // graph.addVertex("Sidewalk");
+// // graph.addVertex("Garbage");
+
+// // graph.addEdges("Property Line", ["Setback", "Easement", "Landscaping", "Approach", "Sidewalk"]);
+// // graph.addEdges("Setback", ["Easement", "Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
+// // graph.addEdges("Easement", ["Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
+// // graph.addEdges("Landscaping", ["Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
+// // graph.addEdges("Sidewalk", ["Garbage","Driveway","Bike Parking","Building","Approach","Parking1","Parking2"]);
+
+
+
+
+
+
+
+type Status = 'not-started' | 'in-progress' | 'complete';
+
+interface StepButtonProps {
+  label: string;
+  onClick: () => void;
+  status: Status;
+}
+
+const StepButton: React.FC<StepButtonProps> = ({ label, onClick, status }) => {
+  const getStatusIcon = () => {
+    switch (status) {
+      case 'not-started':
+        return '⏳'; // Hourglass icon for "not started"
+      case 'in-progress':
+        return '🔄'; // Spinning arrows icon for "in progress"
+      case 'complete':
+        return '✅'; // Checkmark icon for "complete"
+      default:
+        return '';
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+      <span style={{ marginRight: '10px', fontSize: '20px' }}>{getStatusIcon()}</span>
+      <button
+        onClick={onClick}
+        style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px' }}
+      >
+        {label}
+      </button>
+    </div>
+  );
+};

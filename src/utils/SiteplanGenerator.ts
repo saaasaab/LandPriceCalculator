@@ -1,9 +1,9 @@
 import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
-import { IPoint, Line } from "../pages/SitePlanDesigner";
 import { TPoint, VisibilityGraph } from "../pages/VisibilityGraph";
 import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateSnapToEdge, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway } from "./SiteplanGeneratorUtils";
+import { IPoint, Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
 
 type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";

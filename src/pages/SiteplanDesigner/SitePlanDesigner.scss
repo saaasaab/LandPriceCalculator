@@ -24,6 +24,11 @@
       border-radius: $border-radius;
       overflow: hidden;
     }
+    .pre-input-fields{
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
 
     .site-plan-generator {
       // Section Headers

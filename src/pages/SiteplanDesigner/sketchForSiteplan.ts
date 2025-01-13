@@ -1,10 +1,10 @@
 import p5 from "p5";
 import { SiteplanGenerator } from "../../utils/SiteplanGenerator";
-import { IPoint, Line } from "./SitePlanDesigner-2";
+import { IPoint, Line } from "./SitePlanDesigner";
 
  
 
-export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, visualizer: React.MutableRefObject<SiteplanGenerator | null>, isPolygonClosedRef: React.MutableRefObject<boolean>, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, setbackHasInputRef: React.MutableRefObject<boolean[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>) {
+export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, visualizer: React.MutableRefObject<SiteplanGenerator | null>, isPolygonClosedRef: React.MutableRefObject<boolean>, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, setbackHasInputRef: React.MutableRefObject<boolean[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>,canvasContainerRef: React.RefObject<HTMLDivElement>) {
     return (p: p5) => {
       let img: p5.Image | null = null;
       // const 
@@ -15,8 +15,15 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
       };
   
       p.setup = () => {
-        const canvas = p.createCanvas(800, 600);
-        if (canvasRef.current) {
+
+
+        if (canvasRef.current && canvasContainerRef.current) {
+          const rect =canvasContainerRef.current.getBoundingClientRect()
+
+          const canvas = p.createCanvas(rect.width-20, rect.height-20);
+
+          console.log(`object`, rect.width, rect.height,rect)
+
           canvas.parent(canvasRef.current);
         }
       };

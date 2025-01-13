@@ -1,0 +1,91 @@
+.uploader-box {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  
+    &.dragging {
+      border-color: #007bff;
+      background-color: rgba(0, 123, 255, 0.1);
+      animation: pulse-dragging 1s infinite ease-in-out;
+    }
+  
+    &:hover {
+      border-color: #007bff;
+  
+      .uploader-content {
+        animation: hover-scale 0.3s ease forwards;
+      }
+    }
+  
+    &:active {
+      background-color: rgba(0, 123, 255, 0.2);
+    }
+  }
+  
+  .uploader-content {
+    font-size: 16px;
+    color: #666;
+    transition: transform 0.3s ease;
+  
+    .uploader-icon {
+      font-size: 32px;
+      margin-top: 10px;
+      color: #007bff;
+      animation: float-icon 2s infinite ease-in-out;
+    }
+  }
+  
+  .image-preview {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 8px;
+    opacity: 0;
+    animation: fade-in 0.5s ease forwards;
+  }
+  
+  /* Keyframes for Animations */
+  @keyframes hover-scale {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.05);
+    }
+  }
+  
+  @keyframes pulse-dragging {
+    0% {
+      border-color: #007bff;
+    }
+    50% {
+      border-color: #0056b3;
+    }
+    100% {
+      border-color: #007bff;
+    }
+  }
+  
+  @keyframes float-icon {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  

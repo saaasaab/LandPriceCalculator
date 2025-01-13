@@ -9,10 +9,10 @@ import { EPageNames } from './utils/types';
 
 import './App.css'
 import BlogPost from './futureItems/BlogPost';
-import SitePlanDesigner from './pages/SitePlanDesigner';
 // import RealEstatePolygon from './pages/LotLineDrawerP5';
 import LotLineDrawer from './futureItems/LotLineDrawerOld';
 import AStar from './pages/AStar';
+import SitePlanDesigner from './pages/SiteplanDesigner/SitePlanDesigner';
 
 
 function App() {
