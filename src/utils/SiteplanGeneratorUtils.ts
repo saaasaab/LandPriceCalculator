@@ -6,7 +6,7 @@ import { Approach, Building, Edge, Garbage, Parking, ParkingStall, Property, Sit
 
 
 type Point = [number, number];
-export type TTwoPoints = {x:number, y:number, x2:number, y2:number, };
+export type TTwoPoints = { x: number, y: number, x2: number, y2: number, };
 
 export const calculateSnapToEdge = (newAngle: number, element: SitePlanElement, property: Property) => {
   let _newAngle = newAngle;
@@ -70,6 +70,9 @@ export const p5VectorToTPoint = (vectors: p5.Vector[]): TPoint[] => {
   })
 }
 
+export function clampNumber(value:number, min:number, max:number) {
+  return Math.min(Math.max(value, min), max);
+};
 export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
   const obstacles: TPoint[][] = [
     p5VectorToTPoint(parking.parkingOutline),
@@ -79,12 +82,24 @@ export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph,
 
 
   const startPoints: TTwoPoints[] = building.entrances.map(entrance => {
-    const projection = entrance.projectOrthagonally(entrance.intersection, 5 / building.scale)
+    const projection1 = entrance.calculatePointAtDistance(
+      entrance.intersection,
+      building.sitePlanElementEdges[entrance.edgeIndex],
+      1 / building.scale,
+      entrance.p
+    )
+    const projection2 = entrance.calculatePointAtDistance(
+      entrance.intersection,
+      building.sitePlanElementEdges[entrance.edgeIndex],
+      5 / building.scale,
+      entrance.p
+    )
+
     return {
-      x: entrance.intersection.x,
-      y: entrance.intersection.y,
-      x2: projection.x,
-      y2: projection.y,
+      x: projection1.x,
+      y: projection1.y,
+      x2: projection2.x,
+      y2: projection2.y,
     }
   })
 

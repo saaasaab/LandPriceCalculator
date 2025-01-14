@@ -2,7 +2,7 @@ import p5 from "p5";
 import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 import { TPoint, VisibilityGraph } from "../pages/VisibilityGraph";
-import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateSnapToEdge, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway } from "./SiteplanGeneratorUtils";
+import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateSnapToEdge, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway, clampNumber } from "./SiteplanGeneratorUtils";
 import { IPoint, Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
 
 type Point = [number, number];
@@ -90,6 +90,43 @@ export class Edge {
 
     return angleInDegrees;
   }
+
+  calculateClosestIntercept = (
+    mouseX: number,
+    mouseY: number,
+    p: p5
+  ): p5.Vector => {
+    const point1 = this.point1;
+    const point2 = this.point2;
+
+    const mouse = p.createVector(mouseX, mouseY);
+
+    // Vector from point1 to point2 (line direction)
+    const lineVec = p5.Vector.sub(point2, point1);
+
+    // Vector from point1 to the mouse position
+    const mouseVec = p5.Vector.sub(mouse, point1);
+
+    // Project mouseVec onto lineVec to find the closest point on the line
+    const projectionLength = mouseVec.dot(lineVec) / lineVec.magSq();
+    const projection = lineVec.mult(projectionLength);
+
+    // Closest point on the line
+    const closestPoint = p5.Vector.add(point1, projection);
+
+    // Check if the closest point lies on the line segment
+    const onSegment =
+      projectionLength >= 0 && projectionLength <= 1;
+
+    if (!onSegment) {
+      // If not on the segment, return the closest endpoint
+      const distToStart = p.dist(mouseX, mouseY, point1.x, point1.y);
+      const distToEnd = p.dist(mouseX, mouseY, point2.x, point2.y);
+      return distToStart < distToEnd ? point1.copy() : point2.copy();
+    }
+
+    return closestPoint;
+  };
 
   createParallelEdge() {
     // Calculate the normalized perpendicular vector
@@ -1279,7 +1316,7 @@ export class Parking extends SitePlanElement {
 }
 
 export class Entrance {
-  private p: p5;
+  public p: p5;
   private scale: number;
   public lerpPos: number;
   public intersection: p5.Vector;
@@ -1311,16 +1348,30 @@ export class Entrance {
   }
 
 
-  projectOrthagonally(position: p5.Vector, distance: number) {
 
+  calculatePointAtDistance = (
+    intersection: p5.Vector,
+    edge: Edge,
+    distance: number,
+    p: p5
+  ): p5.Vector => {
+    const { point1, point2 } = edge;
 
-    const _angle = calculateAngle(this.buildingCenter, position);
+    // Calculate the edge's direction vector
+    const edgeVector = p5.Vector.sub(point2, point1);
 
-    const newX = position.x + this.p.cos(_angle) * distance;
-    const newY = position.y;// + this.p.sin(_angle) * distance;
+    // Find a perpendicular vector and negate it to reverse direction
+    const perpendicular = p.createVector(edgeVector.y, -edgeVector.x).normalize();
 
-    return { x: newX, y: newY }
-  }
+    // Calculate the point at the specified perpendicular distance in the opposite direction
+    const targetPoint = p.createVector(
+      intersection.x + perpendicular.x * distance,
+      intersection.y + perpendicular.y * distance
+    );
+
+    return targetPoint;
+  };
+
 
 
   drawEnterance() {
@@ -1364,7 +1415,7 @@ export class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
-    this.buildingAreaTarget = 1500;
+    this.buildingAreaTarget = 300;
     this.buildingAreaActual = 0;
     this.hasStopped = true;
     this.ismoving = false;
@@ -1427,11 +1478,11 @@ export class Building extends SitePlanElement {
       const newX = this.p.lerp(edge.point1.x, edge.point2.x, entrance.lerpPos)
       const newY = this.p.lerp(edge.point1.y, edge.point2.y, entrance.lerpPos)
 
-      const newVector = entrance.projectFromCenter(this.p.createVector(newX, newY), 10)
+      // const newVector = entrance.projectFromCenter(this.p.createVector(newX, newY), 10)
 
 
 
-      entrance.intersection = this.p.createVector(newVector.x, newVector.y);
+      entrance.intersection = this.p.createVector(newX, newY);
       entrance.angle = edge.calculateAngle() - 90;
     })
 
@@ -1494,7 +1545,7 @@ export class Building extends SitePlanElement {
 
     // building.center = p.createVector(center.x, center.y);
     p.ellipse(building.center.x, building.center.y, 30, 30)
-    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners)  * this.scale * this.scale)
+    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale)
 
     this.hasStopped = false
   }
@@ -1684,7 +1735,7 @@ export class Building extends SitePlanElement {
 
     this.updateEntrances()
 
-    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners)  * this.scale * this.scale);
+    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale);
 
   }
 
@@ -2054,10 +2105,25 @@ export class SiteplanGenerator {
         building.buildingLocator(p, building, parking, property, approach, garbage);
         garbage.updateCenterGarbage(property, parking);
 
+        building.updateEntrances();
+
         updateVisibilityGraph();
       } else {
+
+        const edgeMidpoint = property.approachEdge?.getMidpoint();
+        if (!edgeMidpoint) return;
+
+
+        if (
+          p.dist(edgeMidpoint.x, edgeMidpoint.y, _center.x, _center.y) <
+          p.dist(edgeMidpoint.x, edgeMidpoint.y, newX, newY)) {
+          return
+
+        }
+
+
         building.hasStopped = true;
-        approach.updateCenter(_center.x, _center.y);
+        approach.updateCenter(newX, newY);
         parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       }
     };
@@ -2083,6 +2149,7 @@ export class SiteplanGenerator {
       building.buildingLocator(p, building, parking, property, approach, garbage);
       garbage.updateCenterGarbage(property, parking);
 
+
       updateVisibilityGraph();
     };
 
@@ -2106,6 +2173,8 @@ export class SiteplanGenerator {
       parking.updateAngle(normalizeAngle(angle));
       garbage.updateAngle(normalizeAngle(angle));
       building.updateAngle(normalizeAngle(angle));
+      building.updateEntrances();
+
 
       const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
 
@@ -2195,12 +2264,14 @@ export class SiteplanGenerator {
       }
 
       if (building.isInitialized) {
-        
+
         const mouse = p.createVector(p.mouseX, p.mouseY)
         const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
         const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
         const distance = calculatePointToEdgeDistance(closestEdge, mouse);
+
         const area = building.width * building.height
+
 
 
 
@@ -2208,27 +2279,46 @@ export class SiteplanGenerator {
 
           // get the point on the line where the entrance should interesect
           const angle = closestEdge.calculateAngle() - 90;
-
-          const inOutSign = isHovered.buildingOffset && !isHovered.building ? -1 : 1;
-          const moreVertSign = isMoreVertical(angle, true) ? -1 : 1;
-
-          const intersection = p.createVector(
-            mouse.x + distance * p.cos(angle) * moreVertSign * inOutSign,
-            mouse.y - distance * p.sin(angle) * moreVertSign * inOutSign);
+          const intersection = closestEdge.calculateClosestIntercept(
+            p.mouseX,
+            p.mouseY,
+            p
+          );
 
 
+          let minDistance = Infinity;
+          let minDistanceIndex = -1;
+          building.entrances.forEach((entrance, i) => {
+            const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
+            if (dist < minDistance) {
+              minDistance = dist;
+              minDistanceIndex = i;
+            }
+          })
 
-          // Draw the entrance
-          let lerpPos = getIntersectionPercentage(
-            closestEdge,
-            intersection
-          ) || 0;
 
-          const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
+          // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
+          if (minDistance < 5 / this.scale) {
+            // THEN DELETE THE ENTRANCE
 
-          building.entrances.push(entrance)
+            building.entrances = building.entrances.filter((_, i) => i !== minDistanceIndex)
+            visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
 
-          visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
+          }
+
+          else {
+            // Draw the entrance
+            let lerpPos = getIntersectionPercentage(
+              closestEdge,
+              intersection
+            ) || 0;
+
+            const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
+
+            building.entrances.push(entrance)
+
+            visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
+          }
         }
       }
     };
@@ -2262,7 +2352,6 @@ export class SiteplanGenerator {
 
       // ) {
 
-      //   console.log(`skip`)
       //     return; // Skip redraw if nothing has changed
       // }
 
@@ -2280,11 +2369,11 @@ export class SiteplanGenerator {
         buildingOffset: building.isMouseHoveringOffset(),
       };
 
-      
-      if(Object.values(isHovered).some((hovered) => hovered)){
+
+      if (Object.values(isHovered).some((hovered) => hovered)) {
         p.cursor('grab');
       }
-      else { 
+      else {
         p.cursor(p.ARROW);
 
       }
@@ -2317,7 +2406,6 @@ export class SiteplanGenerator {
 
       const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [p.mouseX, p.mouseY]) === -1
 
-
       if (!isHovered.approach && !isHovered.parkingOffset && !isHovered.parking && !building.isInitialized && isInboundary) {
 
         // Show the building growing.
@@ -2336,16 +2424,32 @@ export class SiteplanGenerator {
         const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
         const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
         const distance = calculatePointToEdgeDistance(closestEdge, mouse);
+
+
+        // clampNumber()
         // const area = Math.abs(building.width * building.height);
 
         if (distance < 20 && building.hasStopped) {
           // get the point on the line where the entrance should interesect
           const angle = closestEdge.calculateAngle() - 90;
+          const intersection = closestEdge.calculateClosestIntercept(
+            p.mouseX,
+            p.mouseY,
+            p
+          )
 
-          const inOutSign = isHovered.buildingOffset && !isHovered.building ? -1 : 1;
-          const moreVertSign = isMoreVertical(angle, true) ? -1 : 1;
+          // // Draw the entrance
+          // let lerpPos = getIntersectionPercentage(
+          //   closestEdge,
+          //   intersection
+          // ) || 0;
 
-          const intersection = p.createVector(mouse.x + distance * p.cos(angle) * moreVertSign * inOutSign, mouse.y - distance * p.sin(angle) * moreVertSign * inOutSign);
+
+
+
+
+          p.text(1, closestEdge.point1.x, closestEdge.point1.y)
+          p.text(2, closestEdge.point2.x, closestEdge.point2.y)
 
 
           // Draw the entrance

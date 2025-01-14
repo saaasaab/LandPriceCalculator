@@ -10,22 +10,42 @@ export function findShortestPathsAstar(
 ): { start: CNode; end: CNode; path: CNode[] }[] {
     const paths: { start: CNode; end: CNode; path: CNode[] }[] = [];
 
+
+
+    for (const startIndex of startIndices) {
+        for (const projectionIndex of startProjectionIndices) {
+
+            if (!(projectionIndex - startIndex === 1)) continue
+           
+            const _prePath = aStar(nodes, startIndex, projectionIndex);
+            const prePath = _prePath.map(
+                (nodeIndex) =>
+                    nodes.find((node) => node.index === nodeIndex.index) || nodes[0]
+            );
+
+            // Add the pre-path from start to start projection
+            paths.push({
+                start: nodes[startIndex],
+                end: nodes[projectionIndex],
+                path: prePath,
+            });
+        }
+    }
+
+
     // verifyGraphConnectivity(nodes)
     for (const startIndex of startProjectionIndices) {
         for (const endIndex of endIndices) {
 
-            // if ((endIndex % 2 === 0 && needsBackupIndex) || !needsBackupIndex) {
-                const _path = aStar(nodes, startIndex, endIndex);
-                const path = _path.map(nodeIndex => nodes.find(node => node.index === nodeIndex.index) || nodes[0])
+            const _path = aStar(nodes, startIndex, endIndex);
+            const path = _path.map(nodeIndex => nodes.find(node => node.index === nodeIndex.index) || nodes[0])
 
 
-                // if (endIndex % 2 === 0 && !path) needsBackupIndex = true
-                paths.push({
-                    start: nodes[startIndex],
-                    end: nodes[endIndex],
-                    path,
-                });
-            // }
+            paths.push({
+                start: nodes[startIndex],
+                end: nodes[endIndex],
+                path,
+            });
         }
     }
 

@@ -4,6 +4,11 @@ export interface FormData {
   drivewayWidth: number;
   buildingArea: number;
   taperedDriveway: boolean;
+  propertyEntranceCount: number;
+  buildingCount:number;
+  landscapeIsland: number;
+  parkingPer1000: number;
+  imperviousPercentage: number;
 }
 
 export interface SiteMetrics {
@@ -38,26 +43,31 @@ export interface Line {
   isSetback: boolean
 }
 
-
-// SitePlanGenerator.tsx
+import p5 from 'p5';
 import React, { useState, ChangeEvent, useEffect, useRef, useCallback, useMemo } from 'react';
 
-import './SitePlanDesigner.scss';
-import { Card, CardHeader, CardTitle, CardContent, Input } from '../../components/ui';
+import { Card, CardHeader, CardTitle, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
-import p5 from 'p5';
 import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
 import { AdjacencyGraph } from '../../utils/AdjacencyGraph';
 import ImageUploader from './ImageUploader';
 import { EStatus, StepButton } from './StepButton';
+
+import './SitePlanDesigner.scss';
 
 const initialFormData: FormData = {
   parkingStalls: 4,
   approachWidth: 20,
   drivewayWidth: 24,
   buildingArea: 1500,
-  taperedDriveway: true
+  taperedDriveway: true,
+  propertyEntranceCount: 1,
+  buildingCount: 1,
+  landscapeIsland: 7,
+  parkingPer1000: 2.4,
+  imperviousPercentage: 70
+
 };
 
 const initialMetrics: SiteMetrics = {
@@ -82,7 +92,7 @@ const SitePlanGenerator: React.FC = () => {
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('adjust'); // Interaction mode
 
 
-  
+
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(true)
 
@@ -400,13 +410,72 @@ const SitePlanGenerator: React.FC = () => {
                 </div>
 
                 <div className="site-plan-generator__checkbox">
-                  {/* <Checkbox 
-                  id="taperedDriveway"
-                  checked={formData.taperedDriveway}
-                  onCheckedChange={(checked: boolean) => handleInputChange('taperedDriveway', checked)}
-                /> */}
                   <label htmlFor="taperedDriveway">Tapered Driveway</label>
+
+                  <Checkbox
+                    id="taperedDriveway"
+                    checked={formData.taperedDriveway}
+                  //  ={(checked: boolean) => handleInputChange('taperedDriveway', checked)}
+                  />
                 </div>
+
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
+                  <Input
+                    id="propertyEntranceCount"
+                    type="number"
+                    min={0}
+                    value={formData.propertyEntranceCount || ""}
+                    onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="buildingCount">Building Count</label>
+                  <Input
+                    id="buildingCount"
+                    type="number"
+                    min={0}
+                    value={formData.buildingCount || ""}
+                    onChange={(e) => handleNumberInput(e, 'buildingCount')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="landscapeIsland">Stall / Landscape Stall Ratio</label>
+                  <Input
+                    id="landscapeIsland"
+                    type="number"
+                    min={0}
+                    value={formData.landscapeIsland || ""}
+                    onChange={(e) => handleNumberInput(e, 'landscapeIsland')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="parkingPer1000">Minimum Parking per 1000 SQFT</label>
+                  <Input
+                    id="parkingPer1000"
+                    type="number"
+                    min={0}
+                    value={formData.parkingPer1000 || ""}
+                    onChange={(e) => handleNumberInput(e, 'parkingPer1000')}
+                  />
+                </div>
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="imperviousPercentage">Impervious Surface %</label>
+                  <Input
+                    id="imperviousPercentage"
+                    type="number"
+                    min={0}
+                    value={formData.imperviousPercentage|| ""}
+                    onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
+                  />
+                </div>
+
+
 
 
                 {/* Metrics Display */}

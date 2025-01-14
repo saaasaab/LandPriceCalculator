@@ -59,7 +59,7 @@
       }
 
       // Input Groups
-      &__input-group {
+      &__input-group, &__checkbox {
         display: grid;
         grid-template-columns: 3fr 2fr;
         justify-content: space-between;

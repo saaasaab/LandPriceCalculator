@@ -77,7 +77,9 @@ export class VisibilityGraph {
 
     for (const point of startPoints) {
       const isOutsideBoundary = classifyPoint(_boundary, [point.x, point.y]) === 1 || boundary.length === 0
-      if (!isOutsideBoundary) {
+      const isProjectionOutsideBoundary = classifyPoint(_boundary, [point.x2, point.y2]) === 1 || boundary.length === 0
+
+      if (!isOutsideBoundary && !isProjectionOutsideBoundary ) {
         this.nodes.push(new CNode(point.x, point.y, this.nodeCount, "startNode"));
         startIndices.push(this.nodeCount)
         this.nodeCount++;
@@ -377,9 +379,9 @@ export class VisibilityGraph {
         const node2 = this.nodes[j];
 
         // Loop through all the possible edges to make sure it doesn't cross it. 
-
         const isConnects = !this.isLineSegmentBlocked(node1, node2)
-        if (isConnects) {// Add edge to edges array
+        if (isConnects) {
+          // Add edge to edges array
           if (!(node1.children.includes(node2.index))) {
             node1.addChild(node2.index);
             node2.addChild(node1.index);
@@ -387,17 +389,6 @@ export class VisibilityGraph {
         }
       }
     }
-
-
-
-
-
-    // Build the visibility graph Breadth First
-    // this.shortestPaths = findShortestPaths(
-    //   this.nodes as TNode[],
-    //   this.startIndices,
-    //   this.endIndices
-    // )
 
 
     // ASTAR
