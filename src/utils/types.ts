@@ -47,7 +47,6 @@ export enum EPageTitles {
     WATERFALL = "Waterfall Distribution Generator",
     CONSTRUCTION_BUDGET = "Construction Budget Generator",
     SITE_PLAN_BUILDER = "Site Plan Builder",
-    ASTAR = "A*"
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 

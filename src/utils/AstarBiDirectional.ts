@@ -175,14 +175,14 @@ function reconstructPath(nodes: CNode[], cameFrom: Map<number, number>, currentI
 }
 
 
-function verifyGraphConnectivity(nodes: CNode[]) {
-    for (const node of nodes) {
-        for (const childIndex of node.children) {
-            if (childIndex < 0 || childIndex >= nodes.length) {
-                console.error(`Invalid child index ${childIndex} for node ${node.index}`);
-            }
-        }
-    }
-    console.log("Graph connectivity verified.");
-}
+// function verifyGraphConnectivity(nodes: CNode[]) {
+//     for (const node of nodes) {
+//         for (const childIndex of node.children) {
+//             if (childIndex < 0 || childIndex >= nodes.length) {
+//                 console.error(`Invalid child index ${childIndex} for node ${node.index}`);
+//             }
+//         }
+//     }
+//     console.log("Graph connectivity verified.");
+// }
 

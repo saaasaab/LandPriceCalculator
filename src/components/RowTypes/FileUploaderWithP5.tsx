@@ -2,14 +2,12 @@ import React, { useState } from "react";
 import p5 from "p5";
 
 const FileUploaderWithP5: React.FC = () => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
 
   // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setImageFile(file);
       const url = URL.createObjectURL(file);
       setImageURL(url);
     }

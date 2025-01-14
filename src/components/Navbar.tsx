@@ -19,7 +19,6 @@ export const routes = {
   WATERFALL: "/waterfall-generator",
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
   SITE_PLAN_BUILDER: "/site-plan-builder",
-  ASTAR:"/a-star",
   
 }
 
@@ -65,8 +64,6 @@ const Navbar = () => {
             {/* <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link> */}
             {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
             <Link onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link>
-
-            <Link onClick={handleToggleMenu} to={routes.ASTAR}>{EPageTitles.ASTAR}</Link>
             
           </div>
         </li>

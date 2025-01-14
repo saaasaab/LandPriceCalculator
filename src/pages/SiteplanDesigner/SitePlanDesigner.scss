@@ -58,6 +58,7 @@
         }
       }
 
+      
       // Input Groups
       &__input-group, &__checkbox {
         display: grid;
@@ -85,7 +86,13 @@
             border-color: #2563eb;
           }
         }
+
+        &.disabled{
+          display: none;
+        }
       }
+
+      
 
       // Metrics Display
       &__metrics {

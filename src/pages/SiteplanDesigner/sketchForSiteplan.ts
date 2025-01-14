@@ -4,7 +4,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 
  
 
-export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, visualizer: React.MutableRefObject<SiteplanGenerator | null>, isPolygonClosedRef: React.MutableRefObject<boolean>, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, setbackHasInputRef: React.MutableRefObject<boolean[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>,canvasContainerRef: React.RefObject<HTMLDivElement>) {
+export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, visualizer: React.MutableRefObject<SiteplanGenerator | null>, isPolygonClosedRef: React.MutableRefObject<boolean>, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>,canvasContainerRef: React.RefObject<HTMLDivElement>) {
     return (p: p5) => {
       let img: p5.Image | null = null;
       // const 
@@ -121,7 +121,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
         const points = pointsRef.current;
         const lines = linesRef.current;
         const setbacks = setbacksRef.current;
-        const setbackHasInput = setbackHasInputRef.current;
+        // const setbackHasInput = setbackHasInputRef.current;
         const isPolygonClosed = isPolygonClosedRef.current;
         const isSelectingApproach = isSelectingApproachRef.current;
         const isSelectingSetback = isSelectingSetbackRef.current;

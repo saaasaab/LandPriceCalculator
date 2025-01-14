@@ -3,9 +3,8 @@ import p5 from "p5";
 
 import crosses from "robust-segment-intersect"
 import classifyPoint from "robust-point-in-polygon"
-import { findShortestPaths, TNode } from "../utils/BreadthFirstSearchBiDirectional";
+import { TNode } from "../utils/BreadthFirstSearchBiDirectional";
 import { findShortestPathsAstar } from "../utils/AStarBiDirectional";
-import polygonClipping from 'polygon-clipping';
 import { TTwoPoints } from "../utils/SiteplanGeneratorUtils";
 
 
@@ -340,8 +339,8 @@ export class VisibilityGraph {
 
 
 
-  removeDeadEndMidNodes(nodes: CNode[],) {
-
+  removeDeadEndMidNodes() {
+// nodes: CNode[],
   }
 
 
@@ -402,7 +401,7 @@ export class VisibilityGraph {
 
 
 
-    this.removeDeadEndMidNodes(this.nodes)
+    this.removeDeadEndMidNodes()
 
 
 

@@ -19,11 +19,9 @@ interface PolygonData {
 
 // Visualization module using p5.js
 export class SubdivisionGenerator {
-  private iteration: number;
 
 
   constructor() {
-    this.iteration = 0;
   }
 
   subdivide(p: p5): void {
@@ -126,9 +124,9 @@ const dividePolygon = (p: p5, lines: Line[], road: Line): Point[][] => {
   const subPolygons: Point[][] = [];
   const roadStart = road.start;
   const roadEnd = road.end;
-  const roadLength = dist(roadStart.x, roadStart.y, roadEnd.x, roadEnd.y);
-  const segmentLength = roadLength / 4;
-  const roadAngle =  calculateAngle(p, roadStart,roadEnd)
+  // const roadLength = dist(roadStart.x, roadStart.y, roadEnd.x, roadEnd.y);
+  // const segmentLength = roadLength / 4;
+  // const roadAngle =  calculateAngle(p, roadStart,roadEnd)
 
 
   
@@ -169,9 +167,7 @@ const dividePolygon = (p: p5, lines: Line[], road: Line): Point[][] => {
   return subPolygons;
 };
 
-const dist = (x1: number, y1: number, x2: number, y2: number): number => {
-  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-};
+
 
 const lerp = (start: number, end: number, amt: number): number => {
   return (1 - amt) * start + amt * end;
@@ -182,21 +178,3 @@ function getCenterPoint(p1: p5.Vector, p2: p5.Vector): p5.Vector {
   return p5.Vector.add(p1, p2).div(2);
 }
 
-
-
-function  calculateAngle(p:p5, point1: p5.Vector,point2:p5.Vector): number {
-  const deltaY = point2.y - point1.y;
-  const deltaX = point2.x - point1.x;
-
-  // atan2 handles quadrants and division by zero
-  const angleInRadians = Math.atan2(deltaY, deltaX);
-
-  // Convert radians to degrees
-  const angleInDegrees = p.degrees(angleInRadians);
-
-
-  return normalizeAngle(angleInDegrees);
-}
-function normalizeAngle(angle: number): number {
-  return (angle + 360) % 360;
-}

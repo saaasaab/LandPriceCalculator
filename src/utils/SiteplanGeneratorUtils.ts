@@ -1,5 +1,4 @@
 import p5 from "p5";
-import { AdjacencyGraph } from "./AdjacencyGraph";
 import classifyPoint from "robust-point-in-polygon"
 import { TPoint, VisibilityGraph } from "../pages/VisibilityGraph";
 import { Approach, Building, Edge, Garbage, Parking, ParkingStall, Property, SitePlanElement, stallHeight, stallWidth } from "./SiteplanGenerator";
@@ -176,9 +175,8 @@ export function setLineDash(p: p5, list: number[]) {
 }
 
 
-export function createDriveway(p: p5, approach: Approach, parking: Parking, taperParking: boolean) {
-
-
+export function createDriveway(p: p5, approach: Approach, parking: Parking) {
+  // , taperParking: boolean
   if (!parking.entranceEdge) return;
 
   p.beginShape();
@@ -546,7 +544,7 @@ export function moveVector(
 
 
 export function allPointsOutOfPolygon(object1: p5.Vector[], object2: p5.Vector[]) {
-  const allPointsOutPolygon = object2.map((corner1, i) => {
+  const allPointsOutPolygon = object2.map((corner1) => {
     const point = [corner1.x, corner1.y];
     const pointClassification = classifyPoint(object1.map(corner => [corner.x, corner.y]) as Point[], point as Point)
     // 1 = outside
@@ -560,7 +558,7 @@ export function allPointsOutOfPolygon(object1: p5.Vector[], object2: p5.Vector[]
 
 
 export function allPointsInPolygon(boundary: p5.Vector[], poly: p5.Vector[]) {
-  const allPointsInPolygon = poly.map((corner1, i) => {
+  const allPointsInPolygon = poly.map((corner1) => {
     const point = [corner1.x, corner1.y];
     const pointClassification = classifyPoint(boundary.map(corner => [corner.x, corner.y]) as Point[], point as Point)
     // 1 = outside
@@ -865,27 +863,6 @@ export function scalePolygonToFitCanvas(
   });
 
   return { scaledPolygon, scaleFactor };
-}
-
-export function markGridCells(p: p5, grid: boolean[][], objects: p5.Vector[][], solverScale: number, lookInide: boolean): boolean[][] {
-  const cols = grid.length;
-  const rows = grid[0].length;
-
-  for (let col = 0; col < cols; col++) {
-    for (let row = 0; row < rows; row++) {
-      // Calculate the center point of the current grid cell
-      const cellCenter = [(col + 0.5) * solverScale, (row + 0.5) * solverScale] as Point;
-      // Check if the center point is within any of the polygons
-      for (const polygon of objects) {
-        if (pointsAreInBoundary(polygon, cellCenter) === (lookInide ? -1 : 1)) {
-          grid[col][row] = true; // Mark the cell
-          break;
-        }
-      }
-    }
-  }
-
-  return grid;
 }
 
 export function countParkingStalls(parking: Parking | null | undefined) {

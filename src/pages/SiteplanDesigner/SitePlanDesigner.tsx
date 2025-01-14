@@ -44,13 +44,12 @@ export interface Line {
 }
 
 import p5 from 'p5';
-import React, { useState, ChangeEvent, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef, useMemo } from 'react';
 
 import { Card, CardHeader, CardTitle, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
 import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
-import { AdjacencyGraph } from '../../utils/AdjacencyGraph';
 import ImageUploader from './ImageUploader';
 import { EStatus, StepButton } from './StepButton';
 
@@ -99,7 +98,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
   // Property Outputs
-  const [globalAngle, setGlobalAngle] = useState<number>(0);
+  const [globalAngle,_setGlobalAngle] = useState<number>(0);
 
 
 
@@ -107,12 +106,10 @@ const SitePlanGenerator: React.FC = () => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const setbacksRef = useRef<number[]>([]);
-  const setbackHasInputRef = useRef<boolean[]>([]);
   const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
   const isPolygonClosedRef = useRef<boolean>(false);
   const isSelectingApproachRef = useRef<boolean>(false);
-  const isGeneratingSitePlanRef = useRef<boolean>(false);
   const isSelectingSetbackRef = useRef<boolean>(false);
 
   const isDefiningScaleRef = useRef<boolean>(false);
@@ -129,7 +126,7 @@ const SitePlanGenerator: React.FC = () => {
   // P5 sketch function
 
 
-  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isPolygonClosedRef, scaleRef, pointsRef, linesRef, setbacksRef, setbackHasInputRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
+  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isPolygonClosedRef, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
 
 
 
@@ -212,9 +209,9 @@ const SitePlanGenerator: React.FC = () => {
   }, [formData, globalAngle])
 
 
-  const onRotationChange = (value: number) => {
-    setGlobalAngle(value)
-  }
+  // const onRotationChange = (value: number) => {
+  //   setGlobalAngle(value)
+  // }
 
   // Update setback for a specific line
   const updateSetback = (index: number, value: string) => {
@@ -305,8 +302,7 @@ const SitePlanGenerator: React.FC = () => {
     isDefiningScaleRef.current = false;
 
 
-    const graph = new AdjacencyGraph();
-    visualizer.current = new SiteplanGenerator(graph, points, lines, scale || .25)
+    visualizer.current = new SiteplanGenerator(points, lines, scale || .25)
     // Now pass this all on to the solver
   }
 
@@ -340,9 +336,9 @@ const SitePlanGenerator: React.FC = () => {
     [isPolygonClosedRef.current, pointsRef.current],
   )
 
-  const approachStatus = ""
-  const scaleStatus = ""
-  const setbacksStatus = ``
+  // const approachStatus = ""
+  // const scaleStatus = ""
+  // const setbacksStatus = ``
 
   return (
     <div className="site-plan-generator">
@@ -409,7 +405,7 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div>
 
-                <div className="site-plan-generator__checkbox">
+                <div className="site-plan-generator__checkbox disabled">
                   <label htmlFor="taperedDriveway">Tapered Driveway</label>
 
                   <Checkbox
@@ -420,7 +416,7 @@ const SitePlanGenerator: React.FC = () => {
                 </div>
 
 
-                <div className="site-plan-generator__input-group">
+                <div className="site-plan-generator__input-group disabled">
                   <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
                   <Input
                     id="propertyEntranceCount"
@@ -431,7 +427,7 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div>
 
-                <div className="site-plan-generator__input-group">
+                <div className="site-plan-generator__input-group disabled">
                   <label htmlFor="buildingCount">Building Count</label>
                   <Input
                     id="buildingCount"
@@ -442,7 +438,7 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div>
 
-                <div className="site-plan-generator__input-group">
+                <div className="site-plan-generator__input-group disabled">
                   <label htmlFor="landscapeIsland">Stall / Landscape Stall Ratio</label>
                   <Input
                     id="landscapeIsland"
@@ -453,7 +449,7 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div>
 
-                <div className="site-plan-generator__input-group">
+                <div className="site-plan-generator__input-group disabled">
                   <label htmlFor="parkingPer1000">Minimum Parking per 1000 SQFT</label>
                   <Input
                     id="parkingPer1000"
@@ -464,7 +460,7 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div>
 
-                <div className="site-plan-generator__input-group">
+                <div className="site-plan-generator__input-group disabled">
                   <label htmlFor="imperviousPercentage">Impervious Surface %</label>
                   <Input
                     id="imperviousPercentage"
