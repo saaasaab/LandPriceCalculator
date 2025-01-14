@@ -74,7 +74,7 @@ export class Edge {
     const midpoint = this.getMidpoint();
     this.p.textSize(24)
 
-    this.p.text(index, midpoint.x, midpoint.y)
+    // this.p.text(index, midpoint.x, midpoint.y)
   }
 
   calculateAngle(): number {
@@ -723,7 +723,7 @@ export class SitePlanElement {
 
     this.sitePlanElementCorners.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
-      p.text(i, corner.x, corner.y)
+      // p.text(i, corner.x, corner.y)
     });
 
 
@@ -786,7 +786,7 @@ export class Approach extends SitePlanElement {
 
     this.sitePlanElementCorners.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
-      p.text(i, corner.x, corner.y)
+      // p.text(i, corner.x, corner.y)
     });
 
 
@@ -1163,7 +1163,6 @@ export class Parking extends SitePlanElement {
       approach.sitePlanElementCorners[2],
       approach.sitePlanElementCorners[1],
       parking.sitePlanElementCorners[2],
-
     ]
 
     if (rightStalls.length > 0) {
@@ -1266,7 +1265,7 @@ export class Parking extends SitePlanElement {
 
       //   else {
       p.vertex(corner.x, corner.y);
-      p.text(i, corner.x, corner.y);
+      // p.text(i, corner.x, corner.y);
       // }
 
 
@@ -1365,7 +1364,7 @@ export class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
-    this.buildingAreaTarget = 250;
+    this.buildingAreaTarget = 1500;
     this.buildingAreaActual = 0;
     this.hasStopped = true;
     this.ismoving = false;
@@ -1381,7 +1380,6 @@ export class Building extends SitePlanElement {
     this.setSitePlanElementEdges()
 
     this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale);
-
   }
 
   updateBuildingCenter(newX: number, newY: number) {
@@ -1390,6 +1388,7 @@ export class Building extends SitePlanElement {
   }
 
   updateBuildingArea(area: number) {
+    // Should be in sqrt ft
     this.buildingAreaTarget = area;
   }
 
@@ -1471,10 +1470,6 @@ export class Building extends SitePlanElement {
     }).some(el => el)
 
 
-
-
-
-
     if (isInsideParkingOutline) {
       const newBuildingPosition = moveVector(parking.center, building.center, 1, true)
       building.updateCenter(newBuildingPosition.x, newBuildingPosition.y)
@@ -1499,7 +1494,7 @@ export class Building extends SitePlanElement {
 
     // building.center = p.createVector(center.x, center.y);
     p.ellipse(building.center.x, building.center.y, 30, 30)
-    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners))
+    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners)  * this.scale * this.scale)
 
     this.hasStopped = false
   }
@@ -1552,8 +1547,8 @@ export class Building extends SitePlanElement {
 
 
     const targetArea = this.buildingAreaTarget / (this.p.pow(this.scale, 2));
-    let bestArea = calculateArea(this.sitePlanElementCorners);
 
+    let bestArea = calculateArea(this.sitePlanElementCorners)
     const error = Math.abs(targetArea - bestArea) / targetArea;
 
     if (error < .0005) {
@@ -1689,7 +1684,7 @@ export class Building extends SitePlanElement {
 
     this.updateEntrances()
 
-    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners));
+    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners)  * this.scale * this.scale);
 
   }
 
@@ -2076,7 +2071,7 @@ export class SiteplanGenerator {
       const newY = p.mouseY;
       let newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
 
-      newAngle = calculateSnapToEdge(newAngle, parking, property);
+      // newAngle = calculateSnapToEdge(newAngle, parking, property);
       parking.updateAngle(newAngle);
       garbage.updateAngle(newAngle);
 
@@ -2106,7 +2101,7 @@ export class SiteplanGenerator {
 
       let angle = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
 
-      angle = calculateSnapToEdge(angle, parking, property);
+      // angle = calculateSnapToEdge(angle, parking, property);
 
       parking.updateAngle(normalizeAngle(angle));
       garbage.updateAngle(normalizeAngle(angle));
@@ -2179,23 +2174,6 @@ export class SiteplanGenerator {
       }
     };
 
-
-    p.mousePressed = () => {
-      if (!property || !approach || !parking || !building || !garbage) return;
-
-      const posX = p.mouseX;
-      const posY = p.mouseY;
-      const clickIsInProperty = allPointsInPolygon(
-        property.propertyCorners,
-        [p.createVector(posX, posY)]
-      );
-
-      if (!building.isInitialized && truthChecker(clickIsInProperty)) {
-        building.initializeBuilding(posX, posY);
-      }
-    };
-
-
     p.mousePressed = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
 
@@ -2210,17 +2188,14 @@ export class SiteplanGenerator {
       const posX = p.mouseX;
       const posY = p.mouseY;
 
-
       const clickIsInProperty = allPointsInPolygon(property.propertyCorners, [p.createVector(posX, posY)]);
 
       if (!isHovered.approach && !isHovered.parking && !isHovered.parkingOffset && !building.isInitialized && truthChecker(clickIsInProperty)) {
-        const posX = p.mouseX;
-        const posY = p.mouseY;
         building.initializeBuilding(posX, posY);
       }
 
       if (building.isInitialized) {
-
+        
         const mouse = p.createVector(p.mouseX, p.mouseY)
         const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
         const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
@@ -2236,8 +2211,6 @@ export class SiteplanGenerator {
 
           const inOutSign = isHovered.buildingOffset && !isHovered.building ? -1 : 1;
           const moreVertSign = isMoreVertical(angle, true) ? -1 : 1;
-
-
 
           const intersection = p.createVector(
             mouse.x + distance * p.cos(angle) * moreVertSign * inOutSign,
@@ -2307,7 +2280,16 @@ export class SiteplanGenerator {
         buildingOffset: building.isMouseHoveringOffset(),
       };
 
-      p.background(240);
+      
+      if(Object.values(isHovered).some((hovered) => hovered)){
+        p.cursor('grab');
+      }
+      else { 
+        p.cursor(p.ARROW);
+
+      }
+
+      p.background("#f9fafb")
       p.noFill()
       p.stroke(0);
 

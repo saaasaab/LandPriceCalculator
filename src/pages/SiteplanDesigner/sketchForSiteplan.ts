@@ -21,9 +21,6 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
           const rect =canvasContainerRef.current.getBoundingClientRect()
 
           const canvas = p.createCanvas(rect.width-20, rect.height-20);
-
-          console.log(`object`, rect.width, rect.height,rect)
-
           canvas.parent(canvasRef.current);
         }
       };
@@ -58,7 +55,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
   
             // p.image(img, 0, 0, img.width, img.height); // Draw the image as the background
           } else {
-            p.background(200); // Default background
+            p.background("#f9fafb"); // Default background
           }
   
           // Draw lines connecting points

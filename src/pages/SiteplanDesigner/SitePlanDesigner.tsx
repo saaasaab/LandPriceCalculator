@@ -50,6 +50,7 @@ import p5 from 'p5';
 import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
 import { AdjacencyGraph } from '../../utils/AdjacencyGraph';
 import ImageUploader from './ImageUploader';
+import { EStatus, StepButton } from './StepButton';
 
 const initialFormData: FormData = {
   parkingStalls: 4,
@@ -77,13 +78,12 @@ const initialMetrics: SiteMetrics = {
 const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('adjust'); // Interaction mode
 
-  const [offsetHeight, setOffsetHeight] = useState({ x: 0, y: 0 });
-  const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
 
+  
+  const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(true)
 
 
@@ -121,12 +121,7 @@ const SitePlanGenerator: React.FC = () => {
 
   const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isPolygonClosedRef, scaleRef, pointsRef, linesRef, setbacksRef, setbackHasInputRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
 
-  useEffect(() => {
-    if (!canvasRef.current) return;
 
-    const rect = canvasRef.current.getBoundingClientRect()
-    setOffsetHeight({ x: rect.left || 0, y: rect.top || 0 })
-  }, [canvasRef?.current])
 
   useEffect(() => {
     const p5Instance = new p5(sketch);
@@ -134,17 +129,6 @@ const SitePlanGenerator: React.FC = () => {
       p5Instance.remove();
     };
   }, [imageURL]);
-
-
-  // Handle file upload
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const url = URL.createObjectURL(file);
-      setImageURL(url);
-    }
-  };
 
   const handleInputChange = (field: keyof FormData, value: number | boolean): void => {
     setFormData(prev => ({
@@ -174,8 +158,8 @@ const SitePlanGenerator: React.FC = () => {
   useEffect(() => {
     const updateVariables = () => {
       console.log("There be danger here")
-      const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
 
+      const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
 
       const _metrics: SiteMetrics = {
         propertyArea: visualizer.current?.property?.areaOfProperty || 0,
@@ -206,8 +190,6 @@ const SitePlanGenerator: React.FC = () => {
   useEffect(() => {
 
     const updatedGlobals = {
-
-
       approachWidth: formData.approachWidth,
       parkingNumber: formData.parkingStalls,
       parkingDrivewayWidth: formData.drivewayWidth,
@@ -255,7 +237,6 @@ const SitePlanGenerator: React.FC = () => {
   }
 
   const clearCanvas = () => {
-    setImageFile(null);
     setImageURL(null);
     pointsRef.current = []
     linesRef.current = [];
@@ -384,11 +365,14 @@ const SitePlanGenerator: React.FC = () => {
 
                 <div className="site-plan-generator__input-group">
                   <label htmlFor="approachWidth">Approach Width (ft)</label>
+
+
+
                   <Input
                     id="approachWidth"
                     type="number"
                     min={0}
-                    value={formData.approachWidth}
+                    value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
                     onChange={(e) => handleNumberInput(e, 'approachWidth')}
                   />
                 </div>
@@ -399,7 +383,7 @@ const SitePlanGenerator: React.FC = () => {
                     id="drivewayWidth"
                     type="number"
                     min={0}
-                    value={formData.drivewayWidth}
+                    value={formData.drivewayWidth || ""}
                     onChange={(e) => handleNumberInput(e, 'drivewayWidth')}
                   />
                 </div>
@@ -410,7 +394,7 @@ const SitePlanGenerator: React.FC = () => {
                     id="buildingArea"
                     type="number"
                     min={0}
-                    value={formData.buildingArea}
+                    value={formData.buildingArea || ""}
                     onChange={(e) => handleNumberInput(e, 'buildingArea')}
                   />
                 </div>
@@ -447,48 +431,30 @@ const SitePlanGenerator: React.FC = () => {
 
 
 
-                <button
-                  onClick={clearCanvas}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px', marginRight: '10px', marginBottom: '10px' }}
-                >
-                  Clear
-                </button>
+                <StepButton label="Clear" onClick={clearCanvas} />
+                <StepButton label="Upload Property Image" onClick={startUploadingImage} status={uploadStatus()} isActive={mode === 'upload'} >
+                  {mode === "upload" && !isGeneratingSitePlan ?
+                    <ImageUploader onFileUpload={setImageURL} /> : <></>}
+                </StepButton>
 
-                <StepButton label="Upload Property Image" onClick={startUploadingImage} status={uploadStatus()} isActive={mode==='upload'}/>
-                
-                
-                {mode === "upload" && !isGeneratingSitePlan ?
-                  <ImageUploader onFileUpload={setImageURL} /> : <></>}
-
-                <StepButton label="Create Points" onClick={createPoints} status={createPropertyLinesStatus} isActive={mode==='adjust'}/>
-                <StepButton label="Select Approach" onClick={selectApproach} status="not-started" isActive={mode==='approach'}/>
-                <StepButton label="Define Scale" onClick={defineScale} status="not-started" isActive={mode==='scale'}/>
-                <StepButton label="Create Setbacks" onClick={createSetbacks} status="not-started" isActive={mode==='generate'}/>
-                <button
-                  onClick={generateSitePlan}
-                  style={{ padding: '10px 20px', cursor: 'pointer', marginLeft: '10px', marginRight: '10px' }}
-                >
-                  Generate Site Plan
-                </button>
-
-
-
-
-
-                {mode === "scale" ? <div style={{ marginTop: '10px' }}>
-                  <label>Edge Length (ft): </label>
-                  <input
-                    // ref={setbackInputRef} // Attach ref for auto-focus
-                    type="number"
-                    value={inputScaleRef.current || undefined}
-                    onChange={(e) => {
-                      inputScaleRef.current = Number(e.target.value)
-                    }}
-                    autoFocus
-                  />
-                </div> : <></>}
-
-
+                <StepButton label="Create Property Boundary" onClick={createPoints} status={createPropertyLinesStatus} isActive={mode === 'adjust'} />
+                <StepButton label="Select Approach" onClick={selectApproach} status="not-started" isActive={mode === 'approach'} />
+                <StepButton label="Define Scale" onClick={defineScale} status="not-started" isActive={mode === 'scale'} >
+                  {mode === "scale" ? <div style={{ marginTop: '10px' }}>
+                    <label>Edge Length (ft): </label>
+                    <input
+                      // ref={setbackInputRef} // Attach ref for auto-focus
+                      type="number"
+                      value={inputScaleRef.current || undefined}
+                      onChange={(e) => {
+                        inputScaleRef.current = Number(e.target.value)
+                      }}
+                      autoFocus
+                    />
+                  </div> : <></>}
+                </StepButton>
+                <StepButton label="Create Setbacks" onClick={createSetbacks} status="not-started" isActive={mode === 'setback'} />
+                <StepButton label="Generate Site Plan" onClick={generateSitePlan} isActive={mode === 'generate'} />
 
               </div>
             }
@@ -545,137 +511,3 @@ const SitePlanGenerator: React.FC = () => {
 export default SitePlanGenerator;
 
 
-
-
-
-
-
-
-
-
-
-
-// const subdivisionGenerator = new SubdivisionGenerator();
-
-// visualizer.visualize(p);
-// subdivisionGenerator.subdivide(p);
-// const graph = new AdjacencyGraph();
-// graph.addEdges("Parking1", ["Driveway"]);
-// graph.addEdges("Parking2", ["Driveway"]);
-// graph.addEdges("Driveway", ["Bike Parking", "Approach", "Garbage"]);
-// graph.addEdges("Bike Parking", ["Approach", "Building"]);
-
-
-// const canvasRef = useRef<HTMLDivElement>(null);
-
-// const sketch = (p: p5) => {
-//   let img: p5.Image | null = null;
-//   p.preload = () => {
-//     if (imageURL) {
-//       img = p.loadImage(imageURL);
-//     }
-//   };
-
-
-
-{/* <LotLineDrawerOld onFinalize={handleFinalize} /> */ }
-
-// const handleFinalize = (data: FinalizedData) => {
-//   setFinalizedData(data); // Save the finalized data
-// };
-// const [finalizedData, setFinalizedData] = useState<FinalizedData | null>(null);
-{/* <VoronoiDiagram/> */ }
-{/* <PolygonDivider /> */ }
-{/* {!finalizedData ? (
-        
-        // <LotLineDrawer  />
-     
-
-      ) : (
-        <div>
-          <h2>Finalized Data</h2>
-          <pre>{JSON.stringify(finalizedData, null, 2)}</pre>
-          {/* Replace this with the next step in your workflow */}
-{/* </div> */ }
-{/* // )} */ }
-
-
-// // graph.addVertex("Property Line");
-// // graph.addVertex("Setback");
-// // graph.addVertex("Easement");
-// // graph.addVertex("Landscaping");
-// // graph.addVertex("Parking1");
-// // graph.addVertex("Parking2");
-// // graph.addVertex("Driveway");
-// // graph.addVertex("Bike Parking");
-// // graph.addVertex("Building");
-// // graph.addVertex("Approach");
-// // graph.addVertex("Sidewalk");
-// // graph.addVertex("Garbage");
-
-// // graph.addEdges("Property Line", ["Setback", "Easement", "Landscaping", "Approach", "Sidewalk"]);
-// // graph.addEdges("Setback", ["Easement", "Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
-// // graph.addEdges("Easement", ["Landscaping", "Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
-// // graph.addEdges("Landscaping", ["Parking", "Driveway", "Bike Parking", "Building", "Approach", "Sidewalk", "Garbage"]);
-// // graph.addEdges("Sidewalk", ["Garbage","Driveway","Bike Parking","Building","Approach","Parking1","Parking2"]);
-
-
-
-
-
-
-
-type Status = 'not-started' | 'in-progress' | 'complete';
-enum EStatus {
-  notStarted = "not-started",
-  inProgress = "in-progress",
-  complete = "complete",
-}
-
-
-interface StepButtonProps {
-  label: string;
-  onClick: () => void;
-  status: Status;
-  isActive?: boolean;
-}
-
-const StepButton: React.FC<StepButtonProps> = ({ label, onClick, status,isActive=false }) => {
-  const getStatusIcon = () => {
-    switch (status) {
-      case EStatus.notStarted:
-        return '⏳'; // Hourglass icon for "not started"
-      case EStatus.inProgress:
-        return '🔄'; // Spinning arrows icon for "in progress"
-      case EStatus.complete:
-        return '✅'; // Checkmark icon for "complete"
-      default:
-        return '';
-    }
-  };
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }} >
-      {/* <span style={{ marginRight: '10px', fontSize: '20px' }}>{getStatusIcon()}</span> */}
-      <button
-        onClick={onClick}
-        style={{
-          padding: '10px 20px',
-          cursor: 'pointer',
-          marginLeft: '10px',
-          marginRight: '10px',
-          width: '100%',
-          backgroundColor: isActive ? '#007bff' : '#f0f0f0', // Active state styling
-          color: isActive ? '#fff' : '#000', // Text color changes when active
-          border: isActive ? '2px solid #0056b3' : '2px solid #ccc', // Active border styling
-          transition: 'background-color 0.3s, color 0.3s, border 0.3s', // Smooth transitions
-        }}
-      >
-      
-        {label}
-      </button>
-
-      
-    </div>
-  );
-};
