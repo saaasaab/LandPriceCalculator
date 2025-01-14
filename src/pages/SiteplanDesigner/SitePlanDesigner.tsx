@@ -5,7 +5,7 @@ export interface FormData {
   buildingArea: number;
   taperedDriveway: boolean;
   propertyEntranceCount: number;
-  buildingCount:number;
+  buildingCount: number;
   landscapeIsland: number;
   parkingPer1000: number;
   imperviousPercentage: number;
@@ -44,7 +44,7 @@ export interface Line {
 }
 
 import p5 from 'p5';
-import React, { useState, ChangeEvent, useEffect, useRef, useMemo } from 'react';
+import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
 import { Card, CardHeader, CardTitle, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
@@ -93,15 +93,12 @@ const SitePlanGenerator: React.FC = () => {
 
 
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
-  const [isUploadingImage, setIsUploadingImage] = useState(true)
+  const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
 
 
   // Property Outputs
-  const [globalAngle,_setGlobalAngle] = useState<number>(0);
-
-
-
+  const [globalAngle, _setGlobalAngle] = useState<number>(0);
 
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -122,12 +119,10 @@ const SitePlanGenerator: React.FC = () => {
 
   let visualizer = useRef<SiteplanGenerator | null>(null)// new SiteplanGenerator(graph );
 
-
   // P5 sketch function
 
 
-  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isPolygonClosedRef, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
-
+  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
 
 
   useEffect(() => {
@@ -222,13 +217,11 @@ const SitePlanGenerator: React.FC = () => {
 
     lines[index].setback = parseFloat(value) || 0
 
-    // setLines(newLines);
   };
 
   const startUploadingImage = () => {
     setMode('upload')
 
-    setIsUploadingImage(true);
     isSelectingSetbackRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
@@ -238,7 +231,6 @@ const SitePlanGenerator: React.FC = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
     setIsGeneratingSitePlan(false);
-    setIsUploadingImage(false);
 
     setMode('adjust')
   }
@@ -248,9 +240,9 @@ const SitePlanGenerator: React.FC = () => {
     pointsRef.current = []
     linesRef.current = [];
     isPolygonClosedRef.current = false;
+    setIsPolygonClosedState(false);
     isSelectingApproachRef.current = false;
     setIsGeneratingSitePlan(false);
-    setIsUploadingImage(false);
     isDefiningScaleRef.current = false;
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
@@ -261,7 +253,6 @@ const SitePlanGenerator: React.FC = () => {
 
   const selectApproach = () => {
     setIsGeneratingSitePlan(false)
-    setIsUploadingImage(false);
 
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
@@ -272,7 +263,6 @@ const SitePlanGenerator: React.FC = () => {
 
   const defineScale = () => {
     setIsGeneratingSitePlan(false);
-    setIsUploadingImage(false);
 
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
@@ -296,7 +286,6 @@ const SitePlanGenerator: React.FC = () => {
     const scale = scaleRef.current;
 
     setIsGeneratingSitePlan(true)
-    setIsUploadingImage(false);
     isSelectingSetbackRef.current = false;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
@@ -308,11 +297,11 @@ const SitePlanGenerator: React.FC = () => {
 
 
   const uploadStatus = () => {
-    if (!imageURL && isUploadingImage) {
-      return EStatus.notStarted
-    }
-    else if (!imageURL && isUploadingImage) {
+    if (!imageURL && mode === "upload") {
       return EStatus.inProgress
+    }
+    else if (!imageURL && mode !== "upload") {
+      return EStatus.notStarted
     }
     else {
       return EStatus.complete;
@@ -320,21 +309,69 @@ const SitePlanGenerator: React.FC = () => {
   };
 
 
-  const createPropertyLinesStatus = useMemo(
-    () => {
 
-      if (pointsRef.current.length > 0 && !isPolygonClosedRef.current) {
-        return EStatus.inProgress
-      }
-      else if (isPolygonClosedRef.current) {
-        return EStatus.complete
-      }
-      else {
-        return EStatus.notStarted
-      }
-    },
-    [isPolygonClosedRef.current, pointsRef.current],
-  )
+
+
+  const createPropertyLinesStatus = () => {
+
+    if (!isPolygonClosedRef.current && mode === "adjust") {
+      return EStatus.inProgress
+    }
+    else if (!isPolygonClosedRef.current && mode !== "adjust") {
+      return EStatus.notStarted
+    }
+    else {
+      return EStatus.complete;
+    }
+  }
+
+
+
+  const createSelectApproachStatus = () => {
+    const hasApproach = linesRef.current.findIndex(line => line.isApproach === true);
+
+    if (hasApproach === -1 && mode === "approach") {
+      return EStatus.inProgress
+    }
+    else if (hasApproach === -1 && mode !== "approach") {
+      return EStatus.notStarted
+    }
+    else {
+      return EStatus.complete;
+    }
+  }
+
+  const createScaleStatus = () => {
+    if (!scaleRef.current && mode === "scale") {
+      return EStatus.inProgress
+    }
+    else if (!scaleRef.current && mode !== "scale") {
+      return EStatus.notStarted
+    }
+    else {
+      return EStatus.complete;
+    }
+  }
+
+  const createSetbackStatus = () => {
+
+    const allZero = setbacksRef.current.every((val) => val === 0)
+    const hasNoSetback= linesRef.current.findIndex(line => (line.setback || 0) > 0)  === -1;
+
+    console.log(`allZero`, allZero, setbacksRef.current)
+    if (hasNoSetback && mode === "setback") {
+      return EStatus.inProgress
+    }
+    else if (hasNoSetback && mode !== "setback") {
+
+      return EStatus.notStarted
+    }
+    else {
+      return EStatus.complete;
+    }
+  }
+
+
 
   // const approachStatus = ""
   // const scaleStatus = ""
@@ -466,7 +503,7 @@ const SitePlanGenerator: React.FC = () => {
                     id="imperviousPercentage"
                     type="number"
                     min={0}
-                    value={formData.imperviousPercentage|| ""}
+                    value={formData.imperviousPercentage || ""}
                     onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
                   />
                 </div>
@@ -497,14 +534,17 @@ const SitePlanGenerator: React.FC = () => {
 
 
                 <StepButton label="Clear" onClick={clearCanvas} />
+
+
                 <StepButton label="Upload Property Image" onClick={startUploadingImage} status={uploadStatus()} isActive={mode === 'upload'} >
                   {mode === "upload" && !isGeneratingSitePlan ?
                     <ImageUploader onFileUpload={setImageURL} /> : <></>}
                 </StepButton>
 
-                <StepButton label="Create Property Boundary" onClick={createPoints} status={createPropertyLinesStatus} isActive={mode === 'adjust'} />
-                <StepButton label="Select Approach" onClick={selectApproach} status="not-started" isActive={mode === 'approach'} />
-                <StepButton label="Define Scale" onClick={defineScale} status="not-started" isActive={mode === 'scale'} >
+                <StepButton label="Create Property Boundary" onClick={createPoints} status={createPropertyLinesStatus()} isActive={mode === 'adjust'} />
+                <StepButton label="Select Approach" onClick={selectApproach} status={createSelectApproachStatus()} isActive={mode === 'approach'}  disabled={!isPolygonClosedRef.current}/>
+
+                <StepButton label="Define Scale" onClick={defineScale} status={createScaleStatus()} isActive={mode === 'scale'}   disabled={!isPolygonClosedRef.current}>
                   {mode === "scale" ? <div style={{ marginTop: '10px' }}>
                     <label>Edge Length (ft): </label>
                     <input
@@ -518,7 +558,7 @@ const SitePlanGenerator: React.FC = () => {
                     />
                   </div> : <></>}
                 </StepButton>
-                <StepButton label="Create Setbacks" onClick={createSetbacks} status="not-started" isActive={mode === 'setback'} />
+                <StepButton label="Create Setbacks" onClick={createSetbacks} status={createSetbackStatus()} isActive={mode === 'setback'}   disabled={!isPolygonClosedRef.current}/>
                 <StepButton label="Generate Site Plan" onClick={generateSitePlan} isActive={mode === 'generate'} />
 
               </div>

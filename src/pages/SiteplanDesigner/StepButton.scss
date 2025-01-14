@@ -1,26 +1,60 @@
-
-.step-button{
+.step-button {
   display: flex;
-   flex-direction: column;
-   align-items: center;
+  flex-direction: column;
+  align-items: center;
 
-   padding: 0 10px;
-   button{
+  padding: 0 10px;
+ 
+ 
+  .button-header {
+    display: grid;
+    grid-template-columns: 1fr 10fr;
+    column-gap: 10px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .status-indicator {
+    border: 2px solid;
+
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    &.not-started {
+      background-color: #ec8989;
+      border-color: red;
+    }
+    &.in-progress {
+      background-color: yellow;
+      border-color: #d1d100
+    }
+    &.complete {
+      background-color: #007bff;
+      border-color: blue;
+    }
+  }
+
+  button {
     padding: 10px 20px;
     cursor: pointer;
-    width:100%;
-    background-color: #f0f0f0; 
-    color:  #000; 
+    width: 100%;
+    background-color: #f0f0f0;
+    color: #000;
     border: 2px solid #ccc;
-    transition:background-color 0.3s, color 0.3s, border 0.3s;
+    transition: background-color 0.3s, color 0.3s, border 0.3s;
 
-    &.is-active {
-    background-color: #007bff;
-    color: #fff;
-    border:2px solid #0056b3
 
+    &:disabled,
+    &[disabled]{
+      border: 1px solid #999999;
+      background-color: #cccccc;
+      color: #666666;
     }
-
-    
-   }
+    &.is-active {
+      background-color: #007bff;
+      color: #fff;
+      border: 2px solid #0056b3;
+    }
+  }
 }

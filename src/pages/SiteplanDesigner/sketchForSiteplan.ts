@@ -4,7 +4,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 
  
 
-export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, visualizer: React.MutableRefObject<SiteplanGenerator | null>, isPolygonClosedRef: React.MutableRefObject<boolean>, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>,canvasContainerRef: React.RefObject<HTMLDivElement>) {
+export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, visualizer: React.MutableRefObject<SiteplanGenerator | null>, isPolygonClosedRef: React.MutableRefObject<boolean>, setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>,canvasContainerRef: React.RefObject<HTMLDivElement>) {
     return (p: p5) => {
       let img: p5.Image | null = null;
       // const 
@@ -58,10 +58,62 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
             p.background("#f9fafb"); // Default background
           }
   
+
           // Draw lines connecting points
           const points = pointsRef.current;
           const lines = linesRef.current;
+
+          if(points.length === 0){
+            p.push();
+            p.textSize(30);
+            p.fill(50); // Text color
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text("Click here to start creating your siteplan", p.width / 2, p.height / 2);
+            p.pop()
+            return
+          }
+
+          if(!isPolygonClosed){
+            p.push();
+            // Display the message in the bottom-right corner when no boundary is closed
+            p.textSize(16);
+            p.fill(50); // Text color
+            p.textAlign(p.RIGHT, p.BOTTOM);
+            p.text("Click the first point to close the boundary", p.width - 10, p.height - 10);
+            p.pop()
+          }
+
+          if(isPolygonClosed && isSelectingApproachRef.current){
+            p.push();
+            // Display the message in the bottom-right corner when no boundary is closed
+            p.textSize(16);
+            p.fill(50); // Text color
+            p.textAlign(p.RIGHT, p.BOTTOM);
+            p.text("Click the property edge that will be the entrance to the propery", p.width - 10, p.height - 10);
+            p.pop()
+          }
+
+          if(isPolygonClosed && isDefiningScaleRef.current){
+            p.push();
+            // Display the message in the bottom-right corner when no boundary is closed
+            p.textSize(16);
+            p.fill(50); // Text color
+            p.textAlign(p.RIGHT, p.BOTTOM);
+            p.text("Click a property edge then type in the edge's length", p.width - 10, p.height - 10);
+            p.pop()
+          }
+
+          if(isPolygonClosed && isSelectingSetbackRef.current){
+            p.push();
+            // Display the message in the bottom-right corner when no boundary is closed
+            p.textSize(16);
+            p.fill(50); // Text color
+            p.textAlign(p.RIGHT, p.BOTTOM);
+            p.text("For each property edge, enter the setback required for the zoning.\nEntering nothing means a setback of 0 feet", p.width - 10, p.height - 10);
+            p.pop()
+          }
           // const isPolygonClosed = isPolygonClosedRef.current;
+          p.push();
           for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
   
@@ -114,6 +166,8 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
           }
   
           drawArea(p, isPolygonClosedRef.current, points, scale || .25);
+
+          p.pop();
         }
       };
   
@@ -169,6 +223,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
           p.dist(points[0].x, points[0].y, mx, my) < 10 &&
           !isPolygonClosed) {
           isPolygonClosedRef.current = true;
+          setIsPolygonClosedState(true);
   
           const newLine: Line = {
             start: points.length - 1,
