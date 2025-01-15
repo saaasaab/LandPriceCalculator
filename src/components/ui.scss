@@ -108,7 +108,8 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     color: white;
 
     &:hover {
-      background-color: darken($primary-color, 10%);
+      filter:brightness(.9);
+
     }
   }
 
@@ -117,7 +118,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     color: white;
 
     &:hover {
-      background-color: darken($secondary-color, 10%);
+      filter:brightness(.9);
     }
   }
 
@@ -157,7 +158,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     width: $checkbox-size;
     height: $checkbox-size;
     border: 2px solid $border-color;
-    border-radius: $border-radius-sm / 2;
+    border-radius: calc($border-radius-sm / 2);
     background-color: $background-color;
     cursor: pointer;
     position: relative;

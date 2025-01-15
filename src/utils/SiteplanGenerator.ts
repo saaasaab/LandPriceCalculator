@@ -194,7 +194,7 @@ export class ParkingStall {
     p.beginShape();
     p.stroke(0); // Outline color
     p.strokeWeight(1.5);
-
+    p.noFill()
     const reorderCorners = [...this.stallCorners]
     // Needed to not show the parking lines inside the parkint lot.
     reorderCorners.push(...reorderCorners.splice(0, 1));
@@ -345,13 +345,25 @@ export class Property {
 
   drawSetbackPolygon() {
     const p = this.p;
-
-    p.push()
-    p.beginShape();
     p.fill(100, 200, 255, 50); // Fill color with transparency
     p.stroke(0); // Outline color
     p.strokeWeight(1);
 
+
+    p.push()
+
+    p.fill(100, 200, 255, 50); // Fill color with transparency
+
+    p.beginShape();
+    this.propertyCorners.forEach((corner) => {
+      p.vertex(corner.x, corner.y);
+    });
+    p.endShape(p.CLOSE); // Close the polygon
+
+
+    p.fill("#f9fafb"); // Fill color with transparency
+
+    p.beginShape(); // Close the polygon
 
     this.cornerOffsetsFromSetbacks.forEach((corner) => {
       p.vertex(corner.x, corner.y);
@@ -360,6 +372,8 @@ export class Property {
 
 
     p.pop();
+
+  
   }
 
 
@@ -754,9 +768,9 @@ export class SitePlanElement {
 
 
 
-    this.sitePlanElementCorners.forEach((corner) => {
+    this.sitePlanElementCorners.forEach((corner,i) => {
       p.vertex(corner.x, corner.y);
-      // p.text(i, corner.x, corner.y)
+      p.text(i, corner.x, corner.y)
     });
 
 
@@ -830,16 +844,16 @@ export class Approach extends SitePlanElement {
 
     // p.text(p.round(this.angle), this.center.x, this.center.y);
 
-    this.sitePlanElementEdges.forEach(edge => {
-      const center = getCenterPoint(this.p, edge.point1, edge.point2);
-      p.fill(200, 20, 40);
-      p.ellipse(center.x, center.y, 10, 10);
-      p.strokeWeight(1)
-      p.fill(40, 200, 20);
+    // this.sitePlanElementEdges.forEach(edge => {
+    //   const center = getCenterPoint(this.p, edge.point1, edge.point2);
+    //   p.fill(200, 20, 40);
+    //   p.ellipse(center.x, center.y, 10, 10);
+    //   p.strokeWeight(1)
+    //   p.fill(40, 200, 20);
 
 
-      // p.text(p.round(edge.calculateAngle()), center.x, center.y);
-    })
+    //   // p.text(p.round(edge.calculateAngle()), center.x, center.y);
+    // })
 
     p.pop()
 
@@ -1210,6 +1224,10 @@ export class Parking extends SitePlanElement {
 
     parkingOutline.push(
       parking.sitePlanElementCorners[1],
+      garbage.sitePlanElementCorners[2],
+      garbage.sitePlanElementCorners[1],
+      garbage.sitePlanElementCorners[0],
+      garbage.sitePlanElementCorners[3],
       parking.sitePlanElementCorners[0],
     )
 
@@ -1222,8 +1240,6 @@ export class Parking extends SitePlanElement {
       )
 
     }
-
-
 
     parkingOutline.push(
       parking.sitePlanElementCorners[3],
@@ -1239,8 +1255,9 @@ export class Parking extends SitePlanElement {
 
     this.parkingOutlineDoubleLayer = points;
     // Double stroke
+    p.push();
     p.beginShape();
-    p.fill(120, 220, 40, 150); // Fill color with transparency
+    p.fill(120, 120, 120, 150); // Fill color with transparency
     p.stroke(0); // Outline color
     p.strokeWeight(1);
 
@@ -1302,7 +1319,7 @@ export class Parking extends SitePlanElement {
 
     });
     p.endShape(p.CLOSE); // Close the polygon
-
+    p.pop();
 
   }
 }
@@ -1450,8 +1467,43 @@ export class Building extends SitePlanElement {
 
   drawBuilding() {
     if (this.isInitialized) {
-      this.drawSitePlanElement();
 
+      
+      this.p.push();
+      this.p.stroke("black");
+      this.p.strokeWeight(3);
+      this.p.noFill();
+      this.p.beginShape();
+      this.sitePlanElementCorners.forEach(corner=>{
+        this.p.vertex(corner.x,corner.y);
+      })
+      // this.drawSitePlanElement();
+
+      this.p.endShape(this.p.CLOSE)
+      this.p.pop();
+
+
+      this.sitePlanElementEdges.forEach((edge,i)=>{
+        // const hasEntranceOnEdge = this.entrances.findIndex(entrance=>entrance.edgeIndex === i) !==-1;
+        // if(!hasEntranceOnEdge){
+          // draw from one poont to the next
+        // }
+
+        const mid = edge.getMidpoint();
+        const length = edge.getLineLength() * this.scale;
+       
+   
+        this.p.push();
+        this.p.noStroke()
+        this.p.fill('black')
+        this.p.translate(mid.x, mid.y);
+        this.p.rotate(edge.calculateAngle())
+        this.p.textSize(14);
+        this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+        this.p.pop();
+
+        
+      })
 
       this.entrances.forEach(entrance => {
         entrance.drawEnterance();
@@ -1768,6 +1820,38 @@ export class Garbage extends SitePlanElement {
 
     this.center.x = _center.x;
     this.center.y = _center.y;
+  }
+
+  drawGarbageEnclosure(){
+    const p = this.p;
+    const garbageOutline = [];
+    garbageOutline.push(
+      this.sitePlanElementCorners[2],
+      this.sitePlanElementCorners[1],
+      this.sitePlanElementCorners[0],
+      this.sitePlanElementCorners[3],
+    )
+
+    // Set the this.parkingOutline to the inner layer before the offset is created. 
+
+    const offsetParking = expandPolygon(p, garbageOutline, -5);
+    const points = [...offsetParking, ...garbageOutline.reverse()];
+
+
+    p.push();
+    p.beginShape();
+    p.fill(120, 120, 120, 150); // Fill color with transparency
+    p.stroke(0); // Outline color
+    p.strokeWeight(1);
+    p.textSize(10)
+
+    points.forEach((corner) => {
+      p.vertex(corner.x, corner.y);
+    });
+    p.endShape(p.CLOSE); // Close the polygon
+    p.pop();
+    
+
   }
 }
 
@@ -2382,8 +2466,9 @@ export class SiteplanGenerator {
         building.buildingLocator(p, building, parking, property,garbage);
         building.buildingGrower(property, parking);
       }
-      garbage.drawSitePlanElement();
-
+      
+      
+      garbage.drawGarbageEnclosure();//drawSitePlanElement();
 
 
       const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [p.mouseX, p.mouseY]) === -1
@@ -2425,13 +2510,6 @@ export class SiteplanGenerator {
           //   closestEdge,
           //   intersection
           // ) || 0;
-
-
-
-
-
-          p.text(1, closestEdge.point1.x, closestEdge.point1.y)
-          p.text(2, closestEdge.point2.x, closestEdge.point2.y)
 
 
           // Draw the entrance

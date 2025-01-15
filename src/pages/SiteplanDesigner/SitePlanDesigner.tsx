@@ -1,29 +1,31 @@
 export interface FormData {
-  parkingStalls: number;
   approachWidth: number;
-  drivewayWidth: number;
   buildingArea: number;
-  taperedDriveway: boolean;
-  propertyEntranceCount: number;
   buildingCount: number;
+  drivewayWidth: number;
+  halfStreetDriveway: boolean;
+  imperviousPercentage: number;
   landscapeIsland: number;
   parkingPer1000: number;
-  imperviousPercentage: number;
+  parkingStalls: number;
+  propertyEntranceCount: number;
+  taperedDriveway: boolean;
+  parkingSide: 'right' | 'left';
 }
 
 export interface SiteMetrics {
-  propertyArea: number;
-  imperviousSurface: number;
-  drivewayArea: number;
-  parkingArea: number;
-  parkingStallsArea: number;
-  handicappedStallsCount: number;
-  totalParkingStalls: number;
-  sidewalkArea: number;
-  garbageArea: number;
   actualBuildingArea: number;
   approachArea: number;
   bikeParkingArea: number;
+  drivewayArea: number;
+  garbageArea: number;
+  handicappedStallsCount: number;
+  imperviousSurface: number;
+  parkingArea: number;
+  parkingStallsArea: number;
+  propertyArea: number;
+  sidewalkArea: number;
+  totalParkingStalls: number;
 }
 
 export interface IPoint {
@@ -46,7 +48,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
-import { Card, CardHeader, CardTitle, CardContent, Input} from '../../components/ui';
+import { Card, CardHeader, CardTitle, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
 import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
@@ -65,7 +67,10 @@ const initialFormData: FormData = {
   buildingCount: 1,
   landscapeIsland: 7,
   parkingPer1000: 2.4,
-  imperviousPercentage: 70
+  imperviousPercentage: 70,
+  halfStreetDriveway: false,
+  parkingSide: 'left'
+
 
 };
 
@@ -130,11 +135,21 @@ const SitePlanGenerator: React.FC = () => {
     };
   }, [imageURL]);
 
-  const handleInputChange = (field: keyof FormData, value: number | boolean): void => {
+  const handleInputChange = (field: keyof FormData, value: number | boolean | string): void => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
+    const value = e.target.value; // Value is a string ('right' or 'left')
+    handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
+  };
+
+  const handleBooleanInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
+    const value = e.target.checked; // `checked` gives the boolean state of the input
+    handleInputChange(field, value);
   };
 
   const handleNumberInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
@@ -353,7 +368,7 @@ const SitePlanGenerator: React.FC = () => {
 
   const createSetbackStatus = () => {
 
-    const hasNoSetback= linesRef.current.findIndex(line => (line.setback || 0) > 0)  === -1;
+    const hasNoSetback = linesRef.current.findIndex(line => (line.setback || 0) > 0) === -1;
 
     if (hasNoSetback && mode === "setback") {
       return EStatus.inProgress
@@ -438,15 +453,55 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div>
 
-                {/* <div className="site-plan-generator__checkbox disabled">
+
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
+                  <Checkbox
+                    id="halfStreetDriveway"
+                    checked={formData.halfStreetDriveway}
+                    onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
+                  />
+                </div>
+                {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED */}
+
+                {formData.halfStreetDriveway ?
+
+                  <div className="site-plan-generator__input-group subgroup-1">
+                    <label>Parking Side</label>
+                    <div className="radio-group">
+                      <label>
+                        <input
+                          type="radio"
+                          name="parkingSide"
+                          value="right"
+                          checked={formData.parkingSide === 'right'}
+                          onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                        />
+                        Right Parking
+                      </label>
+
+                      <label>
+                        <input
+                          type="radio"
+                          name="parkingSide"
+                          value="left"
+                          checked={formData.parkingSide === 'left'}
+                          onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                        />
+                        Left Parking
+                      </label>
+                    </div>
+                  </div> : <></>}
+
+                <div className="site-plan-generator__checkbox disabled">
                   <label htmlFor="taperedDriveway">Tapered Driveway</label>
 
                   <Checkbox
                     id="taperedDriveway"
                     checked={formData.taperedDriveway}
-                  //  ={(checked: boolean) => handleInputChange('taperedDriveway', checked)}
+                    onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
                   />
-                </div> */}
+                </div>
 
 
                 <div className="site-plan-generator__input-group disabled">
@@ -538,9 +593,9 @@ const SitePlanGenerator: React.FC = () => {
                 </StepButton>
 
                 <StepButton label="Create Property Boundary" onClick={createPoints} status={createPropertyLinesStatus()} isActive={mode === 'adjust'} />
-                <StepButton label="Select Approach" onClick={selectApproach} status={createSelectApproachStatus()} isActive={mode === 'approach'}  disabled={!isPolygonClosedRef.current}/>
+                <StepButton label="Select Approach" onClick={selectApproach} status={createSelectApproachStatus()} isActive={mode === 'approach'} disabled={!isPolygonClosedRef.current} />
 
-                <StepButton label="Define Scale" onClick={defineScale} status={createScaleStatus()} isActive={mode === 'scale'}   disabled={!isPolygonClosedRef.current}>
+                <StepButton label="Define Scale" onClick={defineScale} status={createScaleStatus()} isActive={mode === 'scale'} disabled={!isPolygonClosedRef.current}>
                   {mode === "scale" ? <div style={{ marginTop: '10px' }}>
                     <label>Edge Length (ft): </label>
                     <input
@@ -554,7 +609,7 @@ const SitePlanGenerator: React.FC = () => {
                     />
                   </div> : <></>}
                 </StepButton>
-                <StepButton label="Create Setbacks" onClick={createSetbacks} status={createSetbackStatus()} isActive={mode === 'setback'}   disabled={!isPolygonClosedRef.current}/>
+                <StepButton label="Create Setbacks" onClick={createSetbacks} status={createSetbackStatus()} isActive={mode === 'setback'} disabled={!isPolygonClosedRef.current} />
                 <StepButton label="Generate Site Plan" onClick={generateSitePlan} isActive={mode === 'generate'} />
 
               </div>
