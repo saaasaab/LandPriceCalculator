@@ -132,7 +132,7 @@ export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph,
   ];
 
 
-  visibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles, property.propertyCorners)
+  visibilityGraphSolver = new VisibilityGraph(startPoints, endPoints, obstacles, property.propertyCorners, property.scale)
 
   visibilityGraphSolver.calculateSideWalkPolygons(property.scale)
   return visibilityGraphSolver

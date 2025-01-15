@@ -46,7 +46,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
-import { Card, CardHeader, CardTitle, CardContent, Input, Checkbox } from '../../components/ui';
+import { Card, CardHeader, CardTitle, CardContent, Input} from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
 import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
@@ -355,10 +355,8 @@ const SitePlanGenerator: React.FC = () => {
 
   const createSetbackStatus = () => {
 
-    const allZero = setbacksRef.current.every((val) => val === 0)
     const hasNoSetback= linesRef.current.findIndex(line => (line.setback || 0) > 0)  === -1;
 
-    console.log(`allZero`, allZero, setbacksRef.current)
     if (hasNoSetback && mode === "setback") {
       return EStatus.inProgress
     }
@@ -442,7 +440,7 @@ const SitePlanGenerator: React.FC = () => {
                   />
                 </div>
 
-                <div className="site-plan-generator__checkbox disabled">
+                {/* <div className="site-plan-generator__checkbox disabled">
                   <label htmlFor="taperedDriveway">Tapered Driveway</label>
 
                   <Checkbox
@@ -450,7 +448,7 @@ const SitePlanGenerator: React.FC = () => {
                     checked={formData.taperedDriveway}
                   //  ={(checked: boolean) => handleInputChange('taperedDriveway', checked)}
                   />
-                </div>
+                </div> */}
 
 
                 <div className="site-plan-generator__input-group disabled">

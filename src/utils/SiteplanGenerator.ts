@@ -1407,7 +1407,7 @@ export class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale);
-    this.buildingAreaTarget = 300;
+    this.buildingAreaTarget = 1500;
     this.buildingAreaActual = 0;
     this.hasStopped = true;
     this.ismoving = false;

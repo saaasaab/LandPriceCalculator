@@ -52,10 +52,11 @@ export class VisibilityGraph {
   startProjectionIndices: number[];
   endIndices: number[];
   sideWalkPolygons: [number, number][][];//polygonClipping.MultiPolygon
+  scale: number;
 
   
 
-  constructor(startPoints: TTwoPoints[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[]) {
+  constructor(startPoints: TTwoPoints[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[],scale:number) {
     // Initialize nodes
     this.nodes = [];
     this.obstaclesOffset = [];
@@ -66,7 +67,8 @@ export class VisibilityGraph {
     this.startIndices = [];
     this.startProjectionIndices = []
     this.endIndices = [];
-    this.sideWalkPolygons = []
+    this.sideWalkPolygons = [];
+    this.scale = scale;
 
     const _boundary: Point[] = boundary.map(point => [point.x, point.y]);
     const startIndices: number[] = [];
@@ -110,7 +112,7 @@ export class VisibilityGraph {
         _obstacle.push(newNode);
       }
 
-      const offset = this.expandPolygon(_obstacle, 20);
+      const offset = this.expandPolygon(_obstacle, 7/this.scale);
       this.obstaclesOffset.push(offset);
     }
 
@@ -347,7 +349,6 @@ export class VisibilityGraph {
 
   // Check if a line segment is blocked by any obstacle
   isLineSegmentBlocked(p1: CNode, p2: CNode): boolean {
-
     let isBlocked = false;
     for (const polygon of this.obstacles) {
       const numVertices = polygon.length;
