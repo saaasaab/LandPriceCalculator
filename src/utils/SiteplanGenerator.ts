@@ -1496,7 +1496,6 @@ export class Building extends SitePlanElement {
 
     isInsideParkingOutline = !twoObjectsAreNotColliding(building.sitePlanElementCorners, parking.parkingOutline)
 
-
     isOutsideBoundary = building.sitePlanElementCorners.map(corner => {
       const point: Point = [corner.x, corner.y];
       return pointsAreInBoundary(property.cornerOffsetsFromSetbacks, point) === 1
@@ -1585,6 +1584,7 @@ export class Building extends SitePlanElement {
 
 
     const targetArea = this.buildingAreaTarget / (this.p.pow(this.scale, 2));
+
 
     let bestArea = calculateArea(this.sitePlanElementCorners)
     const error = Math.abs(targetArea - bestArea) / targetArea;
@@ -1794,11 +1794,6 @@ export class SiteplanGenerator {
   public globalAngle: number;
   public globalAnglePrev: number;
   public taperParking: boolean;
-
-  // public p: p5;
-
-
-
 
 
   constructor(points: IPoint[], lines: Line[], scale: number) {

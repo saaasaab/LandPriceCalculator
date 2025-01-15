@@ -40,16 +40,29 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
         if (img) {
 
+          p.background("#f9fafb"); // Default background
+
           // Resize the image, keeping the aspect ratio.
-          if (img.width > img.height) {
+          p.push();
+          let aspectRatio = img.width / img.height;
+
+          if (aspectRatio > 1) {
+            // Image is wider than it is tall
             img.resize(0, p.height);
-
+            if (img.width > p.width) {
+              img.resize(p.width, 0); // Resize again if width exceeds canvas
+            }
           } else {
+            // Image is taller than it is wide
             img.resize(p.width, 0);
-
+            if (img.height > p.height) {
+              img.resize(0, p.height); // Resize again if height exceeds canvas
+            }
           }
-
+          p.pop();
           // Display the resized image.
+
+
           p.image(img, 0, 0);
 
 
@@ -71,7 +84,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
           p.text("Click here to start creating your siteplan", p.width / 2, p.height / 2);
           p.pop()
           return
-        } 
+        }
         else if (points.length === 0 && img) {
           p.push();
           p.textSize(16);
@@ -84,7 +97,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
 
 
-        
+
         if (!isPolygonClosed && points.length === 1) {
           p.push();
           // Display the message in the bottom-right corner when no boundary is closed

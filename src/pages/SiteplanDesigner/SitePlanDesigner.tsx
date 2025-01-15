@@ -79,7 +79,7 @@ const initialMetrics: SiteMetrics = {
   totalParkingStalls: 8,
   sidewalkArea: 0,
   garbageArea: 2808,
-  actualBuildingArea: 5851,
+  actualBuildingArea: 1500,
   approachArea: 62,
   bikeParkingArea: 0
 };
@@ -89,8 +89,6 @@ const SitePlanGenerator: React.FC = () => {
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('adjust'); // Interaction mode
-
-
 
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
@@ -291,7 +289,7 @@ const SitePlanGenerator: React.FC = () => {
     isDefiningScaleRef.current = false;
 
 
-    visualizer.current = new SiteplanGenerator(points, lines, scale || .25)
+    visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
     // Now pass this all on to the solver
   }
 
