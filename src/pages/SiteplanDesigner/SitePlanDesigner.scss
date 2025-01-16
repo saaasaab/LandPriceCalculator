@@ -24,17 +24,14 @@
 
   // Control Panel (Left Column)
   &__controls {
-    overflow: scroll;
+    overflow-y: scroll;
     .card {
-      height: 100%;
+      // height: 100%;
       background-color: white;
       border-radius: $border-radius;
-      // overflow: hidden;
 
 
-      scroll-behavior: smooth;
-      overflow: scroll;
-      height: 100%;
+      // height: 100%;
 
     }
     .pre-input-fields {
@@ -156,8 +153,6 @@
     display: grid;
     grid-template-rows: 1fr 150px;
     .card {
-      // height: 100%;
-
       &__content {
         height: 100%;
         

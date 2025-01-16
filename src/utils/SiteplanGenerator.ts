@@ -1,7 +1,7 @@
 import p5 from "p5";
 import classifyPoint from "robust-point-in-polygon"
-import {  VisibilityGraph } from "../pages/VisibilityGraph";
-import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway} from "./SiteplanGeneratorUtils";
+import { VisibilityGraph } from "../pages/VisibilityGraph";
+import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway } from "./SiteplanGeneratorUtils";
 import { IPoint, Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
 
 type Point = [number, number];
@@ -373,7 +373,7 @@ export class Property {
 
     p.pop();
 
-  
+
   }
 
 
@@ -618,13 +618,16 @@ export class SitePlanElement {
 
     return { x: newX, y: newY }
   }
-  pointIsInPolygon(corners: p5.Vector[], point: p5.Vector) {
+  pointIsInPolygon(corners: p5.Vector[]) {
     // 1 = outside
     // 0 = on the border
     // -1 = inside
-    const searchPoint = [point.x, point.y]
-    const pointClassification = classifyPoint(corners.map(corner => [corner.x, corner.y]) as Point[], searchPoint as Point)
-    return pointClassification === -1
+    const elementIsAllInPolygonArray = this.sitePlanElementCorners.map(sitePlanCorner => {
+      const pointClassification = classifyPoint(corners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
+      return pointClassification === -1
+    })
+
+    return truthChecker(elementIsAllInPolygonArray)
   }
 
 
@@ -768,7 +771,7 @@ export class SitePlanElement {
 
 
 
-    this.sitePlanElementCorners.forEach((corner,i) => {
+    this.sitePlanElementCorners.forEach((corner, i) => {
       p.vertex(corner.x, corner.y);
       p.text(i, corner.x, corner.y)
     });
@@ -1468,14 +1471,14 @@ export class Building extends SitePlanElement {
   drawBuilding() {
     if (this.isInitialized) {
 
-      
+
       this.p.push();
       this.p.stroke("black");
       this.p.strokeWeight(3);
       this.p.noFill();
       this.p.beginShape();
-      this.sitePlanElementCorners.forEach(corner=>{
-        this.p.vertex(corner.x,corner.y);
+      this.sitePlanElementCorners.forEach(corner => {
+        this.p.vertex(corner.x, corner.y);
       })
       // this.drawSitePlanElement();
 
@@ -1483,16 +1486,16 @@ export class Building extends SitePlanElement {
       this.p.pop();
 
 
-      this.sitePlanElementEdges.forEach((edge,i)=>{
+      this.sitePlanElementEdges.forEach((edge) => {
         // const hasEntranceOnEdge = this.entrances.findIndex(entrance=>entrance.edgeIndex === i) !==-1;
         // if(!hasEntranceOnEdge){
-          // draw from one poont to the next
+        // draw from one poont to the next
         // }
 
         const mid = edge.getMidpoint();
         const length = edge.getLineLength() * this.scale;
-       
-   
+
+
         this.p.push();
         this.p.noStroke()
         this.p.fill('black')
@@ -1502,7 +1505,7 @@ export class Building extends SitePlanElement {
         this.p.text(`${length.toFixed(1)} ft`, 0, 0);
         this.p.pop();
 
-        
+
       })
 
       this.entrances.forEach(entrance => {
@@ -1806,7 +1809,7 @@ export class Garbage extends SitePlanElement {
 
 
   updateCenterGarbage(parking: Parking) {
-// property: Property,
+    // property: Property,
 
     parking.sitePlanElementEdges[0].point1
 
@@ -1822,7 +1825,7 @@ export class Garbage extends SitePlanElement {
     this.center.y = _center.y;
   }
 
-  drawGarbageEnclosure(){
+  drawGarbageEnclosure() {
     const p = this.p;
     const garbageOutline = [];
     garbageOutline.push(
@@ -1850,7 +1853,7 @@ export class Garbage extends SitePlanElement {
     });
     p.endShape(p.CLOSE); // Close the polygon
     p.pop();
-    
+
 
   }
 }
@@ -2002,8 +2005,8 @@ export class SiteplanGenerator {
     taperParking: boolean;
   }) {
 
-    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget,  taperParking } = updatedGlobals;
-// globalAngle,
+    const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget, taperParking } = updatedGlobals;
+    // globalAngle,
     if (!this.parking || !this.property || !this.approach || !this.building) return
 
 
@@ -2027,47 +2030,6 @@ export class SiteplanGenerator {
     this.parking.entranceEdge?.point1
 
     this.taperParking = taperParking
-
-
-    // // NEED TO ROTATE AND TRANSLATE BASED OFF THE CENTROID. 
-    // // Update the HIGH LEVEL
-    // this.globalAnglePrev = this.globalAngle;
-    // this.globalAngle = globalAngle;
-
-
-    // const p = this.approach.p;
-
-    // const { scaledPolygon, scaleFactor } = scalePolygonToFitCanvas(p, this.property.propertyCorners, p.width, p.height, 40);
-    // // this.scale = this.scale / scaleFactor 
-    // this.property.propertyCorners = scaledPolygon;
-
-
-
-
-
-    // this.property.propertyCorners = rotateCorners(this.approach.p, this.property.propertyCorners, this.globalAngle);
-
-
-    // const deltaAngle = this.globalAnglePrev - this.globalAngle;
-    // this.approach.updateAngle(this.approach.angle + deltaAngle);
-    // this.building.updateAngle(this.building.angle + deltaAngle);
-    // this.garbage?.updateAngle(this.garbage.angle + deltaAngle);
-    // this.parking.updateAngle(this.parking.angle + deltaAngle);
-
-    // // let approachIndex = this.lines.findIndex(line => line.isApproach);
-
-
-
-
-    // // approachIndex = approachIndex === -1 ? 0 : approachIndex;
-
-
-
-
-
-
-
-
 
   }
 
@@ -2182,7 +2144,6 @@ export class SiteplanGenerator {
           p.dist(edgeMidpoint.x, edgeMidpoint.y, _center.x, _center.y) <
           p.dist(edgeMidpoint.x, edgeMidpoint.y, newX, newY)) {
           return
-
         }
 
 
@@ -2196,12 +2157,16 @@ export class SiteplanGenerator {
       if (!property || !approach || !parking || !building || !garbage) return;
 
       isRotationFrozen = true;
+      // const _centerX = parking.center.x;
+      // const _centerY = parking.center.y;
 
       const newX = p.mouseX;
       const newY = p.mouseY;
-      let newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
 
-      // newAngle = calculateSnapToEdge(newAngle, parking, property);
+      const _angle = parking.angle;
+
+
+      let newAngle = calculateAngle(parking.center, p.createVector(newX, newY)) + 90;
       parking.updateAngle(newAngle);
       garbage.updateAngle(newAngle);
 
@@ -2210,9 +2175,27 @@ export class SiteplanGenerator {
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
       building.hasStopped = false;
-      building.buildingLocator(p, building, parking, property,  garbage);
-      garbage.updateCenterGarbage( parking);
+      building.buildingLocator(p, building, parking, property, garbage);
+      garbage.updateCenterGarbage(parking);
 
+      const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+      const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+
+      if (!parkingInBoundary || !garbageInBoundary) {
+
+        // If I'm moving the parking lot close to the center, then let the new point stand.
+        parking.updateAngle(_angle);
+        garbage.updateAngle(_angle);
+
+        parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+        parking.updateStallCorners();
+        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+
+        building.hasStopped = false;
+        building.buildingLocator(p, building, parking, property, garbage);
+        garbage.updateCenterGarbage(parking);
+        return;
+      }
 
       updateVisibilityGraph();
     };
@@ -2220,14 +2203,37 @@ export class SiteplanGenerator {
     const handleParkingDrag = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
 
+      const _centerX = parking.center.x;
+      const _centerY = parking.center.y;
+
       const newX = p.mouseX;
       const newY = p.mouseY;
-      const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
-
-
-      if (!truthChecker(centerInBoundary)) return;
-
       parking.updateCenter(newX, newY);
+
+      const centerInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+      const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+
+      if (!centerInBoundary || !garbageInBoundary) {
+
+        const center = calculateCentroid(property.propertyCorners)
+
+        if (!center) return;
+
+        // console.log( 
+        //   Math.round(p.dist(center.x, center.y, _centerX, _centerY)),
+        //   Math.round(p.dist(center.x, center.y, newX, newY)))
+        if (
+          p.dist(center.x, center.y, _centerX, _centerY) >
+          p.dist(center.x, center.y, newX, newY)) {
+          return
+        }
+
+
+        parking.updateCenter(_centerX, _centerY);
+        return;
+      }
+
+      // parking.updateCenter(newX, newY);
       garbage.updateCenterGarbage(parking);
 
       let angle = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
@@ -2251,7 +2257,7 @@ export class SiteplanGenerator {
         parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
         building.hasStopped = false;
-        building.buildingLocator(p, building, parking, property,  garbage);
+        building.buildingLocator(p, building, parking, property, garbage);
         updateVisibilityGraph();
       } else {
         building.hasStopped = true;
@@ -2273,7 +2279,6 @@ export class SiteplanGenerator {
         buildingOffset: building.isMouseHoveringOffset(),
       };
 
-
       // Moving the building
       if ((isHovered.building || isHovered.buildingOffset) && building.isInitialized) {
         isDragging.building = true;
@@ -2281,24 +2286,25 @@ export class SiteplanGenerator {
       }
 
       // Move the approach
-      if (isHovered.approach || isDragging.approach) {
+      else if (isHovered.approach || isDragging.approach) {
         isDragging.approach = true;
         handleApproachDrag();
       }
 
       // Meant for rotating the parking lot
-      if (((isHovered.parkingOffset && !isHovered.parking) || isDragging.parkingOffset) && !isDragging.approach) {
+      else if (((isHovered.parkingOffset && !isHovered.parking) || isDragging.parkingOffset) && !isDragging.approach) {
         isDragging.parkingOffset = true;
         handleParkingOffsetDrag();
       }
 
       // Dragging the parking lot
-      if ((isHovered.parking || isDragging.parking) && !isDragging.parkingOffset) {
+      else if ((isHovered.parking || isDragging.parking) && !isDragging.parkingOffset) {
         isDragging.parking = true;
         handleParkingDrag();
       }
 
-      // Update driveway area
+
+      // Update driveway area on every drag
       if (this.approach !== null && this.parking !== null) {
         this.drivewayArea = calculateDrivewayArea(this.approach.p, this.approach, this.parking)
         this.parking.parkingArea = Math.round(parking.width * parking.height * this.scale * this.scale);
@@ -2463,11 +2469,11 @@ export class SiteplanGenerator {
 
       if (!building.hasStopped && building.isInitialized) {
 
-        building.buildingLocator(p, building, parking, property,garbage);
+        building.buildingLocator(p, building, parking, property, garbage);
         building.buildingGrower(property, parking);
       }
-      
-      
+
+
       garbage.drawGarbageEnclosure();//drawSitePlanElement();
 
 

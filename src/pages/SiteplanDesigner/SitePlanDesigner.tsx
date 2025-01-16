@@ -36,7 +36,7 @@ export interface IPoint {
 export interface Line {
   start: number;
   end: number;
-  setback?: number;
+  setback: number;
   color: string;
   index: number;
   selected: boolean;
@@ -48,13 +48,12 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
-import { Info, Upload, Map, ArrowRight, Ruler, Box, FileImage, Delete } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent, Input, Checkbox } from '../../components/ui';
+import { Info, Map, ArrowRight, Ruler, Box, FileImage, Delete } from 'lucide-react';
+import { Card, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
 import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
 import ImageUploader from './ImageUploader';
-import { EStatus, StepButton } from './StepButton';
 
 import './SitePlanDesigner.scss';
 
@@ -99,6 +98,11 @@ const SitePlanGenerator: React.FC = () => {
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
+  const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
+
+
+
+
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isHelpVisible, setIsHelpVisible] = useState(true);
@@ -128,6 +132,7 @@ const SitePlanGenerator: React.FC = () => {
   let visualizer = useRef<SiteplanGenerator | null>(null)// new SiteplanGenerator(graph );
 
   // P5 sketch function
+
 
 
   const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isUploadingImageRef, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
@@ -231,9 +236,15 @@ const SitePlanGenerator: React.FC = () => {
 
     const lines = linesRef.current;
     const newLines = [...lines];
-    newLines[index].setback = parseFloat(value) || 0;
 
-    lines[index].setback = parseFloat(value) || 0
+    // Handle empty string explicitly to allow deleting the value
+    const parsedValue = value === "" ? undefined : parseFloat(value);
+
+    newLines[index].setback = parsedValue || 0; // Fallback to 0 if undefined
+    linesRef.current = newLines;
+
+    const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
+    setOffsetPoints(offsets);
 
   };
 
@@ -315,77 +326,77 @@ const SitePlanGenerator: React.FC = () => {
   }
 
 
-  const uploadStatus = () => {
-    if (!imageURL && mode === "upload") {
-      return EStatus.inProgress
-    }
-    else if (!imageURL && mode !== "upload") {
-      return EStatus.notStarted
-    }
-    else {
-      return EStatus.complete;
-    }
-  };
+  // const uploadStatus = () => {
+  //   if (!imageURL && mode === "upload") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (!imageURL && mode !== "upload") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // };
 
 
 
 
-  const createPropertyLinesStatus = () => {
+  // const createPropertyLinesStatus = () => {
 
-    if (!isPolygonClosedRef.current && mode === "adjust") {
-      return EStatus.inProgress
-    }
-    else if (!isPolygonClosedRef.current && mode !== "adjust") {
-      return EStatus.notStarted
-    }
-    else {
-      return EStatus.complete;
-    }
-  }
+  //   if (!isPolygonClosedRef.current && mode === "adjust") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (!isPolygonClosedRef.current && mode !== "adjust") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
 
 
 
-  const createSelectApproachStatus = () => {
-    const hasApproach = linesRef.current.findIndex(line => line.isApproach === true);
+  // const createSelectApproachStatus = () => {
+  //   const hasApproach = linesRef.current.findIndex(line => line.isApproach === true);
 
-    if (hasApproach === -1 && mode === "approach") {
-      return EStatus.inProgress
-    }
-    else if (hasApproach === -1 && mode !== "approach") {
-      return EStatus.notStarted
-    }
-    else {
-      return EStatus.complete;
-    }
-  }
+  //   if (hasApproach === -1 && mode === "approach") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (hasApproach === -1 && mode !== "approach") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
 
-  const createScaleStatus = () => {
-    if (!scaleRef.current && mode === "scale") {
-      return EStatus.inProgress
-    }
-    else if (!scaleRef.current && mode !== "scale") {
-      return EStatus.notStarted
-    }
-    else {
-      return EStatus.complete;
-    }
-  }
+  // const createScaleStatus = () => {
+  //   if (!scaleRef.current && mode === "scale") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (!scaleRef.current && mode !== "scale") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
 
-  const createSetbackStatus = () => {
+  // const createSetbackStatus = () => {
 
-    const hasNoSetback = linesRef.current.findIndex(line => (line.setback || 0) > 0) === -1;
+  //   const hasNoSetback = linesRef.current.findIndex(line => (line.setback || 0) > 0) === -1;
 
-    if (hasNoSetback && mode === "setback") {
-      return EStatus.inProgress
-    }
-    else if (hasNoSetback && mode !== "setback") {
+  //   if (hasNoSetback && mode === "setback") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (hasNoSetback && mode !== "setback") {
 
-      return EStatus.notStarted
-    }
-    else {
-      return EStatus.complete;
-    }
-  }
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
 
   const steps = [
     {
@@ -467,8 +478,12 @@ const SitePlanGenerator: React.FC = () => {
                 <input
 
                   type="number"
-                  value={line.setback}
-                  onChange={(e) => updateSetback(index, e.target.value)}
+                  value={line.setback === 0 ? "": line.setback }
+                  onChange={(e) => {
+                    updateSetback(index, e.target.value)
+
+
+                  }}
                   tabIndex={index + 1}
                   style={{
 
@@ -491,19 +506,8 @@ const SitePlanGenerator: React.FC = () => {
       help: 'Move the parking lot and building around, create building entrances, create sidewalks, and get ready to submit your site plan.',
       onClick: () => { generateSitePlan() },
     },
-  
+
   ];
-
-        {/* {
-  uploadStatus()
-
-  createPropertyLinesStatus()
-  createSelectApproachStatus()
-  createScaleStatus()
-
-}
-                 */}
-
   return (
     <div className="site-plan-generator">
       <div className="site-plan-generator__container">
@@ -745,7 +749,7 @@ const SitePlanGenerator: React.FC = () => {
                     >
                       <div className="site-plan-generator__step-content">
                         <div className={`site-plan-generator__step-icon`}>
-                         <Delete />,
+                          <Delete />,
                         </div>
                         <div className="site-plan-generator__step-info">
 
@@ -797,3 +801,106 @@ const SitePlanGenerator: React.FC = () => {
 export default SitePlanGenerator;
 
 
+
+
+
+
+function calculatecornerOffsetsFromSetbacks(lines: Line[], points: IPoint[]) {
+  const cornerOffsetsFromSetbacks: p5.Vector[] = [];
+  const cornerOffsetsPoints: p5.Vector[][] = [];
+
+
+  for (let i = 0; i < lines.length; i++) {
+    const currentEdge = lines[i];
+    cornerOffsetsPoints.push(createParallelEdge(currentEdge, points));
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const currentEdge = lines[i];
+    const nextEdge = i === lines.length - 1 ? lines[0] : lines[i + 1];
+    // Calculate the intersection point of the offset edges
+    const intersection = getIntersection(currentEdge, nextEdge, cornerOffsetsPoints);
+
+    if (intersection) {
+      cornerOffsetsFromSetbacks.push(intersection);
+    }
+  }
+
+  return cornerOffsetsFromSetbacks;
+}
+
+function createParallelEdge(line: Line, points: IPoint[]) {
+  // Calculate the normalized perpendicular vector
+  const startPoint = p5.prototype.createVector(points[line.start].x, points[line.start].y)
+  const endPoint = p5.prototype.createVector(points[line.end].x, points[line.end].y)
+
+  const direction = p5.Vector.sub(startPoint, endPoint).normalize();
+  const perpendicular = p5.prototype.createVector(-direction.y, direction.x);
+
+  // Scale the perpendicular vector by the setback
+
+  // p5.Vector.prototype.mult: x, y, or z arguments are either undefined or not a finite number
+
+  const offset = perpendicular.mult(line.setback || 0);
+
+  // Calculate the offset points for the new parallel edge
+  const point1Offset = p5.Vector.add(startPoint, offset).add(direction.copy().mult(-100)); // Extend 100px backward
+  const point2Offset = p5.Vector.add(endPoint, offset).add(direction.copy().mult(100)); // Extend 100px forward
+
+
+  return [point1Offset, point2Offset]
+}
+
+
+function getIntersection(edge1: Line, edge2: Line, cornerOffsetsPoints: p5.Vector[][]): p5.Vector | null {
+
+
+  const x1 = cornerOffsetsPoints[edge1.index][0].x
+  const y1 = cornerOffsetsPoints[edge1.index][0].y
+  const x2 = cornerOffsetsPoints[edge1.index][1].x
+  const y2 = cornerOffsetsPoints[edge1.index][1].y
+
+  const x3 = cornerOffsetsPoints[edge2.index][0].x
+  const y3 = cornerOffsetsPoints[edge2.index][0].y
+  const x4 = cornerOffsetsPoints[edge2.index][1].x
+  const y4 = cornerOffsetsPoints[edge2.index][1].y
+
+
+  // Calculate the denominator for the line intersection formula
+  const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+  // If denom is 0, the lines are parallel or coincident
+  if (Math.abs(denom) < 1e-6) {
+    console.warn("Lines are parallel or coincident:", { edge1, edge2 });
+    return null;
+  }
+
+  // Calculate the intersection point
+  const intersectX =((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denom;
+  const intersectY = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denom;
+
+  const intersection = p5.prototype.createVector(intersectX, intersectY);
+
+  // Debugging: Log the calculated intersection point
+
+  // Check if the intersection lies on both line segments
+  const tolerance = 1e-6; // Increase tolerance to handle floating-point precision
+  const isOnEdge1 =
+    Math.min(x1, x2) - tolerance <= intersectX &&
+    intersectX <= Math.max(x1, x2) + tolerance &&
+    Math.min(y1, y2) - tolerance <= intersectY &&
+    intersectY <= Math.max(y1, y2) + tolerance;
+
+  const isOnEdge2 =
+    Math.min(x3, x4) - tolerance <= intersectX &&
+    intersectX <= Math.max(x3, x4) + tolerance &&
+    Math.min(y3, y4) - tolerance <= intersectY &&
+    intersectY <= Math.max(y3, y4) + tolerance;
+
+  if (isOnEdge1 && isOnEdge2) {
+    return intersection;
+  }
+
+
+  return null; // Intersection is out of bounds
+}

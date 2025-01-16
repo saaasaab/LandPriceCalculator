@@ -7,6 +7,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, visualizer: React.MutableRefObject<SiteplanGenerator | null>, isUploadingImageRef: React.MutableRefObject<boolean>, isPolygonClosedRef: React.MutableRefObject<boolean>, setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>, canvasContainerRef: React.RefObject<HTMLDivElement>) {
   return (p: p5) => {
     let img: p5.Image | null = null;
+    // let offsetPoints: p5.Vector[] = [];
     // const 
     p.preload = () => {
       if (imageURL) {
@@ -20,6 +21,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
         const canvas = p.createCanvas(rect.width - 20, rect.height - 20);
         canvas.parent(canvasRef.current);
+
       }
     };
 
@@ -31,7 +33,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
         const isUploadingImage = isUploadingImageRef.current;
         const isPolygonClosed = isPolygonClosedRef.current;
 
-        if(isUploadingImage) return
+        if (isUploadingImage) return
         calculateScale();
         const scale = scaleRef.current;
 
@@ -151,21 +153,22 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
 
+          if (line.isApproach && line.isScale) {
+            p.strokeWeight(4)
+            p.stroke(230, 120, 20);
 
-          if (line.isApproach) {
+          }
+          else if (line.isApproach) {
             p.stroke(20, 230, 120);
           }
           else if (line.isScale) {
             p.stroke(230, 120, 20);
-
           }
           else {
             p.stroke(0, 20, 220);
           }
           // p.stroke(line.color);
           p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
-
-
           p.strokeWeight(2);
           p.noStroke();
           p.fill(0, 20, 220);
@@ -177,6 +180,8 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
           // if is finished, make the text larger.
           p.textSize(14);
           p.text(`${length.toFixed(1)} ft`, midX, midY);
+
+
         }
 
 
@@ -190,6 +195,15 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
           }
           p.endShape();
 
+
+          // p.fill(100, 250, 200, 20);
+          
+          // p.beginShape();
+          // offsetPoints.forEach(corner=>{
+          //   p.vertex(corner.x,corner.y);
+          // })
+          // p.endShape();
+
         }
 
 
@@ -201,14 +215,17 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
         drawArea(p, isPolygonClosedRef.current, points, scale || .25);
 
+
         p.pop();
       }
     };
 
     p.mousePressed = () => {
+
+      
       const isUploadingImage = isUploadingImageRef.current;
 
-      if(isUploadingImage) return
+      if (isUploadingImage) return
       const points = pointsRef.current;
       const lines = linesRef.current;
       const setbacks = setbacksRef.current;
@@ -247,7 +264,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
             isApproach: false,
             isScale: false,
             isSetback: false,
-            // setback: 0
+            setback: 0
           };
 
           setbacks.push(0);
@@ -271,7 +288,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
           isApproach: false,
           isScale: false,
           isSetback: false,
-          // setback: 5
+          setback: 0
         };
         setbacks.push(0);
         lines.push(newLine);
@@ -279,6 +296,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
 
       if (isPolygonClosed) {
+
         // Check if a line is clicked
         const lineIndex = lines.findIndex((line) => {
           const d1 = p.dist(mx, my, points[line.start].x, points[line.start].y);
@@ -312,8 +330,8 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
     p.mouseDragged = () => {
       const isUploadingImage = isUploadingImageRef.current;
-      if(isUploadingImage) return
-      
+      if (isUploadingImage) return
+
       const draggingPointIndex = draggingPointIndexRef.current;
       if (draggingPointIndex !== null) {
         const points = pointsRef.current;
