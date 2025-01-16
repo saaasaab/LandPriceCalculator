@@ -48,6 +48,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
+import { Info, Upload, Map, ArrowRight, Ruler, Box, FileImage, Delete } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
@@ -93,12 +94,14 @@ const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
-  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('adjust'); // Interaction mode
+  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('upload'); // Interaction mode
 
   const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
 
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isHelpVisible, setIsHelpVisible] = useState(true);
 
   // Property Outputs
   const [globalAngle, _setGlobalAngle] = useState<number>(0);
@@ -108,11 +111,13 @@ const SitePlanGenerator: React.FC = () => {
   const setbacksRef = useRef<number[]>([]);
   const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
+  const isUploadingImageRef = useRef<boolean>(true);
   const isPolygonClosedRef = useRef<boolean>(false);
   const isSelectingApproachRef = useRef<boolean>(false);
   const isSelectingSetbackRef = useRef<boolean>(false);
-
   const isDefiningScaleRef = useRef<boolean>(false);
+
+
   const inputScaleRef = useRef<number | null>(null);
   const scaleRef = useRef<number | null>(null);
 
@@ -125,7 +130,7 @@ const SitePlanGenerator: React.FC = () => {
   // P5 sketch function
 
 
-  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
+  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isUploadingImageRef, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
 
 
   useEffect(() => {
@@ -234,13 +239,14 @@ const SitePlanGenerator: React.FC = () => {
 
   const startUploadingImage = () => {
     setMode('upload')
-
+    isUploadingImageRef.current = true;
     isSelectingSetbackRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
 
   }
   const createPoints = () => {
+    isUploadingImageRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
     setIsGeneratingSitePlan(false);
@@ -252,6 +258,7 @@ const SitePlanGenerator: React.FC = () => {
     setImageURL(null);
     pointsRef.current = []
     linesRef.current = [];
+    isUploadingImageRef.current = true;
     isPolygonClosedRef.current = false;
     setIsPolygonClosedState(false);
     isSelectingApproachRef.current = false;
@@ -260,32 +267,30 @@ const SitePlanGenerator: React.FC = () => {
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
     inputScaleRef.current = null;
-    setMode('adjust')
+    setMode('upload')
 
   };
 
   const selectApproach = () => {
     setIsGeneratingSitePlan(false)
-
+    isUploadingImageRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
     isSelectingSetbackRef.current = false;
     setMode('approach')
-
   }
 
   const defineScale = () => {
     setIsGeneratingSitePlan(false);
-
+    isUploadingImageRef.current = false;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
     isSelectingSetbackRef.current = false;
     setMode('scale')
-
   }
 
   const createSetbacks = () => {
-
+    isUploadingImageRef.current = false;
     setIsGeneratingSitePlan(false);
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
@@ -302,6 +307,7 @@ const SitePlanGenerator: React.FC = () => {
     isSelectingSetbackRef.current = false;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
+    isUploadingImageRef.current = false;
 
 
     visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
@@ -320,7 +326,6 @@ const SitePlanGenerator: React.FC = () => {
       return EStatus.complete;
     }
   };
-
 
 
 
@@ -382,11 +387,122 @@ const SitePlanGenerator: React.FC = () => {
     }
   }
 
+  const steps = [
+    {
+      id: 'upload',
+      title: '1. Upload Property Image',
+      icon: <FileImage />,
+      description: 'Start by uploading an overhead satellite image of your property',
+      help: 'Use a clear aerial photo or satellite image of your property. The clearer the image, the easier it will be to mark boundaries.',
+      onClick: () => startUploadingImage(),
+    },
+    {
+      id: 'boundary',
+      title: '2. Create Property Boundary',
+      icon: <Map />,
+      description: 'Click points on the image to draw your property boundary',
+      help: 'Click each corner of your property to create the boundary line. Click the first point again to complete the shape.',
+      onClick: () => { createPoints() },
+    },
+    {
+      id: 'approach',
+      title: '3. Mark Property Entrance',
+      icon: <ArrowRight />,
+      description: 'Click to indicate where the property is accessed from',
+      help: 'Mark where vehicles enter the property, typically from the street or main access road.',
+      onClick: () => { selectApproach() },
+      disabled: !isPolygonClosedRef.current
+    },
+    {
+      id: 'scale',
+      title: '4. Set Property Scale',
+      icon: <Ruler />,
+      description: 'Define the scale by measuring a known distance',
+      help: 'Draw a line along a known distance (like property edge) and enter its real-world length to set the scale.',
+      onClick: () => { defineScale() },
+      children: <div style={{ marginTop: '10px' }}>
+        <label>Edge Length (ft): </label>
+        <input
+          // ref={setbackInputRef} // Attach ref for auto-focus
+          type="number"
+          value={inputScaleRef.current || undefined}
+          onChange={(e) => {
+            inputScaleRef.current = Number(e.target.value)
+          }}
+          autoFocus
+        />
+      </div>,
+      disabled: !isPolygonClosedRef.current
+    },
+    {
+      id: 'setbacks',
+      title: '5. Define Setbacks',
+      icon: <Ruler />,
+      description: 'Add required setback distances from property lines',
+      help: 'Enter the minimum required distances from property lines according to local zoning laws.',
+      onClick: () => { createSetbacks() },
+      children: <>
+        <div className="setback-inputs">
+          {linesRef.current?.map((line, index) => {
+            const start = pointsRef.current[line.start];
+            const end = pointsRef.current[line.end];
 
+            if (!start || !end || !canvasRef.current) return null;
 
-  // const approachStatus = ""
-  // const scaleStatus = ""
-  // const setbacksStatus = ``
+            const midX = (start.x + end.x) / 2;
+            const midY = (start.y + end.y) / 2;
+            const rect = canvasRef.current.getBoundingClientRect();
+
+            return (
+              <div key={index}>
+                <div className="edge-index"
+                  style={{
+                    position: "fixed",
+                    left: `${midX + rect.left}px`,
+                    top: `${midY + rect.top}px`,
+                    width: "75px",
+                  }}
+                >Edge #{index}</div>
+                <label>Edge #{index} </label>
+                <input
+
+                  type="number"
+                  value={line.setback}
+                  onChange={(e) => updateSetback(index, e.target.value)}
+                  tabIndex={index + 1}
+                  style={{
+
+                    width: "50px",
+                  }}
+                />
+              </div>
+
+            );
+          })}
+        </div>
+      </>,
+      disabled: !isPolygonClosedRef.current
+    },
+    {
+      id: 'generate',
+      title: '6. Generate Siteplan',
+      icon: <Box />,
+      description: 'Generate the base for your site plan',
+      help: 'Move the parking lot and building around, create building entrances, create sidewalks, and get ready to submit your site plan.',
+      onClick: () => { generateSitePlan() },
+    },
+  
+  ];
+
+        {/* {
+  uploadStatus()
+
+  createPropertyLinesStatus()
+  createSelectApproachStatus()
+  createScaleStatus()
+
+}
+                 */}
 
   return (
     <div className="site-plan-generator">
@@ -394,9 +510,7 @@ const SitePlanGenerator: React.FC = () => {
         {/* Left Column - Controls */}
         <div className="site-plan-generator__controls">
           <Card>
-            <CardHeader>
-              <CardTitle>Site Plan Generator</CardTitle>
-            </CardHeader>
+
 
 
             {isGeneratingSitePlan ?
@@ -580,39 +694,74 @@ const SitePlanGenerator: React.FC = () => {
                   ))}
                 </div>
               </CardContent>
-              : <div className="pre-input-fields">
+              :
+
+              <>
+                <div className="site-plan-generator__sidebar">
+                  <div className="site-plan-generator__sidebar-header">
+                    <h2>Site Plan Generator</h2>
+                    <button
+                      className="button"
+                      onClick={() => setIsHelpVisible(!isHelpVisible)}
+                    >
+                      <Info />
+                    </button>
+                  </div>
+                  <div className="site-plan-generator__sidebar-content">
+                    {steps.map((step, index) => (
+                      <div
+                        key={step.id}
+                        className={`site-plan-generator__step 
+                        ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
+                        ${index < currentStep ? 'site-plan-generator__step--completed' : ''}
+                        ${step?.disabled ? 'disabled' : ''}
+
+                          `}
+                        onClick={() => {
+                          if (step?.disabled) return;
+                          setCurrentStep(index);
+                          step.onClick()
+                        }}
+                      >
+                        <div className="site-plan-generator__step-content">
+                          <div className={`site-plan-generator__step-icon ${index === currentStep ? 'site-plan-generator__step-icon--active' : ''
+                            }`}>
+                            {step.icon}
+                          </div>
+                          <div className="site-plan-generator__step-info">
+                            <h3>{step.title}</h3>
+                            <p>{step.description}</p>
+                          </div>
+                        </div>
+
+                        {index === currentStep ? step.children : <></>}
+                      </div>
+                    ))}
 
 
+                    <div
+                      className={`site-plan-generator__step`}
+                      onClick={() => { setCurrentStep(0); clearCanvas(); }}
+                    >
+                      <div className="site-plan-generator__step-content">
+                        <div className={`site-plan-generator__step-icon`}>
+                         <Delete />,
+                        </div>
+                        <div className="site-plan-generator__step-info">
 
-                <StepButton label="Clear" onClick={clearCanvas} />
+
+                          <h3>Clear</h3>
+                          <p>Click to delete the existing siteplan and start over</p>
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+              </>
 
 
-                <StepButton label="Upload Property Image" onClick={startUploadingImage} status={uploadStatus()} isActive={mode === 'upload'} >
-                  {mode === "upload" && !isGeneratingSitePlan ?
-                    <ImageUploader onFileUpload={setImageURL} /> : <></>}
-                </StepButton>
-
-                <StepButton label="Create Property Boundary" onClick={createPoints} status={createPropertyLinesStatus()} isActive={mode === 'adjust'} />
-                <StepButton label="Select Approach" onClick={selectApproach} status={createSelectApproachStatus()} isActive={mode === 'approach'} disabled={!isPolygonClosedRef.current} />
-
-                <StepButton label="Define Scale" onClick={defineScale} status={createScaleStatus()} isActive={mode === 'scale'} disabled={!isPolygonClosedRef.current}>
-                  {mode === "scale" ? <div style={{ marginTop: '10px' }}>
-                    <label>Edge Length (ft): </label>
-                    <input
-                      // ref={setbackInputRef} // Attach ref for auto-focus
-                      type="number"
-                      value={inputScaleRef.current || undefined}
-                      onChange={(e) => {
-                        inputScaleRef.current = Number(e.target.value)
-                      }}
-                      autoFocus
-                    />
-                  </div> : <></>}
-                </StepButton>
-                <StepButton label="Create Setbacks" onClick={createSetbacks} status={createSetbackStatus()} isActive={mode === 'setback'} disabled={!isPolygonClosedRef.current} />
-                <StepButton label="Generate Site Plan" onClick={generateSitePlan} isActive={mode === 'generate'} />
-
-              </div>
             }
           </Card>
         </div>
@@ -623,41 +772,22 @@ const SitePlanGenerator: React.FC = () => {
 
             <CardContent>
               <div className="site-plan-generator__visualization-container" ref={canvasContainerRef}>
+                {mode === "upload" && !isGeneratingSitePlan ?
+                  <ImageUploader onFileUpload={setImageURL} /> : <></>}
 
-                <div ref={canvasRef} />
 
-                {/* Render inputs over the canvas */}
-                {isSelectingSetbackRef.current &&
-                  linesRef.current?.map((line, index) => {
-                    const start = pointsRef.current[line.start];
-                    const end = pointsRef.current[line.end];
-
-                    if (!start || !end || !canvasRef.current) return null;
-
-                    const midX = (start.x + end.x) / 2;
-                    const midY = (start.y + end.y) / 2;
-                    const rect = canvasRef.current.getBoundingClientRect();
-
-                    return (
-                      <input
-                        key={index}
-                        type="number"
-                        value={line.setback}
-                        onChange={(e) => updateSetback(index, e.target.value)}
-                        tabIndex={index}
-                        style={{
-                          position: "absolute",
-                          left: `${midX + rect.left}px`,
-                          top: `${midY + rect.top}px`,
-                          width: "50px",
-                        }}
-                      />
-                    );
-                  })}
+                <div ref={canvasRef} style={{ display: mode === "upload" ? "none" : "block" }} />
 
               </div>
             </CardContent>
           </Card>
+
+          {/* Help Panel */}
+          {isHelpVisible && (
+            <div className="site-plan-generator__help">
+              <p>{steps[currentStep].help}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

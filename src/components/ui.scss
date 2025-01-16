@@ -43,7 +43,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 // styles/components/_input.scss
 .input {
   $self: &;
-  
+
   &__container {
     position: relative;
     width: 100%;
@@ -74,7 +74,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 
     &--error {
       border-color: $error-color;
-      
+
       &:focus {
         box-shadow: 0 0 0 2px rgba($error-color, 0.1);
       }
@@ -108,8 +108,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     color: white;
 
     &:hover {
-      filter:brightness(.9);
-
+      filter: brightness(0.9);
     }
   }
 
@@ -118,7 +117,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     color: white;
 
     &:hover {
-      filter:brightness(.9);
+      filter: brightness(0.9);
     }
   }
 
@@ -146,7 +145,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 // styles/components/_checkbox.scss
 .checkbox {
   $checkbox-size: 1rem;
-  
+
   &__container {
     display: inline-flex;
     align-items: center;
@@ -169,7 +168,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       border-color: $primary-color;
 
       &::after {
-        content: '';
+        content: "";
         position: absolute;
         left: 4px;
         top: 1px;
@@ -196,5 +195,60 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     font-size: 0.875rem;
     color: $text-color;
     cursor: pointer;
+  }
+}
+
+.alert {
+  position: relative;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+
+  &-description {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #475569;
+  }
+
+  // Variants
+  &-info {
+    background-color: #f0f9ff;
+    border-color: #bae6fd;
+
+    .alert-description {
+      color: #0369a1;
+    }
+  }
+
+  &-warning {
+    background-color: #fef9c3;
+    border-color: #fde047;
+
+    .alert-description {
+      color: #854d0e;
+    }
+  }
+
+  &-error {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+
+    .alert-description {
+      color: #b91c1c;
+    }
+  }
+
+  &-success {
+    background-color: #f0fdf4;
+    border-color: #86efac;
+
+    .alert-description {
+      color: #166534;
+    }
   }
 }

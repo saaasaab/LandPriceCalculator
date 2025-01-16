@@ -9,9 +9,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileUpload }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-
-
-
     // Handle file upload
     const handleFileUpload = (file: File) => {
 

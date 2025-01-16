@@ -13,9 +13,9 @@
   // Layout
   &__container {
     display: grid;
-    grid-template-columns: 1fr 3fr;
+    grid-template-columns: 325px 3fr;
     width: 100%;
-    max-width: 1600px;
+    // max-width: 1600px;
     margin: 0 auto;
     padding: $spacing-base;
     gap: 1.5rem;
@@ -153,8 +153,10 @@
 
   // Visualization Panel (Right Column)
   &__visualization {
+    display: grid;
+    grid-template-rows: 1fr 150px;
     .card {
-      height: 100%;
+      // height: 100%;
 
       &__content {
         height: 100%;
@@ -206,5 +208,173 @@
     &__visualization-container {
       height: 50vh;
     }
+  }
+}
+
+
+
+
+// sitePlanGenerator.scss
+.site-plan-generator {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  // max-width: 75rem;
+  margin: 0 auto;
+
+  &__step-info{
+    text-align: left;
+  }
+
+  &__sidebar {
+    width: 20rem;
+
+    &-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin: 0;
+      }
+    }
+
+    &-content {
+      padding: 1rem;
+    }
+  }
+
+  &__step {
+    position: relative;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+    
+    &.disabled{
+      background-color: rgb(225, 225, 225);
+    }
+    &:hover {
+      background-color: #f8fafc;
+    }
+
+    &--active {
+      background-color: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    &--completed {
+      background-color: #f8fafc;
+
+      .site-plan-generator__step-icon {
+        background-color: #22c55e;
+      }
+    }
+
+    
+    &-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    &-icon {
+      padding: 0.5rem;
+      border-radius: 50%;
+      background-color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: white;
+      }
+
+      &--active {
+        background-color: #3b82f6;
+      }
+    }
+
+    &-info {
+      h3 {
+        font-weight: 500;
+        margin: 0 0 0.25rem 0;
+      }
+
+      p {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 0;
+      }
+    }
+  }
+
+  &__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__canvas {
+    height: 24rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+
+    &--empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+
+      svg {
+        width: 3rem;
+        height: 3rem;
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+
+  &__help {
+    padding: 1rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+
+    p {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin: 0;
+    }
+  }
+}
+
+// Add button styles if not using a component library
+.button {
+  padding: 0.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f1f5f9;
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }

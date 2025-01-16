@@ -120,3 +120,42 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   )
 );
 Checkbox.displayName = 'Checkbox';
+
+
+
+
+interface AlertProps {
+  children: React.ReactNode;
+  variant?: 'info' | 'warning' | 'error' | 'success';
+  className?: string;
+}
+
+export const Alert: React.FC<AlertProps> = ({ 
+  children, 
+  variant = 'info',
+  className = '' 
+}) => {
+  return (
+    <div className={`alert alert-${variant} ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+// AlertDescription.tsx
+interface AlertDescriptionProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const AlertDescription: React.FC<AlertDescriptionProps> = ({ 
+  children,
+  className = ''
+}) => {
+  return (
+    <div className={`alert-description ${className}`}>
+      {children}
+    </div>
+  );
+};
+
