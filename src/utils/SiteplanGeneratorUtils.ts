@@ -748,8 +748,6 @@ export function rotateCorners(p: p5, corners: p5.Vector[], angle: number) {
 }
 
 export function rotateAndTranslateCorners(p: p5, x: number, y: number, corners: p5.Vector[], angle: number) {
-
-
   // Convert the angle to radians
   const _angle = normalizeAngle(angle);
 

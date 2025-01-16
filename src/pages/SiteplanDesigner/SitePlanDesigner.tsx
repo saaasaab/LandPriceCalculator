@@ -261,7 +261,6 @@ const SitePlanGenerator: React.FC = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
     setIsGeneratingSitePlan(false);
-
     setMode('adjust')
   }
 
@@ -561,7 +560,7 @@ const SitePlanGenerator: React.FC = () => {
                 </div>
 
                 <div className="site-plan-generator__input-group">
-                  <label htmlFor="buildingArea">Building Area (sq ft)</label>
+                  <label htmlFor="buildingArea">Target Building Area (sq ft)</label>
                   <Input
                     id="buildingArea"
                     type="number"

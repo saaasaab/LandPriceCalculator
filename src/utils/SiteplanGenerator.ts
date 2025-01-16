@@ -1441,6 +1441,8 @@ export class Building extends SitePlanElement {
 
     this.createSitePlanElementCorners();
     this.setSitePlanElementEdges()
+    this.update()
+
 
     this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale);
   }
@@ -1477,8 +1479,10 @@ export class Building extends SitePlanElement {
       this.p.strokeWeight(3);
       this.p.noFill();
       this.p.beginShape();
-      this.sitePlanElementCorners.forEach(corner => {
+      this.sitePlanElementCorners.forEach((corner, i) => {
         this.p.vertex(corner.x, corner.y);
+        this.p.text(`#${i}`, corner.x, corner.y);
+
       })
       // this.drawSitePlanElement();
 
@@ -1486,15 +1490,10 @@ export class Building extends SitePlanElement {
       this.p.pop();
 
 
-      this.sitePlanElementEdges.forEach((edge) => {
-        // const hasEntranceOnEdge = this.entrances.findIndex(entrance=>entrance.edgeIndex === i) !==-1;
-        // if(!hasEntranceOnEdge){
-        // draw from one poont to the next
-        // }
-
+      this.p.textAlign(this.p.CENTER, this.p.BOTTOM);
+      this.sitePlanElementEdges.forEach((edge, i) => {
         const mid = edge.getMidpoint();
         const length = edge.getLineLength() * this.scale;
-
 
         this.p.push();
         this.p.noStroke()
@@ -1502,8 +1501,9 @@ export class Building extends SitePlanElement {
         this.p.translate(mid.x, mid.y);
         this.p.rotate(edge.calculateAngle())
         this.p.textSize(14);
-        this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+        this.p.text(`#${i} ${length.toFixed(1)} ft`, 0, 0);
         this.p.pop();
+
 
 
       })
@@ -1579,7 +1579,7 @@ export class Building extends SitePlanElement {
       const propertyCenterVector = p.createVector(propertyCenter.x, propertyCenter.y)
       const newBuildingPosition = moveVector(propertyCenterVector, building.center, 1, false)
       building.updateCenter(newBuildingPosition.x, newBuildingPosition.y)
-      building.reset();
+      // building.reset();
     }
 
 
@@ -1592,8 +1592,8 @@ export class Building extends SitePlanElement {
   }
 
   reset() {
-    this.updateheight(5);
-    this.updateWidth(5)
+    this.updateheight(10 / this.scale);
+    this.updateWidth(10 / this.scale);
 
     this.entrances = [];
   }
@@ -1883,6 +1883,18 @@ export class SiteplanGenerator {
   public taperParking: boolean;
 
 
+  public dragMode: string | null;
+  public resizeEdges: number[] | null;
+  public resizeCorner: number | null;
+
+  public resizeEdge: number | null;
+  public resizingbuilding: boolean;
+
+
+  public dragOffset: { x: number, y: number };
+
+
+
   constructor(points: IPoint[], lines: Line[], scale: number) {
     this.globalAngle = 0;
     this.globalAnglePrev = 0;
@@ -1901,6 +1913,13 @@ export class SiteplanGenerator {
     this.bikeParkingArea = 0;
     this.taperParking = true;
 
+    this.dragMode = null; // null, 'center', 'edge', 'corner'
+    this.dragOffset = { x: 0, y: 0 };
+    this.resizeEdge = null;
+    this.resizeEdges = null
+    this.resizeCorner = null;
+    this.resizingbuilding = false;
+
   }
 
   initialize(p: p5) {
@@ -1914,7 +1933,6 @@ export class SiteplanGenerator {
     const setbacks = Array.apply(null, Array(this.lines.length)).map(Number.prototype.valueOf, 0);
 
     if (!this.points.length) {
-
 
       propertyCorners = [
         p.createVector(140, 80),
@@ -1942,8 +1960,6 @@ export class SiteplanGenerator {
     }
 
 
-
-
     const { scaledPolygon, scaleFactor } = scalePolygonToFitCanvas(p, propertyCorners, p.width, p.height, 40);
     this.scale = userGeneratedPoints ? this.scale / scaleFactor : this.scale / scaleFactor;
 
@@ -1968,7 +1984,7 @@ export class SiteplanGenerator {
 
     const approachWidth = 20 / this.scale;
     const parkingWidth = 24 / this.scale;
-    const buildingDefault = 1;
+    const buildingDefault = 30 / this.scale;
     const centerOfProperty = calculateCentroid(this.property.cornerOffsetsFromSetbacks)
     const defaultVector = p.createVector(0, 0)
 
@@ -2042,8 +2058,8 @@ export class SiteplanGenerator {
     const building = this.building;
     const garbage = this.garbage;
 
-    // let lastMouseX = -1;
-    // let lastMouseY = -1;
+    let lastMouseX = -1;
+    let lastMouseY = -1;
     // let lastRedrawState = "";
 
     let visibilityGraphSolver: VisibilityGraph;
@@ -2074,22 +2090,137 @@ export class SiteplanGenerator {
 
     const handleBuildingDrag = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
-
+      const dragMode = this.dragMode;
+      const resizeEdge = this.resizeEdge;
+      const resizeEdges = this.resizeEdges;
+      const resizeCorner = this.resizeCorner;
+      const dragOffset = this.dragOffset;
       building.hasStopped = false
 
 
       const newX = p.mouseX;
       const newY = p.mouseY;
 
-      const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
+      if (dragMode === "corner" && resizeCorner !== null) {
+        p.cursor('nesw-resize');
 
-      if (!truthChecker(centerInBoundary)) {
-        building.hasStopped = true;
-        return;
+        this.resizingbuilding = true;
+
+        // Grab the corner being dragged
+
+        // Calculate the opposite corner index
+        const oppositeIndex = (resizeCorner + 2) % 4; // Opposite corner in a rectangle
+        const oppositeCorner = building.sitePlanElementCorners[oppositeIndex];
+
+        // Translate corners to the building's local coordinate system
+        const localOpposite = toLocal(p, building, oppositeCorner.x, oppositeCorner.y);
+
+        // Update the dragged corner in the local coordinate system
+        const newLocalGrabby = toLocal(p, building, newX, newY);
+
+        // Calculate the new width and height
+        const newWidth = Math.abs(localOpposite.x - newLocalGrabby.x);
+        const newHeight = Math.abs(localOpposite.y - newLocalGrabby.y);
+
+        // Calculate the new center in the local coordinate system
+        const newCenterLocal = {
+          x: (localOpposite.x + newLocalGrabby.x) / 2,
+          y: (localOpposite.y + newLocalGrabby.y) / 2,
+        };
+
+        // Convert the new center back to global coordinates
+        const newCenterGlobal = toGlobal(p, building, newCenterLocal.x, newCenterLocal.y);
+
+        // Update the building's properties
+        if (this.building) {
+          this.building.width = newWidth;
+          this.building.height = newHeight;
+        }
+        building.updateCenter(newCenterGlobal.x, newCenterGlobal.y);
       }
 
-      building.updateBuildingCenter(newX, newY);
-      updateVisibilityGraph();
+
+      else if (dragMode === "edge" && this.resizeEdge !== null) {
+        p.cursor('ew-resize'); // Adjust cursor based on edge direction (horizontal/vertical)
+
+        this.resizingbuilding = true;
+
+        // Determine which edge is being dragged
+        const edgeIndex = this.resizeEdge;
+        const oppositeEdgeIndex = (edgeIndex + 2) % 4;
+
+        // Get the two corners defining the edge being dragged
+        const edgeCorners = [
+          building.sitePlanElementEdges[edgeIndex].point1,
+          building.sitePlanElementEdges[edgeIndex].point2,
+        ];
+
+
+        const mouse = p.createVector(newX, newY);
+        const center = p.createVector(building.center.x, building.center.y);
+
+        const midpoint = building.sitePlanElementEdges[edgeIndex].getMidpoint()
+
+        const distance = calculatePointToEdgeDistance(building.sitePlanElementEdges[edgeIndex], mouse)
+
+        const newPointIsInsideMultiplier = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [newX, newY])
+        const _angle = calculateAngle(center, midpoint);
+
+        if (edgeIndex === 0 || edgeIndex === 2) {
+          building.height = building.height + distance*newPointIsInsideMultiplier;
+
+        }
+        else {
+          building.width = building.width + distance*newPointIsInsideMultiplier;
+
+        }
+
+
+
+        const newPoint1X = building.center.x + distance /2 * p.cos(_angle) * newPointIsInsideMultiplier;
+        const newPoint1Y = building.center.y + distance /2 * p.sin(_angle) * newPointIsInsideMultiplier;
+
+        building.updateBuildingCenter( newPoint1X,newPoint1Y)
+
+        // const newPoint2X = edgeCorners[1].x - distance * p.cos(_angle) * newPointIsInsideMultiplier;
+        // const newPoint2Y = edgeCorners[1].y - distance * p.sin(_angle) * newPointIsInsideMultiplier;
+        // // console.log(`object`, newPoint1X ,newPoint1Y,newPoint2X,newPoint2Y )
+
+        // edgeCorners[0].x = newPoint1X;
+        // edgeCorners[1].x = newPoint2X;
+        // edgeCorners[0].y = newPoint1Y;
+        // edgeCorners[1].y = newPoint2Y;
+
+        const isVertical = isMoreVertical(building.sitePlanElementEdges[edgeIndex].calculateAngle())
+
+        // if (isVertical) {
+        //   building.width = building.width + distance*newPointIsInsideMultiplier * this.scale
+        // } else {
+
+        //   building.height = building.height + distance*newPointIsInsideMultiplier * this.scale
+        // }
+
+
+
+
+      }
+
+      else if (dragMode === "center") {
+        p.cursor('grabbing');
+        building.updateCenter(p.mouseX - dragOffset.x, p.mouseY - dragOffset.y)
+        const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
+
+        if (!truthChecker(centerInBoundary)) {
+          building.hasStopped = true;
+          return;
+        }
+
+        building.updateBuildingCenter(newX, newY);
+        // updateVisibilityGraph();
+      }
+      else {
+        p.cursor('default')
+      }
 
     };
 
@@ -2213,24 +2344,15 @@ export class SiteplanGenerator {
       const centerInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
       const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
 
+      const center = calculateCentroid(property.propertyCorners)
+      if (!center) return;
       if (!centerInBoundary || !garbageInBoundary) {
-
-        const center = calculateCentroid(property.propertyCorners)
-
-        if (!center) return;
-
-        // console.log( 
-        //   Math.round(p.dist(center.x, center.y, _centerX, _centerY)),
-        //   Math.round(p.dist(center.x, center.y, newX, newY)))
         if (
-          p.dist(center.x, center.y, _centerX, _centerY) >
+          p.dist(center.x, center.y, _centerX, _centerY) <
           p.dist(center.x, center.y, newX, newY)) {
+          parking.updateCenter(_centerX, _centerY);
           return
         }
-
-
-        parking.updateCenter(_centerX, _centerY);
-        return;
       }
 
       // parking.updateCenter(newX, newY);
@@ -2292,7 +2414,11 @@ export class SiteplanGenerator {
       }
 
       // Meant for rotating the parking lot
-      else if (((isHovered.parkingOffset && !isHovered.parking) || isDragging.parkingOffset) && !isDragging.approach) {
+      else if ((
+        (isHovered.parkingOffset && !isHovered.parking) || isDragging.parkingOffset) &&
+        !isDragging.approach &&
+        !isDragging.parking) {
+
         isDragging.parkingOffset = true;
         handleParkingOffsetDrag();
       }
@@ -2316,6 +2442,7 @@ export class SiteplanGenerator {
     p.mousePressed = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
 
+
       const isHovered = {
         approach: approach.isMouseHovering(),
         parkingOffset: parking.isMouseHoveringOffset(),
@@ -2324,73 +2451,82 @@ export class SiteplanGenerator {
         buildingOffset: building.isMouseHoveringOffset(),
       };
 
+      let dragMode = this.dragMode;
+      let resizeEdge = this.resizeEdge;
+      const dragOffset = this.dragOffset;
+
       const posX = p.mouseX;
       const posY = p.mouseY;
 
       const clickIsInProperty = allPointsInPolygon(property.propertyCorners, [p.createVector(posX, posY)]);
 
-      if (!isHovered.approach && !isHovered.parking && !isHovered.parkingOffset && !building.isInitialized && truthChecker(clickIsInProperty)) {
+
+      // Place
+      if (!building.isInitialized && !isHovered.approach && !isHovered.parking && !isHovered.parkingOffset && truthChecker(clickIsInProperty)) {
         building.initializeBuilding(posX, posY);
       }
 
-      if (building.isInitialized) {
-
-        const mouse = p.createVector(p.mouseX, p.mouseY)
-        const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
-        const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
-        const distance = calculatePointToEdgeDistance(closestEdge, mouse);
-
-        const area = building.width * building.height
 
 
+      if (!building.isInitialized) return;
+
+      // HIDING ENTRANCE AND SOLVER FOR NOW
+
+      // const mouse = p.createVector(p.mouseX, p.mouseY)
+      // const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
+      // const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
+      // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
 
 
-        if (distance < 20 && area > 100 * building.scale) {
-
-          // get the point on the line where the entrance should interesect
-          const angle = closestEdge.calculateAngle() - 90;
-          const intersection = closestEdge.calculateClosestIntercept(
-            p.mouseX,
-            p.mouseY,
-            p
-          );
+      // const edges = getEdges(building);
 
 
-          let minDistance = Infinity;
-          let minDistanceIndex = -1;
-          building.entrances.forEach((entrance, i) => {
-            const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
-            if (dist < minDistance) {
-              minDistance = dist;
-              minDistanceIndex = i;
-            }
-          })
+      // // get the point on the line where the entrance should interesect
+      // const angle = closestEdge.calculateAngle() - 90;
+      // const intersection = closestEdge.calculateClosestIntercept(
+      //   p.mouseX,
+      //   p.mouseY,
+      //   p
+      // );
+
+      // let minDistance = Infinity;
+      // let minDistanceIndex = -1;
+      // building.entrances.forEach((entrance, i) => {
+      //   const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
+      //   if (dist < minDistance) {
+      //     minDistance = dist;
+      //     minDistanceIndex = i;
+      //   }
+      // })
 
 
-          // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
-          if (minDistance < 5 / this.scale) {
-            // THEN DELETE THE ENTRANCE
+      // // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
+      // if (minDistance < 5 / this.scale) {
+      //   // THEN DELETE THE ENTRANCE
 
-            building.entrances = building.entrances.filter((_, i) => i !== minDistanceIndex)
-            visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
+      //   building.entrances = building.entrances.filter((_, i) => i !== minDistanceIndex)
+      //   visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
 
-          }
+      // }
 
-          else {
-            // Draw the entrance
-            let lerpPos = getIntersectionPercentage(
-              closestEdge,
-              intersection
-            ) || 0;
+      // else {
+      //   // Draw the entrance
+      //   const isAddingEntrances = false;
+      //   if (isAddingEntrances) {
+      //     // Hold off on adding entrances for now
+      //     let lerpPos = getIntersectionPercentage(
+      //       closestEdge,
+      //       intersection
+      //     ) || 0;
 
-            const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
+      //     const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
+      //     building.entrances.push(entrance)
 
-            building.entrances.push(entrance)
+      //     visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
 
-            visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
-          }
-        }
-      }
+      //   }
+
+      // }
     };
 
     p.mouseReleased = () => {
@@ -2399,37 +2535,29 @@ export class SiteplanGenerator {
       isDragging.approach = false;
       isDragging.parkingOffset = false;
       isDragging.building = false;
+
+      this.dragMode = null;
+      this.resizeEdges = null;
+      this.resizeCorner = null;
+      this.resizeEdge = null;
+      this.resizingbuilding = false;
     };
 
 
     p.draw = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
 
+      const newX = p.mouseX;
+      const newY = p.mouseY;
 
-
-
-      //   if (
-      //     p.mouseX === lastMouseX &&
-      //     p.mouseY === lastMouseY &&
-      //     !building.ismoving &&
-      //     !(!building.hasStopped && building.isInitialized) &&
-      //     !Object.values(isDragging).some((dragging) => dragging) &&
-      //     lastRedrawState === JSON.stringify({ isDragging })
-
-
-      //     // On entrance click, sidewalks not created
-      //     // On building pre-initialize, the temp building not growing
-
-      // ) {
-
-      //     return; // Skip redraw if nothing has changed
-      // }
-
-
-
-      // lastMouseX = p.mouseX;
-      // lastMouseY = p.mouseY;
-      // lastRedrawState = JSON.stringify({ isDragging });
+      // Check if the mouse moved:
+      if (
+        newX === lastMouseX &&
+        newY === lastMouseY) {
+        return; // Skip redraw if nothing has changed
+      }
+      lastMouseX = newX;
+      lastMouseY = newY;
 
       const isHovered = {
         approach: approach.isMouseHovering(),
@@ -2440,15 +2568,9 @@ export class SiteplanGenerator {
       };
 
 
-      if (Object.values(isHovered).some((hovered) => hovered)) {
-        p.cursor('grab');
-      }
-      else {
-        p.cursor(p.ARROW);
-
-      }
 
       p.background("#f9fafb")
+
       p.noFill()
       p.stroke(0);
 
@@ -2470,7 +2592,9 @@ export class SiteplanGenerator {
       if (!building.hasStopped && building.isInitialized) {
 
         building.buildingLocator(p, building, parking, property, garbage);
-        building.buildingGrower(property, parking);
+
+        // STOP THE GROWING FOR NOW.
+        // building.buildingGrower(property, parking);
       }
 
 
@@ -2568,9 +2692,179 @@ export class SiteplanGenerator {
 
 
 
+
+      // Check if we're hovering over a building corner, edge, or center
+      if (isHovered.building || isHovered.buildingOffset) {
+
+        let anyCornerHover = this.resizingbuilding
+
+
+        if (!anyCornerHover) {
+          building.sitePlanElementCorners.forEach((corner, i) => {
+            // if (this.dragMode) return
+            if (p.dist(newX, newY, corner.x, corner.y) < 20) {
+              this.dragMode = 'corner';
+              const resizeEdges = getAdjacentIndices(i, building.sitePlanElementEdges.length);
+              const totalVertices = building.sitePlanElementEdges.length
+              this.resizeEdges = [resizeEdges[0], (resizeEdges[1] - 1 + totalVertices) % totalVertices]
+              this.resizeCorner = i;
+              this.resizeEdge = null;
+              anyCornerHover = true;
+
+              console.log(`getting SET HERE`)
+            }
+          });
+
+        }
+
+
+
+
+        if (!anyCornerHover) {
+          const mouse = p.createVector(p.mouseX, p.mouseY)
+          const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
+          const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
+          const distance = calculatePointToEdgeDistance(closestEdge, mouse);
+          if (distance <= 20) {
+            this.dragMode = 'edge';
+            this.resizeEdges = null;
+            this.resizeCorner = null;
+            this.resizeEdge = closestEdgeIndex;
+          }
+        }
+
+        if (!anyCornerHover) {
+          if (p.dist(newX, newY, building.center.x, building.center.y) < 20) {
+            this.dragMode = 'center';
+            this.resizeEdges = null;
+            this.resizeCorner = null;
+            this.resizeEdge = null;
+          }
+        }
+
+
+
+        if (this.dragMode === "corner" && this.resizeCorner !== null) {
+          p.push()
+          p.noFill();
+          p.stroke(30, 60, 200);
+          p.strokeWeight(3)
+          p.ellipse(building.sitePlanElementCorners[this.resizeCorner].x, building.sitePlanElementCorners[this.resizeCorner].y, 20, 20)
+          p.pop();
+
+          p.cursor('nesw-resize')
+        }
+
+        else if (this.dragMode === "edge" && this.resizeEdge !== null) {
+          p.push()
+          p.noFill();
+          p.stroke(30, 60, 200);
+          p.strokeWeight(3)
+          p.line(building.sitePlanElementEdges[this.resizeEdge].point1.x,
+            building.sitePlanElementEdges[this.resizeEdge].point1.y,
+            building.sitePlanElementEdges[this.resizeEdge].point2.x,
+            building.sitePlanElementEdges[this.resizeEdge].point2.y)
+          p.pop();
+          p.cursor('ew-resize')
+        }
+        else if (this.dragMode === "center") {
+          p.push()
+          p.noFill();
+          p.stroke(30, 60, 200);
+          p.strokeWeight(3)
+          p.ellipse(building.center.x, building.center.y, 20, 20)
+          p.pop();
+          p.cursor('grab')
+        }
+        else {
+          p.cursor('default')
+        }
+
+      }
+
+      else {
+        this.dragMode = null;
+        this.resizeEdges = null;
+        this.resizeCorner = null;
+        this.resizeEdge = null;
+        p.cursor('default')
+      }
+
+
+
+      // Check for corner hover
+      // Check if clicked on a corner
+      // for (let edge of edges) {
+      //   if (p.dist(posX, posY, edge.x, edge.y) < 10) {
+      //     dragOffset.x = posX - edge.x;
+      //     dragOffset.y = posY - edge.y;
+      //     return;
+      //   }
+      // }
+
+
+      // if (distance < 20) {
+      //   // Check if clicked inside the building
+      //   if (
+      //     posX > building.center.x - building.width / 2 &&
+      //     posX < building.center.x + building.width / 2 &&
+      //     posY > building.center.y - building.height / 2 &&
+      //     posY < building.center.y + building.height / 2
+      //   ) {
+      //     this.dragMode = 'center';
+      //     dragOffset.x = posX - building.center.x;
+      //     dragOffset.y = posY - building.center.y;
+      //   }
+
+
+
+
+
+      // }
+
+
+
+
+
+      //     !building.ismoving &&
+      //     !(!building.hasStopped && building.isInitialized) &&
+      //     !Object.values(isDragging).some((dragging) => dragging) &&
+      //     lastRedrawState === JSON.stringify({ isDragging })
+
+
+      //     // On entrance click, sidewalks not created
+      //     // On building pre-initialize, the temp building not growing
+
+      // ) {
+
+      //     
+      // }
+
+
+      // lastRedrawState = JSON.stringify({ isDragging });
+
+
+
+      // ew-resize	thin long arrow pointing left and right	Bidirectional resize cursor.
+      // ns-resize	thin long arrow pointing up and down
+      // nesw-resize	thin long arrow pointing both to the top-right and bottom-left
+      // nwse-resize	
+
+
+      // if (Object.values(isHovered).some((hovered) => hovered)) {
+      //   p.cursor('grab');
+      // }
+      // else {
+      //   p.cursor(p.ARROW);
+      // }
+
+
+
+
     };
   }
 }
+
 
 
 
@@ -2596,3 +2890,23 @@ export class SiteplanGenerator {
 
 //   p.pop();
 // }
+
+
+
+
+// Translate points to the building's local coordinate system
+const toLocal = (p: p5, building: Building, x: number, y: number) => {
+  const dx = x - building.center.x;
+  const dy = y - building.center.y;
+  return {
+    x: dx * p.cos(-building.angle) - dy * p.sin(-building.angle),
+    y: dx * p.sin(-building.angle) + dy * p.cos(-building.angle),
+  };
+};
+
+const toGlobal = (p: p5, building: Building, x: number, y: number) => {
+  return {
+    x: x * p.cos(building.angle) - y * p.sin(building.angle) + building.center.x,
+    y: x * p.sin(building.angle) + y * p.cos(building.angle) + building.center.y,
+  };
+};
