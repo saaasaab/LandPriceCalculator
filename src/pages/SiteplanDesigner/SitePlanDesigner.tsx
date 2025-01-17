@@ -473,8 +473,8 @@ const SitePlanGenerator: React.FC = () => {
                     top: `${midY + rect.top}px`,
                     width: "75px",
                   }}
-                >Edge #{index}</div>
-                <label>Edge #{index} </label>
+                >Edge #{index + 1}</div>
+                <label>Edge #{index + 1} </label>
                 <input
 
                   type="number"

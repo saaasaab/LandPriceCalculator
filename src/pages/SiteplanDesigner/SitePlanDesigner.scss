@@ -22,6 +22,12 @@
     height: 100%;
   }
 
+  .site-plan-generator__sidebar-header{
+    display: flex;
+    justify-content: space-between;
+    padding: .5rem
+  }
+
   // Control Panel (Left Column)
   .site-plan-generator__controls {
     overflow-y: scroll;
