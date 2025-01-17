@@ -505,6 +505,7 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Generate the base for your site plan',
       help: 'Move the parking lot and building around, create building entrances, create sidewalks, and get ready to submit your site plan.',
       onClick: () => { generateSitePlan() },
+      disabled: isUploadingImageRef.current
     },
 
   ];
