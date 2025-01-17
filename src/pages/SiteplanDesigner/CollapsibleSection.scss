@@ -1,0 +1,25 @@
+.sidebar {
+  background-color: #f9f9f9;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+
+  .sidebar-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ddd;
+
+    .sidebar-section-content {
+      padding: 10px;
+    }
+  }
+}

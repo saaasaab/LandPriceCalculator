@@ -11,7 +11,7 @@
 
   // overflow: hidden;
   // Layout
-  &__container {
+  .site-plan-generator__container {
     display: grid;
     grid-template-columns: 325px 3fr;
     width: 100%;
@@ -23,16 +23,14 @@
   }
 
   // Control Panel (Left Column)
-  &__controls {
+  .site-plan-generator__controls {
     overflow-y: scroll;
     .card {
       // height: 100%;
       background-color: white;
       border-radius: $border-radius;
 
-
       // height: 100%;
-
     }
     .pre-input-fields {
       display: flex;
@@ -40,32 +38,44 @@
       gap: 5px;
     }
 
-    .site-plan-generator {
-      // Section Headers
-      &__section-header {
-        padding-top: $spacing-base * 1.5;
-        padding-bottom: $spacing-base * 0.5;
-        margin-bottom: $spacing-base;
-        border-bottom: 1px solid rgba(#000, 0.1);
+    // Section Headers
 
-        h3 {
-          font-size: 1.125rem;
-          font-weight: 600;
-          color: #374151;
+    // Input Groups
+    .site-plan-generator__input-group,
+    .site-plan-generator__checkbox {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      justify-content: space-between;
+      align-items: center;
+      // grid-template-columns: 2fr 1fr;
+      margin-bottom: $spacing-base * 0.5;
+
+      label {
+        text-align: left;
+        display: block;
+        margin-bottom: $spacing-base * 0.25;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #4b5563;
+        width: 80%;
+      }
+
+      input {
+        width: 100%;
+        transition: border-color $transition-speed ease;
+
+        &:focus {
+          border-color: #2563eb;
         }
       }
 
-      
-      // Input Groups
-      &__input-group, &__checkbox {
-        display: grid;
-        grid-template-columns: 3fr 2fr;
-        justify-content: space-between;
-        align-items: center;
-        // grid-template-columns: 2fr 1fr;
-        margin-bottom: $spacing-base * 0.5;
+      &.disabled {
+        display: none;
+      }
 
-
+      &.subgroup-1 {
+        display: flex;
+        flex-direction: column;
         label {
           text-align: left;
           display: block;
@@ -75,90 +85,54 @@
           color: #4b5563;
           width: 80%;
         }
-
-        input {
-          width: 100%;
-          transition: border-color $transition-speed ease;
-
-          &:focus {
-            border-color: #2563eb;
-          }
-        }
-
-        &.disabled{
-          display: none;
-        }
-
-        &.subgroup-1{
+        .radio-group {
           display: flex;
-          flex-direction: column;
-          label {
-            text-align: left;
-            display: block;
-            margin-bottom: $spacing-base * 0.25;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #4b5563;
-            width: 80%;
-          }
-          .radio-group{
-            display: flex;
-            
-            
-          }
         }
+      }
+    }
 
+    // Metrics Display
+
+    .site-plan-generator__metrics-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .site-plan-generator__metrics-item {
+      display: flex;
+      justify-content: space-between;
+      padding: $spacing-base * 0.75;
+      background-color: #f9fafb;
+      border-radius: $border-radius;
+      transition: background-color $transition-speed ease;
+
+      &:hover {
+        background-color: #f3f4f6;
       }
 
-      
+      .label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-align: left;
+      }
 
-      // Metrics Display
-      &__metrics {
-        &-container {
-          display: flex;
-          flex-direction: column;
-          gap: $spacing-base * 0.5;
-        }
-
-        &-item {
-          display: flex;
-          justify-content: space-between;
-          padding: $spacing-base * 0.75;
-          background-color: #f9fafb;
-          border-radius: $border-radius;
-          transition: background-color $transition-speed ease;
-
-          &:hover {
-            background-color: #f3f4f6;
-          }
-
-          .label {
-            font-size: 0.875rem;
-            color: #6b7280;
-            text-align: left;
-          }
-
-          .value {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #111827;
-          }
-        }
+      .value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #111827;
       }
     }
   }
 
   // Visualization Panel (Right Column)
-  &__visualization {
+  .site-plan-generator__visualization {
     display: grid;
     grid-template-rows: 1fr 150px;
-    .card {
-      &__content {
-        height: 100%;
-        
-      }
+
+    .card__content {
+      height: 100%;
     }
-    &-container {
+    .site-plan-generator__visualization-container {
       // height:max-content;
       // height: calc(100vh - #{$spacing-base * 12});
       background-color: #f9fafb;
@@ -168,14 +142,11 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-
-     
-
     }
   }
 
   // Checkbox styling
-  &__checkbox {
+  .site-plan-generator__checkbox {
     display: flex;
     align-items: center;
     gap: $spacing-base * 0.5;
@@ -191,23 +162,20 @@
 
   // Responsive adjustments
   @media (max-width: 768px) {
-    &__container {
+    .site-plan-generator__container {
       flex-direction: column;
     }
 
-    &__controls,
-    &__visualization {
+    .site-plan-generator__controls,
+    .site-plan-generator__visualization {
       width: 100%;
     }
 
-    &__visualization-container {
+    .site-plan-generator__visualization-container {
       height: 50vh;
     }
   }
 }
-
-
-
 
 // sitePlanGenerator.scss
 .site-plan-generator {
@@ -217,33 +185,11 @@
   // max-width: 75rem;
   margin: 0 auto;
 
-  &__step-info{
+  .site-plan-generator__step-info {
     text-align: left;
   }
 
-  &__sidebar {
-    width: 20rem;
-
-    &-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-
-      h2 {
-        font-size: 1.25rem;
-        font-weight: bold;
-        margin: 0;
-      }
-    }
-
-    &-content {
-      padding: 1rem;
-    }
-  }
-
-  &__step {
+  .site-plan-generator__step {
     position: relative;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
@@ -251,20 +197,20 @@
     cursor: pointer;
     transition: all 0.2s ease;
     margin-bottom: 1rem;
-    
-    &.disabled{
+
+    &.disabled {
       background-color: rgb(225, 225, 225);
     }
     &:hover {
       background-color: #f8fafc;
     }
 
-    &--active {
+    &.site-plan-generator__step--active {
       background-color: #eff6ff;
       border-color: #3b82f6;
     }
 
-    &--completed {
+    &.site-plan-generator__step--completed {
       background-color: #f8fafc;
 
       .site-plan-generator__step-icon {
@@ -272,14 +218,13 @@
       }
     }
 
-    
-    &-content {
+    .site-plan-generator__step-content {
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
 
-    &-icon {
+    .site-plan-generator__step-icon {
       padding: 0.5rem;
       border-radius: 50%;
       background-color: #e2e8f0;
@@ -293,12 +238,12 @@
         color: white;
       }
 
-      &--active {
+      &.site-plan-generator__step-icon--active {
         background-color: #3b82f6;
       }
     }
 
-    &-info {
+    .site-plan-generator__step-info {
       h3 {
         font-weight: 500;
         margin: 0 0 0.25rem 0;
@@ -312,21 +257,21 @@
     }
   }
 
-  &__main {
+  .site-plan-generator__main {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  &__canvas {
+  .site-plan-generator__canvas {
     height: 24rem;
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 0.5rem;
     padding: 1rem;
 
-    &--empty {
+    .site-plan-generator__canvas--empty {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -341,7 +286,7 @@
     }
   }
 
-  &__help {
+  .site-plan-generator__help {
     padding: 1rem;
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;

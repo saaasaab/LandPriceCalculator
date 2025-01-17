@@ -3,6 +3,7 @@ import classifyPoint from "robust-point-in-polygon"
 import { VisibilityGraph } from "../pages/VisibilityGraph";
 import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway } from "./SiteplanGeneratorUtils";
 import { IPoint, Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
+import RotateArrow from "../assets/rotateArrow.png"
 
 type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
@@ -2154,6 +2155,7 @@ export class SiteplanGenerator {
           building.sitePlanElementEdges[edgeIndex].point1,
           building.sitePlanElementEdges[edgeIndex].point2,
         ];
+       
 
 
         const mouse = p.createVector(newX, newY);
@@ -2710,8 +2712,6 @@ export class SiteplanGenerator {
               this.resizeCorner = i;
               this.resizeEdge = null;
               anyCornerHover = true;
-
-              console.log(`getting SET HERE`)
             }
           });
 
@@ -2732,6 +2732,20 @@ export class SiteplanGenerator {
             this.resizeEdge = closestEdgeIndex;
           }
         }
+
+        // if (!anyCornerHover) {
+        //   building.sitePlanElementCorners.forEach((corner, i) => {
+        //     // if (this.dragMode) return
+        //     if (p.dist(newX, newY, corner.x, corner.y) < 30) {
+        //       this.dragMode = 'rotate';
+        //       this.resizeEdges = null;
+        //       this.resizeCorner = null;
+        //       this.resizeEdge = null;
+        //       anyCornerHover = true;
+        //     }
+        //   });
+        // }
+
 
         if (!anyCornerHover) {
           if (p.dist(newX, newY, building.center.x, building.center.y) < 20) {
@@ -2776,6 +2790,18 @@ export class SiteplanGenerator {
           p.pop();
           p.cursor('grab')
         }
+        else if (this.dragMode === "rotate") {
+          p.push()
+          p.noFill();
+          p.stroke(30, 60, 200);
+          p.strokeWeight(3)
+          p.ellipse(building.center.x, building.center.y, p.max(building.width,building.height), p.max(building.width,building.height))
+          p.pop();
+          p.cursor(RotateArrow)
+        }
+
+
+       
         else {
           p.cursor('default')
         }
@@ -2788,6 +2814,7 @@ export class SiteplanGenerator {
         this.resizeCorner = null;
         this.resizeEdge = null;
         p.cursor('default')
+        
       }
 
 
