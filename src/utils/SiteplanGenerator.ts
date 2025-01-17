@@ -766,8 +766,11 @@ export class SitePlanElement {
 
     // Set the hovered index so it can be used later
     let hoverHandles = this.rotationHandles.map((handle, i) => {
-      this.hoverHandleIndex = i;
-      return this.p.dist(this.p.mouseX, this.p.mouseY, handle.x, handle.y) < distance
+      const dist = this.p.dist(this.p.mouseX, this.p.mouseY, handle.x, handle.y) < distance
+      if(dist ){
+        this.hoverHandleIndex = i;
+      }
+      return dist
     })
     return hoverHandles.findIndex(isHover => isHover === true) !== -1
   }
@@ -2440,11 +2443,12 @@ export class SiteplanGenerator {
         isHovered.building || 
         isHovered.buildingOffset || 
         isHovered.buildingHandle || 
-        this.dragMode ||
+        this.dragMode  ||
         building.hoverHandleIndex !== -1
         ) && building.isInitialized) {
         isDragging.building = true;
 
+     
         handleBuildingDrag();
       }
 
@@ -2584,6 +2588,7 @@ export class SiteplanGenerator {
       this.resizeEdge = null;
       this.resizingbuilding = false;
       building.isRotating = false;
+
       building.hoverHandleIndex = -1;
     };
 

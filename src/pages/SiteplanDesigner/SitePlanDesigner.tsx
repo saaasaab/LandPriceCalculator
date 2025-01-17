@@ -520,7 +520,7 @@ const SitePlanGenerator: React.FC = () => {
 
               <div className="sidebar">
                 {/* Input Parameters Section */}
-                <CollapsibleSection title="Input Parameters">
+                <CollapsibleSection title="Siteplan Inputs">
                   <div className="site-plan-generator__input-group">
                     <label htmlFor="parkingStalls">Parking Stalls</label>
                     <Input
@@ -673,7 +673,7 @@ const SitePlanGenerator: React.FC = () => {
                 </CollapsibleSection>
 
                 {/* Site Metrics Section */}
-                <CollapsibleSection title="Site Metrics">
+                <CollapsibleSection title="Siteplan Metrics">
                   <div className="site-plan-generator__metrics-container">
                     {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
                       <div key={key} className="site-plan-generator__metrics-item">
