@@ -370,6 +370,14 @@ export function normalizeAngle180(angle: number): number {
   return (angle + 180) % 180;
 }
 
+export function normalizeAngle90(angle: number): number {
+  return (angle + 90) % 90;
+}
+
+export function normalizeAngle45(angle: number): number {
+  return (angle + 45) % 45;
+}
+
 export function findClosestEdge(edges: Edge[], point: p5.Vector): number {
   let closestEdge: Edge | null = null;
   let shortestDistance = Infinity;

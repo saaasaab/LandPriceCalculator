@@ -555,7 +555,7 @@ const SitePlanGenerator: React.FC = () => {
                   </div>
 
                   <div className="site-plan-generator__input-group">
-                    <label htmlFor="buildingArea">Target Building Area (sq ft)</label>
+                    <label htmlFor="buildingArea">Max Building Area (sq ft)</label>
                     <Input
                       id="buildingArea"
                       type="number"

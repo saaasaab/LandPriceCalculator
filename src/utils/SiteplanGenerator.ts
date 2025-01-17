@@ -1,7 +1,7 @@
 import p5 from "p5";
 import classifyPoint from "robust-point-in-polygon"
 import { VisibilityGraph } from "../pages/VisibilityGraph";
-import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway } from "./SiteplanGeneratorUtils";
+import { setLineDash, calculateArea, polyPoint, expandPolygon, getLineIntersection, createWrappedIndices, calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, twoObjectsAreNotColliding, moveVector, arrayOfRandomNudges, createSitePlanElementCorners, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, getIntersectionPercentage, createDriveway, normalizeAngle90, angularDistance, normalizeAngle45 } from "./SiteplanGeneratorUtils";
 import { IPoint, Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
 import RotateArrow from "../assets/rotateArrow.png"
 
@@ -581,6 +581,10 @@ export class SitePlanElement {
   public width: number;
   public scale: number;
   public area: number;
+  public rotationHandles: p5.Vector[]
+  public isInitialized: boolean;
+  public isRotating: boolean;
+  public hoverHandleIndex: number
 
   constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number) {
     this.angle = angle;
@@ -598,10 +602,15 @@ export class SitePlanElement {
     this.scale = scale;
     this.previousCenter = center;
     this.area = Math.round(width * height);
+    this.rotationHandles = []
+    this.isInitialized = false;
+    this.isRotating = false;
+    this.hoverHandleIndex = -1;
 
   }
 
   initialize() {
+    this.isInitialized = true;
     this.createSitePlanElementCorners();
     this.setSitePlanElementEdges();
   }
@@ -613,10 +622,8 @@ export class SitePlanElement {
 
   projectFromCenter(position: p5.Vector, distance: number) {
     const _angle = calculateAngle(this.center, position);
-
     const newX = position.x + this.p.cos(_angle) * distance;
     const newY = position.y + this.p.sin(_angle) * distance;
-
     return { x: newX, y: newY }
   }
   pointIsInPolygon(corners: p5.Vector[]) {
@@ -679,6 +686,7 @@ export class SitePlanElement {
     this.createOffsetPolygon();
 
     this.calculateArea();
+    this.createRotationHandles();
   }
 
   updateAngle(angle: number) {
@@ -752,6 +760,35 @@ export class SitePlanElement {
 
   isMouseHoveringOffset(): boolean {
     return polyPoint(this.offsetSitePlanElementCorners, this.p.mouseX, this.p.mouseY);
+  }
+
+  isMouseHoveringRotateHandle(distance = 20): boolean {
+
+    // Set the hovered index so it can be used later
+    let hoverHandles = this.rotationHandles.map((handle, i) => {
+      this.hoverHandleIndex = i;
+      return this.p.dist(this.p.mouseX, this.p.mouseY, handle.x, handle.y) < distance
+    })
+    return hoverHandles.findIndex(isHover => isHover === true) !== -1
+  }
+
+  getMouseHoveringRotateHandleIndex(distance = 20): number {
+    let handleIndex = -1;
+    this.rotationHandles.forEach((handle, i) => {
+      if (this.p.dist(this.p.mouseX, this.p.mouseY, handle.x, handle.y) < distance) {
+        handleIndex = i;
+      }
+    })
+    return handleIndex
+  }
+
+  createRotationHandles() {
+    if (!this.isInitialized) return
+    this.rotationHandles = this.sitePlanElementEdges.map(edge => {
+      const offset = this.projectFromCenter(edge.getMidpoint(), 40)
+
+      return this.p.createVector(offset.x, offset.y);
+    })
   }
 
   createOffsetPolygon() {
@@ -1445,6 +1482,10 @@ export class Building extends SitePlanElement {
     this.update()
 
 
+
+    this.createRotationHandles()
+
+
     this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale);
   }
 
@@ -1470,6 +1511,16 @@ export class Building extends SitePlanElement {
     if (this.frameCount * speed > 50) this.frameCount = 0
 
   }
+
+  drawRotationHandles() {
+    this.p.push()
+    this.p.stroke(100, 100, 100)
+    this.rotationHandles.forEach(handle => {
+      this.p.ellipse(handle.x, handle.y, 30, 30);
+    })
+    this.p.pop()
+  }
+
 
   drawBuilding() {
     if (this.isInitialized) {
@@ -2092,8 +2143,7 @@ export class SiteplanGenerator {
     const handleBuildingDrag = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
       const dragMode = this.dragMode;
-      const resizeEdge = this.resizeEdge;
-      const resizeEdges = this.resizeEdges;
+
       const resizeCorner = this.resizeCorner;
       const dragOffset = this.dragOffset;
       building.hasStopped = false
@@ -2106,7 +2156,6 @@ export class SiteplanGenerator {
         p.cursor('nesw-resize');
 
         this.resizingbuilding = true;
-
         // Grab the corner being dragged
 
         // Calculate the opposite corner index
@@ -2148,15 +2197,6 @@ export class SiteplanGenerator {
 
         // Determine which edge is being dragged
         const edgeIndex = this.resizeEdge;
-        const oppositeEdgeIndex = (edgeIndex + 2) % 4;
-
-        // Get the two corners defining the edge being dragged
-        const edgeCorners = [
-          building.sitePlanElementEdges[edgeIndex].point1,
-          building.sitePlanElementEdges[edgeIndex].point2,
-        ];
-       
-
 
         const mouse = p.createVector(newX, newY);
         const center = p.createVector(building.center.x, building.center.y);
@@ -2169,41 +2209,32 @@ export class SiteplanGenerator {
         const _angle = calculateAngle(center, midpoint);
 
         if (edgeIndex === 0 || edgeIndex === 2) {
-          building.height = building.height + distance*newPointIsInsideMultiplier;
+          building.height = building.height + distance * newPointIsInsideMultiplier;
 
         }
         else {
-          building.width = building.width + distance*newPointIsInsideMultiplier;
-
+          building.width = building.width + distance * newPointIsInsideMultiplier;
         }
 
+        const newPoint1X = building.center.x + distance / 2 * p.cos(_angle) * newPointIsInsideMultiplier;
+        const newPoint1Y = building.center.y + distance / 2 * p.sin(_angle) * newPointIsInsideMultiplier;
 
+        building.updateBuildingCenter(newPoint1X, newPoint1Y);
+      }
 
-        const newPoint1X = building.center.x + distance /2 * p.cos(_angle) * newPointIsInsideMultiplier;
-        const newPoint1Y = building.center.y + distance /2 * p.sin(_angle) * newPointIsInsideMultiplier;
+      else if (dragMode === "rotate") {
 
-        building.updateBuildingCenter( newPoint1X,newPoint1Y)
+        building.isRotating = true;
+        p.cursor(RotateArrow);
 
-        // const newPoint2X = edgeCorners[1].x - distance * p.cos(_angle) * newPointIsInsideMultiplier;
-        // const newPoint2Y = edgeCorners[1].y - distance * p.sin(_angle) * newPointIsInsideMultiplier;
-        // // console.log(`object`, newPoint1X ,newPoint1Y,newPoint2X,newPoint2Y )
+        const handle = building.rotationHandles[building.hoverHandleIndex];
+        if (handle) {
+          const mouse = p.createVector(newX, newY)
+          const a = p.atan2(mouse.y - building.center.y, mouse.x - building.center.x) -
+            p.atan2(handle.y - building.center.y, handle.x - building.center.x);
 
-        // edgeCorners[0].x = newPoint1X;
-        // edgeCorners[1].x = newPoint2X;
-        // edgeCorners[0].y = newPoint1Y;
-        // edgeCorners[1].y = newPoint2Y;
-
-        const isVertical = isMoreVertical(building.sitePlanElementEdges[edgeIndex].calculateAngle())
-
-        // if (isVertical) {
-        //   building.width = building.width + distance*newPointIsInsideMultiplier * this.scale
-        // } else {
-
-        //   building.height = building.height + distance*newPointIsInsideMultiplier * this.scale
-        // }
-
-
-
+          building.updateAngle(building.angle + a)
+        }
 
       }
 
@@ -2218,8 +2249,8 @@ export class SiteplanGenerator {
         }
 
         building.updateBuildingCenter(newX, newY);
-        // updateVisibilityGraph();
       }
+
       else {
         p.cursor('default')
       }
@@ -2401,11 +2432,19 @@ export class SiteplanGenerator {
         parking: parking.isMouseHovering(),
         building: building.isMouseHovering(),
         buildingOffset: building.isMouseHoveringOffset(),
+        buildingHandle: building.isMouseHoveringRotateHandle(),
       };
 
       // Moving the building
-      if ((isHovered.building || isHovered.buildingOffset) && building.isInitialized) {
+      if ((
+        isHovered.building || 
+        isHovered.buildingOffset || 
+        isHovered.buildingHandle || 
+        this.dragMode ||
+        building.hoverHandleIndex !== -1
+        ) && building.isInitialized) {
         isDragging.building = true;
+
         handleBuildingDrag();
       }
 
@@ -2451,6 +2490,7 @@ export class SiteplanGenerator {
         parking: parking.isMouseHovering(),
         building: building.isMouseHovering(),
         buildingOffset: building.isMouseHoveringOffset(),
+        buildingHandle: building.isMouseHoveringRotateHandle(),
       };
 
       let dragMode = this.dragMode;
@@ -2543,6 +2583,8 @@ export class SiteplanGenerator {
       this.resizeCorner = null;
       this.resizeEdge = null;
       this.resizingbuilding = false;
+      building.isRotating = false;
+      building.hoverHandleIndex = -1;
     };
 
 
@@ -2567,6 +2609,7 @@ export class SiteplanGenerator {
         parking: parking.isMouseHovering(),
         building: building.isMouseHovering(),
         buildingOffset: building.isMouseHoveringOffset(),
+        buildingHandle: building.isMouseHoveringRotateHandle(),
       };
 
 
@@ -2584,6 +2627,7 @@ export class SiteplanGenerator {
       parking.drawParkingStalls();
 
       building.drawBuilding();
+      building.drawRotationHandles();
 
       property.propertyQuadrant(property, parking);
 
@@ -2696,10 +2740,13 @@ export class SiteplanGenerator {
 
 
       // Check if we're hovering over a building corner, edge, or center
-      if (isHovered.building || isHovered.buildingOffset) {
+      if ((isHovered.building ||
+        isHovered.buildingOffset ||
+        isHovered.buildingHandle ||
+        building.isRotating
+      ) && building.isInitialized) {
 
-        let anyCornerHover = this.resizingbuilding
-
+        let anyCornerHover = this.resizingbuilding || building.isRotating
 
         if (!anyCornerHover) {
           building.sitePlanElementCorners.forEach((corner, i) => {
@@ -2719,7 +2766,6 @@ export class SiteplanGenerator {
 
 
 
-
         if (!anyCornerHover) {
           const mouse = p.createVector(p.mouseX, p.mouseY)
           const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
@@ -2733,18 +2779,19 @@ export class SiteplanGenerator {
           }
         }
 
-        // if (!anyCornerHover) {
-        //   building.sitePlanElementCorners.forEach((corner, i) => {
-        //     // if (this.dragMode) return
-        //     if (p.dist(newX, newY, corner.x, corner.y) < 30) {
-        //       this.dragMode = 'rotate';
-        //       this.resizeEdges = null;
-        //       this.resizeCorner = null;
-        //       this.resizeEdge = null;
-        //       anyCornerHover = true;
-        //     }
-        //   });
-        // }
+        if (!anyCornerHover && isHovered.buildingHandle) {
+
+          const index = building.getMouseHoveringRotateHandleIndex();
+          const handle = building.rotationHandles[index];
+
+          if (p.dist(newX, newY, handle.x, handle.y) < 30) {
+            this.dragMode = 'rotate';
+            this.resizeEdges = null;
+            this.resizeCorner = null;
+            this.resizeEdge = null;
+            anyCornerHover = true;
+          }
+        }
 
 
         if (!anyCornerHover) {
@@ -2791,17 +2838,17 @@ export class SiteplanGenerator {
           p.cursor('grab')
         }
         else if (this.dragMode === "rotate") {
-          p.push()
-          p.noFill();
-          p.stroke(30, 60, 200);
-          p.strokeWeight(3)
-          p.ellipse(building.center.x, building.center.y, p.max(building.width,building.height), p.max(building.width,building.height))
-          p.pop();
+          // p.push()
+          // p.noFill();
+          // p.stroke(30, 60, 200);
+          // p.strokeWeight(3)
+          // p.ellipse(building.center.x, building.center.y, p.max(building.width, building.height), p.max(building.width, building.height))
+          // p.pop();
           p.cursor(RotateArrow)
         }
 
 
-       
+
         else {
           p.cursor('default')
         }
@@ -2814,7 +2861,7 @@ export class SiteplanGenerator {
         this.resizeCorner = null;
         this.resizeEdge = null;
         p.cursor('default')
-        
+
       }
 
 
