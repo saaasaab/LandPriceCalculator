@@ -22,10 +22,10 @@
     height: 100%;
   }
 
-  .site-plan-generator__sidebar-header{
+  .site-plan-generator__sidebar-header {
     display: flex;
     justify-content: space-between;
-    padding: .5rem
+    padding: 0.5rem;
   }
 
   // Control Panel (Left Column)
@@ -259,6 +259,25 @@
         font-size: 0.875rem;
         color: #64748b;
         margin: 0;
+      }
+    }
+
+    .sub-steps {
+      margin-top: 1rem;
+
+      ul {
+        list-style: none;
+        padding: 0;
+
+        .sub-step-item {
+          display: flex;
+          align-items: center;
+          margin-bottom: 0.5rem;
+
+          input[type="checkbox"] {
+            margin-right: 0.5rem;
+          }
+        }
       }
     }
   }

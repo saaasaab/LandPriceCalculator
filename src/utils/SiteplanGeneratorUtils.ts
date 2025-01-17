@@ -1,7 +1,15 @@
 import p5 from "p5";
 import classifyPoint from "robust-point-in-polygon"
 import { TPoint, VisibilityGraph } from "../pages/VisibilityGraph";
-import { Approach, Building, Edge, Garbage, Parking, ParkingStall, Property, SitePlanElement, stallHeight, stallWidth } from "./SiteplanGenerator";
+import { Approach } from "../pages/SiteplanDesigner/SitePlanClasses/Approach";
+import { Building } from "../pages/SiteplanDesigner/SitePlanClasses/Building";
+import { Edge } from "../pages/SiteplanDesigner/SitePlanClasses/Edge";
+import { Garbage } from "../pages/SiteplanDesigner/SitePlanClasses/Garbage";
+import { Parking } from "../pages/SiteplanDesigner/SitePlanClasses/Parking";
+import { ParkingStall } from "../pages/SiteplanDesigner/SitePlanClasses/ParkingStall";
+import { Property } from "../pages/SiteplanDesigner/SitePlanClasses/Property";
+import { SitePlanElement } from "../pages/SiteplanDesigner/SitePlanClasses/SitePlanElement";
+import { stallHeight, stallWidth } from "./SiteplanGenerator";
 
 
 type Point = [number, number];

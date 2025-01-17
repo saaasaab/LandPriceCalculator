@@ -102,9 +102,6 @@ const SitePlanGenerator: React.FC = () => {
   const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
 
 
-
-
-
   const [currentStep, setCurrentStep] = useState(0);
   const [isHelpVisible, setIsHelpVisible] = useState(true);
 
@@ -509,9 +506,42 @@ const SitePlanGenerator: React.FC = () => {
     },
 
   ];
+
+  // const sitePlanGenerationSteps = [
+  //   {
+  //     id: 1,
+  //     title: "Place Building",
+  //     description: "Place a building on the canvas.",
+  //     icon: <BuildingIcon />,
+  //     children: null,
+  //     disabled: false,
+  //     onClick: ()=>{},
+  //     subSteps: [
+  //       { text: "Select a point on the canvas to place a building", completed: false },
+  //       { text: "Click on the edge or corner to change the building size", completed: false },
+  //       { text: "Rotate the building by clicking and holding on the rotation handle", completed: false },
+  //       { text: "Add an entrance by clicking on the edge of the building", completed: false },
+  //     ],
+  //     // toggleSubStep: (subIndex:number) => {
+  //       // setSitePlanGenerationSteps((prevSteps) =>
+  //       //   prevSteps.map((step) =>
+  //       //     step.id === 1
+  //       //       ? {
+  //       //           ...step,
+  //       //           subSteps: step.subSteps.map((subStep, i) =>
+  //       //             i === subIndex ? { ...subStep, completed: !subStep.completed } : subStep
+  //       //           ),
+  //       //         }
+  //       //       : step
+  //       //   )
+  //       // );
+  //     // },
+  //   }
+  // ];
+
   return (
 
-  
+
     <div className="site-plan-generator">
       <div className="site-plan-generator__container">
         {/* Left Column - Controls */}
@@ -528,7 +558,7 @@ const SitePlanGenerator: React.FC = () => {
                       id="parkingStalls"
                       type="number"
                       min={0}
-                      value={formData.parkingStalls}
+                      value={formData.parkingStalls || ""}
                       onChange={(e) => handleNumberInput(e, 'parkingStalls')}
                     />
                   </div>
@@ -685,7 +715,87 @@ const SitePlanGenerator: React.FC = () => {
                   </div>
                 </CollapsibleSection>
 
-                {/* Add more sections here */}
+
+                {/* Site Metrics Section */}
+                {/* <CollapsibleSection title="Siteplan Creation Steps">
+                  <div className="site-plan-generator__sidebar">
+                    <div className="site-plan-generator__sidebar-header">
+                      <h2>Site Plan Generator</h2>
+
+                    </div>
+                    <div className="site-plan-generator__sidebar-content">
+                      {sitePlanGenerationSteps.map((step, index) => (
+                        <div
+                          key={step.id}
+                          className={`site-plan-generator__step
+                            ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
+                            ${index < currentStep ? 'site-plan-generator__step--completed' : ''}
+                            ${step?.disabled ? 'disabled' : ''}`}
+                          onClick={() => {
+                            if (step?.disabled) return;
+                            setCurrentStep(index);
+                            step.onClick();
+                          }}
+                        >
+                          <div className="site-plan-generator__step-content">
+                            <div className={`site-plan-generator__step-icon ${index === currentStep ? 'step-icon-active' : ''}`}>
+                              {step.icon}
+                            </div>
+                            <div className="site-plan-generator__step-info">
+                              <h3>{step.title}</h3>
+                              <p>{step.description}</p>
+                            </div>
+                          </div>
+
+                          {index === currentStep && (
+                            <div className="sub-steps">
+                              {step.subSteps && step.subSteps.length > 0 ? (
+                                <ul>
+                                  {step.subSteps.map((subStep, subIndex) => (
+                                    <li key={subIndex} className="sub-step-item">
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          checked={subStep.completed}
+                                          onChange={() => step.toggleSubStep(subIndex)}
+                                        />
+                                        {subStep.text}
+                                      </label>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                step.children
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+
+                      <div
+                        className={`site-plan-generator__step`}
+                        onClick={() => { setCurrentStep(0); clearCanvas(); }}
+                      >
+                        <div className="site-plan-generator__step-content">
+                          <div className={`site-plan-generator__step-icon`}>
+                            <Delete />,
+                          </div>
+                          <div className="site-plan-generator__step-info">
+
+
+                            <h3>Clear</h3>
+                            <p>Click to delete the existing siteplan and start over</p>
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+                </CollapsibleSection>
+
+                Add more sections here */}
               </div>
 
               :
@@ -785,8 +895,8 @@ const SitePlanGenerator: React.FC = () => {
         </div>
       </div>
     </div>
-  
-  
+
+
   );
 };
 
