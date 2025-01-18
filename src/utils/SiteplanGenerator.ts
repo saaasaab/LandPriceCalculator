@@ -162,7 +162,7 @@ export class SiteplanGenerator {
     this.parking.updateParkingHeight(this.property.cornerOffsetsFromSetbacks);
     this.property.propertyQuadrant(this.property, this.parking);
 
-    this.garbage = new Garbage(p, getCenterPoint(p, this.parking.sitePlanElementEdges[0].point1, this.parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 10 / this.scale, this.parking.angle, ESitePlanObjects.Garbage, this.scale);
+    this.garbage = new Garbage(p, getCenterPoint(p, this.parking.sitePlanElementEdges[0].point1, this.parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 5 / this.scale, this.parking.angle, ESitePlanObjects.Garbage, this.scale);
     this.garbage.initialize();
 
 
@@ -421,16 +421,16 @@ export class SiteplanGenerator {
         approach.updateCenter(newX, newY);
         parking.updateAngle(angle); // +90 to get the perpendicular angle
         garbage.updateAngle(angle);
-        building.updateAngle(angle);
+        // building.updateAngle(angle);
         building.hasStopped = false
 
         parking.calculateNumberOfFittableStalls(property.propertyCorners);
         parking.updateStallCorners(false, true);
         parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-        building.buildingLocator(p, building, parking, property, garbage);
+        // building.buildingLocator(p, building, parking, property, garbage);
         garbage.updateCenterGarbage(parking);
 
-        building.updateEntrances();
+        // building.updateEntrances();
         parking.createRotationHandles();
         updateVisibilityGraph();
       } else {
@@ -488,7 +488,7 @@ export class SiteplanGenerator {
           parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
           building.hasStopped = false;
-          building.buildingLocator(p, building, parking, property, garbage);
+          
           garbage.updateCenterGarbage(parking);
 
           const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
@@ -507,7 +507,6 @@ export class SiteplanGenerator {
             parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
             building.hasStopped = false;
-            building.buildingLocator(p, building, parking, property, garbage);
             garbage.updateCenter(_garbageCenter.x, _garbageCenter.y)
             garbage.updateCenterGarbage(parking);
             return;
@@ -545,7 +544,7 @@ export class SiteplanGenerator {
         let angle = isRotationFrozen ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
         parking.updateAngle(normalizeAngle(angle));
         garbage.updateAngle(normalizeAngle(angle));
-        building.updateAngle(normalizeAngle(angle));
+        // building.updateAngle(normalizeAngle(angle));
         building.updateEntrances();
 
         const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
@@ -559,7 +558,6 @@ export class SiteplanGenerator {
           parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
           building.hasStopped = false;
-          building.buildingLocator(p, building, parking, property, garbage);
           parking.createRotationHandles();
           updateVisibilityGraph();
         } else {

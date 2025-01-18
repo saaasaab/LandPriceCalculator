@@ -195,7 +195,7 @@ export class Parking extends SitePlanElement {
       // Take a snapshot to revert
       const maxParkingStalls = Math.max(this.parkingStalls.left.length, this.parkingStalls.right.length);
   
-      const garbageHeight = 10 / this.scale / 2;
+      const garbageHeight = 5 / this.scale / 2;
   
       this.updateheight(maxParkingStalls * stallHeight / this.scale + garbageHeight);
   

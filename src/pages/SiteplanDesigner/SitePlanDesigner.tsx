@@ -96,7 +96,7 @@ const SitePlanGenerator: React.FC = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('upload'); // Interaction mode
 
-  const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
+  // const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
   const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
@@ -118,6 +118,8 @@ const SitePlanGenerator: React.FC = () => {
   const isSelectingApproachRef = useRef<boolean>(false);
   const isSelectingSetbackRef = useRef<boolean>(false);
   const isDefiningScaleRef = useRef<boolean>(false);
+  const isGeneratingSitePlanRef = useRef<boolean>(false);
+
 
 
   const inputScaleRef = useRef<number | null>(null);
@@ -133,7 +135,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
 
-  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isUploadingImageRef, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
+  const sketch = sketchForSiteplan(imageURL, canvasRef, isGeneratingSitePlanRef, visualizer, isUploadingImageRef, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
 
 
   useEffect(() => {
@@ -258,7 +260,7 @@ const SitePlanGenerator: React.FC = () => {
     isUploadingImageRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
-    setIsGeneratingSitePlan(false);
+    isGeneratingSitePlanRef.current = false;
     setMode('adjust')
   }
 
@@ -270,7 +272,7 @@ const SitePlanGenerator: React.FC = () => {
     isPolygonClosedRef.current = false;
     setIsPolygonClosedState(false);
     isSelectingApproachRef.current = false;
-    setIsGeneratingSitePlan(false);
+    isGeneratingSitePlanRef.current = false;;
     isDefiningScaleRef.current = false;
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
@@ -280,7 +282,7 @@ const SitePlanGenerator: React.FC = () => {
   };
 
   const selectApproach = () => {
-    setIsGeneratingSitePlan(false)
+    isGeneratingSitePlanRef.current = false;
     isUploadingImageRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = true;
@@ -289,7 +291,7 @@ const SitePlanGenerator: React.FC = () => {
   }
 
   const defineScale = () => {
-    setIsGeneratingSitePlan(false);
+    isGeneratingSitePlanRef.current = false;;
     isUploadingImageRef.current = false;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = true;
@@ -299,7 +301,7 @@ const SitePlanGenerator: React.FC = () => {
 
   const createSetbacks = () => {
     isUploadingImageRef.current = false;
-    setIsGeneratingSitePlan(false);
+    isGeneratingSitePlanRef.current = false;;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
     isSelectingSetbackRef.current = true;
@@ -311,7 +313,7 @@ const SitePlanGenerator: React.FC = () => {
     const lines = linesRef.current;
     const scale = scaleRef.current;
 
-    setIsGeneratingSitePlan(true)
+    isGeneratingSitePlanRef.current = true;
     isSelectingSetbackRef.current = false;
     isSelectingApproachRef.current = false;
     isDefiningScaleRef.current = false;
@@ -547,11 +549,80 @@ const SitePlanGenerator: React.FC = () => {
         {/* Left Column - Controls */}
         <div className="site-plan-generator__controls">
           <Card>
-            {isGeneratingSitePlan ?
+            {/* {isGeneratingSitePlan ? */}
 
               <div className="sidebar">
+              <CollapsibleSection title="Site Plan Boundaries" isDefaultOpen={!isGeneratingSitePlanRef.current}>
+                <div className="site-plan-generator__sidebar">
+                  <div className="site-plan-generator__sidebar-header">
+                    <h2>Site Plan Generator</h2>
+                    <button
+                      className="button"
+                      onClick={() => setIsHelpVisible(!isHelpVisible)}
+                    >
+                      <Info />
+                    </button>
+                  </div>
+                  <div className="site-plan-generator__sidebar-content">
+                    {steps.map((step, index) => (
+                      <div
+                        key={step.id}
+                        className={`site-plan-generator__step 
+                        ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
+                        ${index < currentStep ? 'site-plan-generator__step--completed' : ''}
+                        ${step?.disabled ? 'disabled' : ''}
+
+                          `}
+                        onClick={() => {
+                          if (step?.disabled) return;
+                          setCurrentStep(index);
+                          step.onClick()
+                        }}
+                      >
+                        <div className="site-plan-generator__step-content">
+                          <div className={`site-plan-generator__step-icon ${index === currentStep ? 'site-plan-generator__step-icon--active' : ''
+                            }`}>
+                            {step.icon}
+                          </div>
+                          <div className="site-plan-generator__step-info">
+                            <h3>{step.title}</h3>
+                            <p>{step.description}</p>
+                          </div>
+                        </div>
+
+                        {index === currentStep ? step.children : <></>}
+                      </div>
+                    ))}
+
+
+                    <div
+                      className={`site-plan-generator__step`}
+                      onClick={() => { setCurrentStep(0); clearCanvas(); }}
+                    >
+                      <div className="site-plan-generator__step-content">
+                        <div className={`site-plan-generator__step-icon`}>
+                          <Delete />,
+                        </div>
+                        <div className="site-plan-generator__step-info">
+
+
+                          <h3>Clear</h3>
+                          <p>Click to delete the existing siteplan and start over</p>
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+          
+
+                </CollapsibleSection>
+
+
+
                 {/* Input Parameters Section */}
-                <CollapsibleSection title="Siteplan Inputs">
+                <CollapsibleSection title="Site Plan Inputs">
                   <div className="site-plan-generator__input-group">
                     <label htmlFor="parkingStalls">Parking Stalls</label>
                     <Input
@@ -704,7 +775,7 @@ const SitePlanGenerator: React.FC = () => {
                 </CollapsibleSection>
 
                 {/* Site Metrics Section */}
-                <CollapsibleSection title="Siteplan Metrics">
+                <CollapsibleSection title="Site Plan Metrics">
                   <div className="site-plan-generator__metrics-container">
                     {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
                       <div key={key} className="site-plan-generator__metrics-item">
@@ -714,6 +785,9 @@ const SitePlanGenerator: React.FC = () => {
                     ))}
                   </div>
                 </CollapsibleSection>
+
+
+
 
 
                 {/* Site Metrics Section */}
@@ -798,75 +872,8 @@ const SitePlanGenerator: React.FC = () => {
                 Add more sections here */}
               </div>
 
-              :
-
-              <>
-                <div className="site-plan-generator__sidebar">
-                  <div className="site-plan-generator__sidebar-header">
-                    <h2>Site Plan Generator</h2>
-                    <button
-                      className="button"
-                      onClick={() => setIsHelpVisible(!isHelpVisible)}
-                    >
-                      <Info />
-                    </button>
-                  </div>
-                  <div className="site-plan-generator__sidebar-content">
-                    {steps.map((step, index) => (
-                      <div
-                        key={step.id}
-                        className={`site-plan-generator__step 
-                        ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
-                        ${index < currentStep ? 'site-plan-generator__step--completed' : ''}
-                        ${step?.disabled ? 'disabled' : ''}
-
-                          `}
-                        onClick={() => {
-                          if (step?.disabled) return;
-                          setCurrentStep(index);
-                          step.onClick()
-                        }}
-                      >
-                        <div className="site-plan-generator__step-content">
-                          <div className={`site-plan-generator__step-icon ${index === currentStep ? 'site-plan-generator__step-icon--active' : ''
-                            }`}>
-                            {step.icon}
-                          </div>
-                          <div className="site-plan-generator__step-info">
-                            <h3>{step.title}</h3>
-                            <p>{step.description}</p>
-                          </div>
-                        </div>
-
-                        {index === currentStep ? step.children : <></>}
-                      </div>
-                    ))}
-
-
-                    <div
-                      className={`site-plan-generator__step`}
-                      onClick={() => { setCurrentStep(0); clearCanvas(); }}
-                    >
-                      <div className="site-plan-generator__step-content">
-                        <div className={`site-plan-generator__step-icon`}>
-                          <Delete />,
-                        </div>
-                        <div className="site-plan-generator__step-info">
-
-
-                          <h3>Clear</h3>
-                          <p>Click to delete the existing siteplan and start over</p>
-                        </div>
-                      </div>
-
-                    </div>
-
-                  </div>
-                </div>
-              </>
-
-
-            }
+            
+            {/* } */}
           </Card>
         </div>
 
@@ -876,7 +883,7 @@ const SitePlanGenerator: React.FC = () => {
 
             <CardContent>
               <div className="site-plan-generator__visualization-container" ref={canvasContainerRef}>
-                {mode === "upload" && !isGeneratingSitePlan ?
+                {mode === "upload" && !isGeneratingSitePlanRef.current ?
                   <ImageUploader onFileUpload={setImageURL} /> : <></>}
 
 

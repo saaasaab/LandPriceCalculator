@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import './CollapsibleSection.scss';
 
 interface CollapsibleSectionProps {
     title: string;
     children: React.ReactNode;
+    isDefaultOpen?: boolean
   }
   
-  const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+  const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, isDefaultOpen = false }) => {
+    const [isExpanded, setIsExpanded] = useState(isDefaultOpen);
+
+    useEffect(() => {
+     setIsExpanded(isDefaultOpen)
+    }, [isDefaultOpen])
   
     return (
       <div className="sidebar-section">

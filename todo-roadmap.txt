@@ -1,0 +1,39 @@
+[ ] Angles on lines on the first page
+[ ] Arrow pointing north and project north
+[ ] Define by angles
+[ ] Legal description to points on the map
+[ ] Click object to open resize or rotate options
+[ ] Show what are standard sizes for different objects
+[ ] Turn red when intersecting instead of stopping them from overlapping
+[ ] question marks on different items to give more explaination
+[ ] Phantom point when creating boundary
+[ ] Add zoom in on map and site plan
+[ ] adding a color palette
+[ ] update design for hover state. Box with circles at corner, and pill in the middle
+[ ] Add back button
+[ ] Drag on top and glow red
+[ ] Prune the paths
+[ ] add steps to follow when creating the site plan with EVERYTHIGN laid out on the side panel
+[ ] Add taper driveway
+[ ] Fix building area to be double doors
+[ ] Put a curve on the approach
+[ ] ADA and compact and diagonal parking.
+[ ] Add utilities
+[ ] Geohazard and NROD areas
+[ ] Add easements
+[ ] Draw arrow on approach
+[ ] Connect to calculators
+[ ] Cost estimates
+[ ] Bike parking
+[ ] Multiple entrances to property
+[ ] different fire apparatus
+[ ] Export to PDF
+[ ] Snap to edges
+[ ] Parking numbers - strive for equal parking but not linked
+[ ] Total impervious surface area
+[ ] Add loading areas - Determine if you need loading areas because the person probably doesn't know
+[ ] Building elevations
+[ ] Dimenstions
+[ ] Tree Locations
+[ ] Slope Map
+[X] Change rotation circle to arrow and only 

@@ -4,7 +4,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 
 
 
-export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, sitePlanGenerator: React.MutableRefObject<SiteplanGenerator | null>, isUploadingImageRef: React.MutableRefObject<boolean>, isPolygonClosedRef: React.MutableRefObject<boolean>, setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>, canvasContainerRef: React.RefObject<HTMLDivElement>) {
+export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, isGeneratingSitePlanRef:React.MutableRefObject<boolean>, sitePlanGenerator: React.MutableRefObject<SiteplanGenerator | null>, isUploadingImageRef: React.MutableRefObject<boolean>, isPolygonClosedRef: React.MutableRefObject<boolean>, setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>, canvasContainerRef: React.RefObject<HTMLDivElement>) {
   return (p: p5) => {
     let img: p5.Image | null = null;
     // let offsetPoints: p5.Vector[] = [];
@@ -26,14 +26,18 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
     };
 
     p.draw = () => {
+      // console.log(`sitePlanGenerator.current`, sitePlanGenerator.current)
+      // console.log(`isGeneratingSitePlanRef.current`, isGeneratingSitePlanRef.current)
+      // NOW IF I GO BACK, I SHOULD BE ABLE TO UPDATE THIS
+
+      // && isGeneratingSitePlanRef.current
       if (sitePlanGenerator.current) {
         sitePlanGenerator.current.visualize(p); // Delegate drawing to the sitePlanGenerator
-      } else {
+      } 
+      else {
 
         const isUploadingImage = isUploadingImageRef.current;
         const isPolygonClosed = isPolygonClosedRef.current;
-
-
 
 
         if (isUploadingImage) return
@@ -153,6 +157,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
         }
         // const isPolygonClosed = isPolygonClosedRef.current;
         p.push();
+
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i];
 
