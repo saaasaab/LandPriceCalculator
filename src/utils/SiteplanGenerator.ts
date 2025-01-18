@@ -229,6 +229,7 @@ export class SiteplanGenerator {
     let isDragging = {
       parking: false,
       approach: false,
+      parkingOffset: false,
       building: false,
     };
 
@@ -456,7 +457,7 @@ export class SiteplanGenerator {
         parking.calculateNumberOfFittableStalls(property.propertyCorners);
         parking.updateStallCorners(false, true);
         parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-        // building.buildingLocator(p, building, parking, property, garbage);
+        building.buildingLocator(p, building, parking, property, garbage);
         garbage.updateCenterGarbage(parking);
 
         // building.updateEntrances();
@@ -638,8 +639,10 @@ export class SiteplanGenerator {
       const isHovered = {
         approach: approach.isMouseHovering(),
         parking: parking.isMouseHovering(),
+        parkingOffset: parking.isMouseHoveringOffset(),
         parkingHandle: parking.isMouseHoveringRotateHandle(),
         building: building.isMouseHovering(),
+        buildingOffset: building.isMouseHoveringOffset(),
         buildingHandle: building.isMouseHoveringRotateHandle(),
       };
 
@@ -647,6 +650,7 @@ export class SiteplanGenerator {
       // Moving the building
       if ((
         isHovered.building ||
+        isHovered.buildingOffset ||
         isHovered.buildingHandle ||
         this.buildingDragMode ||
         building.hoverHandleIndex !== -1
@@ -683,8 +687,10 @@ export class SiteplanGenerator {
       const isHovered = {
         approach: approach.isMouseHovering(),
         parking: parking.isMouseHovering(),
+        parkingOffset: parking.isMouseHoveringOffset(),
         parkingHandle: parking.isMouseHoveringRotateHandle(),
         building: building.isMouseHovering(),
+        buildingOffset: building.isMouseHoveringOffset(),
         buildingHandle: building.isMouseHoveringRotateHandle(),
         garbage: garbage.isMouseHovering(),
       };
@@ -697,6 +703,7 @@ export class SiteplanGenerator {
       if (!building.isInitialized &&
         !isHovered.approach &&
         !isHovered.parking &&
+        !isHovered.parkingOffset &&
         !isHovered.parkingHandle &&
         !isHovered.garbage &&
 
@@ -768,6 +775,7 @@ export class SiteplanGenerator {
       if (!property || !approach || !parking || !building || !garbage) return;
       isDragging.parking = false;
       isDragging.approach = false;
+      isDragging.parkingOffset = false;
       isDragging.building = false;
 
       this.buildingDragMode = null;
@@ -801,9 +809,11 @@ export class SiteplanGenerator {
       const isHovered = {
         approach: approach.isMouseHovering(),
         parking: parking.isMouseHovering(),
+        parkingOffset: parking.isMouseHoveringOffset(),
         parkingHandle: parking.isMouseHoveringRotateHandle(),
 
         building: building.isMouseHovering(),
+        buildingOffset: building.isMouseHoveringOffset(),
         buildingHandle: building.isMouseHoveringRotateHandle(),
       };
 
@@ -838,7 +848,7 @@ export class SiteplanGenerator {
 
 
       if (!building.hasStopped && building.isInitialized) {
-        // building.buildingLocator(p, building, parking, property, garbage);
+        building.buildingLocator(p, building, parking, property, garbage);
 
         // STOP THE GROWING FOR NOW.
         // building.buildingGrower(property, parking);
@@ -850,13 +860,13 @@ export class SiteplanGenerator {
 
       const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [p.mouseX, p.mouseY]) === -1
 
-      if (!isHovered.approach&& !isHovered.parking && !building.isInitialized && isInboundary && !isHovered.parkingHandle) {
+      if (!isHovered.approach && !isHovered.parking && !building.isInitialized && isInboundary && !isHovered.parkingOffset && !isHovered.parkingHandle) {
 
         // Show the building growing.
         building.tempBuilding();
       }
 
-      if (isHovered.building  && isInboundary && building.isInitialized) {
+      if ((isHovered.building || isHovered.buildingOffset) && isInboundary && building.isInitialized) {
 
         // ----  Show the entrance ----
         // Get the closest edge
@@ -925,10 +935,18 @@ export class SiteplanGenerator {
       
 
       if (
+        isHovered.parkingOffset ||
         isHovered.parking ||
         isHovered.parkingHandle ||
         parking.isRotating) {
+
+        // || isDragging.parkingOffset
+        // !isDragging.parking
+
         parking.showRotationHandles = true;
+        // let hasSetRotating = parking.isRotating;
+        // let hasSetDragging = parking.isDr;
+        // && !hasSetDragging
 
         if (isHovered.parkingHandle) {
           parking.showRotationAnimationCount = 0;
@@ -990,6 +1008,7 @@ export class SiteplanGenerator {
 
       // Check if we're hovering over a building corner, edge, or center
       else if ((isHovered.building ||
+        isHovered.buildingOffset ||
         isHovered.buildingHandle ||
         building.isRotating
       ) && building.isInitialized) {
@@ -1136,3 +1155,121 @@ const toGlobal = (p: p5, building: Building, x: number, y: number) => {
   };
 };
 
+
+
+
+
+export function drawNeonLine( p: p5,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number, 
+    lineColor: p5.Color, glowSize = 20) {
+    // Save the current drawing state
+    p.push();
+    
+    // Disable the stroke outline
+    p.noStroke();
+    
+    // Calculate the number of layers for the glow effect
+    const layers = 15;
+    
+    // Calculate the alpha step for each layer
+    const alphaStep = 255 / layers;
+    
+    // Calculate the size step for each layer
+    const sizeStep = glowSize / layers;
+    
+    // Draw multiple layers from outside to inside
+    for (let i = layers; i >= 0; i--) {
+      // Calculate the current alpha and size
+      const currentAlpha = (layers - i) * alphaStep;
+      const currentSize = i * sizeStep;
+      
+      // Set the color with current alpha
+      const c = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
+      p.drawingContext.shadowColor = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
+      p.drawingContext.shadowBlur = currentSize;
+      
+      // Draw the line
+      p.stroke(c);
+      p.strokeWeight(2);
+      p.line(x1, y1, x2, y2);
+    }
+    
+    // Draw the bright center
+    p. stroke(255);
+    p.strokeWeight(2);
+    p.line(x1, y1, x2, y2);
+    
+    // Restore the drawing state
+    p.pop();
+  }
+
+
+
+  export function drawNeonShape(
+    p: p5,
+    vertices: { x: number; y: number }[], // Array of vertices for the shape
+    lineColor: p5.Color,
+    glowSize = 20
+  ): void {
+    // Save the current drawing state
+    p.push();
+  
+    // Disable the stroke outline
+    p.noStroke();
+  
+    // Calculate the number of layers for the glow effect
+    const layers = 15;
+  
+    // Calculate the alpha step for each layer
+    const alphaStep = 255 / layers;
+  
+    // Calculate the size step for each layer
+    const sizeStep = glowSize / layers;
+  
+    // Draw multiple layers from outside to inside
+    for (let i = layers; i >= 0; i--) {
+      // Calculate the current alpha and size
+      const currentAlpha = (layers - i) * alphaStep;
+      const currentSize = i * sizeStep;
+  
+      // Set the color with current alpha
+      const c = p.color(
+        p.red(lineColor),
+        p.green(lineColor),
+        p.blue(lineColor),
+        currentAlpha
+      );
+      p.drawingContext.shadowColor = p.color(
+        p.red(lineColor),
+        p.green(lineColor),
+        p.blue(lineColor),
+        currentAlpha
+      );
+      p.drawingContext.shadowBlur = currentSize;
+  
+      // Draw the shape with current glow layer
+      p.stroke(c);
+      p.strokeWeight(2);
+      p.beginShape();
+      vertices.forEach((vertex) => {
+        p.vertex(vertex.x, vertex.y);
+      });
+      p.endShape(p.CLOSE);
+    }
+  
+    // Draw the bright center shape
+    p.stroke(255);
+    p.strokeWeight(2);
+    p.beginShape();
+    vertices.forEach((vertex) => {
+      p.vertex(vertex.x, vertex.y);
+    });
+    p.endShape(p.CLOSE);
+    // Restore the drawing state
+    p.pop();
+  }
+
+  

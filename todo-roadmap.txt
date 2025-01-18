@@ -38,5 +38,6 @@
 [ ] Slope Map
 [X] Change rotation circle to arrow and only 
 [ ] Draw Center lines - Light gray and thin
-[ ] Limit on Area, and notify somehow that the max area is reached
-[ ] 
+[X] Limit on Area, and notify somehow that the max area is reached
+[ ] Add Lock to max size option
+[ ] Let user input the width of the building

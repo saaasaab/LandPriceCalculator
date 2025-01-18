@@ -48,7 +48,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
-import { Info, Map, ArrowRight, Ruler, Box, FileImage, Delete } from 'lucide-react';
+import { Map, ArrowRight, Ruler, Box, FileImage, Delete } from 'lucide-react';
 import { Card, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
@@ -103,7 +103,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [isHelpVisible, setIsHelpVisible] = useState(true);
+  // const [isHelpVisible, setIsHelpVisible] = useState(true);
 
   // Property Outputs
   const [globalAngle, _setGlobalAngle] = useState<number>(0);
@@ -135,7 +135,13 @@ const SitePlanGenerator: React.FC = () => {
 
 
 
-  const sketch = sketchForSiteplan(imageURL, canvasRef, isGeneratingSitePlanRef, visualizer, isUploadingImageRef, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
+  useEffect(() => {
+    if(imageURL){
+      createPoints()
+    }
+  }, [imageURL])
+
+  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isUploadingImageRef, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
 
 
   useEffect(() => {
@@ -250,6 +256,7 @@ const SitePlanGenerator: React.FC = () => {
 
   const startUploadingImage = () => {
     setMode('upload')
+    setImageURL(null);
     isUploadingImageRef.current = true;
     isSelectingSetbackRef.current = false;
     isDefiningScaleRef.current = false;
@@ -261,6 +268,8 @@ const SitePlanGenerator: React.FC = () => {
     isDefiningScaleRef.current = false;
     isSelectingApproachRef.current = false;
     isGeneratingSitePlanRef.current = false;
+
+    setCurrentStep(1); // should point to the adjust step
     setMode('adjust')
   }
 
@@ -554,7 +563,7 @@ const SitePlanGenerator: React.FC = () => {
               <div className="sidebar">
               <CollapsibleSection title="Site Plan Boundaries" isDefaultOpen={!isGeneratingSitePlanRef.current}>
                 <div className="site-plan-generator__sidebar">
-                  <div className="site-plan-generator__sidebar-header">
+                  {/* <div className="site-plan-generator__sidebar-header">
                     <h2>Site Plan Generator</h2>
                     <button
                       className="button"
@@ -562,7 +571,7 @@ const SitePlanGenerator: React.FC = () => {
                     >
                       <Info />
                     </button>
-                  </div>
+                  </div> */}
                   <div className="site-plan-generator__sidebar-content">
                     {steps.map((step, index) => (
                       <div
@@ -883,7 +892,7 @@ const SitePlanGenerator: React.FC = () => {
 
             <CardContent>
               <div className="site-plan-generator__visualization-container" ref={canvasContainerRef}>
-                {mode === "upload" && !isGeneratingSitePlanRef.current ?
+                {mode === "upload" && !isGeneratingSitePlanRef.current && !imageURL ?
                   <ImageUploader onFileUpload={setImageURL} /> : <></>}
 
 
@@ -894,11 +903,11 @@ const SitePlanGenerator: React.FC = () => {
           </Card>
 
           {/* Help Panel */}
-          {isHelpVisible && (
+          {/* {isHelpVisible && (
             <div className="site-plan-generator__help">
               <p>{steps[currentStep].help}</p>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

@@ -4,9 +4,10 @@ import { IPoint, Line } from "./SitePlanDesigner";
 
 
 
-export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, isGeneratingSitePlanRef:React.MutableRefObject<boolean>, sitePlanGenerator: React.MutableRefObject<SiteplanGenerator | null>, isUploadingImageRef: React.MutableRefObject<boolean>, isPolygonClosedRef: React.MutableRefObject<boolean>, setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>, canvasContainerRef: React.RefObject<HTMLDivElement>) {
+export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefObject<HTMLDivElement>, sitePlanGenerator: React.MutableRefObject<SiteplanGenerator | null>, isUploadingImageRef: React.MutableRefObject<boolean>, isPolygonClosedRef: React.MutableRefObject<boolean>, setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void, scaleRef: React.MutableRefObject<number | null>, pointsRef: React.MutableRefObject<IPoint[]>, linesRef: React.MutableRefObject<Line[]>, setbacksRef: React.MutableRefObject<number[]>, isSelectingApproachRef: React.MutableRefObject<boolean>, isSelectingSetbackRef: React.MutableRefObject<boolean>, isDefiningScaleRef: React.MutableRefObject<boolean>, draggingPointIndexRef: React.MutableRefObject<number | null>, selectedLineIndexRef: React.MutableRefObject<number | null>, inputScaleRef: React.MutableRefObject<number | null>, canvasContainerRef: React.RefObject<HTMLDivElement>) {
   return (p: p5) => {
     let img: p5.Image | null = null;
+    let rectSize = { width: 0, height: 0 };
     // let offsetPoints: p5.Vector[] = [];
     // const 
     p.preload = () => {
@@ -19,6 +20,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
       if (canvasRef.current && canvasContainerRef.current) {
         const rect = canvasContainerRef.current.getBoundingClientRect()
 
+        rectSize = { width: rect.width, height: rect.height };
         const canvas = p.createCanvas(rect.width - 20, rect.height - 20);
         canvas.parent(canvasRef.current);
 
@@ -26,14 +28,12 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
     };
 
     p.draw = () => {
-      // console.log(`sitePlanGenerator.current`, sitePlanGenerator.current)
-      // console.log(`isGeneratingSitePlanRef.current`, isGeneratingSitePlanRef.current)
       // NOW IF I GO BACK, I SHOULD BE ABLE TO UPDATE THIS
 
       // && isGeneratingSitePlanRef.current
       if (sitePlanGenerator.current) {
         sitePlanGenerator.current.visualize(p); // Delegate drawing to the sitePlanGenerator
-      } 
+      }
       else {
 
         const isUploadingImage = isUploadingImageRef.current;
@@ -46,34 +46,13 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
 
         if (img) {
-
           p.background("#f9fafb"); // Default background
 
           // Resize the image, keeping the aspect ratio.
-          p.push();
-          let aspectRatio = img.width / img.height;
-
-          if (aspectRatio > 1) {
-            // Image is wider than it is tall
-            img.resize(0, p.height);
-            if (img.width > p.width) {
-              img.resize(p.width, 0); // Resize again if width exceeds canvas
-            }
-          } else {
-            // Image is taller than it is wide
-            img.resize(p.width, 0);
-            if (img.height > p.height) {
-              img.resize(0, p.height); // Resize again if height exceeds canvas
-            }
-          }
-          p.pop();
-          // Display the resized image.
-
-
-          p.image(img, 0, 0);
-
-
-          // p.image(img, 0, 0, img.width, img.height); // Draw the image as the background
+          const ratio = img.width/ img.height;
+          const width = rectSize.width;
+          const height = width / ratio;
+          p.image(img, 0, 0,width,height);
         } else {
           p.background("#f9fafb"); // Default background
         }
@@ -205,7 +184,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
 
           // p.fill(100, 250, 200, 20);
-          
+
           // p.beginShape();
           // offsetPoints.forEach(corner=>{
           //   p.vertex(corner.x,corner.y);
@@ -230,7 +209,7 @@ export function sketchForSiteplan(imageURL: string | null, canvasRef: React.RefO
 
     p.mousePressed = () => {
 
-      
+
       const isUploadingImage = isUploadingImageRef.current;
 
       if (isUploadingImage) return

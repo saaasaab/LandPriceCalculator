@@ -132,8 +132,9 @@
 
   // Visualization Panel (Right Column)
   .site-plan-generator__visualization {
+    max-height: 100%;
     display: grid;
-    grid-template-rows: 1fr 150px;
+    // grid-template-rows: 1fr 150px;
 
     .card__content {
       height: 100%;

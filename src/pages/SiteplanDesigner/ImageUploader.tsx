@@ -7,13 +7,11 @@ interface ImageUploaderProps {
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileUpload }) => {
     const [isDragging, setIsDragging] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     // Handle file upload
     const handleFileUpload = (file: File) => {
 
         const url = URL.createObjectURL(file);
-        setImagePreview(url);
         onFileUpload(url);
     };
 
@@ -50,14 +48,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileUpload }) => {
             onDrop={handleDrop}
             onClick={() => document.getElementById('fileInput')?.click()}
         >
-            {imagePreview ? (
+            {/* {imagePreview ? (
                 <img src={imagePreview} alt="Preview" className="image-preview" />
-            ) : (
+            ) : ( */}
                 <div className="uploader-content">
                     <p>{`Click or Drag & Drop to Upload`}</p>
                     <p className="uploader-icon">📤</p>
                 </div>
-            )}
+            {/* )} */}
             <input
                 type="file"
                 id="fileInput"

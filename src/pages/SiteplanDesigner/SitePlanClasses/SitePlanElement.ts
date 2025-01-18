@@ -1,4 +1,4 @@
-import p5, { Color } from "p5";
+import p5 from "p5";
 import { ESitePlanObjects, Point, SitePlanObjects } from "../../../utils/SiteplanGenerator";
 import { calculateArea, calculateAngle, truthChecker, normalizeAngle, polyPoint, expandPolygon, getCenterPoint } from "../../../utils/SiteplanGeneratorUtils";
 import { Edge } from "./Edge";
@@ -134,6 +134,29 @@ export class SitePlanElement {
 
   }
 
+
+  calculatePointAtDistance = (
+    startPoint: p5.Vector,
+    edge: Edge,
+    distance: number,
+    p: p5
+  ): p5.Vector => {
+    const { point1, point2 } = edge;
+
+    // Calculate the edge's direction vector
+    const edgeVector = p5.Vector.sub(point2, point1);
+
+    // Find a perpendicular vector and negate it to reverse direction
+    const perpendicular = p.createVector(edgeVector.y, -edgeVector.x).normalize();
+
+    // Calculate the point at the specified perpendicular distance in the opposite direction
+    const targetPoint = p.createVector(
+      startPoint.x + perpendicular.x * distance,
+      startPoint.y + perpendicular.y * distance
+    );
+
+    return targetPoint;
+  };
 
   setLineColors(color: p5.Color){
     this.lineColor = color;
