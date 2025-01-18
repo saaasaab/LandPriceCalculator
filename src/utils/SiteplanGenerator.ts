@@ -229,7 +229,6 @@ export class SiteplanGenerator {
     let isDragging = {
       parking: false,
       approach: false,
-      parkingOffset: false,
       building: false,
     };
 
@@ -258,15 +257,14 @@ export class SiteplanGenerator {
       const dragOffset = this.dragOffset;
       building.hasStopped = false
 
-
-
-      const _center = p.createVector(building.center.x, building.center.y);
-      const _angle = building.angle;
-      const _width = building.width;
-      const _height = building.height;
-
       const newX = p.mouseX;
       const newY = p.mouseY;
+      const _center = p.createVector(building.center.x, building.center.y);
+      const _height = building.height;
+      const _width = building.width;
+
+      const propertyCenter = calculateCentroid(property.propertyCorners)
+
 
       if (buildingDragMode === "corner" && resizeCorner !== null) {
         p.cursor('nesw-resize');
@@ -302,7 +300,18 @@ export class SiteplanGenerator {
           this.building.width = newWidth;
           this.building.height = newHeight;
         }
-        building.updateCenter(newCenterGlobal.x, newCenterGlobal.y);
+        building.updateBuildingCenter(newCenterGlobal.x, newCenterGlobal.y);
+
+
+        const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
+        if (!pointsInBoundary) {
+          building.width = _width;
+          building.height = _height;
+          building.updateBuildingCenter(_center.x, _center.y);
+          building.hasStopped = true;
+          return;
+        }
+
       }
 
       else if (buildingDragMode === "edge" && this.resizeEdge !== null) {
@@ -317,16 +326,13 @@ export class SiteplanGenerator {
         const center = p.createVector(building.center.x, building.center.y);
 
         const midpoint = building.sitePlanElementEdges[edgeIndex].getMidpoint()
-
         const distance = calculatePointToEdgeDistance(building.sitePlanElementEdges[edgeIndex], mouse)
 
         const newPointIsInsideMultiplier = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [newX, newY])
         const _angle = calculateAngle(center, midpoint);
 
         if (edgeIndex === 0 || edgeIndex === 2) {
-
           const newHeight = building.height + distance * newPointIsInsideMultiplier;
-
           if (newHeight > 5) {
             building.height = newHeight
           }
@@ -343,6 +349,19 @@ export class SiteplanGenerator {
         const newPoint1Y = building.center.y + distance / 2 * p.sin(_angle) * newPointIsInsideMultiplier;
 
         building.updateBuildingCenter(newPoint1X, newPoint1Y);
+
+        const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
+        if (!pointsInBoundary) {
+          if (
+            p.dist(propertyCenter.x, propertyCenter.y, _center.x, _center.y) <
+            p.dist(propertyCenter.x, propertyCenter.y, newX, newY)) {
+            building.width = _width;
+            building.height = _height;
+            building.updateBuildingCenter(_center.x, _center.y);
+            building.hasStopped = true;
+            return
+          }
+        }
       }
 
       else if (buildingDragMode === "rotate") {
@@ -363,32 +382,42 @@ export class SiteplanGenerator {
 
       else if (buildingDragMode === "center") {
         p.cursor('grabbing');
-        building.updateCenter(p.mouseX - dragOffset.x, p.mouseY - dragOffset.y)
-        const centerInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, [p.createVector(newX, newY)]);
 
-        if (!truthChecker(centerInBoundary)) {
-          building.hasStopped = true;
-          return;
+
+
+        building.updateBuildingCenter(p.mouseX - dragOffset.x, p.mouseY - dragOffset.y)
+        const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
+        if (!pointsInBoundary) {
+
+          if (
+            p.dist(propertyCenter.x, propertyCenter.y, _center.x, _center.y) <
+            p.dist(propertyCenter.x, propertyCenter.y, newX, newY)) {
+            building.updateBuildingCenter(_center.x, _center.y);
+            building.hasStopped = true;
+            garbage.updateCenterGarbage(parking);
+            return
+          }
         }
-
-        building.updateBuildingCenter(newX, newY);
       }
 
       else {
         p.cursor('default')
       }
 
+      const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
+        const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
+        return pointClassification === 1
+      }))
 
       if (
+        !parkingIsOutOfBuilding ||
         !building.pointIsInPolygon(property.cornerOffsetsFromSetbacks) ||
         !building.pointIsOutOfPolygon(parking.parkingOutline)) {
-
+        building.setLineColors(p.color(250, 20, 20))
         // TODO: Add the parking outline as an object I can apply pointIsOutOfPolygon 
-
-        building.angle = _angle;
-        building.width = _width;
-        building.height = _height;
-        building.updateBuildingCenter(_center.x, _center.y)
+      }
+      else {
+        building.setLineColors(p.color(20, 20, 20))
       }
 
     };
@@ -478,8 +507,6 @@ export class SiteplanGenerator {
 
           const _garbageCenter = p.createVector(garbage.center.x, garbage.center.y);
 
-
-
           parking.updateAngle(parking.angle + a)
           garbage.updateAngle(parking.angle + a)
 
@@ -488,12 +515,26 @@ export class SiteplanGenerator {
           parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
           building.hasStopped = false;
-          
+
           garbage.updateCenterGarbage(parking);
 
           const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
           const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
 
+
+          const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
+            const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
+            return pointClassification === 1
+          }))
+
+          const buildingIsOutOfParking = building.pointIsOutOfPolygon(parking.parkingOutline);
+
+          if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
+            parking.setLineColors(p.color(250, 20, 20))
+          }
+          else {
+            parking.setLineColors(p.color(20, 20, 20))
+          }
 
 
           if (!parkingInBoundary || !garbageInBoundary) {
@@ -547,8 +588,26 @@ export class SiteplanGenerator {
         // building.updateAngle(normalizeAngle(angle));
         building.updateEntrances();
 
-        const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
 
+        const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
+          const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
+          return pointClassification === 1
+        }))
+
+        const buildingIsOutOfParking = building.pointIsOutOfPolygon(parking.parkingOutline);
+
+
+        if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
+          parking.setLineColors(p.color(250, 20, 20))
+        }
+        else {
+          parking.setLineColors(p.color(20, 20, 20))
+        }
+
+
+
+        // parking.parkingOutline.slice(3, -3)
+        const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
         // const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
 
         if (truthChecker(allPointsInBoundary)) {
@@ -556,7 +615,6 @@ export class SiteplanGenerator {
           parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
           parking.updateStallCorners(false, isRotationFrozen);
           parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-
           building.hasStopped = false;
           parking.createRotationHandles();
           updateVisibilityGraph();
@@ -580,10 +638,8 @@ export class SiteplanGenerator {
       const isHovered = {
         approach: approach.isMouseHovering(),
         parking: parking.isMouseHovering(),
-        parkingOffset: parking.isMouseHoveringOffset(),
         parkingHandle: parking.isMouseHoveringRotateHandle(),
         building: building.isMouseHovering(),
-        buildingOffset: building.isMouseHoveringOffset(),
         buildingHandle: building.isMouseHoveringRotateHandle(),
       };
 
@@ -591,7 +647,6 @@ export class SiteplanGenerator {
       // Moving the building
       if ((
         isHovered.building ||
-        isHovered.buildingOffset ||
         isHovered.buildingHandle ||
         this.buildingDragMode ||
         building.hoverHandleIndex !== -1
@@ -628,10 +683,8 @@ export class SiteplanGenerator {
       const isHovered = {
         approach: approach.isMouseHovering(),
         parking: parking.isMouseHovering(),
-        parkingOffset: parking.isMouseHoveringOffset(),
         parkingHandle: parking.isMouseHoveringRotateHandle(),
         building: building.isMouseHovering(),
-        buildingOffset: building.isMouseHoveringOffset(),
         buildingHandle: building.isMouseHoveringRotateHandle(),
         garbage: garbage.isMouseHovering(),
       };
@@ -644,7 +697,6 @@ export class SiteplanGenerator {
       if (!building.isInitialized &&
         !isHovered.approach &&
         !isHovered.parking &&
-        !isHovered.parkingOffset &&
         !isHovered.parkingHandle &&
         !isHovered.garbage &&
 
@@ -716,7 +768,6 @@ export class SiteplanGenerator {
       if (!property || !approach || !parking || !building || !garbage) return;
       isDragging.parking = false;
       isDragging.approach = false;
-      isDragging.parkingOffset = false;
       isDragging.building = false;
 
       this.buildingDragMode = null;
@@ -750,11 +801,9 @@ export class SiteplanGenerator {
       const isHovered = {
         approach: approach.isMouseHovering(),
         parking: parking.isMouseHovering(),
-        parkingOffset: parking.isMouseHoveringOffset(),
         parkingHandle: parking.isMouseHoveringRotateHandle(),
 
         building: building.isMouseHovering(),
-        buildingOffset: building.isMouseHoveringOffset(),
         buildingHandle: building.isMouseHoveringRotateHandle(),
       };
 
@@ -769,7 +818,7 @@ export class SiteplanGenerator {
       property.drawSetbackPolygon()
       approach.drawApproach();
 
-      // parking.drawSitePlanElement();
+
       parking.drawParkingStalls();
 
       if (parking.showRotationHandles) {
@@ -789,26 +838,25 @@ export class SiteplanGenerator {
 
 
       if (!building.hasStopped && building.isInitialized) {
-
-        building.buildingLocator(p, building, parking, property, garbage);
+        // building.buildingLocator(p, building, parking, property, garbage);
 
         // STOP THE GROWING FOR NOW.
         // building.buildingGrower(property, parking);
       }
 
 
-      garbage.drawGarbageEnclosure();//drawSitePlanElement();
+      // garbage.drawSitePlanElement(); //.drawGarbageEnclosure();
 
 
       const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [p.mouseX, p.mouseY]) === -1
 
-      if (!isHovered.approach && !isHovered.parkingOffset && !isHovered.parking && !building.isInitialized && isInboundary && !isHovered.parkingOffset && !isHovered.parkingHandle) {
+      if (!isHovered.approach&& !isHovered.parking && !building.isInitialized && isInboundary && !isHovered.parkingHandle) {
 
         // Show the building growing.
         building.tempBuilding();
       }
 
-      if ((isHovered.building || isHovered.buildingOffset) && isInboundary && building.isInitialized) {
+      if (isHovered.building  && isInboundary && building.isInitialized) {
 
         // ----  Show the entrance ----
         // Get the closest edge
@@ -873,21 +921,14 @@ export class SiteplanGenerator {
         }
       }
 
-      parking.createParkingOutline(p, parking, garbage, approach)
-
+      parking.drawParkingOutline(p, parking, garbage, approach)
+      
 
       if (
-        isHovered.parkingOffset ||
         isHovered.parking ||
         isHovered.parkingHandle ||
         parking.isRotating) {
-        // || isDragging.parkingOffset
-        // !isDragging.parking
-
         parking.showRotationHandles = true;
-        // let hasSetRotating = parking.isRotating;
-        // let hasSetDragging = parking.isDr;
-        // && !hasSetDragging
 
         if (isHovered.parkingHandle) {
           parking.showRotationAnimationCount = 0;
@@ -917,33 +958,43 @@ export class SiteplanGenerator {
 
 
 
-        if (this.parkingDragMode === "center") {
+
+        if(this.parkingDragMode !== null){
           p.push()
           p.noFill();
           p.stroke(30, 60, 200);
           p.strokeWeight(3)
+
+          // // Circles around the the building corners
+          // building.sitePlanElementCorners.forEach(corner=>{
+          //   p.ellipse(corner.x, corner.y, 15, 15)
+          // })
+
+          // // Lines for all the edges
+          // building.sitePlanElementEdges.forEach(edge=>{
+          //   p.line(edge.point1.x, edge.point1.y, edge.point2.x,edge.point2.y)
+          // });
+
+          // center circle
           p.ellipse(parking.center.x, parking.center.y, 20, 20)
           p.pop();
-          p.cursor('grab');
         }
 
-        else if (this.parkingDragMode === "rotate") {
-          p.cursor(RotateArrow);
-        }
-
-        else {
-          p.cursor('default')
-        }
+        // if (this.parkingDragMode === "corner") p.cursor('nesw-resize');
+        // else if (this.parkingDragMode === "edge") p.cursor('ew-resize');
+        if (this.parkingDragMode === "center") p.cursor('grab');
+        else if (this.parkingDragMode === "rotate") p.cursor(RotateArrow);
+        else p.cursor('default');
       }
 
 
       // Check if we're hovering over a building corner, edge, or center
       else if ((isHovered.building ||
-        isHovered.buildingOffset ||
         isHovered.buildingHandle ||
         building.isRotating
       ) && building.isInitialized) {
 
+       
         building.showRotationHandles = true;
         let anyCornerHover = this.resizingbuilding || building.isRotating
 
@@ -997,49 +1048,33 @@ export class SiteplanGenerator {
         }
 
 
-        if (this.buildingDragMode === "corner" && this.resizeCorner !== null) {
+        if(this.buildingDragMode !== null){
           p.push()
           p.noFill();
-          p.stroke(30, 60, 200);
+          // if(this.building.)
+          p.stroke(building.lineColor);
           p.strokeWeight(3)
-          p.ellipse(building.sitePlanElementCorners[this.resizeCorner].x, building.sitePlanElementCorners[this.resizeCorner].y, 20, 20)
-          p.pop();
 
-          p.cursor('nesw-resize')
-        }
-        else if (this.buildingDragMode === "edge" && this.resizeEdge !== null) {
-          p.push()
-          p.noFill();
-          p.stroke(30, 60, 200);
-          p.strokeWeight(3)
-          p.line(building.sitePlanElementEdges[this.resizeEdge].point1.x,
-            building.sitePlanElementEdges[this.resizeEdge].point1.y,
-            building.sitePlanElementEdges[this.resizeEdge].point2.x,
-            building.sitePlanElementEdges[this.resizeEdge].point2.y)
-          p.pop();
-          p.cursor('ew-resize')
-        }
-        else if (this.buildingDragMode === "center") {
-          p.push()
-          p.noFill();
-          p.stroke(30, 60, 200);
-          p.strokeWeight(3)
+          // Circles around the the building corners
+          building.sitePlanElementCorners.forEach(corner=>{
+            p.ellipse(corner.x, corner.y, 15, 15)
+          })
+
+          // Lines for all the edges
+          building.sitePlanElementEdges.forEach(edge=>{
+            p.line(edge.point1.x, edge.point1.y, edge.point2.x,edge.point2.y)
+          });
+
+          // center circle
           p.ellipse(building.center.x, building.center.y, 20, 20)
           p.pop();
-          p.cursor('grab')
         }
-        else if (this.buildingDragMode === "rotate") {
-          // p.push()
-          // p.noFill();
-          // p.stroke(30, 60, 200);
-          // p.strokeWeight(3)
-          // p.ellipse(building.center.x, building.center.y, p.max(building.width, building.height), p.max(building.width, building.height))
-          // p.pop();
-          p.cursor(RotateArrow)
-        }
-        else {
-          p.cursor('default')
-        }
+
+        if (this.buildingDragMode === "corner") p.cursor('nesw-resize');
+        else if (this.buildingDragMode === "edge") p.cursor('ew-resize');
+        else if (this.buildingDragMode === "center") p.cursor('grab');
+        else if (this.buildingDragMode === "rotate") p.cursor(RotateArrow);
+        else p.cursor('default');
 
       }
 
@@ -1048,6 +1083,7 @@ export class SiteplanGenerator {
       }
 
       else {
+
 
         if (building.showRotationAnimationCount > 0) {
           building.showRotationAnimationCount++
@@ -1082,35 +1118,6 @@ export class SiteplanGenerator {
     };
   }
 }
-
-
-
-
-
-// function drawRotationIcon(p: p5, x: number, y: number, size: number) {
-//   p.push();
-//   p.translate(x, y);
-//   p.stroke(0);
-//   p.strokeWeight(2);
-//   p.noFill();
-
-//   // Draw the circular arrow
-//   p.arc(0, 0, size, size, p.radians(30), p.radians(330));
-//   const arrowHeadSize = size * 0.15;
-//   const arrowAngle = p.radians(30);
-
-//   // Calculate arrowhead position
-//   const arrowX = (size / 2) * p.cos(arrowAngle);
-//   const arrowY = (size / 2) * p.sin(arrowAngle);
-
-//   p.line(arrowX, arrowY, arrowX - arrowHeadSize, arrowY - arrowHeadSize / 2);
-//   p.line(arrowX, arrowY, arrowX - arrowHeadSize, arrowY + arrowHeadSize / 2);
-
-//   p.pop();
-// }
-
-
-
 
 // Translate points to the building's local coordinate system
 const toLocal = (p: p5, building: Building, x: number, y: number) => {

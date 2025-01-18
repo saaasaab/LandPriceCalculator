@@ -79,7 +79,7 @@ export class Building extends SitePlanElement {
   
   
         this.p.push();
-        this.p.stroke("black");
+        this.p.stroke(this.lineColor);
         this.p.strokeWeight(3);
         this.p.noFill();
         this.p.beginShape();

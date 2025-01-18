@@ -1,4 +1,4 @@
-import p5 from "p5";
+import p5, { Color } from "p5";
 import { ESitePlanObjects, Point, SitePlanObjects } from "../../../utils/SiteplanGenerator";
 import { calculateArea, calculateAngle, truthChecker, normalizeAngle, polyPoint, expandPolygon, getCenterPoint } from "../../../utils/SiteplanGeneratorUtils";
 import { Edge } from "./Edge";
@@ -32,6 +32,8 @@ export class SitePlanElement {
   public isRotating: boolean;
   public hoverHandleIndex: number;
   public rotationImage: p5.Image | null = null;
+  public lineColor: p5.Color;
+
 
 
   constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number) {
@@ -57,6 +59,7 @@ export class SitePlanElement {
     this.showRotationAnimationCount = 0;
     this.showRotationHandles = false;
     this.rotationImage = p.loadImage(RotateArrow);
+    this.lineColor = p.color(20,20,20);
   }
 
   initialize() {
@@ -131,6 +134,10 @@ export class SitePlanElement {
 
   }
 
+
+  setLineColors(color: p5.Color){
+    this.lineColor = color;
+  }
 
   update() {
     this.updateSitePlanElementCorners();

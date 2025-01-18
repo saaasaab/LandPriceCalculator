@@ -336,7 +336,7 @@ export class Parking extends SitePlanElement {
   
   
     }
-    createParkingOutline(p: p5, parking: Parking, garbage: Garbage, approach: Approach) {
+    drawParkingOutline(p: p5, parking: Parking, garbage: Garbage, approach: Approach) {
       if (!parking.entranceEdge && !garbage) return;
       // This is going counter clockwise
   
@@ -401,7 +401,8 @@ export class Parking extends SitePlanElement {
       p.push();
       p.beginShape();
       p.fill(120, 120, 120, 150); // Fill color with transparency
-      p.stroke(0); // Outline color
+
+      p.stroke(this.lineColor); // Outline color
       p.strokeWeight(1);
   
   

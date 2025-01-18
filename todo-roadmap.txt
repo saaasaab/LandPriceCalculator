@@ -37,3 +37,6 @@
 [ ] Tree Locations
 [ ] Slope Map
 [X] Change rotation circle to arrow and only 
+[ ] Draw Center lines - Light gray and thin
+[ ] Limit on Area, and notify somehow that the max area is reached
+[ ] 
