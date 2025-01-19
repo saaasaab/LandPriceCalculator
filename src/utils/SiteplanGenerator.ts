@@ -150,9 +150,9 @@ export class SiteplanGenerator {
     const centerOfProperty = calculateCentroid(this.property.cornerOffsetsFromSetbacks)
     const defaultVector = p.createVector(0, 0)
 
-    this.approach = new Approach(p, getCenterPoint(p, this.property.approachEdge?.point1 || defaultVector, this.property.approachEdge?.point2 || defaultVector), approachWidth, 30, approachAngle, ESitePlanObjects.Approach, this.scale);
+    this.approach = new Approach(p, getCenterPoint(p, this.property.approachEdge?.point1 || defaultVector, this.property.approachEdge?.point2 || defaultVector), approachWidth, 20, approachAngle, ESitePlanObjects.Approach, this.scale);
     this.parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
-    this.building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale);
+    this.building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale, 10);
 
     this.approach.initialize()
     this.parking.initializeParking(this.property, this.approach)
@@ -932,7 +932,7 @@ export class SiteplanGenerator {
       }
 
       parking.drawParkingOutline(p, parking, garbage, approach)
-      
+
 
       if (
         isHovered.parkingOffset ||
@@ -977,7 +977,7 @@ export class SiteplanGenerator {
 
 
 
-        if(this.parkingDragMode !== null){
+        if (this.parkingDragMode !== null) {
           p.push()
           p.noFill();
           p.stroke(30, 60, 200);
@@ -1013,7 +1013,7 @@ export class SiteplanGenerator {
         building.isRotating
       ) && building.isInitialized) {
 
-       
+
         building.showRotationHandles = true;
         let anyCornerHover = this.resizingbuilding || building.isRotating
 
@@ -1067,26 +1067,59 @@ export class SiteplanGenerator {
         }
 
 
-        if(this.buildingDragMode !== null){
+        if (this.buildingDragMode !== null) {
           p.push()
           p.noFill();
           // if(this.building.)
           p.stroke(building.lineColor);
-          p.strokeWeight(3)
+          p.strokeWeight(2)
 
           // Circles around the the building corners
-          building.sitePlanElementCorners.forEach(corner=>{
-            p.ellipse(corner.x, corner.y, 15, 15)
+          building.offsetSitePlanElementCorners.forEach(corner => {
+            p.ellipse(corner.x, corner.y, 10, 10);
+          });
+          
+          p.pop();
+
+
+
+
+           // Lines for all the edges
+          p.push()
+          p.noFill();
+          p.stroke(building.lineColor);
+          p.beginShape();
+
+          building.offsetSitePlanElementCorners.forEach((corner,i) => {
+            p.vertex(corner.x, corner.y);
           })
 
-          // Lines for all the edges
-          building.sitePlanElementEdges.forEach(edge=>{
-            p.line(edge.point1.x, edge.point1.y, edge.point2.x,edge.point2.y)
-          });
+          p.noFill();
+          p.endShape(p.CLOSE);
+          p.pop();
 
+
+
+          building.offsetSitePlanElementCorners.forEach((corner,i) => {
+            const corner2 = building.offsetSitePlanElementCorners[(i + 1) % 4];
+
+            p.push()
+            const mid = getCenterPoint(p, corner,corner2);
+            const angle = calculateAngle(corner, corner2 );
+            p.translate(mid.x, mid.y);
+            p.rotate(angle);
+
+
+            p.fill("#f9fafb");
+            p.rect(0, 0, 30, 5, 3, 3, 3, 3);
+
+            p.pop();
+
+          })
+          
           // center circle
           p.ellipse(building.center.x, building.center.y, 20, 20)
-          p.pop();
+
         }
 
         if (this.buildingDragMode === "corner") p.cursor('nesw-resize');
@@ -1159,117 +1192,116 @@ const toGlobal = (p: p5, building: Building, x: number, y: number) => {
 
 
 
-export function drawNeonLine( p: p5,
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number, 
-    lineColor: p5.Color, glowSize = 20) {
-    // Save the current drawing state
-    p.push();
-    
-    // Disable the stroke outline
-    p.noStroke();
-    
-    // Calculate the number of layers for the glow effect
-    const layers = 15;
-    
-    // Calculate the alpha step for each layer
-    const alphaStep = 255 / layers;
-    
-    // Calculate the size step for each layer
-    const sizeStep = glowSize / layers;
-    
-    // Draw multiple layers from outside to inside
-    for (let i = layers; i >= 0; i--) {
-      // Calculate the current alpha and size
-      const currentAlpha = (layers - i) * alphaStep;
-      const currentSize = i * sizeStep;
-      
-      // Set the color with current alpha
-      const c = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
-      p.drawingContext.shadowColor = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
-      p.drawingContext.shadowBlur = currentSize;
-      
-      // Draw the line
-      p.stroke(c);
-      p.strokeWeight(2);
-      p.line(x1, y1, x2, y2);
-    }
-    
-    // Draw the bright center
-    p. stroke(255);
+export function drawNeonLine(p: p5,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  lineColor: p5.Color, glowSize = 20) {
+  // Save the current drawing state
+  p.push();
+
+  // Disable the stroke outline
+  p.noStroke();
+
+  // Calculate the number of layers for the glow effect
+  const layers = 15;
+
+  // Calculate the alpha step for each layer
+  const alphaStep = 255 / layers;
+
+  // Calculate the size step for each layer
+  const sizeStep = glowSize / layers;
+
+  // Draw multiple layers from outside to inside
+  for (let i = layers; i >= 0; i--) {
+    // Calculate the current alpha and size
+    const currentAlpha = (layers - i) * alphaStep;
+    const currentSize = i * sizeStep;
+
+    // Set the color with current alpha
+    const c = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
+    p.drawingContext.shadowColor = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
+    p.drawingContext.shadowBlur = currentSize;
+
+    // Draw the line
+    p.stroke(c);
     p.strokeWeight(2);
     p.line(x1, y1, x2, y2);
-    
-    // Restore the drawing state
-    p.pop();
   }
 
+  // Draw the bright center
+  p.stroke(255);
+  p.strokeWeight(2);
+  p.line(x1, y1, x2, y2);
+
+  // Restore the drawing state
+  p.pop();
+}
 
 
-  export function drawNeonShape(
-    p: p5,
-    vertices: { x: number; y: number }[], // Array of vertices for the shape
-    lineColor: p5.Color,
-    glowSize = 20
-  ): void {
-    // Save the current drawing state
-    p.push();
-  
-    // Disable the stroke outline
-    p.noStroke();
-  
-    // Calculate the number of layers for the glow effect
-    const layers = 15;
-  
-    // Calculate the alpha step for each layer
-    const alphaStep = 255 / layers;
-  
-    // Calculate the size step for each layer
-    const sizeStep = glowSize / layers;
-  
-    // Draw multiple layers from outside to inside
-    for (let i = layers; i >= 0; i--) {
-      // Calculate the current alpha and size
-      const currentAlpha = (layers - i) * alphaStep;
-      const currentSize = i * sizeStep;
-  
-      // Set the color with current alpha
-      const c = p.color(
-        p.red(lineColor),
-        p.green(lineColor),
-        p.blue(lineColor),
-        currentAlpha
-      );
-      p.drawingContext.shadowColor = p.color(
-        p.red(lineColor),
-        p.green(lineColor),
-        p.blue(lineColor),
-        currentAlpha
-      );
-      p.drawingContext.shadowBlur = currentSize;
-  
-      // Draw the shape with current glow layer
-      p.stroke(c);
-      p.strokeWeight(2);
-      p.beginShape();
-      vertices.forEach((vertex) => {
-        p.vertex(vertex.x, vertex.y);
-      });
-      p.endShape(p.CLOSE);
-    }
-  
-    // Draw the bright center shape
-    p.stroke(255);
+
+export function drawNeonShape(
+  p: p5,
+  vertices: { x: number; y: number }[], // Array of vertices for the shape
+  lineColor: p5.Color,
+  glowSize = 20
+): void {
+  // Save the current drawing state
+  p.push();
+
+  // Disable the stroke outline
+  p.noStroke();
+
+  // Calculate the number of layers for the glow effect
+  const layers = 15;
+
+  // Calculate the alpha step for each layer
+  const alphaStep = 255 / layers;
+
+  // Calculate the size step for each layer
+  const sizeStep = glowSize / layers;
+
+  // Draw multiple layers from outside to inside
+  for (let i = layers; i >= 0; i--) {
+    // Calculate the current alpha and size
+    const currentAlpha = (layers - i) * alphaStep;
+    const currentSize = i * sizeStep;
+
+    // Set the color with current alpha
+    const c = p.color(
+      p.red(lineColor),
+      p.green(lineColor),
+      p.blue(lineColor),
+      currentAlpha
+    );
+    p.drawingContext.shadowColor = p.color(
+      p.red(lineColor),
+      p.green(lineColor),
+      p.blue(lineColor),
+      currentAlpha
+    );
+    p.drawingContext.shadowBlur = currentSize;
+
+    // Draw the shape with current glow layer
+    p.stroke(c);
     p.strokeWeight(2);
     p.beginShape();
     vertices.forEach((vertex) => {
       p.vertex(vertex.x, vertex.y);
     });
     p.endShape(p.CLOSE);
-    // Restore the drawing state
-    p.pop();
   }
 
-  
+  // Draw the bright center shape
+  p.stroke(255);
+  p.strokeWeight(2);
+  p.beginShape();
+  vertices.forEach((vertex) => {
+    p.vertex(vertex.x, vertex.y);
+  });
+  p.endShape(p.CLOSE);
+  // Restore the drawing state
+  p.pop();
+}
+

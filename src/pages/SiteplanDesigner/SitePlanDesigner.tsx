@@ -57,6 +57,7 @@ import ImageUploader from './ImageUploader';
 
 import './SitePlanDesigner.scss';
 import CollapsibleSection from './CollapsibleSection';
+import AlphaBanner from './AlphaBanner';
 
 const initialFormData: FormData = {
   parkingStalls: 4,
@@ -554,6 +555,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
     <div className="site-plan-generator">
+      <AlphaBanner/>
       <div className="site-plan-generator__container">
         {/* Left Column - Controls */}
         <div className="site-plan-generator__controls">

@@ -33,10 +33,12 @@ export class SitePlanElement {
   public hoverHandleIndex: number;
   public rotationImage: p5.Image | null = null;
   public lineColor: p5.Color;
+  public offsetSize: number;
+  public isSelected: boolean;
 
 
 
-  constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number) {
+  constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number, offsetSize: number = 30) {
     this.angle = angle;
     this.center = center;
     this.elementType = elementType;
@@ -60,6 +62,8 @@ export class SitePlanElement {
     this.showRotationHandles = false;
     this.rotationImage = p.loadImage(RotateArrow);
     this.lineColor = p.color(20,20,20);
+    this.offsetSize = offsetSize;
+    this.isSelected = false;
   }
 
   initialize() {
@@ -165,7 +169,7 @@ export class SitePlanElement {
   update() {
     this.updateSitePlanElementCorners();
     this.setSitePlanElementEdges();
-    this.createOffsetPolygon();
+    this.createOffsetPolygon(this.offsetSize);
 
     this.calculateArea();
     this.createRotationHandles();
@@ -276,8 +280,8 @@ export class SitePlanElement {
 
   }
 
-  createOffsetPolygon() {
-    this.offsetSitePlanElementCorners = expandPolygon(this.p, this.sitePlanElementCorners, 30);
+  createOffsetPolygon( offsetSize: number) {
+    this.offsetSitePlanElementCorners = expandPolygon(this.p, this.sitePlanElementCorners, offsetSize);
   }
 
   drawRotationHandles() {

@@ -68,6 +68,10 @@ const Navbar = () => {
           </div>
         </li>
 
+        <li className="dropdown">
+            <Link className="dropdown-title" onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link>
+      
+        </li>
         
 
          {/* Howto and Blogs */}
