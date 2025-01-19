@@ -1,6 +1,6 @@
 import p5 from "p5";
-import { calculateArea, createWrappedIndices, expandPolygon, getLineIntersection, polyPoint } from "../../../utils/SiteplanGeneratorUtils";
-import { SitePlanElement } from "./SitePlanElement";
+import { calculateArea,  expandPolygon, polyPoint } from "../../../utils/SiteplanGeneratorUtils";
+// import { SitePlanElement } from "./SitePlanElement";
 import { Edge } from "./Edge";
 
 export class Property {
@@ -10,7 +10,7 @@ export class Property {
     public approachEdge: Edge | null = null;
     public approachEdgeIndex: number;
     public approachAngle: number = 15;
-    public propertyQuadrants: p5.Vector[][] = [];
+    // public propertyQuadrants: p5.Vector[][] = [];
     public maxAreaIndex: number = 0;
     public isClockwise: boolean;
     public scale: number;
@@ -210,132 +210,132 @@ export class Property {
     }
   
   
-    propertyQuadrant(property: Property, parking: SitePlanElement) {
-      const p = this.p;
-      // Find which edge the line intersects by looping through all the edges. If there are more than one, use the one closest to the center point
-      // Find the intersection points of all the crosses, then calculate the area minus the parking size to get the "quadrant" with the most availiable area.
+    // propertyQuadrant(property: Property, parking: SitePlanElement) {
+    //   const p = this.p;
+    //   // Find which edge the line intersects by looping through all the edges. If there are more than one, use the one closest to the center point
+    //   // Find the intersection points of all the crosses, then calculate the area minus the parking size to get the "quadrant" with the most availiable area.
   
-      p.stroke(50, 150, 150)
-      const crossSize = 200;
+    //   p.stroke(50, 150, 150)
+    //   const crossSize = 200;
   
-      const offsets = [
-        [-90, -90],
-        [0, 0],
-        [90, 90],
-        [180, 180],
-      ];
+    //   const offsets = [
+    //     [-90, -90],
+    //     [0, 0],
+    //     [90, 90],
+    //     [180, 180],
+    //   ];
   
-      const edgeIntersections: {
-        edge: number;
-        intersection: p5.Vector;
-        distance: number;
-        minDistanceIndex: number;
-        offset: number[];
-      }[] = [];
-  
-  
-  
-      offsets.forEach((offset) => {
-        const intersections: p5.Vector[] = []
-        const edgeIndecies: number[] = []
-  
-        property.propertyEdges.forEach((edge, edgeIndex) => {
-  
-          const intersect = getLineIntersection(
-            p,
-            [
-              p.createVector(parking.center.x, parking.center.y),
-              p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)
-            ],
-            [edge.point1, edge.point2]
-          )
-          if (intersect) {
-            intersections.push(intersect)
-            edgeIndecies.push(edgeIndex);
-          }
-        })
+    //   const edgeIntersections: {
+    //     edge: number;
+    //     intersection: p5.Vector;
+    //     distance: number;
+    //     minDistanceIndex: number;
+    //     offset: number[];
+    //   }[] = [];
   
   
-        let minDistance = Infinity;
-        let minDistanceIndex = 0;
-        intersections.forEach((intersection, i) => {
-          let d = intersection.dist(parking.center);
   
-          if (d < minDistance) {
-            minDistanceIndex = i;
-            minDistance = d;
-          }
-        })
+    //   offsets.forEach((offset) => {
+    //     const intersections: p5.Vector[] = []
+    //     const edgeIndecies: number[] = []
   
-        edgeIntersections.push({
-          edge: edgeIndecies[minDistanceIndex],
-          intersection: intersections[minDistanceIndex],
-          distance: minDistance,
-          minDistanceIndex: minDistanceIndex,
-          offset: offset,
-        });
-      });
+    //     property.propertyEdges.forEach((edge, edgeIndex) => {
   
-  
-      edgeIntersections.forEach((intersection) => {
-        p.ellipse(intersection?.intersection?.x || 0, intersection?.intersection?.y || 0, 10, 10)
-        p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + intersection.offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + intersection.offset[1]) * crossSize)
-      })
-  
-      const totalEdges = edgeIntersections.length;
-      const polys: p5.Vector[][] = []
-      edgeIntersections.forEach((_current, index) => {
-  
-        const nextIndex = (index + 1) % totalEdges; // Wrap around to the start when at the last index
-        // const next = edgeIntersections[nextIndex];
+    //       const intersect = getLineIntersection(
+    //         p,
+    //         [
+    //           p.createVector(parking.center.x, parking.center.y),
+    //           p.createVector(parking.center.x + p.cos(parking.angle + offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + offset[1]) * crossSize)
+    //         ],
+    //         [edge.point1, edge.point2]
+    //       )
+    //       if (intersect) {
+    //         intersections.push(intersect)
+    //         edgeIndecies.push(edgeIndex);
+    //       }
+    //     })
   
   
-        const poly = [
-          parking.center,
-          edgeIntersections[index].intersection,
-          property.propertyEdges[edgeIntersections[index].edge].point2,
-        ];
-        const startEdge = edgeIntersections[index].edge;
-        const endEdge = edgeIntersections[nextIndex].edge;
-        const indexes = createWrappedIndices(startEdge, endEdge, property.propertyEdges.length)
+    //     let minDistance = Infinity;
+    //     let minDistanceIndex = 0;
+    //     intersections.forEach((intersection, i) => {
+    //       let d = intersection.dist(parking.center);
   
-        indexes.forEach(index =>
-          poly.push(
-            property.propertyEdges[index].point2,
-          )
-        )
-        poly.push(edgeIntersections[nextIndex].intersection);
-        polys.push(poly);
-      });
+    //       if (d < minDistance) {
+    //         minDistanceIndex = i;
+    //         minDistance = d;
+    //       }
+    //     })
   
-      let maxArea = -Infinity;
-      let maxAreaIndex = 0;
-      // let neighboringMaxIndex = -1;
-      let secondMaxArea = -Infinity;
+    //     edgeIntersections.push({
+    //       edge: edgeIndecies[minDistanceIndex],
+    //       intersection: intersections[minDistanceIndex],
+    //       distance: minDistance,
+    //       minDistanceIndex: minDistanceIndex,
+    //       offset: offset,
+    //     });
+    //   });
   
-      polys.forEach((poly, i) => {
-        let area = calculateArea(poly);
   
-        if (area > maxArea) {
-          // Update second max area with the previous max area
-          secondMaxArea = maxArea;
+    //   edgeIntersections.forEach((intersection) => {
+    //     p.ellipse(intersection?.intersection?.x || 0, intersection?.intersection?.y || 0, 10, 10)
+    //     p.line(parking.center.x, parking.center.y, parking.center.x + p.cos(parking.angle + intersection.offset[0]) * crossSize, parking.center.y + p.sin(parking.angle + intersection.offset[1]) * crossSize)
+    //   })
   
-          // Update neighbor index
-          // neighboringMaxIndex = maxAreaIndex;
+    //   const totalEdges = edgeIntersections.length;
+    //   const polys: p5.Vector[][] = []
+    //   edgeIntersections.forEach((_current, index) => {
   
-          // Set new max area and max area index
-          maxArea = area;
-          maxAreaIndex = i;
-        } else if (area > secondMaxArea) {
-          // Update the second max area and its index
-          secondMaxArea = area;
-          // neighboringMaxIndex = i;
-        }
-      });
+    //     const nextIndex = (index + 1) % totalEdges; // Wrap around to the start when at the last index
+    //     // const next = edgeIntersections[nextIndex];
   
-      this.propertyQuadrants = polys;
   
-      this.maxAreaIndex = maxAreaIndex;
+    //     const poly = [
+    //       parking.center,
+    //       edgeIntersections[index].intersection,
+    //       property.propertyEdges[edgeIntersections[index].edge].point2,
+    //     ];
+    //     const startEdge = edgeIntersections[index].edge;
+    //     const endEdge = edgeIntersections[nextIndex].edge;
+    //     const indexes = createWrappedIndices(startEdge, endEdge, property.propertyEdges.length)
   
-    }
+    //     indexes.forEach(index =>
+    //       poly.push(
+    //         property.propertyEdges[index].point2,
+    //       )
+    //     )
+    //     poly.push(edgeIntersections[nextIndex].intersection);
+    //     polys.push(poly);
+    //   });
+  
+    //   let maxArea = -Infinity;
+    //   let maxAreaIndex = 0;
+    //   // let neighboringMaxIndex = -1;
+    //   let secondMaxArea = -Infinity;
+  
+    //   polys.forEach((poly, i) => {
+    //     let area = calculateArea(poly);
+  
+    //     if (area > maxArea) {
+    //       // Update second max area with the previous max area
+    //       secondMaxArea = maxArea;
+  
+    //       // Update neighbor index
+    //       // neighboringMaxIndex = maxAreaIndex;
+  
+    //       // Set new max area and max area index
+    //       maxArea = area;
+    //       maxAreaIndex = i;
+    //     } else if (area > secondMaxArea) {
+    //       // Update the second max area and its index
+    //       secondMaxArea = area;
+    //       // neighboringMaxIndex = i;
+    //     }
+    //   });
+  
+    //   // this.propertyQuadrants = polys;
+  
+    //   this.maxAreaIndex = maxAreaIndex;
+  
+    // }
   }

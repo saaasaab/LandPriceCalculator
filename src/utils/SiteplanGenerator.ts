@@ -1,7 +1,7 @@
 import p5 from "p5";
 import classifyPoint from "robust-point-in-polygon"
 import { VisibilityGraph } from "../pages/VisibilityGraph";
-import { calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateCentroid, pointsAreInBoundary, getAdjacentIndices, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance, createDriveway, getIntersectionPercentage } from "./SiteplanGeneratorUtils";
+import { calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateCentroid, pointsAreInBoundary, getAdjacentIndices, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance } from "./SiteplanGeneratorUtils";
 import { IPoint, Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
 import RotateArrow from "../assets/rotateArrow.png"
 import { Property } from "../pages/SiteplanDesigner/SitePlanClasses/Property";
@@ -9,7 +9,6 @@ import { Parking } from "../pages/SiteplanDesigner/SitePlanClasses/Parking";
 import { Building } from "../pages/SiteplanDesigner/SitePlanClasses/Building";
 import { Garbage } from "../pages/SiteplanDesigner/SitePlanClasses/Garbage";
 import { Approach } from "../pages/SiteplanDesigner/SitePlanClasses/Approach";
-import { Entrance } from "../pages/SiteplanDesigner/SitePlanClasses/Entrance";
 
 export type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
@@ -152,7 +151,7 @@ export class SiteplanGenerator {
 
     this.approach = new Approach(p, getCenterPoint(p, this.property.approachEdge?.point1 || defaultVector, this.property.approachEdge?.point2 || defaultVector), approachWidth, 20, approachAngle, ESitePlanObjects.Approach, this.scale);
     this.parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
-    this.building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale, 10);
+    this.building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale, 20);
 
     this.approach.initialize()
     this.parking.initializeParking(this.property, this.approach)
@@ -160,7 +159,7 @@ export class SiteplanGenerator {
     this.parking.calculateNumberOfFittableStalls(this.property.cornerOffsetsFromSetbacks);
     this.parking.updateStallCorners();
     this.parking.updateParkingHeight(this.property.cornerOffsetsFromSetbacks);
-    this.property.propertyQuadrant(this.property, this.parking);
+    // this.property.propertyQuadrant(this.property, this.parking);
 
     this.garbage = new Garbage(p, getCenterPoint(p, this.parking.sitePlanElementEdges[0].point1, this.parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 5 / this.scale, this.parking.angle, ESitePlanObjects.Garbage, this.scale);
     this.garbage.initialize();
@@ -695,11 +694,25 @@ export class SiteplanGenerator {
         garbage: garbage.isMouseHovering(),
       };
 
+
+      // This is clicking on anything non-objecty to unset whether it is selected or not
+      if (!(
+        isHovered.approach ||
+        isHovered.parking ||
+        isHovered.building ||
+        isHovered.garbage)) {
+        approach.isSelected = false;
+        building.isSelected = false;
+        parking.isSelected = false;
+        garbage.isSelected = false;
+      }
+
+
       const posX = p.mouseX;
       const posY = p.mouseY;
       const clickIsInProperty = allPointsInPolygon(property.propertyCorners, [p.createVector(posX, posY)]);
 
-      // Place
+      // Place the building
       if (!building.isInitialized &&
         !isHovered.approach &&
         !isHovered.parking &&
@@ -713,62 +726,68 @@ export class SiteplanGenerator {
 
 
 
+      if (isHovered.approach) approach.isSelected = true;
+      else if (isHovered.parking) parking.isSelected = true;
+      else if (isHovered.building) building.isSelected = true;
+      else if (isHovered.garbage) garbage.isSelected = true;
+
+
       if (!building.isInitialized) return;
 
       // HIDING ENTRANCE AND SOLVER FOR NOW
 
-      const mouse = p.createVector(p.mouseX, p.mouseY)
-      const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
-      const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
+      // const mouse = p.createVector(p.mouseX, p.mouseY)
+      // const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
+      // const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
       // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
 
 
       // get the point on the line where the entrance should interesect
-      const angle = closestEdge.calculateAngle() - 90;
-      const intersection = closestEdge.calculateClosestIntercept(
-        p.mouseX,
-        p.mouseY,
-        p
-      );
+      // const angle = closestEdge.calculateAngle() - 90;
+      // const intersection = closestEdge.calculateClosestIntercept(
+      //   p.mouseX,
+      //   p.mouseY,
+      //   p
+      // );
 
-      let minDistance = Infinity;
-      let minDistanceIndex = -1;
-      building.entrances.forEach((entrance, i) => {
-        const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
-        if (dist < minDistance) {
-          minDistance = dist;
-          minDistanceIndex = i;
-        }
-      })
+      // let minDistance = Infinity;
+      // let minDistanceIndex = -1;
+      // building.entrances.forEach((entrance, i) => {
+      //   const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
+      //   if (dist < minDistance) {
+      //     minDistance = dist;
+      //     minDistanceIndex = i;
+      //   }
+      // })
 
 
-      // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
-      if (minDistance < 5 / this.scale) {
-        // THEN DELETE THE ENTRANCE
+      // // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
+      // if (minDistance < 5 / this.scale) {
+      //   // THEN DELETE THE ENTRANCE
 
-        building.entrances = building.entrances.filter((_, i) => i !== minDistanceIndex)
-        visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
+      //   building.entrances = building.entrances.filter((_, i) => i !== minDistanceIndex)
+      //   visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
 
-      }
+      // }
 
-      else {
-        // Draw the entrance
-        const isAddingEntrances = false;
-        if (isAddingEntrances) {
-          // Hold off on adding entrances for now
-          let lerpPos = getIntersectionPercentage(
-            closestEdge,
-            intersection
-          ) || 0;
+      // else {
+      //   // Draw the entrance
+      //   const isAddingEntrances = false;
+      //   if (isAddingEntrances) {
+      //     // Hold off on adding entrances for now
+      //     let lerpPos = getIntersectionPercentage(
+      //       closestEdge,
+      //       intersection
+      //     ) || 0;
 
-          const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
-          building.entrances.push(entrance)
+      //     const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
+      //     building.entrances.push(entrance)
 
-          visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
+      //     visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
 
-        }
+      //   }
 
-      }
+      // }
     };
 
     p.mouseReleased = () => {
@@ -798,10 +817,7 @@ export class SiteplanGenerator {
       const newY = p.mouseY;
 
       // Check if the mouse moved:
-      if (
-        newX === lastMouseX &&
-        newY === lastMouseY) {
-        return; // Skip redraw if nothing has changed
+      if ( newX === lastMouseX && newY === lastMouseY) { return; // Skip redraw if nothing has changed
       }
       lastMouseX = newX;
       lastMouseY = newY;
@@ -831,6 +847,7 @@ export class SiteplanGenerator {
 
       parking.drawParkingStalls();
 
+    
       if (parking.showRotationHandles) {
         parking.drawRotationHandles();
       }
@@ -841,10 +858,10 @@ export class SiteplanGenerator {
         building.drawRotationHandles();
       }
 
-      property.propertyQuadrant(property, parking);
+      // property.propertyQuadrant(property, parking);
 
       // , this.taperParking
-      createDriveway(p, approach, parking);
+      // createDriveway(p, approach, parking);
 
 
       if (!building.hasStopped && building.isInitialized) {
@@ -942,7 +959,7 @@ export class SiteplanGenerator {
 
         // || isDragging.parkingOffset
         // !isDragging.parking
-
+        building.showRotationHandles = false;
         parking.showRotationHandles = true;
         // let hasSetRotating = parking.isRotating;
         // let hasSetDragging = parking.isDr;
@@ -1013,7 +1030,7 @@ export class SiteplanGenerator {
         building.isRotating
       ) && building.isInitialized) {
 
-
+        parking.showRotationHandles = false;
         building.showRotationHandles = true;
         let anyCornerHover = this.resizingbuilding || building.isRotating
 
@@ -1068,57 +1085,7 @@ export class SiteplanGenerator {
 
 
         if (this.buildingDragMode !== null) {
-          p.push()
-          p.noFill();
-          // if(this.building.)
-          p.stroke(building.lineColor);
-          p.strokeWeight(2)
-
-          // Circles around the the building corners
-          building.offsetSitePlanElementCorners.forEach(corner => {
-            p.ellipse(corner.x, corner.y, 10, 10);
-          });
-          
-          p.pop();
-
-
-
-
-           // Lines for all the edges
-          p.push()
-          p.noFill();
-          p.stroke(building.lineColor);
-          p.beginShape();
-
-          building.offsetSitePlanElementCorners.forEach((corner,i) => {
-            p.vertex(corner.x, corner.y);
-          })
-
-          p.noFill();
-          p.endShape(p.CLOSE);
-          p.pop();
-
-
-
-          building.offsetSitePlanElementCorners.forEach((corner,i) => {
-            const corner2 = building.offsetSitePlanElementCorners[(i + 1) % 4];
-
-            p.push()
-            const mid = getCenterPoint(p, corner,corner2);
-            const angle = calculateAngle(corner, corner2 );
-            p.translate(mid.x, mid.y);
-            p.rotate(angle);
-
-
-            p.fill("#f9fafb");
-            p.rect(0, 0, 30, 5, 3, 3, 3, 3);
-
-            p.pop();
-
-          })
-          
-          // center circle
-          p.ellipse(building.center.x, building.center.y, 20, 20)
+         building.drawBuildingEditOptions();
 
         }
 
@@ -1130,32 +1097,153 @@ export class SiteplanGenerator {
 
       }
 
+
+      // else if (building.isSelected) {
+      //   building.showRotationHandles = true;
+      //   let anyCornerHover = this.resizingbuilding || building.isRotating
+
+      //   if (!anyCornerHover) {
+      //     building.sitePlanElementCorners.forEach((corner, i) => {
+      //       // if (this.buildingDragMode) return
+      //       if (p.dist(newX, newY, corner.x, corner.y) < 20) {
+      //         this.buildingDragMode = 'corner';
+      //         const resizeEdges = getAdjacentIndices(i, building.sitePlanElementEdges.length);
+      //         const totalVertices = building.sitePlanElementEdges.length
+      //         this.resizeEdges = [resizeEdges[0], (resizeEdges[1] - 1 + totalVertices) % totalVertices]
+      //         this.resizeCorner = i;
+      //         this.resizeEdge = null;
+      //         anyCornerHover = true;
+      //       }
+      //     });
+
+      //   }
+      //   if (!anyCornerHover) {
+      //     const mouse = p.createVector(p.mouseX, p.mouseY)
+      //     const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
+      //     const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
+      //     const distance = calculatePointToEdgeDistance(closestEdge, mouse);
+      //     if (distance <= 20) {
+      //       this.buildingDragMode = 'edge';
+      //       this.resizeEdges = null;
+      //       this.resizeCorner = null;
+      //       this.resizeEdge = closestEdgeIndex;
+      //     }
+      //   }
+      //   if (!anyCornerHover && isHovered.buildingHandle) {
+      //     building.showRotationAnimationCount = 0;
+      //     const index = building.getMouseHoveringRotateHandleIndex();
+      //     const handle = building.rotationHandles[index];
+
+      //     if (p.dist(newX, newY, handle.x, handle.y) < 30) {
+      //       this.buildingDragMode = 'rotate';
+      //       this.resizeEdges = null;
+      //       this.resizeCorner = null;
+      //       this.resizeEdge = null;
+      //       anyCornerHover = true;
+      //     }
+      //   }
+      //   if (!anyCornerHover) {
+      //     if (p.dist(newX, newY, building.center.x, building.center.y) < 20) {
+      //       this.buildingDragMode = 'center';
+      //       this.resizeEdges = null;
+      //       this.resizeCorner = null;
+      //       this.resizeEdge = null;
+      //     }
+      //   }
+
+
+      //   if (this.buildingDragMode !== null) {
+      //     p.push()
+      //     p.noFill();
+      //     // if(this.building.)
+      //     p.stroke(building.lineColor);
+      //     p.strokeWeight(2)
+
+      //     // Circles around the the building corners
+      //     building.offsetSitePlanElementCorners.forEach(corner => {
+      //       p.ellipse(corner.x, corner.y, 10, 10);
+      //     });
+
+      //     p.pop();
+
+
+
+
+      //     // Lines for all the edges
+      //     p.push()
+      //     p.noFill();
+      //     p.stroke(building.lineColor);
+      //     p.beginShape();
+
+      //     building.offsetSitePlanElementCorners.forEach((corner, i) => {
+      //       p.vertex(corner.x, corner.y);
+      //     })
+
+      //     p.noFill();
+      //     p.endShape(p.CLOSE);
+      //     p.pop();
+
+
+
+      //     building.offsetSitePlanElementCorners.forEach((corner, i) => {
+      //       const corner2 = building.offsetSitePlanElementCorners[(i + 1) % 4];
+
+      //       p.push()
+      //       const mid = getCenterPoint(p, corner, corner2);
+      //       const angle = calculateAngle(corner, corner2);
+      //       p.translate(mid.x, mid.y);
+      //       p.rotate(angle);
+
+
+      //       p.fill("#f9fafb");
+      //       p.rect(0, 0, 30, 5, 3, 3, 3, 3);
+
+      //       p.pop();
+
+      //     })
+
+      //     // center circle
+      //     p.ellipse(building.center.x, building.center.y, 20, 20)
+
+      //   }
+
+      //   if (this.buildingDragMode === "corner") p.cursor('nesw-resize');
+      //   else if (this.buildingDragMode === "edge") p.cursor('ew-resize');
+      //   else if (this.buildingDragMode === "center") p.cursor('grab');
+      //   else if (this.buildingDragMode === "rotate") p.cursor(RotateArrow);
+      //   else p.cursor('default');
+
+      // }
+
+
+
       else if (isHovered.approach) {
         p.cursor("grab");
       }
 
       else {
 
+        parking.showRotationHandles = false;
+      
+        // if (building.showRotationAnimationCount > 0) {
+        //   building.showRotationAnimationCount++
+        // }
+        // if (building.showRotationAnimationCount > 30) {
+        //   building.showRotationHandles = false;
+        // }
+        // if (this.buildingDragMode !== null) {
+        //   building.showRotationAnimationCount++
+        // }
 
-        if (building.showRotationAnimationCount > 0) {
-          building.showRotationAnimationCount++
-        }
-        if (building.showRotationAnimationCount > 30) {
-          building.showRotationHandles = false;
-        }
-        if (this.buildingDragMode !== null) {
-          building.showRotationAnimationCount++
-        }
-
-        if (parking.showRotationAnimationCount > 0) {
-          parking.showRotationAnimationCount++
-        }
-        if (parking.showRotationAnimationCount > 30) {
-          parking.showRotationHandles = false;
-        }
-        if (this.parkingDragMode !== null) {
-          parking.showRotationAnimationCount++
-        }
+        // if (parking.showRotationAnimationCount > 0) {
+        //   parking.showRotationAnimationCount++
+        // }
+        // if (parking.showRotationAnimationCount > 30) {
+        //   parking.showRotationHandles = false;
+        // }
+        // if (this.parkingDragMode !== null) {
+        //   parking.showRotationAnimationCount++
+        // }
 
 
         this.buildingDragMode = null;

@@ -2,7 +2,7 @@ import p5 from "p5";
 import { Entrance } from "./Entrance";
 import { SitePlanElement } from "./SitePlanElement";
 import { drawNeonShape, Point, SitePlanObjects } from "../../../utils/SiteplanGenerator";
-import { arrayOfRandomNudges, calculateArea, calculateCentroid, createSitePlanElementCorners, expandPolygon, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
+import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, expandPolygon, getCenterPoint, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
 import { Parking } from "./Parking";
 import { Property } from "./Property";
 import { Garbage } from "./Garbage";
@@ -62,10 +62,51 @@ export class Building extends SitePlanElement {
   updateBuildingArea(area: number) {
     // Should be in sqrt ft
     this.buildingAreaTarget = area;
-
-
   }
+  drawBuildingEditOptions(){
+    const p = this.p;
+    const building = this
+    const offset = expandPolygon(this.p,  building.offsetSitePlanElementCorners,-this.offsetSize/2);
+    
+    
+    
+    // Lines for all the edges
+    p.push()
+    p.noFill();
+    p.stroke(building.lineColor);
+    p.beginShape();
 
+    offset.forEach((corner) => {
+      p.vertex(corner.x, corner.y);
+      p.ellipse(corner.x, corner.y, 10, 10);
+    })
+
+    p.noFill();
+    p.endShape(p.CLOSE);
+    p.pop();
+
+
+    // Draw the pill shape
+    offset.forEach((corner, i) => {
+      const corner2 = offset[(i + 1) % 4];
+
+      p.push()
+      const mid = getCenterPoint(p, corner, corner2);
+      const angle = calculateAngle(corner, corner2);
+      p.translate(mid.x, mid.y);
+      p.rotate(angle);
+
+
+      p.fill("#f9fafb");
+      p.rect(0, 0, 30, 5, 3, 3, 3, 3);
+
+      p.pop();
+
+    })
+
+    // center circle
+    p.ellipse(building.center.x, building.center.y, 20, 20)
+  }
   tempBuilding() {
 
     this.p.rectMode(this.p.CENTER);
@@ -85,7 +126,6 @@ export class Building extends SitePlanElement {
       this.p.stroke(this.lineColor);
       this.p.strokeWeight(3);
       this.p.noFill();
-
 
 
       if (this.areaExceeded) {
@@ -118,7 +158,7 @@ export class Building extends SitePlanElement {
         this.p.translate(mid.x, mid.y);
         this.p.rotate(edge.calculateAngle())
         this.p.textSize(14);
-        this.p.text(`${length.toFixed(1)} ft`, 0, 0);//#${i} 
+        this.p.text(`${length.toFixed(1)} ft`, 0, 0);
         this.p.pop();
       })
 
