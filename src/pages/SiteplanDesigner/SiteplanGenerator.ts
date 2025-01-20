@@ -1,14 +1,14 @@
 import p5 from "p5";
 import classifyPoint from "robust-point-in-polygon"
-import { VisibilityGraph } from "../pages/VisibilityGraph";
-import { calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateCentroid, pointsAreInBoundary, getAdjacentIndices, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance } from "./SiteplanGeneratorUtils";
-import { IPoint, Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
+import { VisibilityGraph } from "../VisibilityGraph";
+import { calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateCentroid, pointsAreInBoundary, getAdjacentIndices, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance } from "../../utils/SiteplanGeneratorUtils";
+import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../assets/rotateArrow.png"
-import { Property } from "../pages/SiteplanDesigner/SitePlanClasses/Property";
-import { Parking } from "../pages/SiteplanDesigner/SitePlanClasses/Parking";
-import { Building } from "../pages/SiteplanDesigner/SitePlanClasses/Building";
-import { Garbage } from "../pages/SiteplanDesigner/SitePlanClasses/Garbage";
-import { Approach } from "../pages/SiteplanDesigner/SitePlanClasses/Approach";
+import { Property } from "./SitePlanClasses/Property";
+import { Parking } from "./SitePlanClasses/Parking";
+import { Building } from "./SitePlanClasses/Building";
+import { Garbage } from "./SitePlanClasses/Garbage";
+import { Approach } from "./SitePlanClasses/Approach";
 
 export type Point = [number, number];
 export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";

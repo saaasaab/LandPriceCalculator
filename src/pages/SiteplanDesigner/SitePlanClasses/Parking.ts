@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { ParkingStall } from "./ParkingStall";
 import { SitePlanElement } from "./SitePlanElement";
-import { Point, SitePlanObjects, stallHeight } from "../../../utils/SiteplanGenerator";
+import { Point, SitePlanObjects, stallHeight } from "../SiteplanGenerator";
 import { Property } from "./Property";
 import { Approach } from "./Approach";
 import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices,  drawPerpendicularBezier } from "../../../utils/SiteplanGeneratorUtils";

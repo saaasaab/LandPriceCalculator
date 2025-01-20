@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { Entrance } from "./Entrance";
 import { SitePlanElement } from "./SitePlanElement";
-import { drawNeonShape, Point, SitePlanObjects } from "../../../utils/SiteplanGenerator";
+import { drawNeonShape, Point, SitePlanObjects } from "../SiteplanGenerator";
 import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, expandPolygon, getCenterPoint, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
 import { Parking } from "./Parking";
 import { Property } from "./Property";

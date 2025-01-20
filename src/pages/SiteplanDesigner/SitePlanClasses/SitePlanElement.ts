@@ -1,5 +1,5 @@
 import p5 from "p5";
-import { ESitePlanObjects, Point, SitePlanObjects } from "../../../utils/SiteplanGenerator";
+import { ESitePlanObjects, Point, SitePlanObjects } from "../SiteplanGenerator";
 import { calculateArea, calculateAngle, truthChecker, normalizeAngle, polyPoint, expandPolygon, getCenterPoint } from "../../../utils/SiteplanGeneratorUtils";
 import { Edge } from "./Edge";
 import classifyPoint from "robust-point-in-polygon";

@@ -50,7 +50,7 @@ import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
 import { Map, ArrowRight, Ruler, Box, FileImage, Delete } from 'lucide-react';
 import { Card, CardContent, Input, Checkbox } from '../../components/ui';
-import { SiteplanGenerator } from '../../utils/SiteplanGenerator';
+import { SiteplanGenerator } from './SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
 import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
 import ImageUploader from './ImageUploader';
@@ -142,7 +142,26 @@ const SitePlanGenerator: React.FC = () => {
     }
   }, [imageURL])
 
-  const sketch = sketchForSiteplan(imageURL, canvasRef, visualizer, isUploadingImageRef, isPolygonClosedRef, setIsPolygonClosedState, scaleRef, pointsRef, linesRef, setbacksRef, isSelectingApproachRef, isSelectingSetbackRef, isDefiningScaleRef, draggingPointIndexRef, selectedLineIndexRef, inputScaleRef, canvasContainerRef);
+  const params =  {
+    imageURL,
+    canvasRef,
+    sitePlanGenerator: visualizer,
+    isUploadingImageRef,
+    isPolygonClosedRef,
+    setIsPolygonClosedState,
+    scaleRef,
+    pointsRef,
+    linesRef,
+    setbacksRef,
+    isSelectingApproachRef,
+    isSelectingSetbackRef,
+    isDefiningScaleRef,
+    draggingPointIndexRef,
+    selectedLineIndexRef,
+    inputScaleRef,
+    canvasContainerRef,
+  };
+  const sketch = sketchForSiteplan(params);
 
 
   useEffect(() => {
@@ -563,17 +582,9 @@ const SitePlanGenerator: React.FC = () => {
             {/* {isGeneratingSitePlan ? */}
 
               <div className="sidebar">
-              <CollapsibleSection title="Site Plan Boundaries" isDefaultOpen={!isGeneratingSitePlanRef.current}>
+              <CollapsibleSection title="Site Plan Steps" isDefaultOpen={!isGeneratingSitePlanRef.current}>
                 <div className="site-plan-generator__sidebar">
-                  {/* <div className="site-plan-generator__sidebar-header">
-                    <h2>Site Plan Generator</h2>
-                    <button
-                      className="button"
-                      onClick={() => setIsHelpVisible(!isHelpVisible)}
-                    >
-                      <Info />
-                    </button>
-                  </div> */}
+                 
                   <div className="site-plan-generator__sidebar-content">
                     {steps.map((step, index) => (
                       <div

@@ -9,7 +9,7 @@ import { Parking } from "../pages/SiteplanDesigner/SitePlanClasses/Parking";
 import { ParkingStall } from "../pages/SiteplanDesigner/SitePlanClasses/ParkingStall";
 import { Property } from "../pages/SiteplanDesigner/SitePlanClasses/Property";
 import { SitePlanElement } from "../pages/SiteplanDesigner/SitePlanClasses/SitePlanElement";
-import { stallHeight, stallWidth } from "./SiteplanGenerator";
+import { stallHeight, stallWidth } from "../pages/SiteplanDesigner/SiteplanGenerator";
 
 
 type Point = [number, number];
@@ -762,6 +762,7 @@ export function rotateCorners(p: p5, corners: p5.Vector[], angle: number) {
   })
   )
 }
+
 
 export function rotateAndTranslateCorners(p: p5, x: number, y: number, corners: p5.Vector[], angle: number) {
   // Convert the angle to radians

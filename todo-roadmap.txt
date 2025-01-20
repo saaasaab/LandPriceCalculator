@@ -41,3 +41,4 @@
 [X] Limit on Area, and notify somehow that the max area is reached
 [ ] Add Lock to max size option
 [ ] Let user input the width of the building
+[ ] Merge the "Site plan boundaries" with the "Generate Site plan" There is no reason they should be completely seperate.

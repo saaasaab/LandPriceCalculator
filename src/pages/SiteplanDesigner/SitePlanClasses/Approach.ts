@@ -1,6 +1,6 @@
 import p5 from "p5";
 import { SitePlanElement } from "./SitePlanElement";
-import { SitePlanObjects } from "../../../utils/SiteplanGenerator";
+import { SitePlanObjects } from "../SiteplanGenerator";
 
 export class Approach extends SitePlanElement {
 
