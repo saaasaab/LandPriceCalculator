@@ -3,7 +3,7 @@ import classifyPoint from "robust-point-in-polygon"
 import { VisibilityGraph } from "../VisibilityGraph";
 import { calculateAngle, normalizeAngle, getCenterPoint, allPointsInPolygon, truthChecker, getParkingStallArea, calculateCentroid, pointsAreInBoundary, getAdjacentIndices, rotateCorners, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas, calculateDrivewayArea, runVisibilityGraphSolver, isMoreVertical, calculateApproachArea, findClosestEdge, calculatePointToEdgeDistance } from "../../utils/SiteplanGeneratorUtils";
 import { IPoint, Line } from "./SitePlanDesigner";
-import RotateArrow from "../assets/rotateArrow.png"
+import RotateArrow from "../../assets/rotateArrow.png"
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";

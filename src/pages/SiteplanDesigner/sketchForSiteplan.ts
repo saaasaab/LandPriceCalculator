@@ -76,181 +76,18 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         const isUploadingImage = isUploadingImageRef.current;
         const isPolygonClosed = isPolygonClosedRef.current;
-
-
         if (isUploadingImage) return
-        calculateScale();
-        const scale = scaleRef.current;
 
-
-        if (img) {
-          p.background("#f9fafb"); // Default background
-
-          // Resize the image, keeping the aspect ratio.
-          const ratio = img.width/ img.height;
-          const width = rectSize.width;
-          const height = width / ratio;
-          p.image(img, 0, 0,width,height);
-        } else {
-          p.background("#f9fafb"); // Default background
-        }
-
-
-        // Draw lines connecting points
-        const points = pointsRef.current;
-        const lines = linesRef.current;
-
-        if (points.length === 0 && !img) {
-          p.push();
-          p.textSize(30);
-          p.fill(50); // Text color
-          p.textAlign(p.CENTER, p.CENTER);
-          p.text("Click here to start creating your siteplan", p.width / 2, p.height / 2);
-          p.pop()
-          return
-        }
-        else if (points.length === 0 && img) {
-          p.push();
-          p.textSize(16);
-          p.fill(50); // Text color
-          p.textAlign(p.RIGHT, p.BOTTOM);
-          p.text("Click the property corners to start creating your siteplan", p.width - 10, p.height - 10);
-          p.pop()
-          return
-        }
-
-
-
-
-        if (!isPolygonClosed && points.length === 1) {
-          p.push();
-          // Display the message in the bottom-right corner when no boundary is closed
-          p.textSize(16);
-          p.fill(50); // Text color
-          p.textAlign(p.RIGHT, p.BOTTOM);
-          p.text("Click another spot to create a property edge", p.width - 10, p.height - 10);
-          p.pop()
-        }
-
-
-        if (!isPolygonClosed && points.length > 1) {
-          p.push();
-          // Display the message in the bottom-right corner when no boundary is closed
-          p.textSize(16);
-          p.fill(50); // Text color
-          p.textAlign(p.RIGHT, p.BOTTOM);
-          p.text("Click the first point to close the boundary", p.width - 10, p.height - 10);
-          p.pop()
-        }
-
-        if (isPolygonClosed && isSelectingApproachRef.current) {
-          p.push();
-          // Display the message in the bottom-right corner when no boundary is closed
-          p.textSize(16);
-          p.fill(50); // Text color
-          p.textAlign(p.RIGHT, p.BOTTOM);
-          p.text("Click the property edge that will be the entrance to the propery", p.width - 10, p.height - 10);
-          p.pop()
-        }
-
-        if (isPolygonClosed && isDefiningScaleRef.current) {
-          p.push();
-          // Display the message in the bottom-right corner when no boundary is closed
-          p.textSize(16);
-          p.fill(50); // Text color
-          p.textAlign(p.RIGHT, p.BOTTOM);
-          p.text("Click a property edge then type in the edge's length", p.width - 10, p.height - 10);
-          p.pop()
-        }
-
-        if (isPolygonClosed && isSelectingSetbackRef.current) {
-          p.push();
-          // Display the message in the bottom-right corner when no boundary is closed
-          p.textSize(16);
-          p.fill(50); // Text color
-          p.textAlign(p.RIGHT, p.BOTTOM);
-          p.text("For each property edge, enter the setback required for the zoning.\nEntering nothing means a setback of 0 feet", p.width - 10, p.height - 10);
-          p.pop()
-        }
-        // const isPolygonClosed = isPolygonClosedRef.current;
-        p.push();
-
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-
-          if (line.isApproach && line.isScale) {
-            p.strokeWeight(4)
-            p.stroke(230, 120, 20);
-
-          }
-          else if (line.isApproach) {
-            p.stroke(20, 230, 120);
-          }
-          else if (line.isScale) {
-            p.stroke(230, 120, 20);
-          }
-          else {
-            p.stroke(0, 20, 220);
-          }
-          // p.stroke(line.color);
-          p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
-          p.strokeWeight(2);
-          p.noStroke();
-          p.fill(0, 20, 220);
-
-          const midX = (points[line.start].x + points[line.end].x) / 2;
-          const midY = (points[line.start].y + points[line.end].y) / 2;
-          const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .25);
-
-          // if is finished, make the text larger.
-          p.textSize(14);
-          p.text(`${length.toFixed(1)} ft`, midX, midY);
-
-
-        }
-
-
-
-
-        if (isPolygonClosed) {
-          p.fill(10, 20, 200, 20);
-          p.beginShape();
-          for (const point of points) {
-            p.vertex(point.x, point.y);
-          }
-          p.endShape();
-
-
-          // p.fill(100, 250, 200, 20);
-
-          // p.beginShape();
-          // offsetPoints.forEach(corner=>{
-          //   p.vertex(corner.x,corner.y);
-          // })
-          // p.endShape();
-
-        }
-
-
-        p.fill(255, 0, 0);
-        for (const point of points) {
-          p.noStroke();
-          p.ellipse(point.x, point.y, 10, 10);
-        }
-
-        drawArea(p, isPolygonClosedRef.current, points, scale || .25);
-
-
-        p.pop();
+        calculateScale(inputScaleRef, linesRef, pointsRef, scaleRef)
+        displayImage(p, img, rectSize)
+        drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, isSelectingApproachRef, isDefiningScaleRef, isSelectingSetbackRef);
+        drawProtoPropertyLines(p, pointsRef, linesRef, isPolygonClosed, scaleRef.current);
+        drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || .25);
       }
     };
 
     p.mousePressed = () => {
-
-
-      const isUploadingImage = isUploadingImageRef.current;
-
-      if (isUploadingImage) return
+      if (isUploadingImageRef.current) return
       const points = pointsRef.current;
       const lines = linesRef.current;
       const setbacks = setbacksRef.current;
@@ -258,14 +95,13 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       const isPolygonClosed = isPolygonClosedRef.current;
       const isSelectingApproach = isSelectingApproachRef.current;
       const isSelectingSetback = isSelectingSetbackRef.current;
-
       const isDefiningScale = isDefiningScaleRef.current;
       const scale = scaleRef.current;
-
 
       const mx = p.mouseX;
       const my = p.mouseY;
 
+      
       if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
 
       // Check if a point is clicked
@@ -277,8 +113,8 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
       else if (!isPolygonClosed) {
         // Add a new point
-        points.push({ x: mx, y: my });
 
+        points.push({ x: mx, y: my });
         if (points.length > 1) {
           const newLine: Line = {
             start: points.length - 2,
@@ -346,9 +182,6 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
           if (isDefiningScale && !inputScaleRef.current && !scale) {
             lines[lineIndex].isScale = !lines[lineIndex].isScale;
           }
-
-          // lines[lineIndex].color = "#00FF00"; // Change color of the selected line to green
-          return;
         }
       }
     };
@@ -370,24 +203,44 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
     };
 
 
-    const calculateScale = () => {
-      const inputScale = inputScaleRef.current;
-      const points = pointsRef.current;
-      const lines = linesRef.current;
-      const lineIndex = lines.find(line => line.isScale)?.index;
 
-      if (typeof lineIndex !== 'undefined' && lineIndex !== -1) {
-        const lineLength = p.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
-
-        if (inputScale && lineLength) {
-          scaleRef.current = inputScale / lineLength;
-
-        }
-      }
-    };
   };
 }
 
+const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: number, height: number }) => {
+  if (img) {
+    p.background("#f9fafb"); // Default background
+    // Resize the image, keeping the aspect ratio.
+    const ratio = img.width / img.height;
+    const width = rectSize.width;
+    const height = width / ratio;
+    p.image(img, 0, 0, width, height);
+  } else {
+    p.background("#f9fafb"); // Default background
+  }
+}
+
+const calculateScale = (
+  inputScaleRef: React.MutableRefObject<number | null>,
+  linesRef: React.MutableRefObject<Line[]>,
+  pointsRef: React.MutableRefObject<IPoint[]>,
+  scaleRef: React.MutableRefObject<number | null>,
+
+) => {
+  const inputScale = inputScaleRef.current;
+  const points = pointsRef.current;
+  const lines = linesRef.current;
+  const lineIndex = lines.find(line => line.isScale)?.index;
+
+  if (typeof lineIndex !== 'undefined' && lineIndex !== -1) {
+    const lineLength = p5.prototype.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
+
+    if (inputScale && lineLength) {
+      scaleRef.current = inputScale / lineLength;
+
+    }
+  }
+};
 
 
 const calculateArea = (polygon: IPoint[]): number => {
@@ -399,13 +252,13 @@ const calculateArea = (polygon: IPoint[]): number => {
   return Math.abs(total / 2);
 };
 
-
 function drawArea(
   p: p5,
   isPolygonClosed: boolean,
-  points: IPoint[],
+  pointsRef: React.MutableRefObject<IPoint[]>,
   scale: number,
 ) {
+  const points = pointsRef.current;
   if (!isPolygonClosed || points.length < 3) return;
   const area = calculateArea(points) * Math.pow(scale, 2)
   // p.noFill()
@@ -416,15 +269,9 @@ function drawArea(
   p.text(`Area: ${area.toFixed(2)} sq ft`, 10, p.height - 20);
 }
 
-
-
-
-
-
 function drawInstructionsToScreen(
   p: p5,
   pointsRef: React.MutableRefObject<IPoint[]>,
-  linesRef: React.MutableRefObject<Line[]>,
   img: p5.Image | null,
   isPolygonClosed: boolean,
   isSelectingApproachRef: React.MutableRefObject<boolean>,
@@ -434,7 +281,6 @@ function drawInstructionsToScreen(
 
   // Draw lines connecting points
   const points = pointsRef.current;
-  const lines = linesRef.current;
 
   if (points.length === 0 && !img) {
     p.push();
@@ -508,9 +354,6 @@ function drawInstructionsToScreen(
   // const isPolygonClosed = isPolygonClosedRef.current;
 
 }
-
-
-
 
 function drawProtoPropertyLines(p: p5,
   pointsRef: React.MutableRefObject<IPoint[]>,
