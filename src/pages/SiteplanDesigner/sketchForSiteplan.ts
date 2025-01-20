@@ -1,18 +1,22 @@
 import p5 from "p5";
 import { SiteplanGenerator } from "./SiteplanGenerator";
 import { IPoint, Line } from "./SitePlanDesigner";
+import { useEffect, useRef, useState } from "react";
+import { getCenterPoint, getIsClockwise, getReversedIndex, scalePolygonToFitCanvas } from "../../utils/SiteplanGeneratorUtils";
+import { Property } from "./SitePlanClasses/Property";
+import { Parking } from "./SitePlanClasses/Parking";
+import { Building } from "./SitePlanClasses/Building";
+import { Garbage } from "./SitePlanClasses/Garbage";
+import { Approach } from "./SitePlanClasses/Approach";
 
 interface SketchForSiteplanParams {
+
   canvasContainerRef: React.RefObject<HTMLDivElement>;
   canvasRef: React.RefObject<HTMLDivElement>;
   draggingPointIndexRef: React.MutableRefObject<number | null>;
   imageURL: string | null;
   inputScaleRef: React.MutableRefObject<number | null>;
-  isDefiningScaleRef: React.MutableRefObject<boolean>;
   isPolygonClosedRef: React.MutableRefObject<boolean>;
-  isSelectingApproachRef: React.MutableRefObject<boolean>;
-  isSelectingSetbackRef: React.MutableRefObject<boolean>;
-  isUploadingImageRef: React.MutableRefObject<boolean>;
   linesRef: React.MutableRefObject<Line[]>;
   pointsRef: React.MutableRefObject<IPoint[]>;
   scaleRef: React.MutableRefObject<number | null>;
@@ -20,34 +24,75 @@ interface SketchForSiteplanParams {
   setbacksRef: React.MutableRefObject<number[]>;
   setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void;
   sitePlanGenerator: React.MutableRefObject<SiteplanGenerator | null>;
+  stepSelectorRefs: {
+    upload: React.MutableRefObject<boolean>;
+    points: React.MutableRefObject<boolean>;
+    approach: React.MutableRefObject<boolean>;
+    scale: React.MutableRefObject<boolean>;
+    setback: React.MutableRefObject<boolean>;
+    parking: React.MutableRefObject<boolean>;
+    building: React.MutableRefObject<boolean>;
+  }
+
 }
 
 
 export function sketchForSiteplan(params: SketchForSiteplanParams) {
   const {
-    imageURL,
-    canvasRef,
-    sitePlanGenerator,
-    isUploadingImageRef,
-    isPolygonClosedRef,
-    setIsPolygonClosedState,
-    scaleRef,
-    pointsRef,
-    linesRef,
-    setbacksRef,
-    isSelectingApproachRef,
-    isSelectingSetbackRef,
-    isDefiningScaleRef,
-    draggingPointIndexRef,
-    selectedLineIndexRef,
-    inputScaleRef,
     canvasContainerRef,
+    canvasRef,
+    draggingPointIndexRef,
+    imageURL,
+    inputScaleRef,
+    isPolygonClosedRef,
+    linesRef,
+    pointsRef,
+    scaleRef,
+    selectedLineIndexRef,
+    setbacksRef,
+    setIsPolygonClosedState,
+    sitePlanGenerator,
+    stepSelectorRefs,
   } = params;
+  const defaultScale = 0.25;
+
+
+  // const [property, setProperty] = useState<Property | null>(null);
+  const [parking, setParking] = useState<Parking | null>(null);
+  const [building, setBuilding] = useState<Building | null>(null);
+  const [garbage, setGarbage] = useState<Garbage | null>(null);
+  const [approach, setApproach] = useState<Approach | null>(null);
+
+  const propertyRef = useRef<Property | null>(null);
+
+
+
+  // propertyRef.current.setSetbacks(lines[lineIndex].setback, lineIndex)
+
+  // When an input changes in the component above, set he sketch variable here.
+  if (propertyRef.current) {
+    propertyRef.current.updateSetbacks(linesRef.current);
+  }
+
+
+
+
   return (p: p5) => {
+    const {
+      upload: isUploadingImageRef,
+      points: isUpdatingBoundaryPointsRef,
+      approach: isSelectingApproachRef,
+      scale: isDefiningScaleRef,
+      setback: isSelectingSetbackRef,
+      parking: isSettingParkingLotRef,
+      building: isPlacingBuildingRef,
+    } = stepSelectorRefs;
+
+
     let img: p5.Image | null = null;
     let rectSize = { width: 0, height: 0 };
-    // let offsetPoints: p5.Vector[] = [];
-    // const 
+
+
     p.preload = () => {
       if (imageURL) {
         img = p.loadImage(imageURL);
@@ -55,70 +100,117 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
     };
 
     p.setup = () => {
+      p.frameRate(10)
+      p.clear(); // Clear the canvas
+      p.angleMode(p.DEGREES);
+
       if (canvasRef.current && canvasContainerRef.current) {
         const rect = canvasContainerRef.current.getBoundingClientRect()
 
         rectSize = { width: rect.width, height: rect.height };
         const canvas = p.createCanvas(rect.width - 20, rect.height - 20);
         canvas.parent(canvasRef.current);
-
       }
     };
 
     p.draw = () => {
-      // NOW IF I GO BACK, I SHOULD BE ABLE TO UPDATE THIS
 
-      // && isGeneratingSitePlanRef.current
-      if (sitePlanGenerator.current) {
-        sitePlanGenerator.current.visualize(p); // Delegate drawing to the sitePlanGenerator
+      // if (sitePlanGenerator.current) {
+      // sitePlanGenerator.current.visualize(p); // Delegate drawing to the sitePlanGenerator
+      // }
+      const isUploadingImage = isUploadingImageRef.current;
+      const isPolygonClosed = isPolygonClosedRef.current;
+      if (isUploadingImage) return
+
+
+      if (stepSelectorRefs.points.current || stepSelectorRefs.scale.current) {
+
+        calculateScale(inputScaleRef, linesRef, pointsRef, scaleRef, propertyRef);
+
+      }
+      displayImage(p, img, rectSize);
+      drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, isSelectingApproachRef, isDefiningScaleRef, isSelectingSetbackRef);
+
+
+      if (propertyRef.current) {
+        propertyRef.current.drawProperty();
+        propertyRef.current.drawSetbackPolygon();
+        propertyRef.current.drawLineLengths();
       }
       else {
-
-        const isUploadingImage = isUploadingImageRef.current;
-        const isPolygonClosed = isPolygonClosedRef.current;
-        if (isUploadingImage) return
-
-        calculateScale(inputScaleRef, linesRef, pointsRef, scaleRef)
-        displayImage(p, img, rectSize)
-        drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, isSelectingApproachRef, isDefiningScaleRef, isSelectingSetbackRef);
-        drawProtoPropertyLines(p, pointsRef, linesRef, isPolygonClosed, scaleRef.current);
-        drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || .25);
+        drawProtoPropertyLines(p, pointsRef, linesRef, isPolygonClosed, scaleRef.current || defaultScale);
       }
+
+      
+      drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || defaultScale);
     };
 
     p.mousePressed = () => {
-      if (isUploadingImageRef.current) return
       const points = pointsRef.current;
       const lines = linesRef.current;
       const setbacks = setbacksRef.current;
+      const scale = scaleRef.current;
+
+
       // const setbackHasInput = setbackHasInputRef.current;
       const isPolygonClosed = isPolygonClosedRef.current;
-      const isSelectingApproach = isSelectingApproachRef.current;
-      const isSelectingSetback = isSelectingSetbackRef.current;
-      const isDefiningScale = isDefiningScaleRef.current;
-      const scale = scaleRef.current;
 
       const mx = p.mouseX;
       const my = p.mouseY;
 
-      
+
       if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
 
-      // Check if a point is clicked
-      const pointIndex = points.findIndex((point) => p.dist(point.x, point.y, mx, my) < 10);
 
-      if (pointIndex !== -1) {
-        // Start dragging the clicked point
-        draggingPointIndexRef.current = pointIndex;
-      }
-      else if (!isPolygonClosed) {
-        // Add a new point
+      const lineIndex = calculateLineIndexOfClosestLine(points, lines, mx, my)
 
-        points.push({ x: mx, y: my });
-        if (points.length > 1) {
+
+      // ALL THINGS UPLOAD
+      if (stepSelectorRefs.upload.current) { return }
+
+      // ALL THINGS PROPERTY BOUNDARY
+      else if (stepSelectorRefs.points.current) {
+
+        // Check if a point is clicked
+        const pointIndex = points.findIndex((point) => p.dist(point.x, point.y, mx, my) < 10);
+
+        if (pointIndex !== -1) {
+          // Start dragging the clicked point
+          draggingPointIndexRef.current = pointIndex;
+        }
+
+
+        else if (!isPolygonClosed) {
+          // Add a new point
+          points.push({ x: mx, y: my });
+          if (points.length > 1) {
+            const newLine: Line = {
+              start: points.length - 2,
+              end: points.length - 1,
+              color: "#000000", // Default line color
+              index: lines.length,
+              selected: false,
+              isApproach: false,
+              isScale: false,
+              isSetback: false,
+              setback: 0
+            };
+
+            setbacks.push(0);
+            lines.push(newLine);
+          }
+        }
+
+        // Close the polygon if the first and last points are clicked
+        if (points.length > 2 &&
+          p.dist(points[0].x, points[0].y, mx, my) < 10 &&
+          !isPolygonClosed) {
+          isPolygonClosedRef.current = true;
+          setIsPolygonClosedState(true);
+
           const newLine: Line = {
-            start: points.length - 2,
-            end: points.length - 1,
+            start: points.length - 1,
+            end: 0,
             color: "#000000", // Default line color
             index: lines.length,
             selected: false,
@@ -130,70 +222,156 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
           setbacks.push(0);
           lines.push(newLine);
+
+
+          // CREATE THE PROPERTY AND SAVE IT TO STATE.
+          let propertyCorners = points.map(point => p.createVector(point.x, point.y));
+          const isClockwise = getIsClockwise(propertyCorners)
+          const _property = new Property(p, propertyCorners, isClockwise, scaleRef.current || defaultScale, setbacks);
+          propertyRef.current = _property;
+          propertyRef.current.initialize()
         }
+
+
+
       }
 
-      // Close the polygon if the first and last points are clicked
-      if (points.length > 2 &&
-        p.dist(points[0].x, points[0].y, mx, my) < 10 &&
-        !isPolygonClosed) {
-        isPolygonClosedRef.current = true;
-        setIsPolygonClosedState(true);
+      // ALL THINGS SCALE
+      else if (stepSelectorRefs.scale.current) {
 
-        const newLine: Line = {
-          start: points.length - 1,
-          end: 0,
-          color: "#000000", // Default line color
-          index: lines.length,
-          selected: false,
-          isApproach: false,
-          isScale: false,
-          isSetback: false,
-          setback: 0
-        };
-        setbacks.push(0);
-        lines.push(newLine);
-      }
+        if (isPolygonClosed && lineIndex !== -1) {
 
-
-      if (isPolygonClosed) {
-
-        // Check if a line is clicked
-        const lineIndex = lines.findIndex((line) => {
-          const d1 = p.dist(mx, my, points[line.start].x, points[line.start].y);
-          const d2 = p.dist(mx, my, points[line.end].x, points[line.end].y);
-          const lineLength = p.dist(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
-          return Math.abs(d1 + d2 - lineLength) < 5; // Allow for small tolerance
-        });
-
-
-        // Set line to be an approach
-        if (lineIndex !== -1) {
           selectedLineIndexRef.current = lineIndex;
-
-          if (isSelectingApproach) {
-            lines[lineIndex].isApproach = !lines[lineIndex].isApproach;
-          }
-
-          if (isSelectingSetback) {
-            lines[lineIndex].isSetback = !lines[lineIndex].isSetback;
-          }
-
-          if (isDefiningScale && !inputScaleRef.current && !scale) {
+          if (!inputScaleRef.current && !scale) {
             lines[lineIndex].isScale = !lines[lineIndex].isScale;
+            if (propertyRef.current) {
+              propertyRef.current.propertyEdges[lineIndex].isScale = lines[lineIndex].isScale;
+            }
+
           }
         }
       }
+
+      // ALL THINGS SETBACK
+      else if (stepSelectorRefs.setback.current) {
+        if (isPolygonClosed && lineIndex !== -1) {
+          selectedLineIndexRef.current = lineIndex;
+          lines[lineIndex].isSetback = !lines[lineIndex].isSetback;
+          if (propertyRef.current) {
+            propertyRef.current.propertyEdges[lineIndex].isSetback = lines[lineIndex].isSetback;
+
+          }
+        }
+
+
+
+        // SET THE SETBACKS
+        // if (_lines.length) {
+        //   _lines.forEach((line, index) => {
+        //     let _i = index;
+        //     if (isClockwise) {
+        //       _i = getReversedIndex(index, _lines.length);
+        //     }
+        //     setbacks[_i] = (line.setback || 0) / (scaleRef.current || 1)
+        //   });
+        // }
+
+      }
+
+      // ALL THINGS APPROACH
+      if (stepSelectorRefs.approach.current) {
+        if (isPolygonClosed && lineIndex !== -1) {
+          selectedLineIndexRef.current = lineIndex;
+          lines[lineIndex].isApproach = !lines[lineIndex].isApproach;
+
+
+          // const _lines = [...lines, newLine]
+          // this.approach = new Approach(p, getCenterPoint(p, this.property.approachEdge?.point1 || defaultVector, this.property.approachEdge?.point2 || defaultVector), approachWidth, 20, approachAngle, ESitePlanObjects.Approach, this.scale);
+
+          // approachIndex === -1 ? 0 : approachIndex
+          // const setbacks = Array.apply(null, Array(_lines.length)).map(Number.prototype.valueOf, 0);
+          // let approachIndex = _lines.findIndex(line => line.isApproach);
+          // approachIndex = approachIndex === -1 ? 0 : approachIndex;
+
+          // const isClockwise = getIsClockwise(propertyCorners)
+          // if (isClockwise) {
+          //   const first = propertyCorners[0];
+          //   const rest = propertyCorners.slice(1, propertyCorners.length).reverse()
+          //   propertyCorners = [first, ...rest]
+          //   const newIndex = getReversedIndex(approachIndex, _lines.length);
+          //   approachIndex = newIndex;
+          // }
+
+        }
+      }
+      // ALL THINGS PARKING
+      else if (stepSelectorRefs.parking.current) {
+        // this.parking = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, this.scale);
+
+      }
+      // ALL THINGS BUILDING
+      else if (stepSelectorRefs.building.current) {
+        //  this.building = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, this.scale, 20);
+      }
+
+
+
+      else {
+        // Somthing happened, just go back 
+        return
+      }
+
     };
 
     p.mouseDragged = () => {
-      const isUploadingImage = isUploadingImageRef.current;
-      if (isUploadingImage) return
 
-      const draggingPointIndex = draggingPointIndexRef.current;
-      if (draggingPointIndex !== null) {
-        const points = pointsRef.current;
-        points[draggingPointIndex] = { x: p.mouseX, y: p.mouseY };
+      // ALL THINGS UPLOAD
+      if (stepSelectorRefs.upload.current) { return }
+
+
+      // ALL THINGS PROPERTY BOUNDARY
+      else if (stepSelectorRefs.points.current) {
+        const property = propertyRef.current;
+        const draggingPointIndex = draggingPointIndexRef.current;
+        if (draggingPointIndex !== null) {
+          const points = pointsRef.current;
+          points[draggingPointIndex] = { x: p.mouseX, y: p.mouseY };
+
+
+          if (property) {
+            property.updateCornersAndEdgesPositions(points)
+          }
+        }
+      }
+
+      // ALL THINGS SCALE
+      else if (stepSelectorRefs.scale.current) {
+
+      }
+
+      // ALL THINGS SETBACK
+      else if (stepSelectorRefs.setback.current) {
+
+      }
+
+      // ALL THINGS APPROACH
+      if (stepSelectorRefs.approach.current) {
+
+      }
+
+      // ALL THINGS BUILDING
+      else if (stepSelectorRefs.building.current) {
+
+      }
+
+      // ALL THINGS PARKING
+      else if (stepSelectorRefs.parking.current) {
+
+      }
+
+      else {
+        // Somthing happened, just go back 
+        return
       }
     };
 
@@ -201,9 +379,6 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       draggingPointIndexRef.current = null;
       selectedLineIndexRef.current = null;
     };
-
-
-
   };
 }
 
@@ -225,23 +400,22 @@ const calculateScale = (
   linesRef: React.MutableRefObject<Line[]>,
   pointsRef: React.MutableRefObject<IPoint[]>,
   scaleRef: React.MutableRefObject<number | null>,
+  propertyRef: React.MutableRefObject<Property | null>
 
 ) => {
   const inputScale = inputScaleRef.current;
   const points = pointsRef.current;
   const lines = linesRef.current;
   const lineIndex = lines.find(line => line.isScale)?.index;
-
   if (typeof lineIndex !== 'undefined' && lineIndex !== -1) {
     const lineLength = p5.prototype.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
 
-    if (inputScale && lineLength) {
+    if (inputScale && lineLength && propertyRef.current) {
       scaleRef.current = inputScale / lineLength;
-
+      propertyRef.current.scale = scaleRef.current;
     }
   }
 };
-
 
 const calculateArea = (polygon: IPoint[]): number => {
   let total = 0;
@@ -265,8 +439,9 @@ function drawArea(
   p.stroke(0, 0, 0)
   p.strokeWeight(1)
 
+  p.textAlign(p.RIGHT)
   p.textSize(18);
-  p.text(`Area: ${area.toFixed(2)} sq ft`, 10, p.height - 20);
+  p.text(`Area: ${area.toFixed(2)} sq ft`, p.width-10,  20);
 }
 
 function drawInstructionsToScreen(
@@ -359,10 +534,8 @@ function drawProtoPropertyLines(p: p5,
   pointsRef: React.MutableRefObject<IPoint[]>,
   linesRef: React.MutableRefObject<Line[]>,
   isPolygonClosed: boolean,
-  scale: number | null,
+  scale: number,
 ) {
-
-
   p.push();
   const points = pointsRef.current;
   const lines = linesRef.current;
@@ -391,7 +564,7 @@ function drawProtoPropertyLines(p: p5,
 
     const midX = (points[line.start].x + points[line.end].x) / 2;
     const midY = (points[line.start].y + points[line.end].y) / 2;
-    const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale || .25);
+    const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale);
 
     // if is finished, make the text larger.
     p.textSize(14);
@@ -417,4 +590,20 @@ function drawProtoPropertyLines(p: p5,
   }
 
   p.pop();
+}
+
+function calculateLineIndexOfClosestLine(
+  points: IPoint[],
+  lines: Line[],
+  mx: number,
+  my: number
+) {
+  const lineIndex = lines.findIndex((line) => {
+    const d1 = p5.prototype.dist(mx, my, points[line.start].x, points[line.start].y);
+    const d2 = p5.prototype.dist(mx, my, points[line.end].x, points[line.end].y);
+    const lineLength = p5.prototype.dist(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
+    return Math.abs(d1 + d2 - lineLength) < 5; // Allow for small tolerance
+  });
+
+  return lineIndex;
 }

@@ -84,7 +84,7 @@ export class SiteplanGenerator {
   }
 
   initialize(p: p5) {
-
+    p.clear(); // Clear the canvas
     p.angleMode(p.DEGREES);
     // p.frameRate(10);
     let propertyCorners = this.points.map(point => p.createVector(point.x, point.y));
@@ -94,6 +94,7 @@ export class SiteplanGenerator {
     const setbacks = Array.apply(null, Array(this.lines.length)).map(Number.prototype.valueOf, 0);
 
     if (!this.points.length) {
+
       propertyCorners = [
         p.createVector(140, 80),
         p.createVector(p.width - 180, 50),
@@ -102,6 +103,7 @@ export class SiteplanGenerator {
         p.createVector(p.width / 2 - 140, p.height - 150),
         p.createVector(108, p.height - 220),
       ];
+
       propertyCorners = rotateCorners(p, propertyCorners, this.globalAngle);
     }
 
@@ -135,8 +137,7 @@ export class SiteplanGenerator {
 
 
     propertyCorners = scaledPolygon;
-    // , approachIndex === -1 ? 0 : approachIndex
-    this.property = new Property(p, propertyCorners, isClockwise, this.scale, setbacks);
+    this.property = new Property(p, propertyCorners, approachIndex === -1 ? 0 : approachIndex, isClockwise, this.scale, setbacks);
     this.property.initialize()
     const approachAngle = (this.property.approachEdge?.calculateAngle() || 0) + 180;
 
@@ -162,6 +163,8 @@ export class SiteplanGenerator {
 
     this.garbage = new Garbage(p, getCenterPoint(p, this.parking.sitePlanElementEdges[0].point1, this.parking.sitePlanElementEdges[0].point2 || defaultVector), 12 / this.scale, 5 / this.scale, this.parking.angle, ESitePlanObjects.Garbage, this.scale);
     this.garbage.initialize();
+
+
 
 
     // Update driveway area
@@ -197,6 +200,9 @@ export class SiteplanGenerator {
 
     // Update all this BUILDING
     this.building.updateBuildingArea(Number(buildingAreaTarget))
+
+
+
 
     this.parking.entranceEdge?.point1
 
@@ -811,8 +817,7 @@ export class SiteplanGenerator {
       const newY = p.mouseY;
 
       // Check if the mouse moved:
-      if (newX === lastMouseX && newY === lastMouseY) {
-        return; // Skip redraw if nothing has changed
+      if ( newX === lastMouseX && newY === lastMouseY) { return; // Skip redraw if nothing has changed
       }
       lastMouseX = newX;
       lastMouseY = newY;
@@ -842,7 +847,7 @@ export class SiteplanGenerator {
 
       parking.drawParkingStalls();
 
-
+    
       if (parking.showRotationHandles) {
         parking.drawRotationHandles();
       }
@@ -1080,7 +1085,7 @@ export class SiteplanGenerator {
 
 
         if (this.buildingDragMode !== null) {
-          building.drawBuildingEditOptions();
+         building.drawBuildingEditOptions();
 
         }
 
@@ -1219,7 +1224,7 @@ export class SiteplanGenerator {
       else {
 
         parking.showRotationHandles = false;
-
+      
         // if (building.showRotationAnimationCount > 0) {
         //   building.showRotationAnimationCount++
         // }

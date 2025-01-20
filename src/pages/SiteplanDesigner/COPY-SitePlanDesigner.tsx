@@ -48,7 +48,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
-import { Map, ArrowRight, Ruler, Box, FileImage, Delete, Car } from 'lucide-react';
+import { Map, ArrowRight, Ruler, Box, FileImage, Delete } from 'lucide-react';
 import { Card, CardContent, Input, Checkbox } from '../../components/ui';
 import { SiteplanGenerator } from './SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
@@ -71,7 +71,9 @@ const initialFormData: FormData = {
   parkingPer1000: 2.4,
   imperviousPercentage: 70,
   halfStreetDriveway: false,
-  parkingSide: 'left',
+  parkingSide: 'left'
+
+
 };
 
 const initialMetrics: SiteMetrics = {
@@ -112,35 +114,19 @@ const SitePlanGenerator: React.FC = () => {
   const setbacksRef = useRef<number[]>([]);
   const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
-
-
-
   const isUploadingImageRef = useRef<boolean>(true);
-  const isUpdatingBoundaryPointsRef = useRef<boolean>(false);
-  const isSelectingApproachRef = useRef<boolean>(false);
-  const isDefiningScaleRef = useRef<boolean>(false);
-  const isSelectingSetbackRef = useRef<boolean>(false);
-  const isSettingParkingLotRef = useRef<boolean>(false);
-  const isPlacingBuildingRef = useRef<boolean>(false);
-
-
-  const stepSelectorRefs = {
-    upload: isUploadingImageRef,
-    points: isUpdatingBoundaryPointsRef,
-    approach: isSelectingApproachRef,
-    scale: isDefiningScaleRef,
-    setback: isSelectingSetbackRef,
-    parking: isSettingParkingLotRef,
-    building: isPlacingBuildingRef,
-  }
-
-
-
   const isPolygonClosedRef = useRef<boolean>(false);
+  const isSelectingApproachRef = useRef<boolean>(false);
+  const isSelectingSetbackRef = useRef<boolean>(false);
+  const isDefiningScaleRef = useRef<boolean>(false);
   const isGeneratingSitePlanRef = useRef<boolean>(false);
+
+
 
   const inputScaleRef = useRef<number | null>(null);
   const scaleRef = useRef<number | null>(null);
+
+
   const draggingPointIndexRef = useRef<number | null>(null);
   const selectedLineIndexRef = useRef<number | null>(null);
 
@@ -151,28 +137,29 @@ const SitePlanGenerator: React.FC = () => {
 
 
   useEffect(() => {
-    if (imageURL) {
+    if(imageURL){
       createPoints()
     }
   }, [imageURL])
 
-
-
-  const params = {
-    canvasContainerRef,
-    canvasRef,
-    draggingPointIndexRef,
+  const params =  {
     imageURL,
-    inputScaleRef,
-    isPolygonClosedRef,
-    linesRef,
-    pointsRef,
-    scaleRef,
-    selectedLineIndexRef,
-    setbacksRef,
-    setIsPolygonClosedState,
+    canvasRef,
     sitePlanGenerator: visualizer,
-    stepSelectorRefs,
+    isUploadingImageRef,
+    isPolygonClosedRef,
+    setIsPolygonClosedState,
+    scaleRef,
+    pointsRef,
+    linesRef,
+    setbacksRef,
+    isSelectingApproachRef,
+    isSelectingSetbackRef,
+    isDefiningScaleRef,
+    draggingPointIndexRef,
+    selectedLineIndexRef,
+    inputScaleRef,
+    canvasContainerRef,
   };
   const sketch = sketchForSiteplan(params);
 
@@ -265,6 +252,11 @@ const SitePlanGenerator: React.FC = () => {
     visualizer.current?.updateGlobalVariables(updatedGlobals)
   }, [formData, globalAngle])
 
+
+  // const onRotationChange = (value: number) => {
+  //   setGlobalAngle(value)
+  // }
+
   // Update setback for a specific line
   const updateSetback = (index: number, value: string) => {
 
@@ -277,92 +269,162 @@ const SitePlanGenerator: React.FC = () => {
     newLines[index].setback = parsedValue || 0; // Fallback to 0 if undefined
     linesRef.current = newLines;
 
-    
-
     const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
     setOffsetPoints(offsets);
 
   };
 
-  const falsifyRefs = () => {
-    // isUploadingImageRef.current = true; // step 1
-    // isUpdatingBoundaryPointsRef.current = false; // step 2
-    // isDefiningScaleRef.current = false; // step 3
-    // isSelectingSetbackRef.current = false;  // step 4
-    // isSelectingApproachRef.current = false; // step 5
-    // isSettingParkingLotRef.current = false; // step 6
-    // isPlacingBuildingRef.current = false; // step 7
-
-    Object.keys(stepSelectorRefs).forEach((key) => {
-      const refKey = key as keyof typeof stepSelectorRefs; // Cast the key as a valid key of stepSelectorRefs
-      stepSelectorRefs[refKey].current = false; // Update the current value of the ref
-    });
-  }
-
-
   const startUploadingImage = () => {
     setMode('upload')
     setImageURL(null);
-    falsifyRefs()
     isUploadingImageRef.current = true;
+    isSelectingSetbackRef.current = false;
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = false;
 
   }
   const createPoints = () => {
-    falsifyRefs()
-    isUpdatingBoundaryPointsRef.current = true;
+    isUploadingImageRef.current = false;
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = false;
+    isGeneratingSitePlanRef.current = false;
+
     setCurrentStep(1); // should point to the adjust step
     setMode('adjust')
-  }
-  const defineScale = () => {
-    falsifyRefs()
-    isDefiningScaleRef.current = true;
-
-    setMode('scale')
-  }
-
-  const selectApproach = () => {
-    falsifyRefs();
-    isSelectingApproachRef.current = true;
-    setMode('approach')
-  }
-
-  const createSetbacks = () => {
-    falsifyRefs();
-    isSelectingSetbackRef.current = true;
-    setMode('setback');
   }
 
   const clearCanvas = () => {
     setImageURL(null);
-    pointsRef.current = [];
+    pointsRef.current = []
     linesRef.current = [];
-    setIsPolygonClosedState(false);
-
-    // The steps on the sidebar
-    falsifyRefs();
-
+    isUploadingImageRef.current = true;
     isPolygonClosedRef.current = false;
-    isGeneratingSitePlanRef.current = false;
+    setIsPolygonClosedState(false);
+    isSelectingApproachRef.current = false;
+    isGeneratingSitePlanRef.current = false;;
+    isDefiningScaleRef.current = false;
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
     inputScaleRef.current = null;
-    setMode('upload');
-    visualizer.current = null;
+    setMode('upload')
+
   };
 
+  const selectApproach = () => {
+    isGeneratingSitePlanRef.current = false;
+    isUploadingImageRef.current = false;
+    isDefiningScaleRef.current = false;
+    isSelectingApproachRef.current = true;
+    isSelectingSetbackRef.current = false;
+    setMode('approach')
+  }
 
+  const defineScale = () => {
+    isGeneratingSitePlanRef.current = false;;
+    isUploadingImageRef.current = false;
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = true;
+    isSelectingSetbackRef.current = false;
+    setMode('scale')
+  }
 
+  const createSetbacks = () => {
+    isUploadingImageRef.current = false;
+    isGeneratingSitePlanRef.current = false;;
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = false;
+    isSelectingSetbackRef.current = true;
+    setMode('setback')
+  }
 
   const generateSitePlan = () => {
     const points = pointsRef.current;
     const lines = linesRef.current;
     const scale = scaleRef.current;
-    falsifyRefs();
+
     isGeneratingSitePlanRef.current = true;
+    isSelectingSetbackRef.current = false;
+    isSelectingApproachRef.current = false;
+    isDefiningScaleRef.current = false;
+    isUploadingImageRef.current = false;
+
 
     visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
+    // Now pass this all on to the solver
   }
 
+
+  // const uploadStatus = () => {
+  //   if (!imageURL && mode === "upload") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (!imageURL && mode !== "upload") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // };
+
+
+
+
+  // const createPropertyLinesStatus = () => {
+
+  //   if (!isPolygonClosedRef.current && mode === "adjust") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (!isPolygonClosedRef.current && mode !== "adjust") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
+
+
+
+  // const createSelectApproachStatus = () => {
+  //   const hasApproach = linesRef.current.findIndex(line => line.isApproach === true);
+
+  //   if (hasApproach === -1 && mode === "approach") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (hasApproach === -1 && mode !== "approach") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
+
+  // const createScaleStatus = () => {
+  //   if (!scaleRef.current && mode === "scale") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (!scaleRef.current && mode !== "scale") {
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
+
+  // const createSetbackStatus = () => {
+
+  //   const hasNoSetback = linesRef.current.findIndex(line => (line.setback || 0) > 0) === -1;
+
+  //   if (hasNoSetback && mode === "setback") {
+  //     return EStatus.inProgress
+  //   }
+  //   else if (hasNoSetback && mode !== "setback") {
+
+  //     return EStatus.notStarted
+  //   }
+  //   else {
+  //     return EStatus.complete;
+  //   }
+  // }
 
   const steps = [
     {
@@ -382,8 +444,17 @@ const SitePlanGenerator: React.FC = () => {
       onClick: () => { createPoints() },
     },
     {
+      id: 'approach',
+      title: '3. Mark Property Entrance',
+      icon: <ArrowRight />,
+      description: 'Click to indicate where the property is accessed from',
+      help: 'Mark where vehicles enter the property, typically from the street or main access road.',
+      onClick: () => { selectApproach() },
+      disabled: !isPolygonClosedRef.current
+    },
+    {
       id: 'scale',
-      title: '3. Set Property Scale',
+      title: '4. Set Property Scale',
       icon: <Ruler />,
       description: 'Define the scale by measuring a known distance',
       help: 'Draw a line along a known distance (like property edge) and enter its real-world length to set the scale.',
@@ -404,7 +475,7 @@ const SitePlanGenerator: React.FC = () => {
     },
     {
       id: 'setbacks',
-      title: '4. Define Setbacks',
+      title: '5. Define Setbacks',
       icon: <Ruler />,
       description: 'Add required setback distances from property lines',
       help: 'Enter the minimum required distances from property lines according to local zoning laws.',
@@ -455,46 +526,6 @@ const SitePlanGenerator: React.FC = () => {
       </>,
       disabled: !isPolygonClosedRef.current
     },
-
-    {
-      id: 'approach',
-      title: '5. Mark Property Entrance',
-      icon: <ArrowRight />,
-      description: 'Click to indicate where the property is accessed from',
-      help: 'Mark where vehicles enter the property, typically from the street or main access road.',
-      onClick: () => { selectApproach() },
-      disabled: !isPolygonClosedRef.current
-    },
-    {
-      id: 'parking',
-      title: '6. Place Parking lot',
-      icon: <Car />,
-      description: 'Places the parking lot',
-      help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
-      onClick: () => { selectApproach() },
-      disabled: !isPolygonClosedRef.current
-    },
-
-    {
-      id: 'building',
-      title: '7. Place Building',
-      icon: <Car />,
-      description: 'Places the Building',
-      help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
-      onClick: () => { selectApproach() },
-      disabled: !isPolygonClosedRef.current
-    },
-    {
-      id: 'buildingEntrance',
-      title: '8. Place Building Entrances',
-      icon: <Car />,
-      description: 'Places the building entrances',
-      help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
-      onClick: () => { selectApproach() },
-      disabled: !isPolygonClosedRef.current
-    },
-    
-    
     {
       id: 'generate',
       title: '6. Generate Siteplan',
@@ -506,21 +537,54 @@ const SitePlanGenerator: React.FC = () => {
     },
 
   ];
+
+  // const sitePlanGenerationSteps = [
+  //   {
+  //     id: 1,
+  //     title: "Place Building",
+  //     description: "Place a building on the canvas.",
+  //     icon: <BuildingIcon />,
+  //     children: null,
+  //     disabled: false,
+  //     onClick: ()=>{},
+  //     subSteps: [
+  //       { text: "Select a point on the canvas to place a building", completed: false },
+  //       { text: "Click on the edge or corner to change the building size", completed: false },
+  //       { text: "Rotate the building by clicking and holding on the rotation handle", completed: false },
+  //       { text: "Add an entrance by clicking on the edge of the building", completed: false },
+  //     ],
+  //     // toggleSubStep: (subIndex:number) => {
+  //       // setSitePlanGenerationSteps((prevSteps) =>
+  //       //   prevSteps.map((step) =>
+  //       //     step.id === 1
+  //       //       ? {
+  //       //           ...step,
+  //       //           subSteps: step.subSteps.map((subStep, i) =>
+  //       //             i === subIndex ? { ...subStep, completed: !subStep.completed } : subStep
+  //       //           ),
+  //       //         }
+  //       //       : step
+  //       //   )
+  //       // );
+  //     // },
+  //   }
+  // ];
+
   return (
 
 
     <div className="site-plan-generator">
-      <AlphaBanner />
+      <AlphaBanner/>
       <div className="site-plan-generator__container">
         {/* Left Column - Controls */}
         <div className="site-plan-generator__controls">
           <Card>
             {/* {isGeneratingSitePlan ? */}
 
-            <div className="sidebar">
+              <div className="sidebar">
               <CollapsibleSection title="Site Plan Steps" isDefaultOpen={!isGeneratingSitePlanRef.current}>
                 <div className="site-plan-generator__sidebar">
-
+                 
                   <div className="site-plan-generator__sidebar-content">
                     {steps.map((step, index) => (
                       <div
@@ -573,179 +637,264 @@ const SitePlanGenerator: React.FC = () => {
 
                   </div>
                 </div>
+          
+
+                </CollapsibleSection>
 
 
-              </CollapsibleSection>
+
+                {/* Input Parameters Section */}
+                <CollapsibleSection title="Site Plan Inputs">
+                  <div className="site-plan-generator__input-group">
+                    <label htmlFor="parkingStalls">Parking Stalls</label>
+                    <Input
+                      id="parkingStalls"
+                      type="number"
+                      min={0}
+                      value={formData.parkingStalls || ""}
+                      onChange={(e) => handleNumberInput(e, 'parkingStalls')}
+                    />
+                  </div>
+
+                  <div className="site-plan-generator__input-group">
+                    <label htmlFor="approachWidth">Approach Width (ft)</label>
+                    <Input
+                      id="approachWidth"
+                      type="number"
+                      min={0}
+                      value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
+                      onChange={(e) => handleNumberInput(e, 'approachWidth')}
+                    />
+                  </div>
+
+                  <div className="site-plan-generator__input-group">
+                    <label htmlFor="drivewayWidth">Driveway Width (ft)</label>
+                    <Input
+                      id="drivewayWidth"
+                      type="number"
+                      min={0}
+                      value={formData.drivewayWidth || ""}
+                      onChange={(e) => handleNumberInput(e, 'drivewayWidth')}
+                    />
+                  </div>
+
+                  <div className="site-plan-generator__input-group">
+                    <label htmlFor="buildingArea">Max Building Area (sq ft)</label>
+                    <Input
+                      id="buildingArea"
+                      type="number"
+                      min={0}
+                      value={formData.buildingArea || ""}
+                      onChange={(e) => handleNumberInput(e, 'buildingArea')}
+                    />
+                  </div>
 
 
-              {/* Input Parameters Section */}
-              <CollapsibleSection title="Site Plan Inputs">
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="parkingStalls">Parking Stalls</label>
-                  <Input
-                    id="parkingStalls"
-                    type="number"
-                    min={0}
-                    value={formData.parkingStalls || ""}
-                    onChange={(e) => handleNumberInput(e, 'parkingStalls')}
-                  />
-                </div>
+                  <div className="site-plan-generator__input-group">
+                    <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
+                    <Checkbox
+                      id="halfStreetDriveway"
+                      checked={formData.halfStreetDriveway}
+                      onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
+                    />
+                  </div>
+                  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED */}
 
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="approachWidth">Approach Width (ft)</label>
-                  <Input
-                    id="approachWidth"
-                    type="number"
-                    min={0}
-                    value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
-                    onChange={(e) => handleNumberInput(e, 'approachWidth')}
-                  />
-                </div>
+                  {formData.halfStreetDriveway ?
 
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="drivewayWidth">Driveway Width (ft)</label>
-                  <Input
-                    id="drivewayWidth"
-                    type="number"
-                    min={0}
-                    value={formData.drivewayWidth || ""}
-                    onChange={(e) => handleNumberInput(e, 'drivewayWidth')}
-                  />
-                </div>
+                    <div className="site-plan-generator__input-group subgroup-1">
+                      <label>Parking Side</label>
+                      <div className="radio-group">
+                        <label>
+                          <input
+                            type="radio"
+                            name="parkingSide"
+                            value="right"
+                            checked={formData.parkingSide === 'right'}
+                            onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                          />
+                          Right Parking
+                        </label>
 
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="buildingArea">Max Building Area (sq ft)</label>
-                  <Input
-                    id="buildingArea"
-                    type="number"
-                    min={0}
-                    value={formData.buildingArea || ""}
-                    onChange={(e) => handleNumberInput(e, 'buildingArea')}
-                  />
-                </div>
+                        <label>
+                          <input
+                            type="radio"
+                            name="parkingSide"
+                            value="left"
+                            checked={formData.parkingSide === 'left'}
+                            onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                          />
+                          Left Parking
+                        </label>
+                      </div>
+                    </div> : <></>}
+
+                  <div className="site-plan-generator__checkbox disabled">
+                    <label htmlFor="taperedDriveway">Tapered Driveway</label>
+
+                    <Checkbox
+                      id="taperedDriveway"
+                      checked={formData.taperedDriveway}
+                      onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
+                    />
+                  </div>
 
 
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
-                  <Checkbox
-                    id="halfStreetDriveway"
-                    checked={formData.halfStreetDriveway}
-                    onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
-                  />
-                </div>
-                {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED */}
+                  <div className="site-plan-generator__input-group disabled">
+                    <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
+                    <Input
+                      id="propertyEntranceCount"
+                      type="number"
+                      min={0}
+                      value={formData.propertyEntranceCount || ""}
+                      onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
+                    />
+                  </div>
 
-                {formData.halfStreetDriveway ?
+                  <div className="site-plan-generator__input-group disabled">
+                    <label htmlFor="buildingCount">Building Count</label>
+                    <Input
+                      id="buildingCount"
+                      type="number"
+                      min={0}
+                      value={formData.buildingCount || ""}
+                      onChange={(e) => handleNumberInput(e, 'buildingCount')}
+                    />
+                  </div>
 
-                  <div className="site-plan-generator__input-group subgroup-1">
-                    <label>Parking Side</label>
-                    <div className="radio-group">
-                      <label>
-                        <input
-                          type="radio"
-                          name="parkingSide"
-                          value="right"
-                          checked={formData.parkingSide === 'right'}
-                          onChange={(e) => handleRadioChange(e, 'parkingSide')}
-                        />
-                        Right Parking
-                      </label>
+                  <div className="site-plan-generator__input-group disabled">
+                    <label htmlFor="landscapeIsland">Stall / Landscape Stall Ratio</label>
+                    <Input
+                      id="landscapeIsland"
+                      type="number"
+                      min={0}
+                      value={formData.landscapeIsland || ""}
+                      onChange={(e) => handleNumberInput(e, 'landscapeIsland')}
+                    />
+                  </div>
 
-                      <label>
-                        <input
-                          type="radio"
-                          name="parkingSide"
-                          value="left"
-                          checked={formData.parkingSide === 'left'}
-                          onChange={(e) => handleRadioChange(e, 'parkingSide')}
-                        />
-                        Left Parking
-                      </label>
+                  <div className="site-plan-generator__input-group disabled">
+                    <label htmlFor="parkingPer1000">Minimum Parking per 1000 SQFT</label>
+                    <Input
+                      id="parkingPer1000"
+                      type="number"
+                      min={0}
+                      value={formData.parkingPer1000 || ""}
+                      onChange={(e) => handleNumberInput(e, 'parkingPer1000')}
+                    />
+                  </div>
+
+                  <div className="site-plan-generator__input-group disabled">
+                    <label htmlFor="imperviousPercentage">Impervious Surface %</label>
+                    <Input
+                      id="imperviousPercentage"
+                      type="number"
+                      min={0}
+                      value={formData.imperviousPercentage || ""}
+                      onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* Site Metrics Section */}
+                <CollapsibleSection title="Site Plan Metrics">
+                  <div className="site-plan-generator__metrics-container">
+                    {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
+                      <div key={key} className="site-plan-generator__metrics-item">
+                        <span className="label">{formatMetricLabel(key)}</span>
+                        <span className="value">{formatMetricValue(key, value)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleSection>
+
+
+
+
+
+                {/* Site Metrics Section */}
+                {/* <CollapsibleSection title="Siteplan Creation Steps">
+                  <div className="site-plan-generator__sidebar">
+                    <div className="site-plan-generator__sidebar-header">
+                      <h2>Site Plan Generator</h2>
+
                     </div>
-                  </div> : <></>}
+                    <div className="site-plan-generator__sidebar-content">
+                      {sitePlanGenerationSteps.map((step, index) => (
+                        <div
+                          key={step.id}
+                          className={`site-plan-generator__step
+                            ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
+                            ${index < currentStep ? 'site-plan-generator__step--completed' : ''}
+                            ${step?.disabled ? 'disabled' : ''}`}
+                          onClick={() => {
+                            if (step?.disabled) return;
+                            setCurrentStep(index);
+                            step.onClick();
+                          }}
+                        >
+                          <div className="site-plan-generator__step-content">
+                            <div className={`site-plan-generator__step-icon ${index === currentStep ? 'step-icon-active' : ''}`}>
+                              {step.icon}
+                            </div>
+                            <div className="site-plan-generator__step-info">
+                              <h3>{step.title}</h3>
+                              <p>{step.description}</p>
+                            </div>
+                          </div>
 
-                <div className="site-plan-generator__checkbox disabled">
-                  <label htmlFor="taperedDriveway">Tapered Driveway</label>
+                          {index === currentStep && (
+                            <div className="sub-steps">
+                              {step.subSteps && step.subSteps.length > 0 ? (
+                                <ul>
+                                  {step.subSteps.map((subStep, subIndex) => (
+                                    <li key={subIndex} className="sub-step-item">
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          checked={subStep.completed}
+                                          onChange={() => step.toggleSubStep(subIndex)}
+                                        />
+                                        {subStep.text}
+                                      </label>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                step.children
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
 
-                  <Checkbox
-                    id="taperedDriveway"
-                    checked={formData.taperedDriveway}
-                    onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
-                  />
-                </div>
+
+                      <div
+                        className={`site-plan-generator__step`}
+                        onClick={() => { setCurrentStep(0); clearCanvas(); }}
+                      >
+                        <div className="site-plan-generator__step-content">
+                          <div className={`site-plan-generator__step-icon`}>
+                            <Delete />,
+                          </div>
+                          <div className="site-plan-generator__step-info">
 
 
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
-                  <Input
-                    id="propertyEntranceCount"
-                    type="number"
-                    min={0}
-                    value={formData.propertyEntranceCount || ""}
-                    onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
-                  />
-                </div>
+                            <h3>Clear</h3>
+                            <p>Click to delete the existing siteplan and start over</p>
+                          </div>
+                        </div>
 
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="buildingCount">Building Count</label>
-                  <Input
-                    id="buildingCount"
-                    type="number"
-                    min={0}
-                    value={formData.buildingCount || ""}
-                    onChange={(e) => handleNumberInput(e, 'buildingCount')}
-                  />
-                </div>
+                      </div>
 
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="landscapeIsland">Stall / Landscape Stall Ratio</label>
-                  <Input
-                    id="landscapeIsland"
-                    type="number"
-                    min={0}
-                    value={formData.landscapeIsland || ""}
-                    onChange={(e) => handleNumberInput(e, 'landscapeIsland')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="parkingPer1000">Minimum Parking per 1000 SQFT</label>
-                  <Input
-                    id="parkingPer1000"
-                    type="number"
-                    min={0}
-                    value={formData.parkingPer1000 || ""}
-                    onChange={(e) => handleNumberInput(e, 'parkingPer1000')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="imperviousPercentage">Impervious Surface %</label>
-                  <Input
-                    id="imperviousPercentage"
-                    type="number"
-                    min={0}
-                    value={formData.imperviousPercentage || ""}
-                    onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
-                  />
-                </div>
-              </CollapsibleSection>
-
-              {/* Site Metrics Section */}
-              <CollapsibleSection title="Site Plan Metrics">
-                <div className="site-plan-generator__metrics-container">
-                  {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
-                    <div key={key} className="site-plan-generator__metrics-item">
-                      <span className="label">{formatMetricLabel(key)}</span>
-                      <span className="value">{formatMetricValue(key, value)}</span>
                     </div>
-                  ))}
-                </div>
-              </CollapsibleSection>
+                  </div>
+                </CollapsibleSection>
 
-            </div>
+                Add more sections here */}
+              </div>
 
-
+            
             {/* } */}
           </Card>
         </div>
@@ -766,13 +915,25 @@ const SitePlanGenerator: React.FC = () => {
             </CardContent>
           </Card>
 
+          {/* Help Panel */}
+          {/* {isHelpVisible && (
+            <div className="site-plan-generator__help">
+              <p>{steps[currentStep].help}</p>
+            </div>
+          )} */}
         </div>
       </div>
     </div>
+
+
   );
 };
 
 export default SitePlanGenerator;
+
+
+
+
 
 
 function calculatecornerOffsetsFromSetbacks(lines: Line[], points: IPoint[]) {
@@ -823,6 +984,8 @@ function createParallelEdge(line: Line, points: IPoint[]) {
 
 
 function getIntersection(edge1: Line, edge2: Line, cornerOffsetsPoints: p5.Vector[][]): p5.Vector | null {
+
+
   const x1 = cornerOffsetsPoints[edge1.index][0].x
   const y1 = cornerOffsetsPoints[edge1.index][0].y
   const x2 = cornerOffsetsPoints[edge1.index][1].x
