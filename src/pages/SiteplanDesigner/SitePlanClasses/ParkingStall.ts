@@ -59,16 +59,23 @@ export class ParkingStall {
       })
       p.endShape(); // Close the polygon
   
+
+
       p.push();
       p.translate(this.center.x, this.center.y)
       p.rotate(this.angle);
-      p.rect(Math.sign(this.cementOffset) * stallWidth / this.scale / 2 - this.cementOffset / this.scale, 0, .5 / this.scale, 7 / this.scale)
+      p.rectMode(p.CENTER);
+      p.rect(
+        
+        Math.sign(this.cementOffset) * stallWidth / this.scale / 2 - this.cementOffset / this.scale,
+        0 , 
+        .5 / this.scale, 
+        7 / this.scale)
       p.pop()
-  
-      // p.drawingContext.fillStyle = 'white';
-  
+    
     }
   
+    
     setParkingStallEdges() {
   
     }

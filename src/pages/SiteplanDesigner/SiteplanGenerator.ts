@@ -671,135 +671,9 @@ export class SiteplanGenerator {
       }
     };
 
-    p.mousePressed = () => {
-      if (!property || !approach || !parking || !building || !garbage) return;
+    p.mousePressed = () => { };
 
-      const isHovered = {
-        approach: approach.isMouseHovering(),
-        parking: parking.isMouseHovering(),
-        parkingOffset: parking.isMouseHoveringOffset(),
-        parkingHandle: parking.isMouseHoveringRotateHandle(),
-        building: building.isMouseHovering(),
-        buildingOffset: building.isMouseHoveringOffset(),
-        buildingHandle: building.isMouseHoveringRotateHandle(),
-        garbage: garbage.isMouseHovering(),
-      };
-
-
-      // This is clicking on anything non-objecty to unset whether it is selected or not
-      if (!(
-        isHovered.approach ||
-        isHovered.parking ||
-        isHovered.building ||
-        isHovered.garbage)) {
-        approach.isSelected = false;
-        building.isSelected = false;
-        parking.isSelected = false;
-        garbage.isSelected = false;
-      }
-
-
-      const posX = p.mouseX;
-      const posY = p.mouseY;
-      const clickIsInProperty = allPointsInPolygon(property.propertyCorners, [p.createVector(posX, posY)]);
-
-      // Place the building
-      if (!building.isInitialized &&
-        !isHovered.approach &&
-        !isHovered.parking &&
-        !isHovered.parkingOffset &&
-        !isHovered.parkingHandle &&
-        !isHovered.garbage &&
-
-        truthChecker(clickIsInProperty)) {
-        building.initializeBuilding(posX, posY);
-      }
-
-
-
-      if (isHovered.approach) approach.isSelected = true;
-      else if (isHovered.parking) parking.isSelected = true;
-      else if (isHovered.building) building.isSelected = true;
-      else if (isHovered.garbage) garbage.isSelected = true;
-
-
-      if (!building.isInitialized) return;
-
-      // HIDING ENTRANCE AND SOLVER FOR NOW
-
-      // const mouse = p.createVector(p.mouseX, p.mouseY)
-      // const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
-      // const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
-      // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
-
-
-      // get the point on the line where the entrance should interesect
-      // const angle = closestEdge.calculateAngle() - 90;
-      // const intersection = closestEdge.calculateClosestIntercept(
-      //   p.mouseX,
-      //   p.mouseY,
-      //   p
-      // );
-
-      // let minDistance = Infinity;
-      // let minDistanceIndex = -1;
-      // building.entrances.forEach((entrance, i) => {
-      //   const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
-      //   if (dist < minDistance) {
-      //     minDistance = dist;
-      //     minDistanceIndex = i;
-      //   }
-      // })
-
-
-      // // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
-      // if (minDistance < 5 / this.scale) {
-      //   // THEN DELETE THE ENTRANCE
-
-      //   building.entrances = building.entrances.filter((_, i) => i !== minDistanceIndex)
-      //   visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
-
-      // }
-
-      // else {
-      //   // Draw the entrance
-      //   const isAddingEntrances = false;
-      //   if (isAddingEntrances) {
-      //     // Hold off on adding entrances for now
-      //     let lerpPos = getIntersectionPercentage(
-      //       closestEdge,
-      //       intersection
-      //     ) || 0;
-
-      //     const entrance = new Entrance(p, this.scale, lerpPos, intersection, angle, closestEdgeIndex, building.center);
-      //     building.entrances.push(entrance)
-
-      //     visibilityGraphSolver = runVisibilityGraphSolver(visibilityGraphSolver, building, parking, property, garbage, approach);
-
-      //   }
-
-      // }
-    };
-
-    p.mouseReleased = () => {
-      if (!property || !approach || !parking || !building || !garbage) return;
-      isDragging.parking = false;
-      isDragging.approach = false;
-      isDragging.parkingOffset = false;
-      isDragging.building = false;
-
-      this.buildingDragMode = null;
-      this.parkingDragMode = null;
-
-      this.resizeEdges = null;
-      this.resizeCorner = null;
-      this.resizeEdge = null;
-      this.resizingbuilding = false;
-      building.isRotating = false;
-      parking.isRotating = false;
-
-      building.hoverHandleIndex = -1;
-    };
+    p.mouseReleased = () => { };
 
     p.draw = () => {
       if (!property || !approach || !parking || !building || !garbage) return;
@@ -943,7 +817,7 @@ export class SiteplanGenerator {
 
 
       // Check if we're hovering over a building corner, edge, or center
-     if ((isHovered.building ||
+      if ((isHovered.building ||
         isHovered.buildingOffset ||
         isHovered.buildingHandle ||
         building.isRotating
