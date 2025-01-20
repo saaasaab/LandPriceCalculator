@@ -838,14 +838,12 @@ export class SiteplanGenerator {
 
 
       parking.drawParkingStalls();
-
-
       if (parking.showRotationHandles) {
         parking.drawRotationHandles();
       }
+
+
       building.drawBuilding();
-
-
       if (building.showRotationHandles) {
         building.drawRotationHandles();
       }
@@ -940,83 +938,12 @@ export class SiteplanGenerator {
         }
       }
 
-      parking.drawParkingOutline(p, parking, garbage, approach)
 
 
-      if (
-        isHovered.parkingOffset ||
-        isHovered.parking ||
-        isHovered.parkingHandle ||
-        parking.isRotating) {
-
-        // || isDragging.parkingOffset
-        // !isDragging.parking
-        building.showRotationHandles = false;
-        parking.showRotationHandles = true;
-        // let hasSetRotating = parking.isRotating;
-        // let hasSetDragging = parking.isDr;
-        // && !hasSetDragging
-
-        if (isHovered.parkingHandle) {
-          parking.showRotationAnimationCount = 0;
-
-          const index = parking.getMouseHoveringRotateHandleIndex();
-          const handle = parking.rotationHandles[index];
-          if (p.dist(newX, newY, handle.x, handle.y) < 30) {
-            this.parkingDragMode = 'rotate';
-            this.resizeEdges = null;
-            this.resizeCorner = null;
-            this.resizeEdge = null;
-            // hasSetRotating = true;
-
-          }
-        }
-
-
-        if (isHovered.parking && !parking.isRotating) {
-          // !hasSetRotating&&
-          if (p.dist(newX, newY, parking.center.x, parking.center.y) < 20) {
-            this.parkingDragMode = 'center';
-            this.resizeEdges = null;
-            this.resizeCorner = null;
-            this.resizeEdge = null;
-          }
-        }
-
-
-
-
-        if (this.parkingDragMode !== null) {
-          p.push()
-          p.noFill();
-          p.stroke(30, 60, 200);
-          p.strokeWeight(3)
-
-          // // Circles around the the building corners
-          // building.sitePlanElementCorners.forEach(corner=>{
-          //   p.ellipse(corner.x, corner.y, 15, 15)
-          // })
-
-          // // Lines for all the edges
-          // building.sitePlanElementEdges.forEach(edge=>{
-          //   p.line(edge.point1.x, edge.point1.y, edge.point2.x,edge.point2.y)
-          // });
-
-          // center circle
-          p.ellipse(parking.center.x, parking.center.y, 20, 20)
-          p.pop();
-        }
-
-        // if (this.parkingDragMode === "corner") p.cursor('nesw-resize');
-        // else if (this.parkingDragMode === "edge") p.cursor('ew-resize');
-        if (this.parkingDragMode === "center") p.cursor('grab');
-        else if (this.parkingDragMode === "rotate") p.cursor(RotateArrow);
-        else p.cursor('default');
-      }
 
 
       // Check if we're hovering over a building corner, edge, or center
-      else if ((isHovered.building ||
+     if ((isHovered.building ||
         isHovered.buildingOffset ||
         isHovered.buildingHandle ||
         building.isRotating
