@@ -42,7 +42,7 @@ export class Property {
       const corner1 = propertyCorners[i];
       let corner2 = i === propertyCorners.length - 1 ? propertyCorners[0] : propertyCorners[i + 1];
       const isApproach = i === this.approachEdgeIndex;
-      const newEdge = new Edge(p, corner1, corner2, isApproach, this.setbacks[i]);
+      const newEdge = new Edge(p, corner1, corner2, isApproach, this.setbacks[i], i);
       propertyEdges.push(newEdge);
     }
 
@@ -56,7 +56,7 @@ export class Property {
 
   updateSetbacks(lines: Line[]) {
     lines.forEach((line, i) => {
-      this.propertyEdges[i].setback = (this.isClockwise? -1: 1)*(line.setback/this.scale)
+      this.propertyEdges[i].setback = (this.isClockwise? 1: -1)*(line.setback/this.scale)
     })
     this.calculateCornerOffsetsFromSetbacks()
   }
@@ -117,7 +117,7 @@ export class Property {
   }
 
   drawLineLengths(){
-    this.propertyEdges.forEach((edge) => {
+    this.propertyEdges.forEach((edge, i) => {
       edge.drawLine()
 
       const midX = (edge.point1.x + edge.point2.x) / 2;
@@ -130,7 +130,7 @@ export class Property {
       this.p.translate(midX, midY);
       this.p.rotate(edge.calculateAngle())
       this.p.textSize(14);
-      this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+      this.p.text(`#${i} - ${length.toFixed(1)} ft`, 0, 0);
       this.p.pop();
     })
   }

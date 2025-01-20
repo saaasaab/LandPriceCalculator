@@ -36,8 +36,6 @@ export class SitePlanElement {
   public offsetSize: number;
   public isSelected: boolean;
 
-
-
   constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number, offsetSize: number = 30) {
     this.angle = angle;
     this.center = center;
@@ -118,7 +116,7 @@ export class SitePlanElement {
       let corner2 = i === sitePlanElementCorners.length - 1 ? sitePlanElementCorners[0] : sitePlanElementCorners[i + 1];
 
       const isApproach = i === 2 && this.elementType === ESitePlanObjects.Approach;
-      const newEdge = new Edge(this.p, corner1, corner2, isApproach, 0);
+      const newEdge = new Edge(this.p, corner1, corner2, isApproach, 0, i);
       edges.push(newEdge);
     }
     this.sitePlanElementEdges = edges

@@ -11,9 +11,11 @@ export class Edge {
   public point2Offset: p5.Vector;
   public isScale: boolean;
   public isSetback: boolean;
+  public lineIndex: number;
+  public midpoint: p5.Vector;
 
 
-  constructor(p: p5, point1: p5.Vector, point2: p5.Vector, isApproach: boolean, setback: number) {
+  constructor(p: p5, point1: p5.Vector, point2: p5.Vector, isApproach: boolean, setback: number, index: number) {
     this.point1 = point1;
     this.point2 = point2;
     this.isApproach = isApproach;
@@ -23,11 +25,15 @@ export class Edge {
     this.point2Offset = this.p.createVector(0, 0);
     this.isScale = false;
     this.isSetback = false;
+    this.lineIndex = index;
+    this.midpoint = this.p.createVector(0, 0);
   }
 
   updateEdge(newPoint1: p5.Vector, newPoint2: p5.Vector) {
     this.point1 = newPoint1;
     this.point2 = newPoint2;
+
+    this.midpoint = this.getMidpoint()
   }
 
   getLineLength() {
@@ -70,7 +76,6 @@ export class Edge {
     setLineDash(this.p, [])
     this.p.textSize(24)
 
-    // this.p.text(index, midpoint.x, midpoint.y)
   }
 
   calculateAngle(): number {

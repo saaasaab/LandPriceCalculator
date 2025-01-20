@@ -15,6 +15,7 @@ export class Approach extends SitePlanElement {
       scale: number
     ) {
       super(p, center, width, height, angle, elementType, scale);
+
       this.approachArea = width * height / 2
     }
   
@@ -30,8 +31,7 @@ export class Approach extends SitePlanElement {
       p.stroke(0); // Outline color
       p.strokeWeight(2);
   
-  
-  
+      
       this.sitePlanElementCorners.forEach((corner) => {
         p.vertex(corner.x, corner.y);
         // p.text(i, corner.x, corner.y)

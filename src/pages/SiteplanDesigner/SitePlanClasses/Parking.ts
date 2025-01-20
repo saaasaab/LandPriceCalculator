@@ -22,9 +22,6 @@ export class Parking extends SitePlanElement {
   public parkingOutline: p5.Vector[]
   public parkingOutlineDoubleLayer: p5.Vector[]
 
-
-
-
   constructor(
     p: p5,
     center: p5.Vector,
@@ -86,10 +83,7 @@ export class Parking extends SitePlanElement {
       }
       else {
         this.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-
       }
-
-
       previousParkingCount = parkingCount;
       parkingCount = this.parkingStalls.left.length + this.parkingStalls.right.length
 
@@ -411,8 +405,6 @@ export class Parking extends SitePlanElement {
     p.strokeWeight(1.5);
     p.textSize(10)
 
-    // const entranceEdge1 = new Edge(p, parkingOutline[0], parkingOutline[1], false, 0)
-    // const parkingEdge1 = parking.sitePlanElementEdges[1]
 
     points.forEach((corner, i) => {
 
@@ -420,8 +412,8 @@ export class Parking extends SitePlanElement {
       if (i === 1 && parking.entranceEdge) {
         drawPerpendicularBezier(
           p,
-          approach.sitePlanElementCorners[1],
-          parking.entranceEdge.point1,
+          parkingOutline[1],
+          parkingOutline[2],
           approach.sitePlanElementEdges[2],
           parking.entranceEdge,
           true

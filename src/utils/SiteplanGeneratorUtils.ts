@@ -785,7 +785,7 @@ export const getIsClockwise = (polygon: p5.Vector[]): boolean => {
     const next = polygon[(i + 1) % polygon.length];
     sum += (next.x - current.x) * (next.y + current.y);
   }
-  return sum > 0;
+  return sum < 0;
 };
 
 export function getReversedIndex(oldIndex: number, listLength: number): number {

@@ -80,7 +80,6 @@ export class SiteplanGenerator {
     this.resizeEdges = null
     this.resizeCorner = null;
     this.resizingbuilding = false;
-
   }
 
   initialize(p: p5) {
@@ -121,7 +120,6 @@ export class SiteplanGenerator {
 
     const { scaledPolygon, scaleFactor } = scalePolygonToFitCanvas(p, propertyCorners, p.width, p.height, 40);
     this.scale = userGeneratedPoints ? this.scale / scaleFactor : this.scale / scaleFactor;
-
 
     if (lines.length) {
       lines.forEach((line, index) => {
@@ -474,7 +472,6 @@ export class SiteplanGenerator {
         parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       }
     };
-
 
     const handleParkingDrag = () => {
       if (!property || !approach || !parking || !building || !garbage) return;

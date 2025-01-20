@@ -93,7 +93,7 @@ const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
-  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload'>('upload'); // Interaction mode
+  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'entrances'>('upload'); // Interaction mode
 
   // const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
@@ -122,6 +122,7 @@ const SitePlanGenerator: React.FC = () => {
   const isSelectingSetbackRef = useRef<boolean>(false);
   const isSettingParkingLotRef = useRef<boolean>(false);
   const isPlacingBuildingRef = useRef<boolean>(false);
+  const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
 
 
   const stepSelectorRefs = {
@@ -132,6 +133,7 @@ const SitePlanGenerator: React.FC = () => {
     setback: isSelectingSetbackRef,
     parking: isSettingParkingLotRef,
     building: isPlacingBuildingRef,
+    entrances: isPlacingBuildingEntrancesRef,
   }
 
 
@@ -277,7 +279,7 @@ const SitePlanGenerator: React.FC = () => {
     newLines[index].setback = parsedValue || 0; // Fallback to 0 if undefined
     linesRef.current = newLines;
 
-    
+
 
     const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
     setOffsetPoints(offsets);
@@ -331,6 +333,27 @@ const SitePlanGenerator: React.FC = () => {
     isSelectingSetbackRef.current = true;
     setMode('setback');
   }
+
+  const createParking = () => {
+    falsifyRefs();
+    isSettingParkingLotRef.current = true;
+    setMode('parking');
+  }
+
+  const createBuilding = () => {
+    falsifyRefs();
+    isPlacingBuildingRef.current = true;
+    setMode('building');
+  }
+
+  const createBuildingEntrances = () => {
+    falsifyRefs();
+    isPlacingBuildingEntrancesRef.current = true;
+    setMode('entrances');
+  }
+
+
+  stepSelectorRefs.parking
 
   const clearCanvas = () => {
     setImageURL(null);
@@ -471,7 +494,7 @@ const SitePlanGenerator: React.FC = () => {
       icon: <Car />,
       description: 'Places the parking lot',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
-      onClick: () => { selectApproach() },
+      onClick: () => { createParking() },
       disabled: !isPolygonClosedRef.current
     },
 
@@ -481,7 +504,8 @@ const SitePlanGenerator: React.FC = () => {
       icon: <Car />,
       description: 'Places the Building',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
-      onClick: () => { selectApproach() },
+      onClick: () => { createBuilding() },
+
       disabled: !isPolygonClosedRef.current
     },
     {
@@ -490,11 +514,11 @@ const SitePlanGenerator: React.FC = () => {
       icon: <Car />,
       description: 'Places the building entrances',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
-      onClick: () => { selectApproach() },
+      onClick: () => { createBuildingEntrances() },
       disabled: !isPolygonClosedRef.current
     },
-    
-    
+
+
     {
       id: 'generate',
       title: '6. Generate Siteplan',
