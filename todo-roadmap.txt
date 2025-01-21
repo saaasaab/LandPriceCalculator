@@ -1,27 +1,33 @@
+[X] Click object to open resize or rotate options
+[X] Turn red when intersecting instead of stopping them from overlapping
+[X] Phantom point when creating boundary
+[X] update design for hover state. Box with circles at corner, and pill in the middle
+[X] Add back button
+[X] Drag on top and glow red
+[X] Put a curve on the approach
+[X] add steps to follow when creating the site plan with EVERYTHINH laid out on the side panel
+[X] Change rotation circle to arrow and only 
+[X] Draw arrow on approach
+[X] Limit on Area, and notify somehow that the max area is reached
+[X] Merge the "Site plan boundaries" with the "Generate Site plan" There is no reason they should be completely seperate.
 [ ] Angles on lines on the first page
 [ ] Arrow pointing north and project north
 [ ] Define by angles
 [ ] Legal description to points on the map
-[ ] Click object to open resize or rotate options
 [ ] Show what are standard sizes for different objects
-[ ] Turn red when intersecting instead of stopping them from overlapping
 [ ] question marks on different items to give more explaination
-[ ] Phantom point when creating boundary
+
 [ ] Add zoom in on map and site plan
 [ ] adding a color palette
-[ ] update design for hover state. Box with circles at corner, and pill in the middle
-[ ] Add back button
-[ ] Drag on top and glow red
+
 [ ] Prune the paths
-[ ] add steps to follow when creating the site plan with EVERYTHIGN laid out on the side panel
 [ ] Add taper driveway
 [ ] Fix building area to be double doors
-[ ] Put a curve on the approach
-[ ] ADA and compact and diagonal parking.
+[ ] ADA and compact parking
+[ ] diagonal parking.
 [ ] Add utilities
 [ ] Geohazard and NROD areas
 [ ] Add easements
-[ ] Draw arrow on approach
 [ ] Connect to calculators
 [ ] Cost estimates
 [ ] Bike parking
@@ -36,9 +42,6 @@
 [ ] Dimenstions
 [ ] Tree Locations
 [ ] Slope Map
-[X] Change rotation circle to arrow and only 
 [ ] Draw Center lines - Light gray and thin
-[X] Limit on Area, and notify somehow that the max area is reached
 [ ] Add Lock to max size option
 [ ] Let user input the width of the building
-[ ] Merge the "Site plan boundaries" with the "Generate Site plan" There is no reason they should be completely seperate.

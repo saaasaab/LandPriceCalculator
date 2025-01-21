@@ -43,10 +43,10 @@ export class Approach extends SitePlanElement {
 
     this.sitePlanElementCorners.forEach((corner) => {
       p.vertex(corner.x, corner.y);
-      // p.text(i, corner.x, corner.y)
     });
 
 
+ 
     p.endShape(p.CLOSE); // Close the polygon
 
     p.ellipse(this.center.x, this.center.y, 10, 10);
@@ -64,6 +64,20 @@ export class Approach extends SitePlanElement {
 
     //   // p.text(p.round(edge.calculateAngle()), center.x, center.y);
     // })
+
+
+
+
+    const arrowEdge =  this.sitePlanElementEdges[2];
+    const midpoint = arrowEdge.getMidpoint();
+
+    p.translate(midpoint.x,midpoint.y);
+    p.rotate(this.angle);
+
+    p.textAlign("center");
+    p.text('↔', 0, 20)
+
+
 
     p.pop()
 

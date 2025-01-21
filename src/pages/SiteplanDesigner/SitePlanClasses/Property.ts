@@ -1,5 +1,5 @@
 import p5 from "p5";
-import { calculateArea, expandPolygon, polyPoint } from "../../../utils/SiteplanGeneratorUtils";
+import { angularDistance360, calculateAngle, calculateArea, expandPolygon, polyPoint } from "../../../utils/SiteplanGeneratorUtils";
 // import { SitePlanElement } from "./SitePlanElement";
 import { Edge } from "./Edge";
 import { IPoint, Line } from "../SitePlanDesigner";
@@ -126,9 +126,45 @@ export class Property {
     this.p.noFill();
     this.p.stroke('black');
     this.p.strokeWeight(1)
+
     this.propertyCorners.forEach(corner => {
       this.p.ellipse(corner.x, corner.y, 6, 6);
     })
+  }
+
+  drawAnglesBetweenLines() {
+    // Draw interior angle curves between consecutive lines
+    for (let i = 0; i < this.propertyCorners.length; i++) {
+
+      let i1 = i;
+      let i2 = (i + 1) % this.propertyCorners.length;
+      let i3 = (i + 2) % this.propertyCorners.length;
+
+      const p1 = this.p.createVector(this.propertyCorners[i1].x, this.propertyCorners[i1].y);
+      const p2 = this.p.createVector(this.propertyCorners[i2].x, this.propertyCorners[i2].y);
+      const p3 = this.p.createVector(this.propertyCorners[i3].x, this.propertyCorners[i3].y);
+
+      const _angle1 = calculateAngle(p2, p1);
+      const _angle2 = calculateAngle(p2, p3);
+
+      const angle = angularDistance360(_angle1, _angle2);
+
+      const radius = 25;
+      this.p.noFill();
+      this.p.stroke(255, 0, 0);
+      this.p.arc(p2.x, p2.y, radius * 2, radius * 2, _angle1, _angle2);
+
+      // Display the angle value
+      const angleText = `${angle.toFixed(1)}°`;
+      const angleMid = _angle1 + angle / 2;
+      const textX = p2.x + this.p.cos(angleMid) * (radius + 10);
+      const textY = p2.y + this.p.sin(angleMid) * (radius + 10);
+
+      this.p.textSize(12);
+      this.p.noStroke();
+      this.p.fill(255, 0, 0);
+      this.p.text(angleText, textX, textY);
+    }
   }
 
   drawLineLengths() {

@@ -5,7 +5,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale,  displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, initialFormData, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, initialFormData, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
@@ -56,7 +56,14 @@ interface SketchForSiteplanParams {
 
   // inboundMetricsRef: React.MutableRefObject<FormDataInputs>;
   // setOutboundMetrics: React.Dispatch<React.SetStateAction<SiteMetrics>>;
-  formData: FormDataInputs
+  formData: FormDataInputs;
+
+
+  propertyRef: React.MutableRefObject<Property | null>;
+  approachRef: React.MutableRefObject<Approach | null>;
+  parkingRef: React.MutableRefObject<Parking | null>;
+  buildingRef: React.MutableRefObject<Building | null>;
+  garbageRef: React.MutableRefObject<Garbage | null>;
 
 }
 
@@ -79,6 +86,13 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     // inboundMetricsRef,
     // setOutboundMetrics,
     formData,
+
+    propertyRef,
+    approachRef,
+    parkingRef,
+    buildingRef,
+    garbageRef,
+
   } = params;
   const defaultScale = 0.25;
 
@@ -97,12 +111,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
   //   return propertyCorners;
   // }
-
-  const propertyRef = useRef<Property | null>(null);
-  const approachRef = useRef<Approach | null>(null);
-  const parkingRef = useRef<Parking | null>(null);
-  const buildingRef = useRef<Building | null>(null);
-  const garbageRef = useRef<Garbage | null>(null);
 
 
 
@@ -221,13 +229,16 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       displayImage(p, img, rectSize);
       drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
 
+
+
       if (propertyRef.current) {
         propertyRef.current.drawProperty();
         propertyRef.current.drawSetbackPolygon();
         propertyRef.current.drawLineLengths();
+        propertyRef.current.drawAnglesBetweenLines()
       }
       else {
-        drawProtoPropertyLines(p, pointsRef, linesRef, isPolygonClosed, scaleRef.current || defaultScale);
+        drawProtoPropertyLines(p, pointsRef, linesRef, scaleRef.current || defaultScale);
       }
 
       if (approachRef.current) {
@@ -253,9 +264,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         }
 
       }
-
-
-
 
 
 
@@ -519,11 +527,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           }
         }
 
-
-
         if (buildingDragMode !== null) {
           building.drawBuildingEditOptions();
-
         }
 
         if (buildingDragMode === "corner") p.cursor('nesw-resize');
@@ -557,14 +562,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         resizeEdge = null;
         p.cursor('default')
       }
-
-
-
-
-
-
-
-
     };
 
     p.mousePressed = () => {
@@ -584,10 +581,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
 
-
-
       const lineIndex = calculateLineIndexOfClosestLine(points, lines, mx, my)
-
 
       // ALL THINGS UPLOAD
       if (stepSelectorRefs.upload.current) { return }

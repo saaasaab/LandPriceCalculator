@@ -48,6 +48,11 @@ import './SitePlanDesigner.scss';
 import CollapsibleSection from './CollapsibleSection';
 import AlphaBanner from './AlphaBanner';
 import { FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUtils';
+import { Property } from './SitePlanClasses/Property';
+import { Approach } from './SitePlanClasses/Approach';
+import { Garbage } from './SitePlanClasses/Garbage';
+import { Building } from './SitePlanClasses/Building';
+import { Parking } from './SitePlanClasses/Parking';
 
 
 const initialMetrics: SiteMetrics = {
@@ -73,7 +78,6 @@ const SitePlanGenerator: React.FC = () => {
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'entrances'>('upload'); // Interaction mode
 
-  // const [isGeneratingSitePlan, setIsGeneratingSitePlan] = useState(false);
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
   const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
@@ -119,11 +123,19 @@ const SitePlanGenerator: React.FC = () => {
   }
 
   const isPolygonClosedRef = useRef<boolean>(false);
-  const isGeneratingSitePlanRef = useRef<boolean>(false);
   const inputScaleRef = useRef<number | null>(null);
   const scaleRef = useRef<number | null>(null);
   const draggingPointIndexRef = useRef<number | null>(null);
   const selectedLineIndexRef = useRef<number | null>(null);
+
+
+  const propertyRef = useRef<Property | null>(null);
+  const approachRef = useRef<Approach | null>(null);
+  const parkingRef = useRef<Parking | null>(null);
+  const buildingRef = useRef<Building | null>(null);
+  const garbageRef = useRef<Garbage | null>(null);
+
+
 
 
   useEffect(() => {
@@ -152,7 +164,15 @@ const SitePlanGenerator: React.FC = () => {
     // inboundMetricsRef,
     // setOutboundMetrics,
 
-    formData
+    formData,
+
+
+
+    propertyRef,
+    approachRef,
+    parkingRef,
+    buildingRef,
+    garbageRef
   };
   const sketch = sketchForSiteplan(params);
 
@@ -318,7 +338,6 @@ const SitePlanGenerator: React.FC = () => {
     falsifyRefs();
 
     isPolygonClosedRef.current = false;
-    isGeneratingSitePlanRef.current = false;
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
     inputScaleRef.current = null;
@@ -337,7 +356,6 @@ const SitePlanGenerator: React.FC = () => {
   //   // const lines = linesRef.current;
   //   // const scale = scaleRef.current;
   //   // falsifyRefs();
-  //   // isGeneratingSitePlanRef.current = true;
   //   // visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
   // }
 
@@ -357,30 +375,45 @@ const SitePlanGenerator: React.FC = () => {
       icon: <Map />,
       description: 'Click points on the image to draw your property boundary',
       help: 'Click each corner of your property to create the boundary line. Click the first point again to complete the shape.',
-      children:
-        <div style={{ marginTop: '10px' }}>
-          <div className="site-plan-generator__input-group">
-            <label>Max Impervious Percentage</label>
-            <Input
-              id="imperviousPercentage"
-              type="number"
-              min={0}
-              value={formData.imperviousPercentage || ""}
-              onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
-            />
-          </div>
+      children: <>
+        <div className="site-plan-generator__input-group">
+          <label>Enter a legal description</label>
+          <Input
+            id="legalDescription"
+            type="text"
+            min={0}
+            value={""}
+            onChange={(e) => (e)}
+          />
+        </div>
+        {propertyRef.current ?
+          <div style={{ marginTop: '10px' }}>
+            <div className="site-plan-generator__input-group">
+              <label>Max Impervious Percentage</label>
+              <Input
+                id="imperviousPercentage"
+                type="number"
+                min={0}
+                value={formData.imperviousPercentage || ""}
+                onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
+              />
+            </div>
 
-          <div className="site-plan-generator__input-group">
-            <label>Max Building Coverage</label>
-            <Input
-              id="buildingCoveragePercentage"
-              type="number"
-              min={0}
-              value={formData.buildingCoveragePercentage || ""}
-              onChange={(e) => handleNumberInput(e, 'buildingCoveragePercentage')}
-            />
-          </div>
-        </div>,
+            <div className="site-plan-generator__input-group">
+              <label>Max Building Coverage</label>
+              <Input
+                id="buildingCoveragePercentage"
+                type="number"
+                min={0}
+                value={formData.buildingCoveragePercentage || ""}
+                onChange={(e) => handleNumberInput(e, 'buildingCoveragePercentage')}
+              />
+            </div>
+
+
+          </div> : <>  </>}
+
+      </>,
 
       onClick: () => { createPoints() },
     },
@@ -466,44 +499,46 @@ const SitePlanGenerator: React.FC = () => {
       help: 'Mark where vehicles enter the property, typically from the street or main access road.',
       onClick: () => { selectApproach() },
       children:
-        <div style={{ marginTop: '10px' }}>
+        <>
+          {approachRef.current ?
+            <div style={{ marginTop: '10px' }}>
+              <div className="site-plan-generator__input-group">
+                <label htmlFor="approachWidth">Approach Width (ft)</label>
+                <Input
+                  id="approachWidth"
+                  type="number"
+                  min={0}
+                  value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
+                  onChange={(e) => handleNumberInput(e, 'approachWidth')}
+                />
+              </div>
+
+              <div className="site-plan-generator__input-group">
+                <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
+                <Input
+                  id="propertyEntranceCount"
+                  type="number"
+                  min={0}
+                  value={formData.propertyEntranceCount || ""}
+                  onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
+                />
+              </div>
+
+              <div className="site-plan-generator__checkbox">
+                <label htmlFor="taperedDriveway">Tapered Driveway</label>
+
+                <Checkbox
+                  id="taperedDriveway"
+                  checked={formData.taperedDriveway}
+                  onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
+                />
+              </div>
 
 
-          <div className="site-plan-generator__input-group">
-            <label htmlFor="approachWidth">Approach Width (ft)</label>
-            <Input
-              id="approachWidth"
-              type="number"
-              min={0}
-              value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
-              onChange={(e) => handleNumberInput(e, 'approachWidth')}
-            />
-          </div>
-
-          <div className="site-plan-generator__input-group">
-            <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
-            <Input
-              id="propertyEntranceCount"
-              type="number"
-              min={0}
-              value={formData.propertyEntranceCount || ""}
-              onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
-            />
-          </div>
-
-          <div className="site-plan-generator__checkbox">
-            <label htmlFor="taperedDriveway">Tapered Driveway</label>
-
-            <Checkbox
-              id="taperedDriveway"
-              checked={formData.taperedDriveway}
-              onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
-            />
-          </div>
-
-
-        </div>,
-
+            </div>
+            : <></>
+          }
+        </>,
 
       disabled: !isPolygonClosedRef.current
     },
@@ -514,131 +549,133 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Places the parking lot',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createParking() },
-      children: <div style={{ marginTop: '10px' }}>
+      children:
+        <div style={{ marginTop: '10px' }}>
 
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="parkingStalls">Parking Stalls</label>
-          <Input
-            id="parkingStalls"
-            type="number"
-            min={0}
-            value={formData.parkingStalls || ""}
-            onChange={(e) => handleNumberInput(e, 'parkingStalls')}
-          />
-        </div>
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="parkingStalls">Parking Stalls</label>
+            <Input
+              id="parkingStalls"
+              type="number"
+              min={0}
+              value={formData.parkingStalls || ""}
+              onChange={(e) => handleNumberInput(e, 'parkingStalls')}
+            />
+          </div>
 
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="handicappedParkingStalls">Handicapped Parking Stalls</label>
+            <Input
+              id="handicappedParkingStalls"
+              type="number"
+              min={0}
+              value={formData.handicappedParkingStalls || ""}
+              onChange={(e) => handleNumberInput(e, 'handicappedParkingStalls')}
+            />
+          </div>
 
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="handicappedParkingStalls">Handicapped Parking Stalls</label>
-          <Input
-            id="handicappedParkingStalls"
-            type="number"
-            min={0}
-            value={formData.handicappedParkingStalls || ""}
-            onChange={(e) => handleNumberInput(e, 'handicappedParkingStalls')}
-          />
-        </div>
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="compactParkingStalls">Compact Parking Stalls</label>
+            {/* 30 percent of required stalls */}
+            <Input
+              id="compactParkingStalls"
+              type="number"
+              min={0}
+              value={formData.compactParkingStalls || ""}
+              onChange={(e) => handleNumberInput(e, 'compactParkingStalls')}
+            />
+          </div>
 
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="compactParkingStalls">Compact Parking Stalls</label>
-          {/* 30 percent of required stalls */}
-          <Input
-            id="compactParkingStalls"
-            type="number"
-            min={0}
-            value={formData.compactParkingStalls || ""}
-            onChange={(e) => handleNumberInput(e, 'compactParkingStalls')}
-          />
-        </div>
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
+            <Checkbox
+              id="halfStreetDriveway"
+              checked={formData.halfStreetDriveway}
+              onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
+            />
+          </div>
 
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
-          <Checkbox
-            id="halfStreetDriveway"
-            checked={formData.halfStreetDriveway}
-            onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
-          />
-        </div>
+          {formData.halfStreetDriveway ?
+            //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
+            <div className="site-plan-generator__input-group subgroup-1">
+              <label>Parking Side</label>
+              <div className="radio-group">
+                <label>
+                  <input
+                    type="radio"
+                    name="parkingSide"
+                    value="right"
+                    checked={formData.parkingSide === 'right'}
+                    onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                  />
+                  Right Parking
+                </label>
 
-        {formData.halfStreetDriveway ?
-          //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
-          <div className="site-plan-generator__input-group subgroup-1">
-            <label>Parking Side</label>
-            <div className="radio-group">
-              <label>
-                <input
-                  type="radio"
-                  name="parkingSide"
-                  value="right"
-                  checked={formData.parkingSide === 'right'}
-                  onChange={(e) => handleRadioChange(e, 'parkingSide')}
-                />
-                Right Parking
-              </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="parkingSide"
+                    value="left"
+                    checked={formData.parkingSide === 'left'}
+                    onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                  />
+                  Left Parking
+                </label>
+              </div>
+            </div> :
+            <></>
 
-              <label>
-                <input
-                  type="radio"
-                  name="parkingSide"
-                  value="left"
-                  checked={formData.parkingSide === 'left'}
-                  onChange={(e) => handleRadioChange(e, 'parkingSide')}
-                />
-                Left Parking
-              </label>
-            </div>
-          </div> : <></>}
-
-
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="landscapeIsland">Stalls per group</label>
-          <Input
-            id="landscapeIsland"
-            type="number"
-            min={0}
-            value={formData.landscapeIsland || ""}
-            onChange={(e) => handleNumberInput(e, 'landscapeIsland')}
-          />
-        </div>
+          }
 
 
-        {/* disabled"> */}
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="parkingPer1000Min">Minimum Parking per 1000 SQFT</label>
-          <Input
-            id="parkingPer1000Min"
-            type="number"
-            min={0}
-            value={formData.parkingPer1000Min || ""}
-            onChange={(e) => handleNumberInput(e, 'parkingPer1000Min')}
-          />
-        </div>
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="landscapeIsland">Stalls per group</label>
+            <Input
+              id="landscapeIsland"
+              type="number"
+              min={0}
+              value={formData.landscapeIsland || ""}
+              onChange={(e) => handleNumberInput(e, 'landscapeIsland')}
+            />
+          </div>
 
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="parkingPer1000Max">Maximum Parking per 1000 SQFT</label>
-          <Input
-            id="parkingPer1000Max"
-            type="number"
-            min={0}
-            value={formData.parkingPer1000Max || ""}
-            onChange={(e) => handleNumberInput(e, 'parkingPer1000Max')}
-          />
-        </div>
 
-        <div className="site-plan-generator__input-group">
-          <label htmlFor="parkingPerUnit">Parking per Unit</label>
-          <Input
-            id="parkingPerUnit"
-            type="number"
-            min={0}
-            value={formData.parkingPerUnit || ""}
-            onChange={(e) => handleNumberInput(e, 'parkingPerUnit')}
-          />
-        </div>
+          {/* disabled"> */}
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="parkingPer1000Min">Minimum Parking per 1000 SQFT</label>
+            <Input
+              id="parkingPer1000Min"
+              type="number"
+              min={0}
+              value={formData.parkingPer1000Min || ""}
+              onChange={(e) => handleNumberInput(e, 'parkingPer1000Min')}
+            />
+          </div>
 
-      </div>,
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="parkingPer1000Max">Maximum Parking per 1000 SQFT</label>
+            <Input
+              id="parkingPer1000Max"
+              type="number"
+              min={0}
+              value={formData.parkingPer1000Max || ""}
+              onChange={(e) => handleNumberInput(e, 'parkingPer1000Max')}
+            />
+          </div>
 
-      disabled: !isPolygonClosedRef.current
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="parkingPerUnit">Parking per Unit</label>
+            <Input
+              id="parkingPerUnit"
+              type="number"
+              min={0}
+              value={formData.parkingPerUnit || ""}
+              onChange={(e) => handleNumberInput(e, 'parkingPerUnit')}
+            />
+          </div>
+
+        </div>,
+      disabled: !isPolygonClosedRef.current// !approachRef.current?.isInitialized
     },
 
     {
@@ -675,7 +712,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
       </div>,
-      disabled: !isPolygonClosedRef.current
+      disabled: !isPolygonClosedRef.current//!parkingRef.current
     },
     {
       id: 'buildingEntrance',
@@ -684,7 +721,7 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Places the building entrances',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuildingEntrances() },
-      disabled: !isPolygonClosedRef.current
+      disabled: !isPolygonClosedRef.current// !buildingRef.current
     },
 
 
@@ -711,11 +748,14 @@ const SitePlanGenerator: React.FC = () => {
             {/* {isGeneratingSitePlan ? */}
 
             <div className="sidebar">
-              <CollapsibleSection title="Site Plan Steps" isDefaultOpen={!isGeneratingSitePlanRef.current}>
+              <CollapsibleSection title="Site Plan Steps"
+                isDefaultOpen={true}>
                 <div className="site-plan-generator__sidebar">
 
                   <div className="site-plan-generator__sidebar-content">
                     {steps.map((step, index) => (
+
+
                       <div
                         key={step.id}
                         className={`site-plan-generator__step 
@@ -744,6 +784,7 @@ const SitePlanGenerator: React.FC = () => {
                         {index === currentStep ? step.children : <></>}
                       </div>
                     ))}
+
 
 
                     <div
@@ -793,7 +834,7 @@ const SitePlanGenerator: React.FC = () => {
 
             <CardContent>
               <div className="site-plan-generator__visualization-container" ref={canvasContainerRef}>
-                {mode === "upload" && !isGeneratingSitePlanRef.current && !imageURL ?
+                {mode === "upload" && !imageURL ?
                   <ImageUploader onFileUpload={setImageURL} /> : <></>}
 
 

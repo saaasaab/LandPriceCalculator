@@ -120,7 +120,7 @@ export const p5VectorToTPoint = (vectors: p5.Vector[]): TPoint[] => {
   })
 }
 
-export function clampNumber(value:number, min:number, max:number) {
+export function clampNumber(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 };
 export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
@@ -862,6 +862,11 @@ export function angularDistance(angle1: number, angle2: number): number {
   return Math.min(diff, 180 - diff);
 }
 
+export function angularDistance360(angle1: number, angle2: number): number {
+  const diff = Math.abs(angle1 - angle2);
+  return Math.min(diff, 360 - diff);
+}
+
 export function getBoundingBox(points: p5.Vector[]) {
   const minX = Math.min(...points.map((p) => p.x));
   const minY = Math.min(...points.map((p) => p.y));
@@ -1010,7 +1015,7 @@ export function drawArea(
 
   p.textAlign(p.RIGHT)
   p.textSize(18);
-  p.text(`Area: ${area.toFixed(1)} sq ft - ${(area/43560).toFixed(2)} Acres`, p.width - 10, 20);
+  p.text(`Area: ${area.toFixed(1)} sq ft - ${(area / 43560).toFixed(2)} Acres`, p.width - 10, 20);
   p.pop();
 }
 
@@ -1103,7 +1108,6 @@ export function drawInstructionsToScreen(
 export function drawProtoPropertyLines(p: p5,
   pointsRef: React.MutableRefObject<IPoint[]>,
   linesRef: React.MutableRefObject<Line[]>,
-  isPolygonClosed: boolean,
   scale: number,
 ) {
   p.push();
@@ -1111,11 +1115,9 @@ export function drawProtoPropertyLines(p: p5,
   const lines = linesRef.current;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-
     if (line.isApproach && line.isScale) {
       p.strokeWeight(4)
       p.stroke(230, 120, 20);
-
     }
     else if (line.isApproach) {
       p.stroke(20, 230, 120);
@@ -1131,7 +1133,6 @@ export function drawProtoPropertyLines(p: p5,
     p.strokeWeight(2);
     p.noStroke();
     p.fill(0, 20, 220);
-
     const midX = (points[line.start].x + points[line.end].x) / 2;
     const midY = (points[line.start].y + points[line.end].y) / 2;
     const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale);
@@ -1139,27 +1140,105 @@ export function drawProtoPropertyLines(p: p5,
     // if is finished, make the text larger.
     p.textSize(14);
     p.text(`${length.toFixed(1)} ft`, midX, midY);
-
-
   }
 
-  if (isPolygonClosed) {
-    p.fill(10, 20, 200, 20);
-    p.beginShape();
-    for (const point of points) {
-      p.vertex(point.x, point.y);
-    }
-    p.endShape();
-  }
 
+
+
+
+
+  // Draws the phantom line and point
+  const lastPoint = points[points.length - 1];
+
+  if (points.length > 0) {
+    p.stroke(0, 20, 220);
+    p.line(lastPoint.x, lastPoint.y, p.mouseX, p.mouseY);
+
+    p.strokeWeight(2);
+    p.noStroke();
+
+    p.fill(0, 20, 220);
+    const midX = (lastPoint.x + p.mouseX) / 2;
+    const midY = (lastPoint.y + p.mouseY) / 2;
+    const length = Math.hypot(lastPoint.x - p.mouseX, lastPoint.y - p.mouseY) * (scale);
+
+    // if is finished, make the text larger.
+    p.textSize(14);
+    p.text(`${length.toFixed(1)} ft`, midX, midY);
+  }
 
   p.fill(255, 0, 0);
   for (const point of points) {
     p.noStroke();
     p.ellipse(point.x, point.y, 10, 10);
   }
+  p.ellipse(p.mouseX, p.mouseY, 10, 10);
 
   p.pop();
+
+
+
+
+  // Draw interior angle curves between consecutive lines
+  for (let i = 0; i < points.length - 2; i++) {
+    const p1 = p.createVector(points[i].x,points[i].y);
+    const p2 = p.createVector(points[i + 1].x,points[i + 1].y);
+    const p3 = p.createVector(points[i + 2].x,points[i + 2].y);
+
+    const _angle1 = calculateAngle( p2,p1);
+    const _angle2 = calculateAngle(p2,p3);
+
+    const angle = angularDistance360(_angle1,_angle2);
+
+    const radius = 25;
+    p.noFill();
+    p.stroke(255, 0, 0);
+    p.arc(p2.x, p2.y, radius * 2, radius * 2,_angle1, _angle2);
+
+    // Display the angle value
+    const angleText = `${angle.toFixed(1)}°`;
+    const angleMid = _angle1 + angle / 2;
+    const textX = p2.x + p.cos(angleMid) * (radius + 10);
+    const textY = p2.y + p.sin(angleMid) * (radius + 10);
+
+    p.textSize(12);
+    p.noStroke();
+    p.fill(255, 0, 0);
+    p.text(angleText, textX, textY);
+  }
+
+  // Draw angle for phantom line
+  if (points.length > 1) {
+    const lastPoint = points[points.length - 1];
+    const secondLastPoint = points[points.length - 2];
+
+    const p1 = p.createVector(secondLastPoint.x,secondLastPoint.y);
+    const p2 = p.createVector(lastPoint.x,lastPoint.y);
+    const p3 = p.createVector(p.mouseX,p.mouseY);
+
+    const _angle1 = calculateAngle( p2,p1);
+    const _angle2 = calculateAngle(p2,p3);
+
+    const angle = angularDistance360(_angle1,_angle2);
+    const radius = 25;  
+    p.noFill();
+    p.stroke(255, 0, 0);
+    p.arc(p2.x, p2.y, radius * 2, radius * 2,_angle1, _angle2);
+
+
+    // Display the angle value
+
+    const angleText = `${angle.toFixed(1)}°`;
+    const angleMid = _angle1 + angle / 2;
+    const textX = lastPoint.x + p.cos(angleMid) * (radius + 10);
+    const textY = lastPoint.y + p.sin(angleMid) * (radius + 10);
+
+    p.textSize(12);
+    p.noStroke();
+    p.fill(0, 255, 0);
+    p.text(angleText, textX, textY);
+  }
+
 }
 
 export function calculateLineIndexOfClosestLine(
