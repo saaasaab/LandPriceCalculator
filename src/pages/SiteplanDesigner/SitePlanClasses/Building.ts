@@ -1,21 +1,26 @@
 import p5 from "p5";
 import { Entrance } from "./Entrance";
 import { SitePlanElement } from "./SitePlanElement";
-import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, expandPolygon, getCenterPoint, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
+import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, drawNeonShape, expandPolygon, getCenterPoint, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
 import { Parking } from "./Parking";
 import { Property } from "./Property";
 import { Garbage } from "./Garbage";
-import { drawNeonShape, Point, SitePlanObjects } from "../sketchForSiteplan";
+import { Point, SitePlanObjects } from "../sketchForSiteplan";
+import { initialFormData } from "../SitePlanDesigner";
 
 export class Building extends SitePlanElement {
   public isInitialized = false;
   public frameCount = 0;
   public entrances: Entrance[] = [];
-  public buildingAreaTarget: number;
   public buildingAreaActual: number;
   public hasStopped: boolean;
   public ismoving: boolean;
   public areaExceeded: boolean;
+
+
+  // Input Constraints
+  public buildingAreaTarget: number;
+  public buildingCount: number;
 
   constructor(
     p: p5,
@@ -29,11 +34,15 @@ export class Building extends SitePlanElement {
   ) {
     // Call the parent class constructor to initialize all inherited variables
     super(p, center, width, height, angle, elementType, scale, offsetSize);
-    this.buildingAreaTarget = 1500;
     this.buildingAreaActual = 0;
     this.hasStopped = true;
     this.ismoving = false;
     this.areaExceeded = false;
+
+
+    // Input Constraints
+    this.buildingAreaTarget = initialFormData.buildingAreaTarget
+    this.buildingCount = initialFormData.buildingCount
   }
 
   initializeBuilding(x: number, y: number,) {
@@ -63,13 +72,13 @@ export class Building extends SitePlanElement {
     // Should be in sqrt ft
     this.buildingAreaTarget = area;
   }
-  drawBuildingEditOptions(){
+  drawBuildingEditOptions() {
     const p = this.p;
     const building = this
-    const offset = expandPolygon(this.p,  building.offsetSitePlanElementCorners,-this.offsetSize/2);
-    
-    
-    
+    const offset = expandPolygon(this.p, building.offsetSitePlanElementCorners, -this.offsetSize / 2);
+
+
+
     // Lines for all the edges
     p.push()
     p.noFill();
@@ -171,7 +180,7 @@ export class Building extends SitePlanElement {
 
       this.p.push();
       this.p.textSize(16)
-      this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x,  this.center.y - this.height/2)
+      this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 2)
       this.p.textAlign(this.p.CENTER, this.p.CENTER);
       this.p.pop();
     }
@@ -253,7 +262,7 @@ export class Building extends SitePlanElement {
 
   updateBuildingAreaActual(area: number) {
     this.buildingAreaActual = area;
-  if (area > this.buildingAreaTarget) {
+    if (area > this.buildingAreaTarget) {
       this.areaExceeded = true;
     }
     else {

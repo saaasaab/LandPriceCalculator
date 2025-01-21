@@ -1,16 +1,21 @@
-export interface FormData {
+export interface FormDataInputs {
   approachWidth: number;
-  buildingArea: number;
+  buildingAreaTarget: number;
   buildingCount: number;
   drivewayWidth: number;
   halfStreetDriveway: boolean;
   imperviousPercentage: number;
+  buildingCoveragePercentage: number;
   landscapeIsland: number;
-  parkingPer1000: number;
+  parkingPer1000Min: number;
+  parkingPer1000Max: number;
   parkingStalls: number;
+  handicappedParkingStalls: number;
+  compactParkingStalls: number;
   propertyEntranceCount: number;
   taperedDriveway: boolean;
   parkingSide: 'right' | 'left';
+  parkingPerUnit: 1.5,
 }
 
 export interface SiteMetrics {
@@ -26,6 +31,8 @@ export interface SiteMetrics {
   propertyArea: number;
   sidewalkArea: number;
   totalParkingStalls: number;
+
+  totalAreaDedicatedToSetbacks: number
 }
 
 export interface IPoint {
@@ -46,52 +53,59 @@ export interface Line {
 }
 
 import p5 from 'p5';
-import React, { useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 
 import { Map, ArrowRight, Ruler, FileImage, Delete, Car } from 'lucide-react'; //Box,
 
-import { Card, CardContent } from '../../components/ui';
+import { Card, CardContent, Checkbox, Input } from '../../components/ui';
 
-import sketchForSiteplan  from './sketchForSiteplan';
+import sketchForSiteplan from './sketchForSiteplan';
 import ImageUploader from './ImageUploader';
 
 import './SitePlanDesigner.scss';
 import CollapsibleSection from './CollapsibleSection';
 import AlphaBanner from './AlphaBanner';
 
-// const initialFormData: FormData = {
-//   parkingStalls: 4,
-//   approachWidth: 20,
-//   drivewayWidth: 24,
-//   buildingArea: 1500,
-//   taperedDriveway: true,
-//   propertyEntranceCount: 1,
-//   buildingCount: 1,
-//   landscapeIsland: 7,
-//   parkingPer1000: 2.4,
-//   imperviousPercentage: 70,
-//   halfStreetDriveway: false,
-//   parkingSide: 'left',
-// };
+export const initialFormData: FormDataInputs = {
+  parkingStalls: 4,
+  handicappedParkingStalls: 0,
+  compactParkingStalls: 1,
+  approachWidth: 20,
+  drivewayWidth: 24,
+  buildingAreaTarget: 1500,
+  taperedDriveway: true,
+  propertyEntranceCount: 1,
+  buildingCount: 1,
+  landscapeIsland: 7,
+  parkingPer1000Min: 2.4,
+  parkingPer1000Max: 4.5,
+  imperviousPercentage: 70,
+  buildingCoveragePercentage: 70,
+  halfStreetDriveway: false,
+  parkingSide: 'left',
+  parkingPerUnit: 1.5,
+};
 
-// const initialMetrics: SiteMetrics = {
-//   propertyArea: 12192,
-//   imperviousSurface: 12192,
-//   drivewayArea: 521,
-//   parkingArea: 936,
-//   parkingStallsArea: 1156,
-//   handicappedStallsCount: 0,
-//   totalParkingStalls: 8,
-//   sidewalkArea: 0,
-//   garbageArea: 2808,
-//   actualBuildingArea: 1500,
-//   approachArea: 62,
-//   bikeParkingArea: 0
-// };
+const initialMetrics: SiteMetrics = {
+  propertyArea: 12192,
+  imperviousSurface: 12192,
+  drivewayArea: 521,
+  parkingArea: 936,
+  parkingStallsArea: 1156,
+  handicappedStallsCount: 0,
+  totalParkingStalls: 8,
+  sidewalkArea: 0,
+  garbageArea: 2808,
+  actualBuildingArea: 1500,
+  approachArea: 62,
+  bikeParkingArea: 0,
+  totalAreaDedicatedToSetbacks: 1000,
+};
+
 
 const SitePlanGenerator: React.FC = () => {
-  // const [formData, setFormData] = useState<FormData>(initialFormData);
-  // const [metrics, _setMetrics] = useState<SiteMetrics>(initialMetrics);
+  const [formData, setFormData] = useState<FormDataInputs>(initialFormData);
+  const [metrics, _setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'entrances'>('upload'); // Interaction mode
 
@@ -102,6 +116,12 @@ const SitePlanGenerator: React.FC = () => {
 
 
   const [currentStep, setCurrentStep] = useState(0);
+
+
+  // const [outboundMetrics, setOutboundMetrics] = useState<SiteMetrics>(initialMetrics);
+
+
+
   // const [isHelpVisible, setIsHelpVisible] = useState(true);
 
   // Property Outputs
@@ -123,7 +143,6 @@ const SitePlanGenerator: React.FC = () => {
   const isPlacingBuildingRef = useRef<boolean>(false);
   const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
 
-
   const stepSelectorRefs = {
     upload: isUploadingImageRef,
     points: isUpdatingBoundaryPointsRef,
@@ -143,13 +162,11 @@ const SitePlanGenerator: React.FC = () => {
   const selectedLineIndexRef = useRef<number | null>(null);
 
 
-
   useEffect(() => {
     if (imageURL) {
       createPoints()
     }
   }, [imageURL])
-
 
 
   const params = {
@@ -166,9 +183,17 @@ const SitePlanGenerator: React.FC = () => {
     setbacksRef,
     setIsPolygonClosedState,
     stepSelectorRefs,
-    clearEverythingRef
+    clearEverythingRef,
+
+    // inboundMetricsRef,
+    // setOutboundMetrics,
+
+    formData
   };
   const sketch = sketchForSiteplan(params);
+
+
+
 
 
   useEffect(() => {
@@ -178,84 +203,55 @@ const SitePlanGenerator: React.FC = () => {
     };
   }, [imageURL]);
 
-  // const handleInputChange = (field: keyof FormData, value: number | boolean | string): void => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     [field]: value
-  //   }));
-  // };
+  const handleInputChange = (field: keyof FormDataInputs, value: number | boolean | string): void => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-  // const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
-  //   const value = e.target.value; // Value is a string ('right' or 'left')
-  //   handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
-  // };
+  const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormDataInputs): void => {
+    const value = e.target.value; // Value is a string ('right' or 'left')
+    handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
+  };
 
-  // const handleBooleanInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
-  //   const value = e.target.checked; // `checked` gives the boolean state of the input
-  //   handleInputChange(field, value);
-  // };
+  const handleBooleanInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormDataInputs): void => {
+    const value = e.target.checked; // `checked` gives the boolean state of the input
+    handleInputChange(field, value);
+  };
 
-  // const handleNumberInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
-  //   const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-  //   if (!isNaN(value)) {
-  //     handleInputChange(field, value);
-  //   }
-  // };
+  const handleNumberInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormDataInputs): void => {
+    const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+    if (!isNaN(value)) {
+      handleInputChange(field, value);
+    }
+  };
 
-  // const formatMetricValue = (key: keyof SiteMetrics, value: number): string => {
-  //   const formattedValue = value.toLocaleString();
-  //   return key.toLowerCase().includes('area') ? `${formattedValue} sq ft` : formattedValue;
-  // };
+  const formatMetricValue = (key: keyof SiteMetrics, value: number): string => {
+    const formattedValue = value.toLocaleString();
+    return key.toLowerCase().includes('area') ? `${formattedValue} sq ft` : formattedValue;
+  };
 
-  // const formatMetricLabel = (key: string): string => {
-  //   return key.replace(/([A-Z])/g, ' $1').trim().replace(/\b\w/g, (char) => char.toUpperCase());
-  // };
-
-
-
-  // useEffect(() => {
-  //   const updateVariables = () => {
-  //     console.log("There be danger here")
-
-  //     const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
-
-  //     const _metrics: SiteMetrics = {
-  //       propertyArea: visualizer.current?.property?.areaOfProperty || 0,
-  //       imperviousSurface: visualizer.current?.property?.areaOfProperty || 0,
-  //       drivewayArea: visualizer.current?.drivewayArea || 0,
-  //       parkingArea: visualizer.current?.parking?.parkingArea || 0,
-  //       parkingStallsArea: visualizer.current?.parking?.parkingStallsArea || 0,
-  //       handicappedStallsCount: visualizer.current?.parking?.handicappedParkingNum || 0,
-  //       totalParkingStalls: leftStalls + rightStalls,
-  //       sidewalkArea: visualizer.current?.sidewalkArea || 0,
-  //       garbageArea: visualizer.current?.garbage?.area || 0,
-  //       actualBuildingArea: visualizer.current?.building?.buildingAreaActual || 0,
-  //       approachArea: visualizer.current?.approach?.approachArea || 0,
-  //       bikeParkingArea: visualizer.current?.bikeParkingArea || 0,
-  //     };
-  //     setMetrics(_metrics);
-  //   };
-
-
-  //   if (visualizer.current) {
-  //     const interval = setInterval(updateVariables, 500); // Check for changes periodically
-
-  //     return () => clearInterval(interval);
-  //   }
-
-  // }, [visualizer?.current]);
+  const formatMetricLabel = (key: string): string => {
+    return key.replace(/([A-Z])/g, ' $1').trim().replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   // useEffect(() => {
 
   //   const updatedGlobals = {
   //     approachWidth: formData.approachWidth,
-  //     parkingNumber: formData.parkingStalls,
+  //     parkingStallsNum: formData.parkingStalls,
   //     parkingDrivewayWidth: formData.drivewayWidth,
   //     buildingAreaTarget: formData.buildingArea,
   //     globalAngle: globalAngle,
   //     taperParking: formData.taperedDriveway
   //   }
 
+  //   console.log(`formData.parkingStalls`, formData.parkingStalls)
+
+  //   // setBigBucketOfFormData(updatedGlobals)
+  //   // setNumberOfParkingStalls(formData.parkingStalls)
+  //   // inboundMetricsRef.current.parkingStalls = formData.parkingStalls;
   //   // visualizer.current?.updateGlobalVariables(updatedGlobals)
   // }, [formData, globalAngle])
 
@@ -397,6 +393,31 @@ const SitePlanGenerator: React.FC = () => {
       icon: <Map />,
       description: 'Click points on the image to draw your property boundary',
       help: 'Click each corner of your property to create the boundary line. Click the first point again to complete the shape.',
+      children:
+        <div style={{ marginTop: '10px' }}>
+          <div className="site-plan-generator__input-group">
+            <label>Max Impervious Percentage</label>
+            <Input
+              id="imperviousPercentage"
+              type="number"
+              min={0}
+              value={formData.imperviousPercentage || ""}
+              onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
+            />
+          </div>
+
+          <div className="site-plan-generator__input-group">
+            <label>Max Building Coverage</label>
+            <Input
+              id="buildingCoveragePercentage"
+              type="number"
+              min={0}
+              value={formData.buildingCoveragePercentage || ""}
+              onChange={(e) => handleNumberInput(e, 'buildingCoveragePercentage')}
+            />
+          </div>
+        </div>,
+
       onClick: () => { createPoints() },
     },
     {
@@ -449,22 +470,21 @@ const SitePlanGenerator: React.FC = () => {
                     width: "75px",
                   }}
                 >Edge #{index + 1}</div>
-                <label>Edge #{index + 1} </label>
-                <input
 
-                  type="number"
-                  value={line.setback === 0 ? "" : line.setback}
-                  onChange={(e) => {
-                    updateSetback(index, e.target.value)
+                <div className="site-plan-generator__input-group">
+                  <label htmlFor={`Edge #${index + 1}`}>Edge #{index + 1}</label>
+                  <Input
+                    id={`Edge #${index + 1}`}
+                    type="number"
+                    min={0}
+                    value={line.setback === 0 ? "" : line.setback}
+                    onChange={(e) => { updateSetback(index, e.target.value) }}
+                    tabIndex={index + 1}
+                  />
+                </div>
 
 
-                  }}
-                  tabIndex={index + 1}
-                  style={{
 
-                    width: "50px",
-                  }}
-                />
               </div>
 
             );
@@ -481,6 +501,45 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Click to indicate where the property is accessed from',
       help: 'Mark where vehicles enter the property, typically from the street or main access road.',
       onClick: () => { selectApproach() },
+      children:
+        <div style={{ marginTop: '10px' }}>
+
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="approachWidth">Approach Width (ft)</label>
+            <Input
+              id="approachWidth"
+              type="number"
+              min={0}
+              value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
+              onChange={(e) => handleNumberInput(e, 'approachWidth')}
+            />
+          </div>
+
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
+            <Input
+              id="propertyEntranceCount"
+              type="number"
+              min={0}
+              value={formData.propertyEntranceCount || ""}
+              onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
+            />
+          </div>
+
+          <div className="site-plan-generator__checkbox">
+            <label htmlFor="taperedDriveway">Tapered Driveway</label>
+
+            <Checkbox
+              id="taperedDriveway"
+              checked={formData.taperedDriveway}
+              onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
+            />
+          </div>
+
+
+        </div>,
+
+
       disabled: !isPolygonClosedRef.current
     },
     {
@@ -490,6 +549,130 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Places the parking lot',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createParking() },
+      children: <div style={{ marginTop: '10px' }}>
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="parkingStalls">Parking Stalls</label>
+          <Input
+            id="parkingStalls"
+            type="number"
+            min={0}
+            value={formData.parkingStalls || ""}
+            onChange={(e) => handleNumberInput(e, 'parkingStalls')}
+          />
+        </div>
+
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="handicappedParkingStalls">Handicapped Parking Stalls</label>
+          <Input
+            id="handicappedParkingStalls"
+            type="number"
+            min={0}
+            value={formData.handicappedParkingStalls || ""}
+            onChange={(e) => handleNumberInput(e, 'handicappedParkingStalls')}
+          />
+        </div>
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="compactParkingStalls">Compact Parking Stalls</label>
+          {/* 30 percent of required stalls */}
+          <Input
+            id="compactParkingStalls"
+            type="number"
+            min={0}
+            value={formData.compactParkingStalls || ""}
+            onChange={(e) => handleNumberInput(e, 'compactParkingStalls')}
+          />
+        </div>
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
+          <Checkbox
+            id="halfStreetDriveway"
+            checked={formData.halfStreetDriveway}
+            onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
+          />
+        </div>
+
+        {formData.halfStreetDriveway ?
+          //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
+          <div className="site-plan-generator__input-group subgroup-1">
+            <label>Parking Side</label>
+            <div className="radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="parkingSide"
+                  value="right"
+                  checked={formData.parkingSide === 'right'}
+                  onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                />
+                Right Parking
+              </label>
+
+              <label>
+                <input
+                  type="radio"
+                  name="parkingSide"
+                  value="left"
+                  checked={formData.parkingSide === 'left'}
+                  onChange={(e) => handleRadioChange(e, 'parkingSide')}
+                />
+                Left Parking
+              </label>
+            </div>
+          </div> : <></>}
+
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="landscapeIsland">Stalls per group</label>
+          <Input
+            id="landscapeIsland"
+            type="number"
+            min={0}
+            value={formData.landscapeIsland || ""}
+            onChange={(e) => handleNumberInput(e, 'landscapeIsland')}
+          />
+        </div>
+
+
+        {/* disabled"> */}
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="parkingPer1000Min">Minimum Parking per 1000 SQFT</label>
+          <Input
+            id="parkingPer1000Min"
+            type="number"
+            min={0}
+            value={formData.parkingPer1000Min || ""}
+            onChange={(e) => handleNumberInput(e, 'parkingPer1000Min')}
+          />
+        </div>
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="parkingPer1000Max">Maximum Parking per 1000 SQFT</label>
+          <Input
+            id="parkingPer1000Max"
+            type="number"
+            min={0}
+            value={formData.parkingPer1000Max || ""}
+            onChange={(e) => handleNumberInput(e, 'parkingPer1000Max')}
+          />
+        </div>
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="parkingPerUnit">Parking per Unit</label>
+          <Input
+            id="parkingPerUnit"
+            type="number"
+            min={0}
+            value={formData.parkingPerUnit || ""}
+            onChange={(e) => handleNumberInput(e, 'parkingPerUnit')}
+          />
+        </div>
+
+      </div>,
+
       disabled: !isPolygonClosedRef.current
     },
 
@@ -500,7 +683,33 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Places the Building',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuilding() },
+      children: <div style={{ marginTop: '10px' }}>
 
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="buildingAreaTarget">Max Building Area (sq ft)</label>
+          <Input
+            id="buildingAreaTarget"
+            type="number"
+            min={0}
+            value={formData.buildingAreaTarget || ""}
+            onChange={(e) => handleNumberInput(e, 'buildingAreaTarget')}
+          />
+        </div>
+
+
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="buildingCount">Number of Buildings</label>
+          <Input
+            id="buildingCount"
+            type="number"
+            min={0}
+            value={formData.buildingCount || ""}
+            onChange={(e) => handleNumberInput(e, 'buildingCount')}
+          />
+        </div>
+
+
+      </div>,
       disabled: !isPolygonClosedRef.current
     },
     {
@@ -592,167 +801,9 @@ const SitePlanGenerator: React.FC = () => {
 
                   </div>
                 </div>
-
-
               </CollapsibleSection>
 
-
-              {/* Input Parameters Section */}
-              {/* <CollapsibleSection title="Site Plan Inputs">
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="parkingStalls">Parking Stalls</label>
-                  <Input
-                    id="parkingStalls"
-                    type="number"
-                    min={0}
-                    value={formData.parkingStalls || ""}
-                    onChange={(e) => handleNumberInput(e, 'parkingStalls')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="approachWidth">Approach Width (ft)</label>
-                  <Input
-                    id="approachWidth"
-                    type="number"
-                    min={0}
-                    value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
-                    onChange={(e) => handleNumberInput(e, 'approachWidth')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="drivewayWidth">Driveway Width (ft)</label>
-                  <Input
-                    id="drivewayWidth"
-                    type="number"
-                    min={0}
-                    value={formData.drivewayWidth || ""}
-                    onChange={(e) => handleNumberInput(e, 'drivewayWidth')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="buildingArea">Max Building Area (sq ft)</label>
-                  <Input
-                    id="buildingArea"
-                    type="number"
-                    min={0}
-                    value={formData.buildingArea || ""}
-                    onChange={(e) => handleNumberInput(e, 'buildingArea')}
-                  />
-                </div>
-
-
-                <div className="site-plan-generator__input-group">
-                  <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
-                  <Checkbox
-                    id="halfStreetDriveway"
-                    checked={formData.halfStreetDriveway}
-                    onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
-                  />
-                </div>
-
-
-
-
-                {formData.halfStreetDriveway ?
-                  //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
-                  <div className="site-plan-generator__input-group subgroup-1">
-                    <label>Parking Side</label>
-                    <div className="radio-group">
-                      <label>
-                        <input
-                          type="radio"
-                          name="parkingSide"
-                          value="right"
-                          checked={formData.parkingSide === 'right'}
-                          onChange={(e) => handleRadioChange(e, 'parkingSide')}
-                        />
-                        Right Parking
-                      </label>
-
-                      <label>
-                        <input
-                          type="radio"
-                          name="parkingSide"
-                          value="left"
-                          checked={formData.parkingSide === 'left'}
-                          onChange={(e) => handleRadioChange(e, 'parkingSide')}
-                        />
-                        Left Parking
-                      </label>
-                    </div>
-                  </div> : <></>}
-
-                <div className="site-plan-generator__checkbox disabled">
-                  <label htmlFor="taperedDriveway">Tapered Driveway</label>
-
-                  <Checkbox
-                    id="taperedDriveway"
-                    checked={formData.taperedDriveway}
-                    onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
-                  />
-                </div>
-
-
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
-                  <Input
-                    id="propertyEntranceCount"
-                    type="number"
-                    min={0}
-                    value={formData.propertyEntranceCount || ""}
-                    onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="buildingCount">Building Count</label>
-                  <Input
-                    id="buildingCount"
-                    type="number"
-                    min={0}
-                    value={formData.buildingCount || ""}
-                    onChange={(e) => handleNumberInput(e, 'buildingCount')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="landscapeIsland">Stall / Landscape Stall Ratio</label>
-                  <Input
-                    id="landscapeIsland"
-                    type="number"
-                    min={0}
-                    value={formData.landscapeIsland || ""}
-                    onChange={(e) => handleNumberInput(e, 'landscapeIsland')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="parkingPer1000">Minimum Parking per 1000 SQFT</label>
-                  <Input
-                    id="parkingPer1000"
-                    type="number"
-                    min={0}
-                    value={formData.parkingPer1000 || ""}
-                    onChange={(e) => handleNumberInput(e, 'parkingPer1000')}
-                  />
-                </div>
-
-                <div className="site-plan-generator__input-group disabled">
-                  <label htmlFor="imperviousPercentage">Impervious Surface %</label>
-                  <Input
-                    id="imperviousPercentage"
-                    type="number"
-                    min={0}
-                    value={formData.imperviousPercentage || ""}
-                    onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
-                  />
-                </div>
-              </CollapsibleSection> */}
-              {/* 
-              Site Metrics Section
+              {/* Site Metrics Section */}
               <CollapsibleSection title="Site Plan Metrics">
                 <div className="site-plan-generator__metrics-container">
                   {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
@@ -762,7 +813,7 @@ const SitePlanGenerator: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </CollapsibleSection> */}
+              </CollapsibleSection>
 
             </div>
 

@@ -20,6 +20,11 @@ export class Property {
   public areaOfProperty: number;
 
 
+  // INPUT CONTSTRAINTS
+  public drivewayWidth: number;
+  public taperedDriveway: boolean;
+  public buildingCoveragePercentage: number;
+  public imperviousPercentage: number;
 
   constructor(p: p5, propertyCorners: p5.Vector[], isClockwise: boolean, scale: number, setbacks: number[]) {
     this.p = p;
@@ -29,6 +34,16 @@ export class Property {
     this.scale = scale;
     this.setbacks = setbacks;
     this.areaOfProperty = 0;
+
+
+    //INPUT CONTSTRAINTS
+    this.buildingCoveragePercentage = 70;
+    this.imperviousPercentage = 70;
+    this.taperedDriveway = true;
+    this.drivewayWidth = 24;
+
+
+
   }
 
 
@@ -56,7 +71,7 @@ export class Property {
 
   updateSetbacks(lines: Line[]) {
     lines.forEach((line, i) => {
-      this.propertyEdges[i].setback = (this.isClockwise? 1: -1)*(line.setback/this.scale)
+      this.propertyEdges[i].setback = (this.isClockwise ? 1 : -1) * (line.setback / this.scale)
     })
     this.calculateCornerOffsetsFromSetbacks()
   }
@@ -116,7 +131,7 @@ export class Property {
     })
   }
 
-  drawLineLengths(){
+  drawLineLengths() {
     this.propertyEdges.forEach((edge) => {
       edge.drawLine()
 

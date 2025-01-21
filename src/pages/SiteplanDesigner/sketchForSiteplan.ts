@@ -1,12 +1,11 @@
 import p5 from "p5";
 import { useRef } from "react";
-import classifyPoint from "robust-point-in-polygon"
 
-import { IPoint, Line } from "./SitePlanDesigner";
+import { FormDataInputs, initialFormData, IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateAngle, calculateApproachArea, calculateCentroid, calculatePointToEdgeDistance, findClosestEdge, getCenterPoint, getIsClockwise, getParkingStallArea, isMoreVertical, normalizeAngle, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
@@ -55,8 +54,11 @@ interface SketchForSiteplanParams {
   };
   clearEverythingRef: React.MutableRefObject<boolean>;
 
-}
+  // inboundMetricsRef: React.MutableRefObject<FormDataInputs>;
+  // setOutboundMetrics: React.Dispatch<React.SetStateAction<SiteMetrics>>;
+  formData: FormDataInputs
 
+}
 
 export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   const {
@@ -73,63 +75,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     setbacksRef,
     setIsPolygonClosedState,
     stepSelectorRefs,
-    clearEverythingRef
+    clearEverythingRef,
+    // inboundMetricsRef,
+    // setOutboundMetrics,
+    formData,
   } = params;
   const defaultScale = 0.25;
-
-
-
-  // public points: IPoint[];
-  // public lines: Line[];
-  // public scale: number;
-  // public parkingNum: number;
-  // public drivewayArea: number;
-  // public property: Property | null;
-  // public parking: Parking | null;
-  // public building: Building | null;
-  // public garbage: Garbage | null;
-  // public approach: Approach | null;
-  // public pathCellIndex: number;
-  // public sidewalkArea: number;
-  // public bikeParkingArea: number;
-  // public globalAngle: number;
-  // public globalAnglePrev: number;
-  // public taperParking: boolean;
-  // public buildingDragMode: string | null;
-  // public parkingDragMode: string | null;
-  // public resizeEdges: number[] | null;
-  // public resizeCorner: number | null;
-  // public resizeEdge: number | null;
-  // public resizingbuilding: boolean;
-  // public dragOffset: { x: number, y: number };
-
-
-
-  // constructor(points: IPoint[], lines: Line[], scale: number) {
-  //   this.globalAngle = 0;
-  //   this.globalAnglePrev = 0;
-  //   this.points = points;
-  //   this.lines = lines;
-  //   this.scale = scale;
-  //   this.parkingNum = 10;
-  //   this.property = null;
-  //   this.parking = null;
-  //   this.building = null;
-  //   this.garbage = null;
-  //   this.approach = null;
-  //   this.pathCellIndex = 0;
-  //   this.drivewayArea = 0;
-  //   this.sidewalkArea = 0;
-  //   this.bikeParkingArea = 0;
-  //   this.taperParking = true;
-  //   this.buildingDragMode = null; // null, 'center', 'edge', 'corner'
-  //   this.parkingDragMode = null; // null, 'center', 'edge', 'corner'
-  //   this.dragOffset = { x: 0, y: 0 };
-  //   this.resizeEdge = null;
-  //   this.resizeEdges = null
-  //   this.resizeCorner = null;
-  //   this.resizingbuilding = false;
-  // }
 
 
   // const defaultEdges = (p: p5) => {
@@ -154,6 +105,18 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   const garbageRef = useRef<Garbage | null>(null);
 
 
+
+  updateGlobalVariables(
+    propertyRef.current, approachRef.current, parkingRef.current, buildingRef.current, garbageRef.current,
+    formData
+  )
+  // if (bikeParkingRef.current) {
+
+  // }
+
+
+
+
   let buildingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
   let parkingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
   let approachDragMode: string | null = null; // null, 'center', 'edge', 'corner'
@@ -176,10 +139,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   if (propertyRef.current) {
     propertyRef.current.updateSetbacks(linesRef.current);
   }
-
-
-
-
 
   // When an input changes in the component above, set he sketch variable here.
   if (propertyRef.current) {
@@ -766,7 +725,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           property.approachEdge = approachEdge
           property.approachEdgeIndex = approachIndex
 
-          const approachWidth = 20 / property.scale;
+          const approachWidth = initialFormData.approachWidth / property.scale;
           const approachAngle = approachEdge.calculateAngle();
 
           approachRef.current = new Approach(p, midpoint, approachWidth, 20, approachAngle, ESitePlanObjects.Approach, property.scale);
@@ -1192,858 +1151,69 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   };
 }
 
-const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: number, height: number }) => {
-  if (img) {
-    p.background("#f9fafb"); // Default background
-    // Resize the image, keeping the aspect ratio.
-    const ratio = img.width / img.height;
-    const width = rectSize.width;
-    const height = width / ratio;
-    p.image(img, 0, 0, width, height);
-  } else {
-    p.background("#f9fafb"); // Default background
-  }
-}
-
-const calculateScale = (
-  inputScaleRef: React.MutableRefObject<number | null>,
-  linesRef: React.MutableRefObject<Line[]>,
-  pointsRef: React.MutableRefObject<IPoint[]>,
-  scaleRef: React.MutableRefObject<number | null>,
-  propertyRef: React.MutableRefObject<Property | null>
-
-) => {
-  const inputScale = inputScaleRef.current;
-  const points = pointsRef.current;
-  const lines = linesRef.current;
-  const lineIndex = lines.find(line => line.isScale)?.index;
-  if (typeof lineIndex !== 'undefined' && lineIndex !== -1) {
-    const lineLength = p5.prototype.dist(points[lines[lineIndex].start].x, points[lines[lineIndex].start].y, points[lines[lineIndex].end].x, points[lines[lineIndex].end].y);
-
-    if (inputScale && lineLength && propertyRef.current) {
-      scaleRef.current = inputScale / lineLength;
-      propertyRef.current.scale = scaleRef.current;
-    }
-  }
-};
-
-const calculateArea = (polygon: IPoint[]): number => {
-  let total = 0;
-  for (let i = 0; i < polygon.length; i++) {
-    const next = (i + 1) % polygon.length;
-    total += polygon[i].x * polygon[next].y - polygon[next].x * polygon[i].y;
-  }
-  return Math.abs(total / 2);
-};
-
-function drawArea(
-  p: p5,
-  isPolygonClosed: boolean,
-  pointsRef: React.MutableRefObject<IPoint[]>,
-  scale: number,
+function updateGlobalVariables(
+  property: Property | null, approach: Approach | null, parking: Parking | null, building: Building | null, garbage: Garbage | null,
+  formData: FormDataInputs
 ) {
-  const points = pointsRef.current;
-  if (!isPolygonClosed || points.length < 3) return;
-  const area = calculateArea(points) * Math.pow(scale, 2)
-  // p.noFill()
-
-  p.push();
-  p.stroke(0, 0, 0)
-  p.strokeWeight(1)
-
-  p.textAlign(p.RIGHT)
-  p.textSize(18);
-  p.text(`Area: ${area.toFixed(2)} sq ft`, p.width - 10, 20);
-  p.pop();
-}
-
-function drawInstructionsToScreen(
-  p: p5,
-  pointsRef: React.MutableRefObject<IPoint[]>,
-  img: p5.Image | null,
-  isPolygonClosed: boolean,
-  isSelectingApproachRef: React.MutableRefObject<boolean>,
-  isDefiningScaleRef: React.MutableRefObject<boolean>,
-  isSelectingSetbackRef: React.MutableRefObject<boolean>,
-) {
-
-  // Draw lines connecting points
-  const points = pointsRef.current;
-
-  if (points.length === 0 && !img) {
-    p.push();
-    p.textSize(30);
-    p.fill(50); // Text color
-    p.textAlign(p.CENTER, p.CENTER);
-    p.text("Click here to start creating your siteplan", p.width / 2, p.height / 2);
-    p.pop()
-    return
-  }
-  else if (points.length === 0 && img) {
-    p.push();
-    p.textSize(16);
-    p.fill(50); // Text color
-    p.textAlign(p.RIGHT, p.BOTTOM);
-    p.text("Click the property corners to start creating your siteplan", p.width - 10, p.height - 10);
-    p.pop()
-    return
-  }
-
-  if (!isPolygonClosed && points.length === 1) {
-    p.push();
-    // Display the message in the bottom-right corner when no boundary is closed
-    p.textSize(16);
-    p.fill(50); // Text color
-    p.textAlign(p.RIGHT, p.BOTTOM);
-    p.text("Click another spot to create a property edge", p.width - 10, p.height - 10);
-    p.pop()
+  if (property) {
+    property.imperviousPercentage = formData.imperviousPercentage
+    property.buildingCoveragePercentage = formData.buildingCoveragePercentage
   }
 
 
-  if (!isPolygonClosed && points.length > 1) {
-    p.push();
-    // Display the message in the bottom-right corner when no boundary is closed
-    p.textSize(16);
-    p.fill(50); // Text color
-    p.textAlign(p.RIGHT, p.BOTTOM);
-    p.text("Click the first point to close the boundary", p.width - 10, p.height - 10);
-    p.pop()
+  // Pull in the data from above.
+  if (approach) {
+    approach.approachWidth = formData.approachWidth
+    approach.propertyEntranceCount = formData.propertyEntranceCount
+
+
+    if (property) {
+      approach.updateWidth(Number(formData.approachWidth) / property.scale)
+    }
+
   }
 
-  if (isPolygonClosed && isSelectingApproachRef.current) {
-    p.push();
-    // Display the message in the bottom-right corner when no boundary is closed
-    p.textSize(16);
-    p.fill(50); // Text color
-    p.textAlign(p.RIGHT, p.BOTTOM);
-    p.text("Click the property edge that will be the entrance to the propery", p.width - 10, p.height - 10);
-    p.pop()
+  if (parking) {
+    parking.parkingStallsNumber = formData.parkingStalls;
+    parking.handicappedParkingNum = formData.handicappedParkingStalls
+    parking.compactParkingNum = formData.compactParkingStalls
+    parking.parkingPer1000Max = formData.parkingPer1000Max;
+    parking.parkingPer1000Min = formData.parkingPer1000Min;
+    parking.parkingPer1000Min = formData.parkingPerUnit;
+    parking.landscapeIsland = formData.landscapeIsland;
+    parking.halfStreetDriveway = formData.halfStreetDriveway;
+    parking.parkingSide = formData.parkingSide;
   }
 
-  if (isPolygonClosed && isDefiningScaleRef.current) {
-    p.push();
-    // Display the message in the bottom-right corner when no boundary is closed
-    p.textSize(16);
-    p.fill(50); // Text color
-    p.textAlign(p.RIGHT, p.BOTTOM);
-    p.text("Click a property edge then type in the edge's length", p.width - 10, p.height - 10);
-    p.pop()
+
+  if (building) {
+    building.buildingAreaTarget = formData.buildingAreaTarget;
+    building.buildingCount = formData.buildingCount
+
+    building.updateBuildingArea(Number(formData.buildingAreaTarget))
+
   }
 
-  if (isPolygonClosed && isSelectingSetbackRef.current) {
-    p.push();
-    // Display the message in the bottom-right corner when no boundary is closed
-    p.textSize(16);
-    p.fill(50); // Text color
-    p.textAlign(p.RIGHT, p.BOTTOM);
-    p.text("For each property edge, enter the setback required for the zoning.\nEntering nothing means a setback of 0 feet", p.width - 10, p.height - 10);
-    p.pop()
+
+  if (garbage) { }
+
+  if (approach && parking && property) {
+    property.drivewayWidth = formData.drivewayWidth;
+    property.taperedDriveway = formData.taperedDriveway;
+
+    parking.updateParkingStallsNumber(property, formData.parkingStalls);
+    parking.updateWidth(Number(formData.drivewayWidth) / property.scale);
+
   }
-  // const isPolygonClosed = isPolygonClosedRef.current;
+
+
+
+
+  // globalAngle,
+  // if (!parking || !property || !approach || !building) return
+
+
+
+
 
 }
-
-function drawProtoPropertyLines(p: p5,
-  pointsRef: React.MutableRefObject<IPoint[]>,
-  linesRef: React.MutableRefObject<Line[]>,
-  isPolygonClosed: boolean,
-  scale: number,
-) {
-  p.push();
-  const points = pointsRef.current;
-  const lines = linesRef.current;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (line.isApproach && line.isScale) {
-      p.strokeWeight(4)
-      p.stroke(230, 120, 20);
-
-    }
-    else if (line.isApproach) {
-      p.stroke(20, 230, 120);
-    }
-    else if (line.isScale) {
-      p.stroke(230, 120, 20);
-    }
-    else {
-      p.stroke(0, 20, 220);
-    }
-    // p.stroke(line.color);
-    p.line(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
-    p.strokeWeight(2);
-    p.noStroke();
-    p.fill(0, 20, 220);
-
-    const midX = (points[line.start].x + points[line.end].x) / 2;
-    const midY = (points[line.start].y + points[line.end].y) / 2;
-    const length = Math.hypot(points[line.end].x - points[line.start].x, points[line.end].y - points[line.start].y) * (scale);
-
-    // if is finished, make the text larger.
-    p.textSize(14);
-    p.text(`${length.toFixed(1)} ft`, midX, midY);
-
-
-  }
-
-  if (isPolygonClosed) {
-    p.fill(10, 20, 200, 20);
-    p.beginShape();
-    for (const point of points) {
-      p.vertex(point.x, point.y);
-    }
-    p.endShape();
-  }
-
-
-  p.fill(255, 0, 0);
-  for (const point of points) {
-    p.noStroke();
-    p.ellipse(point.x, point.y, 10, 10);
-  }
-
-  p.pop();
-}
-
-function calculateLineIndexOfClosestLine(
-  points: IPoint[],
-  lines: Line[],
-  mx: number,
-  my: number
-) {
-  const lineIndex = lines.findIndex((line) => {
-    const d1 = p5.prototype.dist(mx, my, points[line.start].x, points[line.start].y);
-    const d2 = p5.prototype.dist(mx, my, points[line.end].x, points[line.end].y);
-    const lineLength = p5.prototype.dist(points[line.start].x, points[line.start].y, points[line.end].x, points[line.end].y);
-    return Math.abs(d1 + d2 - lineLength) < 5; // Allow for small tolerance
-  });
-
-  return lineIndex;
-}
-
-
-
-const handleBuildingDrag = (
-  p: p5,
-  property: Property, approach: Approach | null, parking: Parking | null, building: Building | null, garbage: Garbage | null,
-  buildingDragMode: string | null,
-  resizeCorner: number | null,
-  resizeEdge: number | null,
-  resizingbuildingRef: React.MutableRefObject<boolean>
-) => {
-  if (!property || !approach || !parking || !building || !garbage) return;
-  // let visibilityGraphSolver: VisibilityGraph;
-
-  building.hasStopped = false
-
-  const newX = p.mouseX;
-  const newY = p.mouseY;
-  const _center = p.createVector(building.center.x, building.center.y);
-  const _height = building.height;
-  const _width = building.width;
-
-  const propertyCenter = calculateCentroid(property.propertyCorners)
-
-
-  // const updateVisibilityGraph = () => {
-  //   if (!property || !approach || !parking || !building || !garbage) return;
-
-  //   if (visibilityGraphSolver) {
-  //     visibilityGraphSolver = runVisibilityGraphSolver(
-  //       visibilityGraphSolver,
-  //       building,
-  //       parking,
-  //       property,
-  //       garbage,
-  //       approach
-  //     );
-  //   }
-  // };
-
-
-
-
-  if (buildingDragMode === "corner" && resizeCorner !== null) {
-    p.cursor('nesw-resize');
-
-    resizingbuildingRef.current = true
-    // Grab the corner being dragged
-
-    // Calculate the opposite corner index
-    const oppositeIndex = (resizeCorner + 2) % 4; // Opposite corner in a rectangle
-    const oppositeCorner = building.sitePlanElementCorners[oppositeIndex];
-
-    // Translate corners to the building's local coordinate system
-    const localOpposite = toLocal(p, building, oppositeCorner.x, oppositeCorner.y);
-
-    // Update the dragged corner in the local coordinate system
-    const newLocalGrabby = toLocal(p, building, newX, newY);
-
-    // Calculate the new width and height
-    const newWidth = Math.abs(localOpposite.x - newLocalGrabby.x);
-    const newHeight = Math.abs(localOpposite.y - newLocalGrabby.y);
-
-    // Calculate the new center in the local coordinate system
-    const newCenterLocal = {
-      x: (localOpposite.x + newLocalGrabby.x) / 2,
-      y: (localOpposite.y + newLocalGrabby.y) / 2,
-    };
-
-    // Convert the new center back to global coordinates
-    const newCenterGlobal = toGlobal(p, building, newCenterLocal.x, newCenterLocal.y);
-
-    // Update the building's properties
-    if (building) {
-      building.width = newWidth;
-      building.height = newHeight;
-    }
-
-    building.updateBuildingCenter(newCenterGlobal.x, newCenterGlobal.y);
-
-
-    const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
-    if (!pointsInBoundary) {
-      building.width = _width;
-      building.height = _height;
-      building.updateBuildingCenter(_center.x, _center.y);
-      building.hasStopped = true;
-      return;
-    }
-
-  }
-
-  else if (buildingDragMode === "edge" && resizeEdge !== null) {
-    p.cursor('ew-resize'); // Adjust cursor based on edge direction (horizontal/vertical)
-
-    resizingbuildingRef.current = true;
-
-    // Determine which edge is being dragged
-    const edgeIndex = resizeEdge;
-
-    const mouse = p.createVector(newX, newY);
-    const center = p.createVector(building.center.x, building.center.y);
-
-    const midpoint = building.sitePlanElementEdges[edgeIndex].getMidpoint()
-    const distance = calculatePointToEdgeDistance(building.sitePlanElementEdges[edgeIndex], mouse)
-
-    const newPointIsInsideMultiplier = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [newX, newY])
-    const _angle = calculateAngle(center, midpoint);
-
-    if (edgeIndex === 0 || edgeIndex === 2) {
-      const newHeight = building.height + distance * newPointIsInsideMultiplier;
-      if (newHeight > 5) {
-        building.height = newHeight
-      }
-
-    }
-    else {
-      const newWidth = building.width + distance * newPointIsInsideMultiplier;
-      if (newWidth > 5) {
-        building.width = newWidth
-      }
-    }
-
-    const newPoint1X = building.center.x + distance / 2 * p.cos(_angle) * newPointIsInsideMultiplier;
-    const newPoint1Y = building.center.y + distance / 2 * p.sin(_angle) * newPointIsInsideMultiplier;
-
-    building.updateBuildingCenter(newPoint1X, newPoint1Y);
-
-    const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
-    if (!pointsInBoundary) {
-      if (
-        p.dist(propertyCenter.x, propertyCenter.y, _center.x, _center.y) <
-        p.dist(propertyCenter.x, propertyCenter.y, newX, newY)) {
-        building.width = _width;
-        building.height = _height;
-        building.updateBuildingCenter(_center.x, _center.y);
-        building.hasStopped = true;
-        return
-      }
-    }
-  }
-
-  else if (buildingDragMode === "rotate") {
-
-    building.isRotating = true;
-    p.cursor(RotateArrow);
-
-    const handle = building.rotationHandles[building.hoverHandleIndex];
-    if (handle) {
-      const mouse = p.createVector(newX, newY)
-      const a = p.atan2(mouse.y - building.center.y, mouse.x - building.center.x) -
-        p.atan2(handle.y - building.center.y, handle.x - building.center.x);
-
-      building.updateAngle(building.angle + a)
-    }
-
-  }
-
-  else if (buildingDragMode === "center") {
-    p.cursor('grabbing');
-
-
-    building.updateBuildingCenter(p.mouseX, p.mouseY);
-    const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
-    if (!pointsInBoundary) {
-
-      if (
-        p.dist(propertyCenter.x, propertyCenter.y, _center.x, _center.y) <
-        p.dist(propertyCenter.x, propertyCenter.y, newX, newY)) {
-
-        building.updateBuildingCenter(_center.x, _center.y);
-        building.hasStopped = true;
-        garbage.updateCenterGarbage(parking);
-        return
-      }
-    }
-  }
-
-  else {
-    p.cursor('default')
-  }
-
-  const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
-    const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
-    return pointClassification === 1
-  }))
-
-  if (
-    !parkingIsOutOfBuilding ||
-    !building.pointIsInPolygon(property.cornerOffsetsFromSetbacks) ||
-    !building.pointIsOutOfPolygon(parking.parkingOutline)) {
-    building.setLineColors(p.color(250, 20, 20))
-    // TODO: Add the parking outline as an object I can apply pointIsOutOfPolygon 
-  }
-  else {
-    building.setLineColors(p.color(20, 20, 20))
-  }
-
-};
-
-const handleApproachDrag = (
-  p: p5,
-  property: Property, approach: Approach, parking: Parking | null, garbage: Garbage | null, building: Building | null,
-  isRotationFrozenRef: React.MutableRefObject<boolean>,
-  approachDragMode: string | null
-
-) => {
-
-  if (!property || !approach || !approachDragMode) return;
-  // || !building  || !parking || !garbage
-
-  const _center = p.createVector(approach.center.x, approach.center.y);
-  const approachEdgeAngle = property.approachEdge?.calculateAngle();
-
-
-  let newX = p.mouseX;
-  let newY = p.mouseY;
-  const isVertical = isMoreVertical(approachEdgeAngle || 0, true);
-
-  if (isVertical) {
-    newX = approach.center.x + (newY - approach.center.y) / p.tan(approachEdgeAngle || 0);
-    newY = p.mouseY;
-  }
-  else {
-    newX = p.mouseX;
-    newY = approach.center.y + (newX - approach.center.x) * p.tan(approachEdgeAngle || 0);
-  }
-
-
-  const allPointsInBoundary = allPointsInPolygon(property.propertyCorners, [approach.sitePlanElementCorners[0], approach.sitePlanElementCorners[1]]);
-
-  if (truthChecker(allPointsInBoundary)) {
-
-    approach.updateCenter(newX, newY);
-
-    if (parking && garbage) {
-      const angle = isRotationFrozenRef.current ? parking.angle : calculateAngle(parking.center, approach.center) - 90
-
-      parking.updateAngle(angle); // +90 to get the perpendicular angle
-      garbage.updateAngle(angle);
-      // building.updateAngle(angle);
-
-      if (building) {
-        building.hasStopped = false
-      }
-
-      parking.calculateNumberOfFittableStalls(property.propertyCorners);
-      parking.updateStallCorners(false, true);
-      parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-      if (building) {
-        building.buildingLocator(p, building, parking, property, garbage);
-      }
-      garbage.updateCenterGarbage(parking);
-
-      // building.updateEntrances();
-      parking.createRotationHandles();
-
-      // updateVisibilityGraph();
-
-    }
-  } else {
-
-    const edgeMidpoint = property.approachEdge?.getMidpoint();
-    if (!edgeMidpoint) return;
-
-
-    if (
-      p.dist(edgeMidpoint.x, edgeMidpoint.y, _center.x, _center.y) <
-      p.dist(edgeMidpoint.x, edgeMidpoint.y, newX, newY)) {
-      return
-    }
-
-
-    if (building) {
-      building.hasStopped = true;
-    }
-    approach.updateCenter(newX, newY);
-    if (parking && garbage) {
-      parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-    }
-  }
-
-
-};
-
-const handleParkingDrag = (
-  p: p5,
-  property: Property, approach: Approach, parking: Parking, garbage: Garbage, building: Building | null,
-  parkingDragMode: string | null,
-  isRotationFrozenRef: React.MutableRefObject<boolean>
-) => {
-
-  if (!property || !approach || !parking || !garbage) return;
-
-  const _centerX = parking.center.x;
-  const _centerY = parking.center.y;
-  const newX = p.mouseX;
-  const newY = p.mouseY;
-
-  const _angle = parking.angle;
-
-  if (parkingDragMode === "rotate") {
-
-    isRotationFrozenRef.current = true;
-    parking.isRotating = true;
-
-    const handle = parking.rotationHandles[parking.hoverHandleIndex];
-    if (handle) {
-      const mouse = p.createVector(newX, newY)
-      const a = p.atan2(mouse.y - parking.center.y, mouse.x - parking.center.x) -
-        p.atan2(handle.y - parking.center.y, handle.x - parking.center.x);
-
-      const _garbageCenter = p.createVector(garbage.center.x, garbage.center.y);
-
-      parking.updateAngle(parking.angle + a)
-      garbage.updateAngle(parking.angle + a)
-
-      parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-      parking.updateStallCorners();
-      parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-
-
-      garbage.updateCenterGarbage(parking);
-
-      const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-      const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-
-
-      if (building) {
-        building.hasStopped = false;
-
-        const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
-          const pointClassification = classifyPoint(building?.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
-          return pointClassification === 1
-        }))
-
-        const buildingIsOutOfParking = building?.pointIsOutOfPolygon(parking.parkingOutline);
-
-        if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
-          parking.setLineColors(p.color(250, 20, 20))
-        }
-        else {
-          parking.setLineColors(p.color(20, 20, 20))
-        }
-
-      }
-
-
-      if (!parkingInBoundary || !garbageInBoundary) {
-
-        // If I'm moving the parking lot close to the center, then let the new point stand.
-        parking.updateAngle(_angle);
-        garbage.updateAngle(_angle);
-
-        parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-        parking.updateStallCorners();
-        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-        if (building) {
-          building.hasStopped = false;
-        }
-        garbage.updateCenter(_garbageCenter.x, _garbageCenter.y)
-        garbage.updateCenterGarbage(parking);
-        return;
-      }
-      parking.createRotationHandles();
-
-
-      // UNCOMMENT WHEN I'M READY TO PUT BACK IN ENTRANCES
-      // updateVisibilityGraph();
-
-
-      p.cursor(RotateArrow);
-    }
-
-
-  }
-
-  else if (parkingDragMode === "center") {
-    p.cursor('grabbing');
-
-    parking.updateCenter(newX, newY);
-    const centerInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-    const center = calculateCentroid(property.propertyCorners)
-
-
-    garbage.updateCenterGarbage(parking);
-    const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-    if (!center) return;
-    if (!centerInBoundary || !garbageInBoundary) {
-      if (
-
-
-        p.dist(center.x, center.y, _centerX, _centerY) <
-        p.dist(center.x, center.y, newX, newY)) {
-        parking.updateCenter(_centerX, _centerY);
-        garbage.updateCenterGarbage(parking);
-        return
-      }
-    }
-    let angle = isRotationFrozenRef.current ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
-    parking.updateAngle(normalizeAngle(angle));
-    garbage.updateAngle(normalizeAngle(angle));
-
-
-    if (building) {
-
-      building?.updateEntrances();
-
-      const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
-        const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
-        return pointClassification === 1
-      }))
-
-      const buildingIsOutOfParking = building?.pointIsOutOfPolygon(parking.parkingOutline);
-
-
-      if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
-        parking.setLineColors(p.color(250, 20, 20))
-      }
-      else {
-        parking.setLineColors(p.color(20, 20, 20))
-      }
-
-    }
-
-
-    // parking.parkingOutline.slice(3, -3)
-    const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
-    // const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
-
-    if (truthChecker(allPointsInBoundary)) {
-
-      parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-      parking.updateStallCorners(false, isRotationFrozenRef.current);
-      parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-      if (building) {
-        building.hasStopped = false;
-      }
-      parking.createRotationHandles();
-      // UNCOMMENT WHEN I'M READY TO PUT BACK IN ENTRANCES
-      // updateVisibilityGraph();
-    } else {
-      if (building) {
-        building.hasStopped = true;
-      }
-      parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-    }
-  }
-
-  else {
-    p.cursor('default')
-  }
-
-};
-
-
-const toLocal = (p: p5, building: Building, x: number, y: number) => {
-  const dx = x - building.center.x;
-  const dy = y - building.center.y;
-  return {
-    x: dx * p.cos(-building.angle) - dy * p.sin(-building.angle),
-    y: dx * p.sin(-building.angle) + dy * p.cos(-building.angle),
-  };
-};
-
-const toGlobal = (p: p5, building: Building, x: number, y: number) => {
-  return {
-    x: x * p.cos(building.angle) - y * p.sin(building.angle) + building.center.x,
-    y: x * p.sin(building.angle) + y * p.cos(building.angle) + building.center.y,
-  };
-};
-
-
-
-
-
-export function drawNeonLine(p: p5,
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  lineColor: p5.Color, glowSize = 20) {
-  // Save the current drawing state
-  p.push();
-
-  // Disable the stroke outline
-  p.noStroke();
-
-  // Calculate the number of layers for the glow effect
-  const layers = 15;
-
-  // Calculate the alpha step for each layer
-  const alphaStep = 255 / layers;
-
-  // Calculate the size step for each layer
-  const sizeStep = glowSize / layers;
-
-  // Draw multiple layers from outside to inside
-  for (let i = layers; i >= 0; i--) {
-    // Calculate the current alpha and size
-    const currentAlpha = (layers - i) * alphaStep;
-    const currentSize = i * sizeStep;
-
-    // Set the color with current alpha
-    const c = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
-    p.drawingContext.shadowColor = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
-    p.drawingContext.shadowBlur = currentSize;
-
-    // Draw the line
-    p.stroke(c);
-    p.strokeWeight(2);
-    p.line(x1, y1, x2, y2);
-  }
-
-  // Draw the bright center
-  p.stroke(255);
-  p.strokeWeight(2);
-  p.line(x1, y1, x2, y2);
-
-  // Restore the drawing state
-  p.pop();
-}
-
-
-
-export function drawNeonShape(
-  p: p5,
-  vertices: { x: number; y: number }[], // Array of vertices for the shape
-  lineColor: p5.Color,
-  glowSize = 20
-): void {
-  // Save the current drawing state
-  p.push();
-
-  // Disable the stroke outline
-  p.noStroke();
-
-  // Calculate the number of layers for the glow effect
-  const layers = 15;
-
-  // Calculate the alpha step for each layer
-  const alphaStep = 255 / layers;
-
-  // Calculate the size step for each layer
-  const sizeStep = glowSize / layers;
-
-  // Draw multiple layers from outside to inside
-  for (let i = layers; i >= 0; i--) {
-    // Calculate the current alpha and size
-    const currentAlpha = (layers - i) * alphaStep;
-    const currentSize = i * sizeStep;
-
-    // Set the color with current alpha
-    const c = p.color(
-      p.red(lineColor),
-      p.green(lineColor),
-      p.blue(lineColor),
-      currentAlpha
-    );
-    p.drawingContext.shadowColor = p.color(
-      p.red(lineColor),
-      p.green(lineColor),
-      p.blue(lineColor),
-      currentAlpha
-    );
-    p.drawingContext.shadowBlur = currentSize;
-
-    // Draw the shape with current glow layer
-    p.stroke(c);
-    p.strokeWeight(2);
-    p.beginShape();
-    vertices.forEach((vertex) => {
-      p.vertex(vertex.x, vertex.y);
-    });
-    p.endShape(p.CLOSE);
-  }
-
-  // Draw the bright center shape
-  p.stroke(255);
-  p.strokeWeight(2);
-  p.beginShape();
-  vertices.forEach((vertex) => {
-    p.vertex(vertex.x, vertex.y);
-  });
-  p.endShape(p.CLOSE);
-  // Restore the drawing state
-  p.pop();
-}
-
-
-
-
-
-// function updateGlobalVariables(updatedGlobals: {
-//   approachWidth: string | number;
-//   parkingNumber: string | number;
-//   parkingDrivewayWidth: string | number;
-//   buildingAreaTarget: string | number;
-//   globalAngle: number;
-//   taperParking: boolean;
-
-// }) {
-
-//   const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget, taperParking } = updatedGlobals;
-//   // globalAngle,
-//   if (!this.parking || !this.property || !this.approach || !this.building) return
-
-
-
-//   // Update all things PARKING
-//   this.parking.updateWidth(Number(parkingDrivewayWidth) / this.scale);
-//   this.parking.updateParkingStallsNumber(this.property, Number(parkingNumber));
-
-
-//   // Update all things APPROACH
-//   // Scale up the approach witht he scale
-//   this.approach.updateWidth(Number(approachWidth) / this.scale)
-
-
-//   // Update all this BUILDING
-//   this.building.updateBuildingArea(Number(buildingAreaTarget))
-
-//   this.parking.entranceEdge?.point1
-
-//   this.taperParking = taperParking
-
-// }

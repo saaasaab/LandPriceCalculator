@@ -6,6 +6,7 @@ import { Approach } from "./Approach";
 import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices,  drawPerpendicularBezier } from "../../../utils/SiteplanGeneratorUtils";
 import { Garbage } from "./Garbage";
 import { Point, SitePlanObjects, stallHeight } from "../sketchForSiteplan";
+import { initialFormData } from "../SitePlanDesigner";
 
 export class Parking extends SitePlanElement {
 
@@ -15,13 +16,25 @@ export class Parking extends SitePlanElement {
     right: ParkingStall[];
   };
   public scale: number;
-  public parkingStallsNumber: number;
   public parkingArea: number;
   public parkingStallsArea: number;
-  public handicappedParkingNum: number;
   public parkingOutline: p5.Vector[]
   public parkingOutlineDoubleLayer: p5.Vector[]
 
+
+
+     // Input Constraints
+     public parkingStallsNumber: number;
+     public handicappedParkingNum: number;
+     public compactParkingNum : number;
+     public parkingPer1000Max : number;
+     public parkingPer1000Min : number;
+     public parkingPerUnit : number;
+     public landscapeIsland : number;
+     public halfStreetDriveway : boolean;
+     public parkingSide:'left' | 'right';
+
+     
   constructor(
     p: p5,
     center: p5.Vector,
@@ -39,12 +52,26 @@ export class Parking extends SitePlanElement {
     this.parkingStalls = { left: [], right: [] };
     this.entranceEdgeIndex = 2;
     this.scale = scale;
-    this.parkingStallsNumber = 4;
     this.parkingArea = Math.round(width * height);
     this.parkingStallsArea = 0;
-    this.handicappedParkingNum = 0;
     this.parkingOutline = []
     this.parkingOutlineDoubleLayer = []
+
+
+
+    // Input Constraints
+    this.parkingStallsNumber =initialFormData.parkingStalls;
+    this.handicappedParkingNum = initialFormData.handicappedParkingStalls;
+    this.compactParkingNum = initialFormData.compactParkingStalls;
+    this.parkingPer1000Max = initialFormData.parkingPer1000Max;
+    this.parkingPer1000Min = initialFormData.parkingPer1000Min;
+    this.parkingPerUnit = initialFormData.parkingPerUnit;
+    this.parkingPer1000Min = initialFormData.parkingPerUnit;
+    this.landscapeIsland = initialFormData.landscapeIsland;
+    this.halfStreetDriveway = initialFormData.halfStreetDriveway;
+    this.parkingSide = initialFormData.parkingSide;
+
+
   }
 
   initializeParking(property: Property, approach: Approach) {
