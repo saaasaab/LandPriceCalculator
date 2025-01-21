@@ -117,7 +117,7 @@ export class Property {
   }
 
   drawLineLengths(){
-    this.propertyEdges.forEach((edge, i) => {
+    this.propertyEdges.forEach((edge) => {
       edge.drawLine()
 
       const midX = (edge.point1.x + edge.point2.x) / 2;
@@ -130,7 +130,7 @@ export class Property {
       this.p.translate(midX, midY);
       this.p.rotate(edge.calculateAngle())
       this.p.textSize(14);
-      this.p.text(`#${i} - ${length.toFixed(1)} ft`, 0, 0);
+      this.p.text(`${length.toFixed(1)} ft`, 0, 0);
       this.p.pop();
     })
   }

@@ -130,7 +130,6 @@ const dividePolygon = (p: p5, lines: Line[], road: Line): Point[][] => {
 
 
   
-  // console.log(`roadAngle`, roadAngle)
 
 
 

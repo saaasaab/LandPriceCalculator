@@ -46,11 +46,13 @@ export interface Line {
 }
 
 import p5 from 'p5';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 
 import { Map, ArrowRight, Ruler, FileImage, Delete, Car } from 'lucide-react'; //Box,
+
 import { Card, CardContent } from '../../components/ui';
-import { sketchForSiteplan } from './sketchForSiteplan';
+
+import sketchForSiteplan  from './sketchForSiteplan';
 import ImageUploader from './ImageUploader';
 
 import './SitePlanDesigner.scss';

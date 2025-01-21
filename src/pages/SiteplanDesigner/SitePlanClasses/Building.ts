@@ -167,9 +167,11 @@ export class Building extends SitePlanElement {
         entrance.drawEnterance();
       })
 
+
+
       this.p.push();
       this.p.textSize(16)
-      this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x,  this.center.y - this.height/4)
+      this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x,  this.center.y - this.height/2)
       this.p.textAlign(this.p.CENTER, this.p.CENTER);
       this.p.pop();
     }

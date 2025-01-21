@@ -58,7 +58,7 @@ interface SketchForSiteplanParams {
 }
 
 
-export function sketchForSiteplan(params: SketchForSiteplanParams) {
+export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   const {
     canvasContainerRef,
     canvasRef,
@@ -216,9 +216,6 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
   return (p: p5) => {
-
-
-
     let img: p5.Image | null = null;
     let rectSize = { width: 0, height: 0 };
     const defaultVector = p.createVector(0, 0);
@@ -430,7 +427,10 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
           isHovered.parkingHandle ||
           parking?.isRotating)) {
 
-        // building.showRotationHandles = false;
+        if (building) building.showRotationHandles = false;
+        parkingDragMode = null;
+        approachDragMode = null;
+
         parking.showRotationHandles = true;
 
 
@@ -494,6 +494,8 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       else if (isHovered.approach || isHovered.approachOffset) {
         approachDragMode = 'center';
+        buildingDragMode = null;
+        parkingDragMode = null;
         p.cursor("grab");
       }
       // Check if we're hovering over a building corner, edge, or center
@@ -504,11 +506,15 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
           building.isRotating
         ) && building.isInitialized) {
 
+        parkingDragMode = null;
+        approachDragMode = null;
+
         if (parking) {
           parking.showRotationHandles = false;
         }
         building.showRotationHandles = true;
         let anyCornerHover = resizingbuildingRef.current || building.isRotating
+
 
         if (!anyCornerHover) {
           building.sitePlanElementCorners.forEach((corner, i) => {
@@ -537,6 +543,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
             resizeEdge = closestEdgeIndex;
           }
         }
+
         if (!anyCornerHover && isHovered.buildingHandle) {
           building.showRotationAnimationCount = 0;
           const index = building.getMouseHoveringRotateHandleIndex();
@@ -771,7 +778,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       // ALL THINGS PARKING
       else if (stepSelectorRefs.parking.current && !parkingDragMode && !approachDragMode) {
 
-        if (!propertyRef.current || !approachRef.current) return;
+        if (!propertyRef.current || !approachRef.current || parkingRef.current?.isInitialized) return;
 
         const centerOfProperty = calculateCentroid(propertyRef.current.cornerOffsetsFromSetbacks)
         const parkingWidth = 24 / propertyRef.current.scale;
@@ -789,7 +796,8 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       // ALL THINGS BUILDING
       else if (stepSelectorRefs.building.current && !buildingDragMode) {
-        if (!propertyRef.current || !approachRef.current) return;
+        if (!propertyRef.current || !approachRef.current || buildingRef.current?.isInitialized) return;
+
 
         const approach = approachRef.current;
         const parking = parkingRef.current;
@@ -838,17 +846,13 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
           !isHovered.parkingOffset &&
           !isHovered.parkingHandle &&
           !isHovered.garbage &&
-
           truthChecker(clickIsInProperty)) {
+
           const approachAngle = (propertyRef.current.approachEdge?.calculateAngle() || 0) + 180;
           const buildingDefault = 30 / propertyRef.current.scale;
           buildingRef.current = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale, 20);
           buildingRef.current.initializeBuilding(mx, my);
         }
-
-
-
-
       }
 
       // ALL THINGS BUILDING ENTRANCES
@@ -934,9 +938,6 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       if (!property) return;
 
-
-
-
       const isHovered = {
         approach: false,
         approachOffset: false,
@@ -1019,7 +1020,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
       // ALL THINGS APPROACH
-      if (stepSelectorRefs.approach.current) {
+      else if (stepSelectorRefs.approach.current) {
 
 
       }
@@ -1047,7 +1048,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
       if (!property) return;
-      //  || !building ||
+
       const isHovered = {
         approach: false,
         parking: false,
@@ -1071,15 +1072,18 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         isHovered.buildingHandle = building.isMouseHoveringRotateHandle();
       }
 
+
+
       // Moving the building
       if ((
-        building !== null && (
+        building !== null && buildingDragMode !== null && (
           isHovered.building ||
           isHovered.buildingOffset ||
           isHovered.buildingHandle ||
-          buildingDragMode !== null ||
           building.hoverHandleIndex !== -1
+
         )) && building.isInitialized) {
+
 
         isDragging.building = true;
 
@@ -1095,7 +1099,15 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
       // Dragging the parking lot
-      if ((isHovered.parking || isDragging.parking) || isHovered.parkingHandle || parking?.hoverHandleIndex !== -1) {
+      else if (
+        parking !== null && parkingDragMode !== null && (
+          isHovered.parking ||
+          isDragging.parking ||
+          isHovered.parkingHandle ||
+          parking?.hoverHandleIndex !== -1)
+
+      ) {
+
         if (approach && parking && garbage) {
           isDragging.parking = true;
           handleParkingDrag(
@@ -1109,7 +1121,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
       // Move the approach
-      if (isHovered.approach || isDragging.approach) {
+      else if (isHovered.approach || isDragging.approach) {
         if (approach) {
 
           isDragging.approach = true;
@@ -1132,6 +1144,8 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         parking.parkingStallsArea = getParkingStallArea(parking)
       }
 
+
+
     };
 
     p.mouseReleased = () => {
@@ -1151,6 +1165,8 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       isDragging.parkingOffset = false;
       isDragging.building = false;
 
+
+
       buildingDragMode = null;
       parkingDragMode = null;
       approachDragMode = null;
@@ -1164,9 +1180,11 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       if (building) {
         building.hoverHandleIndex = -1;
         building.isRotating = false;
+        building.isSelected = false
       }
       if (parking) {
         parking.isRotating = false;
+        parking.isSelected = false
       }
 
 
@@ -1479,6 +1497,7 @@ const handleBuildingDrag = (
       building.width = newWidth;
       building.height = newHeight;
     }
+
     building.updateBuildingCenter(newCenterGlobal.x, newCenterGlobal.y);
 
 
@@ -1563,7 +1582,6 @@ const handleBuildingDrag = (
     p.cursor('grabbing');
 
 
-
     building.updateBuildingCenter(p.mouseX, p.mouseY);
     const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
     if (!pointsInBoundary) {
@@ -1571,6 +1589,7 @@ const handleBuildingDrag = (
       if (
         p.dist(propertyCenter.x, propertyCenter.y, _center.x, _center.y) <
         p.dist(propertyCenter.x, propertyCenter.y, newX, newY)) {
+
         building.updateBuildingCenter(_center.x, _center.y);
         building.hasStopped = true;
         garbage.updateCenterGarbage(parking);
@@ -1609,7 +1628,6 @@ const handleApproachDrag = (
 
 ) => {
 
-  console.log(`approachDragMode`, approachDragMode)
   if (!property || !approach || !approachDragMode) return;
   // || !building  || !parking || !garbage
 
@@ -1695,8 +1713,6 @@ const handleParkingDrag = (
 ) => {
 
   if (!property || !approach || !parking || !garbage) return;
-
-  // || !building 
 
   const _centerX = parking.center.x;
   const _centerY = parking.center.y;
@@ -1791,10 +1807,11 @@ const handleParkingDrag = (
 
     garbage.updateCenterGarbage(parking);
     const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-
     if (!center) return;
     if (!centerInBoundary || !garbageInBoundary) {
       if (
+
+
         p.dist(center.x, center.y, _centerX, _centerY) <
         p.dist(center.x, center.y, newX, newY)) {
         parking.updateCenter(_centerX, _centerY);
@@ -1809,9 +1826,7 @@ const handleParkingDrag = (
 
     if (building) {
 
-      // building.updateAngle(normalizeAngle(angle));
       building?.updateEntrances();
-
 
       const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
         const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
