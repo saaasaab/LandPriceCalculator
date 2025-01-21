@@ -1,11 +1,11 @@
 import p5 from "p5";
 import { useRef } from "react";
 
-import { FormDataInputs, initialFormData, IPoint, Line } from "./SitePlanDesigner";
+import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale,  displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, initialFormData, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
@@ -221,7 +221,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       displayImage(p, img, rectSize);
       drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
 
-
       if (propertyRef.current) {
         propertyRef.current.drawProperty();
         propertyRef.current.drawSetbackPolygon();
@@ -239,11 +238,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         parkingRef.current.drawParkingStalls();
         parkingRef.current.drawParkingOutline(p, parkingRef.current, garbageRef.current, approachRef.current)
       }
-
-
-
-
-
 
       if (buildingRef.current) {
         buildingRef.current.drawBuilding();
@@ -1102,9 +1096,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         approach.approachArea = calculateApproachArea(approach)
         parking.parkingStallsArea = getParkingStallArea(parking)
       }
-
-
-
     };
 
     p.mouseReleased = () => {

@@ -1,5 +1,5 @@
 
-import { useEffect, useState, lazy } from 'react';
+import { useEffect, useState} from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import NotFound from './pages/NotFound';
@@ -9,8 +9,7 @@ import { EPageNames } from './utils/types';
 
 import './App.css'
 import BlogPost from './futureItems/BlogPost';
-
-const SitePlanDesigner = lazy(()=>import('./pages/SiteplanDesigner/SitePlanDesigner'))
+import SitePlanDesigner from './pages/SiteplanDesigner/SitePlanDesigner';
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);

@@ -1,12 +1,11 @@
 import p5 from "p5";
 import { Entrance } from "./Entrance";
 import { SitePlanElement } from "./SitePlanElement";
-import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, drawNeonShape, expandPolygon, getCenterPoint, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
+import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, drawNeonShape, expandPolygon, getCenterPoint, initialFormData, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
 import { Parking } from "./Parking";
 import { Property } from "./Property";
 import { Garbage } from "./Garbage";
 import { Point, SitePlanObjects } from "../sketchForSiteplan";
-import { initialFormData } from "../SitePlanDesigner";
 
 export class Building extends SitePlanElement {
   public isInitialized = false;

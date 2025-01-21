@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { SitePlanElement } from "./SitePlanElement";
 import { SitePlanObjects } from "../sketchForSiteplan";
-import { initialFormData } from "../SitePlanDesigner";
+import { initialFormData } from "../../../utils/SiteplanGeneratorUtils";
 
 export class Approach extends SitePlanElement {
 

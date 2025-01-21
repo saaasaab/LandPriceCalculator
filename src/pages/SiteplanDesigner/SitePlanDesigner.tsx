@@ -1,22 +1,4 @@
-export interface FormDataInputs {
-  approachWidth: number;
-  buildingAreaTarget: number;
-  buildingCount: number;
-  drivewayWidth: number;
-  halfStreetDriveway: boolean;
-  imperviousPercentage: number;
-  buildingCoveragePercentage: number;
-  landscapeIsland: number;
-  parkingPer1000Min: number;
-  parkingPer1000Max: number;
-  parkingStalls: number;
-  handicappedParkingStalls: number;
-  compactParkingStalls: number;
-  propertyEntranceCount: number;
-  taperedDriveway: boolean;
-  parkingSide: 'right' | 'left';
-  parkingPerUnit: 1.5,
-}
+
 
 export interface SiteMetrics {
   actualBuildingArea: number;
@@ -65,26 +47,8 @@ import ImageUploader from './ImageUploader';
 import './SitePlanDesigner.scss';
 import CollapsibleSection from './CollapsibleSection';
 import AlphaBanner from './AlphaBanner';
+import { FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUtils';
 
-export const initialFormData: FormDataInputs = {
-  parkingStalls: 4,
-  handicappedParkingStalls: 0,
-  compactParkingStalls: 1,
-  approachWidth: 20,
-  drivewayWidth: 24,
-  buildingAreaTarget: 1500,
-  taperedDriveway: true,
-  propertyEntranceCount: 1,
-  buildingCount: 1,
-  landscapeIsland: 7,
-  parkingPer1000Min: 2.4,
-  parkingPer1000Max: 4.5,
-  imperviousPercentage: 70,
-  buildingCoveragePercentage: 70,
-  halfStreetDriveway: false,
-  parkingSide: 'left',
-  parkingPerUnit: 1.5,
-};
 
 const initialMetrics: SiteMetrics = {
   propertyArea: 12192,
@@ -503,6 +467,7 @@ const SitePlanGenerator: React.FC = () => {
       onClick: () => { selectApproach() },
       children:
         <div style={{ marginTop: '10px' }}>
+
 
           <div className="site-plan-generator__input-group">
             <label htmlFor="approachWidth">Approach Width (ft)</label>

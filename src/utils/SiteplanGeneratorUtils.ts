@@ -17,6 +17,47 @@ import { Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
 type Point = [number, number];
 export type TTwoPoints = { x: number, y: number, x2: number, y2: number, };
 
+export interface FormDataInputs {
+  approachWidth: number;
+  buildingAreaTarget: number;
+  buildingCount: number;
+  drivewayWidth: number;
+  halfStreetDriveway: boolean;
+  imperviousPercentage: number;
+  buildingCoveragePercentage: number;
+  landscapeIsland: number;
+  parkingPer1000Min: number;
+  parkingPer1000Max: number;
+  parkingStalls: number;
+  handicappedParkingStalls: number;
+  compactParkingStalls: number;
+  propertyEntranceCount: number;
+  taperedDriveway: boolean;
+  parkingSide: 'right' | 'left';
+  parkingPerUnit: 1.5,
+}
+
+export const initialFormData: FormDataInputs = {
+  parkingStalls: 4,
+  handicappedParkingStalls: 0,
+  compactParkingStalls: 1,
+  approachWidth: 20,
+  drivewayWidth: 24,
+  buildingAreaTarget: 1500,
+  taperedDriveway: true,
+  propertyEntranceCount: 1,
+  buildingCount: 1,
+  landscapeIsland: 7,
+  parkingPer1000Min: 2.4,
+  parkingPer1000Max: 4.5,
+  imperviousPercentage: 70,
+  buildingCoveragePercentage: 70,
+  halfStreetDriveway: false,
+  parkingSide: 'left',
+  parkingPerUnit: 1.5,
+};
+
+
 export const calculateSnapToEdge = (newAngle: number, element: SitePlanElement, property: Property) => {
   let _newAngle = newAngle;
 
@@ -1428,8 +1469,8 @@ export const handleParkingDrag = (
 
   if (!property || !approach || !parking || !garbage) return;
 
-  const _centerX = parking.center.x;
-  const _centerY = parking.center.y;
+  // const _centerX = parking.center.x;
+  // const _centerY = parking.center.y;
   const newX = p.mouseX;
   const newY = p.mouseY;
 
@@ -1515,31 +1556,28 @@ export const handleParkingDrag = (
     p.cursor('grabbing');
 
     parking.updateCenter(newX, newY);
-    const centerInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-    const center = calculateCentroid(property.propertyCorners)
-
+    // const centerInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+    // const center = calculateCentroid(property.propertyCorners)
 
     garbage.updateCenterGarbage(parking);
-    const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-    if (!center) return;
-    if (!centerInBoundary || !garbageInBoundary) {
-      if (
-
-
-        p.dist(center.x, center.y, _centerX, _centerY) <
-        p.dist(center.x, center.y, newX, newY)) {
-        parking.updateCenter(_centerX, _centerY);
-        garbage.updateCenterGarbage(parking);
-        return
-      }
-    }
+    // const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+    // if (!center) return;
+    // if (!centerInBoundary || !garbageInBoundary) {
+    //   if (
+    //     p.dist(center.x, center.y, _centerX, _centerY) <
+    //     p.dist(center.x, center.y, newX, newY)) {
+    //     parking.updateCenter(_centerX, _centerY);
+    //     garbage.updateCenterGarbage(parking);
+    //     return
+    //   }
+    // }
     let angle = isRotationFrozenRef.current ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
     parking.updateAngle(normalizeAngle(angle));
     garbage.updateAngle(normalizeAngle(angle));
 
 
-    if (building) {
 
+    if (building) {
       building?.updateEntrances();
 
       const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
@@ -1579,7 +1617,11 @@ export const handleParkingDrag = (
       if (building) {
         building.hasStopped = true;
       }
+
+      parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+      parking.updateStallCorners(false, isRotationFrozenRef.current);
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+      // parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
     }
   }
 

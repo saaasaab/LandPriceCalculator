@@ -3,10 +3,9 @@ import { ParkingStall } from "./ParkingStall";
 import { SitePlanElement } from "./SitePlanElement";
 import { Property } from "./Property";
 import { Approach } from "./Approach";
-import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices,  drawPerpendicularBezier } from "../../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices,  drawPerpendicularBezier, countParkingStalls, initialFormData } from "../../../utils/SiteplanGeneratorUtils";
 import { Garbage } from "./Garbage";
 import { Point, SitePlanObjects, stallHeight } from "../sketchForSiteplan";
-import { initialFormData } from "../SitePlanDesigner";
 
 export class Parking extends SitePlanElement {
 
@@ -180,10 +179,6 @@ export class Parking extends SitePlanElement {
         this.parkingStalls.left[i].center.x = _center.x
         this.parkingStalls.left[i].center.y = _center.y
         this.parkingStalls.left[i].angle = this.angle
-
-
-
-
       }
 
       for (let i = 0; i < this.parkingStalls.right.length; i++) {
@@ -251,6 +246,19 @@ export class Parking extends SitePlanElement {
 
   updateParkingStallsNumber(property: Property, parkingNum: number) {
     this.parkingStallsNumber = parkingNum
+
+
+    // Check if the parking stalls are more than allowed
+    const stallCounts = countParkingStalls(this)
+    if(stallCounts.leftStalls + stallCounts.rightStalls   >  this.parkingStallsNumber){
+      if(stallCounts.leftStalls > stallCounts.rightStalls ){
+        
+        
+
+      }
+    }
+
+    
 
     this.calculateNumberOfFittableStalls(property.propertyCorners)
     this.updateStallCorners(true);
