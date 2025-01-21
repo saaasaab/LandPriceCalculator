@@ -46,10 +46,10 @@ export interface Line {
 }
 
 import p5 from 'p5';
-import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-import { Map, ArrowRight, Ruler, Box, FileImage, Delete, Car } from 'lucide-react';
-import { Card, CardContent, Input, Checkbox } from '../../components/ui';
+import { Map, ArrowRight, Ruler, FileImage, Delete, Car } from 'lucide-react'; //Box,
+import { Card, CardContent } from '../../components/ui';
 import { sketchForSiteplan } from './sketchForSiteplan';
 import ImageUploader from './ImageUploader';
 
@@ -57,39 +57,39 @@ import './SitePlanDesigner.scss';
 import CollapsibleSection from './CollapsibleSection';
 import AlphaBanner from './AlphaBanner';
 
-const initialFormData: FormData = {
-  parkingStalls: 4,
-  approachWidth: 20,
-  drivewayWidth: 24,
-  buildingArea: 1500,
-  taperedDriveway: true,
-  propertyEntranceCount: 1,
-  buildingCount: 1,
-  landscapeIsland: 7,
-  parkingPer1000: 2.4,
-  imperviousPercentage: 70,
-  halfStreetDriveway: false,
-  parkingSide: 'left',
-};
+// const initialFormData: FormData = {
+//   parkingStalls: 4,
+//   approachWidth: 20,
+//   drivewayWidth: 24,
+//   buildingArea: 1500,
+//   taperedDriveway: true,
+//   propertyEntranceCount: 1,
+//   buildingCount: 1,
+//   landscapeIsland: 7,
+//   parkingPer1000: 2.4,
+//   imperviousPercentage: 70,
+//   halfStreetDriveway: false,
+//   parkingSide: 'left',
+// };
 
-const initialMetrics: SiteMetrics = {
-  propertyArea: 12192,
-  imperviousSurface: 12192,
-  drivewayArea: 521,
-  parkingArea: 936,
-  parkingStallsArea: 1156,
-  handicappedStallsCount: 0,
-  totalParkingStalls: 8,
-  sidewalkArea: 0,
-  garbageArea: 2808,
-  actualBuildingArea: 1500,
-  approachArea: 62,
-  bikeParkingArea: 0
-};
+// const initialMetrics: SiteMetrics = {
+//   propertyArea: 12192,
+//   imperviousSurface: 12192,
+//   drivewayArea: 521,
+//   parkingArea: 936,
+//   parkingStallsArea: 1156,
+//   handicappedStallsCount: 0,
+//   totalParkingStalls: 8,
+//   sidewalkArea: 0,
+//   garbageArea: 2808,
+//   actualBuildingArea: 1500,
+//   approachArea: 62,
+//   bikeParkingArea: 0
+// };
 
 const SitePlanGenerator: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [metrics, _setMetrics] = useState<SiteMetrics>(initialMetrics);
+  // const [formData, setFormData] = useState<FormData>(initialFormData);
+  // const [metrics, _setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'entrances'>('upload'); // Interaction mode
 
@@ -104,13 +104,12 @@ const SitePlanGenerator: React.FC = () => {
 
   // Property Outputs
   // const [globalAngle, _setGlobalAngle] = useState<number>(0);
-
+  const clearEverythingRef = useRef<boolean>(false);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const setbacksRef = useRef<number[]>([]);
   const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
-
 
 
   const isUploadingImageRef = useRef<boolean>(true);
@@ -165,6 +164,7 @@ const SitePlanGenerator: React.FC = () => {
     setbacksRef,
     setIsPolygonClosedState,
     stepSelectorRefs,
+    clearEverythingRef
   };
   const sketch = sketchForSiteplan(params);
 
@@ -176,38 +176,38 @@ const SitePlanGenerator: React.FC = () => {
     };
   }, [imageURL]);
 
-  const handleInputChange = (field: keyof FormData, value: number | boolean | string): void => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  // const handleInputChange = (field: keyof FormData, value: number | boolean | string): void => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }));
+  // };
 
-  const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
-    const value = e.target.value; // Value is a string ('right' or 'left')
-    handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
-  };
+  // const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
+  //   const value = e.target.value; // Value is a string ('right' or 'left')
+  //   handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
+  // };
 
-  const handleBooleanInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
-    const value = e.target.checked; // `checked` gives the boolean state of the input
-    handleInputChange(field, value);
-  };
+  // const handleBooleanInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
+  //   const value = e.target.checked; // `checked` gives the boolean state of the input
+  //   handleInputChange(field, value);
+  // };
 
-  const handleNumberInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
-    const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-    if (!isNaN(value)) {
-      handleInputChange(field, value);
-    }
-  };
+  // const handleNumberInput = (e: ChangeEvent<HTMLInputElement>, field: keyof FormData): void => {
+  //   const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+  //   if (!isNaN(value)) {
+  //     handleInputChange(field, value);
+  //   }
+  // };
 
-  const formatMetricValue = (key: keyof SiteMetrics, value: number): string => {
-    const formattedValue = value.toLocaleString();
-    return key.toLowerCase().includes('area') ? `${formattedValue} sq ft` : formattedValue;
-  };
+  // const formatMetricValue = (key: keyof SiteMetrics, value: number): string => {
+  //   const formattedValue = value.toLocaleString();
+  //   return key.toLowerCase().includes('area') ? `${formattedValue} sq ft` : formattedValue;
+  // };
 
-  const formatMetricLabel = (key: string): string => {
-    return key.replace(/([A-Z])/g, ' $1').trim().replace(/\b\w/g, (char) => char.toUpperCase());
-  };
+  // const formatMetricLabel = (key: string): string => {
+  //   return key.replace(/([A-Z])/g, ' $1').trim().replace(/\b\w/g, (char) => char.toUpperCase());
+  // };
 
 
 
@@ -347,6 +347,7 @@ const SitePlanGenerator: React.FC = () => {
 
   const clearCanvas = () => {
     setImageURL(null);
+    clearEverythingRef.current = true;
     pointsRef.current = [];
     linesRef.current = [];
     setIsPolygonClosedState(false);
@@ -359,22 +360,24 @@ const SitePlanGenerator: React.FC = () => {
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
     inputScaleRef.current = null;
+
+
     setMode('upload');
   };
 
 
 
 
-  const generateSitePlan = () => {
+  // const generateSitePlan = () => {
 
 
-    // const points = pointsRef.current;
-    // const lines = linesRef.current;
-    // const scale = scaleRef.current;
-    // falsifyRefs();
-    // isGeneratingSitePlanRef.current = true;
-    // visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
-  }
+  //   // const points = pointsRef.current;
+  //   // const lines = linesRef.current;
+  //   // const scale = scaleRef.current;
+  //   // falsifyRefs();
+  //   // isGeneratingSitePlanRef.current = true;
+  //   // visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
+  // }
 
 
   const steps = [
@@ -509,15 +512,15 @@ const SitePlanGenerator: React.FC = () => {
     },
 
 
-    {
-      id: 'generate',
-      title: '6. Generate Siteplan',
-      icon: <Box />,
-      description: 'Generate the base for your site plan',
-      help: 'Move the parking lot and building around, create building entrances, create sidewalks, and get ready to submit your site plan.',
-      onClick: () => { generateSitePlan() },
-      disabled: isUploadingImageRef.current
-    },
+    // {
+    //   id: 'generate',
+    //   title: '6. Generate Siteplan',
+    //   icon: <Box />,
+    //   description: 'Generate the base for your site plan',
+    //   help: 'Move the parking lot and building around, create building entrances, create sidewalks, and get ready to submit your site plan.',
+    //   onClick: () => { generateSitePlan() },
+    //   disabled: isUploadingImageRef.current
+    // },
 
   ];
   return (
@@ -593,7 +596,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
               {/* Input Parameters Section */}
-              <CollapsibleSection title="Site Plan Inputs">
+              {/* <CollapsibleSection title="Site Plan Inputs">
                 <div className="site-plan-generator__input-group">
                   <label htmlFor="parkingStalls">Parking Stalls</label>
                   <Input
@@ -647,10 +650,12 @@ const SitePlanGenerator: React.FC = () => {
                     onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
                   />
                 </div>
-                {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED */}
+
+
+
 
                 {formData.halfStreetDriveway ?
-
+                  //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
                   <div className="site-plan-generator__input-group subgroup-1">
                     <label>Parking Side</label>
                     <div className="radio-group">
@@ -743,9 +748,9 @@ const SitePlanGenerator: React.FC = () => {
                     onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
                   />
                 </div>
-              </CollapsibleSection>
-
-              {/* Site Metrics Section */}
+              </CollapsibleSection> */}
+              {/* 
+              Site Metrics Section
               <CollapsibleSection title="Site Plan Metrics">
                 <div className="site-plan-generator__metrics-container">
                   {(Object.entries(metrics) as [keyof SiteMetrics, number][]).map(([key, value]) => (
@@ -755,7 +760,7 @@ const SitePlanGenerator: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </CollapsibleSection>
+              </CollapsibleSection> */}
 
             </div>
 

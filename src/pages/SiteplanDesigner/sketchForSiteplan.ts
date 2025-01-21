@@ -52,8 +52,8 @@ interface SketchForSiteplanParams {
     parking: React.MutableRefObject<boolean>;
     building: React.MutableRefObject<boolean>;
     entrances: React.MutableRefObject<boolean>;
-
-  }
+  };
+  clearEverythingRef: React.MutableRefObject<boolean>;
 
 }
 
@@ -73,6 +73,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
     setbacksRef,
     setIsPolygonClosedState,
     stepSelectorRefs,
+    clearEverythingRef
   } = params;
   const defaultScale = 0.25;
 
@@ -175,6 +176,43 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
   if (propertyRef.current) {
     propertyRef.current.updateSetbacks(linesRef.current);
   }
+
+
+
+
+
+  // When an input changes in the component above, set he sketch variable here.
+  if (propertyRef.current) {
+    propertyRef.current.updateSetbacks(linesRef.current);
+  }
+
+
+  if (clearEverythingRef.current === true) {
+    clearEverythingRef.current = false;
+
+    propertyRef.current = null
+    approachRef.current = null
+    parkingRef.current = null
+    buildingRef.current = null
+    garbageRef.current = null
+
+
+    buildingDragMode = null; // null, 'center', 'edge', 'corner'
+    parkingDragMode = null; // null, 'center', 'edge', 'corner'
+    approachDragMode = null; // null, 'center', 'edge', 'corner'
+
+    resizeEdge = null;
+    // resizeEdges: number[] | null = null
+    resizeCorner = null;
+    // drivewayArea = 0;
+    isRotationFrozenRef.current = false;
+    resizingbuildingRef.current = false;
+    isDragging.parking = false;
+    isDragging.approach = false;
+    isDragging.parkingOffset = false;
+    isDragging.building = false;
+  }
+
 
 
   return (p: p5) => {

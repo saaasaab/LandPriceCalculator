@@ -98,6 +98,7 @@ export class Building extends SitePlanElement {
 
 
       p.fill("#f9fafb");
+      p.rectMode(p.CENTER);
       p.rect(0, 0, 30, 5, 3, 3, 3, 3);
 
       p.pop();
