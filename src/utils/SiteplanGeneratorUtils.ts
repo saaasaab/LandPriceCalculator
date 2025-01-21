@@ -9,7 +9,7 @@ import { Parking } from "../pages/SiteplanDesigner/SitePlanClasses/Parking";
 import { ParkingStall } from "../pages/SiteplanDesigner/SitePlanClasses/ParkingStall";
 import { Property } from "../pages/SiteplanDesigner/SitePlanClasses/Property";
 import { SitePlanElement } from "../pages/SiteplanDesigner/SitePlanClasses/SitePlanElement";
-import { stallHeight, stallWidth } from "../pages/SiteplanDesigner/SiteplanGenerator";
+import { stallHeight, stallWidth } from "../pages/SiteplanDesigner/sketchForSiteplan";
 
 
 type Point = [number, number];
