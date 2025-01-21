@@ -1,6 +1,6 @@
 import p5 from "p5";
 import { Edge } from "./Edge";
-import { stallWidth } from "../SiteplanGenerator";
+import { stallWidth } from "../sketchForSiteplan";
 
 export class ParkingStall {
 

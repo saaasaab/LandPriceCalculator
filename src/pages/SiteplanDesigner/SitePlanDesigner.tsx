@@ -50,9 +50,7 @@ import React, { useState, ChangeEvent, useEffect, useRef } from 'react';
 
 import { Map, ArrowRight, Ruler, Box, FileImage, Delete, Car } from 'lucide-react';
 import { Card, CardContent, Input, Checkbox } from '../../components/ui';
-import { SiteplanGenerator } from './SiteplanGenerator';
 import { sketchForSiteplan } from './sketchForSiteplan';
-import { countParkingStalls } from '../../utils/SiteplanGeneratorUtils';
 import ImageUploader from './ImageUploader';
 
 import './SitePlanDesigner.scss';
@@ -91,7 +89,7 @@ const initialMetrics: SiteMetrics = {
 
 const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
+  const [metrics, _setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'entrances'>('upload'); // Interaction mode
 
@@ -105,7 +103,7 @@ const SitePlanGenerator: React.FC = () => {
   // const [isHelpVisible, setIsHelpVisible] = useState(true);
 
   // Property Outputs
-  const [globalAngle, _setGlobalAngle] = useState<number>(0);
+  // const [globalAngle, _setGlobalAngle] = useState<number>(0);
 
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -136,19 +134,12 @@ const SitePlanGenerator: React.FC = () => {
     entrances: isPlacingBuildingEntrancesRef,
   }
 
-
-
   const isPolygonClosedRef = useRef<boolean>(false);
   const isGeneratingSitePlanRef = useRef<boolean>(false);
-
   const inputScaleRef = useRef<number | null>(null);
   const scaleRef = useRef<number | null>(null);
   const draggingPointIndexRef = useRef<number | null>(null);
   const selectedLineIndexRef = useRef<number | null>(null);
-
-  let visualizer = useRef<SiteplanGenerator | null>(null)// new SiteplanGenerator(graph );
-
-  // P5 sketch function
 
 
 
@@ -173,7 +164,6 @@ const SitePlanGenerator: React.FC = () => {
     selectedLineIndexRef,
     setbacksRef,
     setIsPolygonClosedState,
-    sitePlanGenerator: visualizer,
     stepSelectorRefs,
   };
   const sketch = sketchForSiteplan(params);
@@ -221,51 +211,51 @@ const SitePlanGenerator: React.FC = () => {
 
 
 
-  useEffect(() => {
-    const updateVariables = () => {
-      console.log("There be danger here")
+  // useEffect(() => {
+  //   const updateVariables = () => {
+  //     console.log("There be danger here")
 
-      const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
+  //     const { leftStalls, rightStalls } = countParkingStalls(visualizer.current?.parking)
 
-      const _metrics: SiteMetrics = {
-        propertyArea: visualizer.current?.property?.areaOfProperty || 0,
-        imperviousSurface: visualizer.current?.property?.areaOfProperty || 0,
-        drivewayArea: visualizer.current?.drivewayArea || 0,
-        parkingArea: visualizer.current?.parking?.parkingArea || 0,
-        parkingStallsArea: visualizer.current?.parking?.parkingStallsArea || 0,
-        handicappedStallsCount: visualizer.current?.parking?.handicappedParkingNum || 0,
-        totalParkingStalls: leftStalls + rightStalls,
-        sidewalkArea: visualizer.current?.sidewalkArea || 0,
-        garbageArea: visualizer.current?.garbage?.area || 0,
-        actualBuildingArea: visualizer.current?.building?.buildingAreaActual || 0,
-        approachArea: visualizer.current?.approach?.approachArea || 0,
-        bikeParkingArea: visualizer.current?.bikeParkingArea || 0,
-      };
-      setMetrics(_metrics);
-    };
+  //     const _metrics: SiteMetrics = {
+  //       propertyArea: visualizer.current?.property?.areaOfProperty || 0,
+  //       imperviousSurface: visualizer.current?.property?.areaOfProperty || 0,
+  //       drivewayArea: visualizer.current?.drivewayArea || 0,
+  //       parkingArea: visualizer.current?.parking?.parkingArea || 0,
+  //       parkingStallsArea: visualizer.current?.parking?.parkingStallsArea || 0,
+  //       handicappedStallsCount: visualizer.current?.parking?.handicappedParkingNum || 0,
+  //       totalParkingStalls: leftStalls + rightStalls,
+  //       sidewalkArea: visualizer.current?.sidewalkArea || 0,
+  //       garbageArea: visualizer.current?.garbage?.area || 0,
+  //       actualBuildingArea: visualizer.current?.building?.buildingAreaActual || 0,
+  //       approachArea: visualizer.current?.approach?.approachArea || 0,
+  //       bikeParkingArea: visualizer.current?.bikeParkingArea || 0,
+  //     };
+  //     setMetrics(_metrics);
+  //   };
 
 
-    if (visualizer.current) {
-      const interval = setInterval(updateVariables, 500); // Check for changes periodically
+  //   if (visualizer.current) {
+  //     const interval = setInterval(updateVariables, 500); // Check for changes periodically
 
-      return () => clearInterval(interval);
-    }
+  //     return () => clearInterval(interval);
+  //   }
 
-  }, [visualizer?.current]);
+  // }, [visualizer?.current]);
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const updatedGlobals = {
-      approachWidth: formData.approachWidth,
-      parkingNumber: formData.parkingStalls,
-      parkingDrivewayWidth: formData.drivewayWidth,
-      buildingAreaTarget: formData.buildingArea,
-      globalAngle: globalAngle,
-      taperParking: formData.taperedDriveway
-    }
+  //   const updatedGlobals = {
+  //     approachWidth: formData.approachWidth,
+  //     parkingNumber: formData.parkingStalls,
+  //     parkingDrivewayWidth: formData.drivewayWidth,
+  //     buildingAreaTarget: formData.buildingArea,
+  //     globalAngle: globalAngle,
+  //     taperParking: formData.taperedDriveway
+  //   }
 
-    visualizer.current?.updateGlobalVariables(updatedGlobals)
-  }, [formData, globalAngle])
+  //   // visualizer.current?.updateGlobalVariables(updatedGlobals)
+  // }, [formData, globalAngle])
 
   // Update setback for a specific line
   const updateSetback = (index: number, value: string) => {
@@ -370,20 +360,20 @@ const SitePlanGenerator: React.FC = () => {
     selectedLineIndexRef.current = null;
     inputScaleRef.current = null;
     setMode('upload');
-    visualizer.current = null;
   };
 
 
 
 
   const generateSitePlan = () => {
-    const points = pointsRef.current;
-    const lines = linesRef.current;
-    const scale = scaleRef.current;
-    falsifyRefs();
-    isGeneratingSitePlanRef.current = true;
 
-    visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
+
+    // const points = pointsRef.current;
+    // const lines = linesRef.current;
+    // const scale = scaleRef.current;
+    // falsifyRefs();
+    // isGeneratingSitePlanRef.current = true;
+    // visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
   }
 
 

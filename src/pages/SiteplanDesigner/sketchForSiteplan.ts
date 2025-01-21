@@ -1,21 +1,34 @@
 import p5 from "p5";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import classifyPoint from "robust-point-in-polygon"
 
-import { ESitePlanObjects, SiteplanGenerator } from "./SiteplanGenerator";
 import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateAngle, calculateApproachArea, calculateCentroid, calculateDrivewayArea, calculatePointToEdgeDistance, findClosestEdge, getAdjacentIndices, getCenterPoint, getIsClockwise, getParkingStallArea, getReversedIndex, isMoreVertical, normalizeAngle, scalePolygonToFitCanvas, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateAngle, calculateApproachArea, calculateCentroid, calculatePointToEdgeDistance, findClosestEdge, getCenterPoint, getIsClockwise, getParkingStallArea, isMoreVertical, normalizeAngle, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
 import { Garbage } from "./SitePlanClasses/Garbage";
 import { Approach } from "./SitePlanClasses/Approach";
+// import { VisibilityGraph } from "../VisibilityGraph";
 
 
 export type Point = [number, number];
+export type SitePlanObjects = "Parking1" | "Parking2" | "Driveway" | "Bike Parking" | "Approach" | "Garbage" | "Building" | "ParkingWay";
+export enum ESitePlanObjects {
+  ParkingWay = "ParkingWay",
+  Parking1 = "Parking1",
+  Parking2 = "Parking2",
+  Driveway = "Driveway",
+  BikeParking = "Bike Parking",
+  Approach = "Approach",
+  Garbage = "Garbage",
+  Building = "Building"
+}
+export const stallWidth = 17;
+export const stallHeight = 8.5;
 
 interface SketchForSiteplanParams {
   canvasContainerRef: React.RefObject<HTMLDivElement>;
@@ -30,7 +43,6 @@ interface SketchForSiteplanParams {
   selectedLineIndexRef: React.MutableRefObject<number | null>;
   setbacksRef: React.MutableRefObject<number[]>;
   setIsPolygonClosedState: (value: React.SetStateAction<boolean>) => void;
-  sitePlanGenerator: React.MutableRefObject<SiteplanGenerator | null>;
   stepSelectorRefs: {
     upload: React.MutableRefObject<boolean>;
     points: React.MutableRefObject<boolean>;
@@ -60,17 +72,79 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
     selectedLineIndexRef,
     setbacksRef,
     setIsPolygonClosedState,
-    sitePlanGenerator,
     stepSelectorRefs,
   } = params;
   const defaultScale = 0.25;
 
 
-  // const [property, setProperty] = useState<Property | null>(null);
-  // const [parking, setParking] = useState<Parking | null>(null);
-  // const [building, setBuilding] = useState<Building | null>(null);
-  // const [garbage, setGarbage] = useState<Garbage | null>(null);
-  // const [approach, setApproach] = useState<Approach | null>(null);
+
+  // public points: IPoint[];
+  // public lines: Line[];
+  // public scale: number;
+  // public parkingNum: number;
+  // public drivewayArea: number;
+  // public property: Property | null;
+  // public parking: Parking | null;
+  // public building: Building | null;
+  // public garbage: Garbage | null;
+  // public approach: Approach | null;
+  // public pathCellIndex: number;
+  // public sidewalkArea: number;
+  // public bikeParkingArea: number;
+  // public globalAngle: number;
+  // public globalAnglePrev: number;
+  // public taperParking: boolean;
+  // public buildingDragMode: string | null;
+  // public parkingDragMode: string | null;
+  // public resizeEdges: number[] | null;
+  // public resizeCorner: number | null;
+  // public resizeEdge: number | null;
+  // public resizingbuilding: boolean;
+  // public dragOffset: { x: number, y: number };
+
+
+
+  // constructor(points: IPoint[], lines: Line[], scale: number) {
+  //   this.globalAngle = 0;
+  //   this.globalAnglePrev = 0;
+  //   this.points = points;
+  //   this.lines = lines;
+  //   this.scale = scale;
+  //   this.parkingNum = 10;
+  //   this.property = null;
+  //   this.parking = null;
+  //   this.building = null;
+  //   this.garbage = null;
+  //   this.approach = null;
+  //   this.pathCellIndex = 0;
+  //   this.drivewayArea = 0;
+  //   this.sidewalkArea = 0;
+  //   this.bikeParkingArea = 0;
+  //   this.taperParking = true;
+  //   this.buildingDragMode = null; // null, 'center', 'edge', 'corner'
+  //   this.parkingDragMode = null; // null, 'center', 'edge', 'corner'
+  //   this.dragOffset = { x: 0, y: 0 };
+  //   this.resizeEdge = null;
+  //   this.resizeEdges = null
+  //   this.resizeCorner = null;
+  //   this.resizingbuilding = false;
+  // }
+
+
+  // const defaultEdges = (p: p5) => {
+  //   const globalAngle = 0;
+  //   let propertyCorners = [
+  //     p.createVector(140, 80),
+  //     p.createVector(p.width - 180, 50),
+  //     p.createVector(p.width - 180, p.height / 2 + 10),
+  //     p.createVector(p.width - 135, p.height - 120),
+  //     p.createVector(p.width / 2 - 140, p.height - 150),
+  //     p.createVector(108, p.height - 220),
+  //   ];
+  //   propertyCorners = rotateCorners(p, propertyCorners, globalAngle);
+
+  //   return propertyCorners;
+  // }
 
   const propertyRef = useRef<Property | null>(null);
   const approachRef = useRef<Approach | null>(null);
@@ -84,9 +158,9 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
   let approachDragMode: string | null = null; // null, 'center', 'edge', 'corner'
 
   let resizeEdge: number | null = null;
-  let resizeEdges: number[] | null = null
+  // let resizeEdges: number[] | null = null
   let resizeCorner: number | null = null;
-  let drivewayArea = 0;
+  // let drivewayArea = 0;
   let isRotationFrozenRef = useRef<boolean>(false);
   let resizingbuildingRef = useRef<boolean>(false);
   let isDragging = {
@@ -140,7 +214,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       const approach = approachRef.current;
       const parking = parkingRef.current;
       const building = buildingRef.current;
-      const garbage = garbageRef.current;
+      // const garbage = garbageRef.current;
 
       const isUploadingImage = stepSelectorRefs.upload.current;
       const isPolygonClosed = isPolygonClosedRef.current;
@@ -171,6 +245,31 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         parkingRef.current.drawParkingStalls();
         parkingRef.current.drawParkingOutline(p, parkingRef.current, garbageRef.current, approachRef.current)
       }
+
+
+
+
+
+
+      if (buildingRef.current) {
+        buildingRef.current.drawBuilding();
+        if (buildingRef.current.showRotationHandles) {
+          buildingRef.current.drawRotationHandles();
+        }
+
+        if (!buildingRef.current.hasStopped && buildingRef.current.isInitialized && parkingRef.current && propertyRef.current && garbageRef.current) {
+          buildingRef.current.buildingLocator(p, buildingRef.current, parkingRef.current, propertyRef.current, garbageRef.current);
+
+          // STOP THE GROWING FOR NOW.
+          // building.buildingGrower(property, parking);
+        }
+
+      }
+
+
+
+
+
 
 
       drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || defaultScale);
@@ -205,11 +304,87 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         isHovered.buildingHandle = building.isMouseHoveringRotateHandle();
       }
 
-
-
       if (parking && parking.showRotationHandles) {
         parking.drawRotationHandles();
       }
+
+
+      // if (visibilityGraphSolver) {
+      //   this.pathCellIndex++
+
+      //   // visibilityGraphSolver.displaySolution(p, this.pathCellIndex)
+
+
+      //   // Display the shortest path for a specific start-end pair
+      //   visibilityGraphSolver.displayShortestPaths(p);
+      //   // visibilityGraphSolver.displayPathsAsPolygons(p);
+
+      //   const maxPathStatesLength = visibilityGraphSolver.edges.length;
+      //   if (this.pathCellIndex > maxPathStatesLength + 30) {
+      //     this.pathCellIndex = 0
+      //   }
+      // }
+
+
+      if (buildingRef.current) {
+        const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [p.mouseX, p.mouseY]) === -1
+
+        if (!isHovered.approach && !isHovered.parking && !buildingRef.current.isInitialized && isInboundary && !isHovered.parkingOffset && !isHovered.parkingHandle) {
+
+          // Show the building growing.
+          buildingRef.current.tempBuilding();
+        }
+
+        if ((isHovered.building || isHovered.buildingOffset) && isInboundary && buildingRef.current.isInitialized) {
+
+          // ----  Show the entrance ----
+          // Get the closest edge
+          // check that the edge is within 30 px
+          // show the entrance being drawn in the right orientation and the right position
+          // Get the position % of the entrance. 
+          // Remove entrance by clicking again within X px of enteracne
+          const mouse = p.createVector(p.mouseX, p.mouseY)
+          const closestEdgeIndex = findClosestEdge(buildingRef.current.sitePlanElementEdges, mouse)
+          const closestEdge = buildingRef.current.sitePlanElementEdges[closestEdgeIndex];
+          const distance = calculatePointToEdgeDistance(closestEdge, mouse);
+
+
+          // clampNumber()
+          // const area = Math.abs(building.width * building.height);
+
+          if (distance < 20 && buildingRef.current.hasStopped) {
+            // get the point on the line where the entrance should interesect
+            const angle = closestEdge.calculateAngle() - 90;
+            const intersection = closestEdge.calculateClosestIntercept(
+              p.mouseX,
+              p.mouseY,
+              p
+            )
+
+            // // Draw the entrance
+            // let lerpPos = getIntersectionPercentage(
+            //   closestEdge,
+            //   intersection
+            // ) || 0;
+
+
+            // Draw the entrance
+            const enteranceWidth = 8;
+            p.stroke('red')
+            p.strokeWeight(2)
+
+            p.push();
+            p.translate(intersection.x, intersection.y)
+            p.rotate(angle - 180)
+            p.textSize(14);
+            p.arc(0, 0, enteranceWidth / property.scale, enteranceWidth / property.scale, 0, 90, p.PIE);
+
+            p.pop();
+          }
+        }
+      }
+
+
       if (
         parking && (
           isHovered.parkingOffset ||
@@ -229,7 +404,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
           const handle = parking.rotationHandles[index];
           if (p.dist(newX, newY, handle.x, handle.y) < 30) {
             parkingDragMode = 'rotate';
-            resizeEdges = null;
+            // resizeEdges = null;
             resizeCorner = null;
             resizeEdge = null;
             // hasSetRotating = true;
@@ -242,7 +417,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
           // !hasSetRotating&&
           if (p.dist(newX, newY, parking.center.x, parking.center.y) < 20) {
             parkingDragMode = 'center';
-            resizeEdges = null;
+            // // resizeEdges = null;c
             resizeCorner = null;
             resizeEdge = null;
           }
@@ -272,9 +447,9 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
 
-        // if (parkingDragMode === "corner") p.cursor('nesw-resize');
-        // else if (parkingDragMode === "edge") p.cursor('ew-resize');
-        if (parkingDragMode === "center") p.cursor('grab');
+        if (parkingDragMode === "corner") p.cursor('nesw-resize');
+        else if (parkingDragMode === "edge") p.cursor('ew-resize');
+        else if (parkingDragMode === "center") p.cursor('grab');
         else if (parkingDragMode === "rotate") p.cursor(RotateArrow);
         else p.cursor('default');
       }
@@ -283,8 +458,6 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         approachDragMode = 'center';
         p.cursor("grab");
       }
-
-
       // Check if we're hovering over a building corner, edge, or center
       else if (building !== null &&
         (isHovered.building ||
@@ -304,9 +477,9 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
             // if (this.buildingDragMode) return
             if (p.dist(newX, newY, corner.x, corner.y) < 20) {
               buildingDragMode = 'corner';
-              const _resizeEdges = getAdjacentIndices(i, building.sitePlanElementEdges.length);
-              const totalVertices = building.sitePlanElementEdges.length
-              resizeEdges = [_resizeEdges[0], (_resizeEdges[1] - 1 + totalVertices) % totalVertices]
+              // const _resizeEdges = getAdjacentIndices(i, building.sitePlanElementEdges.length);
+              // const totalVertices = building.sitePlanElementEdges.length
+              // resizeEdges = [_resizeEdges[0], (_resizeEdges[1] - 1 + totalVertices) % totalVertices]
               resizeCorner = i;
               resizeEdge = null;
               anyCornerHover = true;
@@ -321,7 +494,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
           const distance = calculatePointToEdgeDistance(closestEdge, mouse);
           if (distance <= 20) {
             buildingDragMode = 'edge';
-            resizeEdges = null;
+            // resizeEdges = null;
             resizeCorner = null;
             resizeEdge = closestEdgeIndex;
           }
@@ -333,7 +506,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
           if (p.dist(newX, newY, handle.x, handle.y) < 30) {
             buildingDragMode = 'rotate';
-            resizeEdges = null;
+            // resizeEdges = null;
             resizeCorner = null;
             resizeEdge = null;
             anyCornerHover = true;
@@ -342,11 +515,12 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         if (!anyCornerHover) {
           if (p.dist(newX, newY, building.center.x, building.center.y) < 20) {
             buildingDragMode = 'center';
-            resizeEdges = null;
+            // resizeEdges = null;
             resizeCorner = null;
             resizeEdge = null;
           }
         }
+
 
 
         if (buildingDragMode !== null) {
@@ -361,14 +535,12 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         else p.cursor('default');
       }
 
-      
-
       else {
-        const property = propertyRef.current;
-        const approach = approachRef.current;
+        // const property = propertyRef.current;
+        // const approach = approachRef.current;
         const parking = parkingRef.current;
         const building = buildingRef.current;
-        const garbage = garbageRef.current;
+        // const garbage = garbageRef.current;
 
 
         if (parking) {
@@ -382,11 +554,14 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
         parkingDragMode = null;
         approachDragMode = null;
 
-        resizeEdges = null;
+        // resizeEdges = null;
         resizeCorner = null;
         resizeEdge = null;
         p.cursor('default')
       }
+
+
+
 
 
 
@@ -913,7 +1088,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       // Update driveway area on every drag
       if (approach !== null && parking !== null) {
-        drivewayArea = calculateDrivewayArea(approach.p, approach, parking)
+        // drivewayArea = calculateDrivewayArea(approach.p, approach, parking)
         parking.parkingArea = Math.round(parking.width * parking.height * property.scale * property.scale);
         approach.approachArea = calculateApproachArea(approach)
         parking.parkingStallsArea = getParkingStallArea(parking)
@@ -923,11 +1098,11 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
 
     p.mouseReleased = () => {
 
-      const property = propertyRef.current;
-      const approach = approachRef.current;
+      // const property = propertyRef.current;
+      // const approach = approachRef.current;
       const parking = parkingRef.current;
       const building = buildingRef.current;
-      const garbage = garbageRef.current;
+      // const garbage = garbageRef.current;
 
 
       draggingPointIndexRef.current = null;
@@ -943,7 +1118,7 @@ export function sketchForSiteplan(params: SketchForSiteplanParams) {
       approachDragMode = null;
 
 
-      resizeEdges = null;
+      // resizeEdges = null;
       resizeCorner = null;
       resizeEdge = null;
       resizingbuildingRef.current = false;
@@ -1201,6 +1376,7 @@ const handleBuildingDrag = (
   resizingbuildingRef: React.MutableRefObject<boolean>
 ) => {
   if (!property || !approach || !parking || !building || !garbage) return;
+  // let visibilityGraphSolver: VisibilityGraph;
 
   building.hasStopped = false
 
@@ -1211,6 +1387,24 @@ const handleBuildingDrag = (
   const _width = building.width;
 
   const propertyCenter = calculateCentroid(property.propertyCorners)
+
+
+  // const updateVisibilityGraph = () => {
+  //   if (!property || !approach || !parking || !building || !garbage) return;
+
+  //   if (visibilityGraphSolver) {
+  //     visibilityGraphSolver = runVisibilityGraphSolver(
+  //       visibilityGraphSolver,
+  //       building,
+  //       parking,
+  //       property,
+  //       garbage,
+  //       approach
+  //     );
+  //   }
+  // };
+
+
 
 
   if (buildingDragMode === "corner" && resizeCorner !== null) {
@@ -1629,7 +1823,6 @@ const handleParkingDrag = (
 };
 
 
-
 const toLocal = (p: p5, building: Building, x: number, y: number) => {
   const dx = x - building.center.x;
   const dy = y - building.center.y;
@@ -1646,3 +1839,158 @@ const toGlobal = (p: p5, building: Building, x: number, y: number) => {
   };
 };
 
+
+
+
+
+export function drawNeonLine(p: p5,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  lineColor: p5.Color, glowSize = 20) {
+  // Save the current drawing state
+  p.push();
+
+  // Disable the stroke outline
+  p.noStroke();
+
+  // Calculate the number of layers for the glow effect
+  const layers = 15;
+
+  // Calculate the alpha step for each layer
+  const alphaStep = 255 / layers;
+
+  // Calculate the size step for each layer
+  const sizeStep = glowSize / layers;
+
+  // Draw multiple layers from outside to inside
+  for (let i = layers; i >= 0; i--) {
+    // Calculate the current alpha and size
+    const currentAlpha = (layers - i) * alphaStep;
+    const currentSize = i * sizeStep;
+
+    // Set the color with current alpha
+    const c = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
+    p.drawingContext.shadowColor = p.color(p.red(lineColor), p.green(lineColor), p.blue(lineColor), currentAlpha);
+    p.drawingContext.shadowBlur = currentSize;
+
+    // Draw the line
+    p.stroke(c);
+    p.strokeWeight(2);
+    p.line(x1, y1, x2, y2);
+  }
+
+  // Draw the bright center
+  p.stroke(255);
+  p.strokeWeight(2);
+  p.line(x1, y1, x2, y2);
+
+  // Restore the drawing state
+  p.pop();
+}
+
+
+
+export function drawNeonShape(
+  p: p5,
+  vertices: { x: number; y: number }[], // Array of vertices for the shape
+  lineColor: p5.Color,
+  glowSize = 20
+): void {
+  // Save the current drawing state
+  p.push();
+
+  // Disable the stroke outline
+  p.noStroke();
+
+  // Calculate the number of layers for the glow effect
+  const layers = 15;
+
+  // Calculate the alpha step for each layer
+  const alphaStep = 255 / layers;
+
+  // Calculate the size step for each layer
+  const sizeStep = glowSize / layers;
+
+  // Draw multiple layers from outside to inside
+  for (let i = layers; i >= 0; i--) {
+    // Calculate the current alpha and size
+    const currentAlpha = (layers - i) * alphaStep;
+    const currentSize = i * sizeStep;
+
+    // Set the color with current alpha
+    const c = p.color(
+      p.red(lineColor),
+      p.green(lineColor),
+      p.blue(lineColor),
+      currentAlpha
+    );
+    p.drawingContext.shadowColor = p.color(
+      p.red(lineColor),
+      p.green(lineColor),
+      p.blue(lineColor),
+      currentAlpha
+    );
+    p.drawingContext.shadowBlur = currentSize;
+
+    // Draw the shape with current glow layer
+    p.stroke(c);
+    p.strokeWeight(2);
+    p.beginShape();
+    vertices.forEach((vertex) => {
+      p.vertex(vertex.x, vertex.y);
+    });
+    p.endShape(p.CLOSE);
+  }
+
+  // Draw the bright center shape
+  p.stroke(255);
+  p.strokeWeight(2);
+  p.beginShape();
+  vertices.forEach((vertex) => {
+    p.vertex(vertex.x, vertex.y);
+  });
+  p.endShape(p.CLOSE);
+  // Restore the drawing state
+  p.pop();
+}
+
+
+
+
+
+// function updateGlobalVariables(updatedGlobals: {
+//   approachWidth: string | number;
+//   parkingNumber: string | number;
+//   parkingDrivewayWidth: string | number;
+//   buildingAreaTarget: string | number;
+//   globalAngle: number;
+//   taperParking: boolean;
+
+// }) {
+
+//   const { approachWidth, parkingNumber, parkingDrivewayWidth, buildingAreaTarget, taperParking } = updatedGlobals;
+//   // globalAngle,
+//   if (!this.parking || !this.property || !this.approach || !this.building) return
+
+
+
+//   // Update all things PARKING
+//   this.parking.updateWidth(Number(parkingDrivewayWidth) / this.scale);
+//   this.parking.updateParkingStallsNumber(this.property, Number(parkingNumber));
+
+
+//   // Update all things APPROACH
+//   // Scale up the approach witht he scale
+//   this.approach.updateWidth(Number(approachWidth) / this.scale)
+
+
+//   // Update all this BUILDING
+//   this.building.updateBuildingArea(Number(buildingAreaTarget))
+
+//   this.parking.entranceEdge?.point1
+
+//   this.taperParking = taperParking
+
+// }

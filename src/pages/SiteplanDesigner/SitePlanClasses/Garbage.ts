@@ -1,8 +1,8 @@
 import p5 from "p5";
 import { SitePlanElement } from "./SitePlanElement";
-import { SitePlanObjects } from "../SiteplanGenerator";
 import { Parking } from "./Parking";
 import { expandPolygon, getCenterPoint } from "../../../utils/SiteplanGeneratorUtils";
+import { SitePlanObjects } from "../sketchForSiteplan";
 
 export class Garbage extends SitePlanElement {
 
