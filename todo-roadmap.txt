@@ -37,7 +37,7 @@
 [ ] Total impervious surface area
 [ ] Add loading areas - Determine if you need loading areas because the person probably doesn't know
 [ ] Building elevations
-[ ] Dimenstions
+[ ] Dimensions
 [ ] Tree Locations
 [ ] Slope Map
 [ ] Draw Center lines - Light gray and thin

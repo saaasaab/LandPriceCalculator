@@ -39,7 +39,7 @@ import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 
 import { Map, ArrowRight, Ruler, FileImage, Delete, Car } from 'lucide-react'; //Box,
 
-import { Card, CardContent, Checkbox, Input } from '../../components/ui';
+import { Button, Card, CardContent, Checkbox, Input } from '../../components/ui';
 
 import sketchForSiteplan from './sketchForSiteplan';
 import ImageUploader from './ImageUploader';
@@ -228,7 +228,7 @@ const SitePlanGenerator: React.FC = () => {
   //   const updatedGlobals = {
   //     approachWidth: formData.approachWidth,
   //     parkingStallsNum: formData.parkingStalls,
-  //     parkingDrivewayWidth: formData.drivewayWidth,
+  //     drivewayWidth: formData.drivewayWidth,
   //     buildingAreaTarget: formData.buildingArea,
   //     globalAngle: globalAngle,
   //     taperParking: formData.taperedDriveway
@@ -539,7 +539,7 @@ const SitePlanGenerator: React.FC = () => {
       onClick: () => { selectApproach() },
       children:
         <>
-          {approachRef.current ?
+          {/* {approachRef.current ? */}
             <div style={{ marginTop: '10px' }}>
               <div className="site-plan-generator__input-group">
                 <label htmlFor="approachWidth">Approach Width (ft)</label>
@@ -573,10 +573,20 @@ const SitePlanGenerator: React.FC = () => {
                 />
               </div>
 
+              <div className="site-plan-generator__checkbox">
+                <label htmlFor="deleteDriveway">Delete Driveway</label>
+
+                <Button
+                  id="deleteDriveway"
+                  
+                  onClick={()=>{approachRef.current = null;}}
+                />
+              </div>
+
 
             </div>
-            : <></>
-          }
+            {/* : <></>
+          } */}
         </>,
 
       disabled: !isPolygonClosedRef.current
@@ -599,6 +609,17 @@ const SitePlanGenerator: React.FC = () => {
               min={0}
               value={formData.parkingStalls || ""}
               onChange={(e) => handleNumberInput(e, 'parkingStalls')}
+            />
+          </div>
+
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="drivewayWidth">Driveway Width</label>
+            <Input
+              id="drivewayWidth"
+              type="number"
+              min={0}
+              value={formData.drivewayWidth || ""}
+              onChange={(e) => handleNumberInput(e, 'drivewayWidth')}
             />
           </div>
 

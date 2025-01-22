@@ -5,7 +5,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, initialFormData, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
@@ -586,7 +586,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
 
-      const lineIndex = calculateLineIndexOfClosestLine(points, lines, mx, my)
+      let lineIndex = calculateLineIndexOfClosestLine(points, lines, mx, my)
 
       // ALL THINGS UPLOAD
       if (stepSelectorRefs.upload.current) { return }
@@ -659,12 +659,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             const firstPoint = points[0]
             const restPoints = points.slice(1, points.length).reverse()
 
-            const firstLine = lines[0];
-            const restLines = lines.slice(1, lines.length).reverse()
+            // const firstLine = lines[0];
+            // const restLines = lines.slice(1, lines.length).reverse()
 
             propertyCorners = [first, ...rest];
             pointsRef.current = [firstPoint, ...restPoints];
-            linesRef.current = [firstLine, ...restLines];
+            // linesRef.current = [firstLine, ...restLines];
           }
           const _property = new Property(p, propertyCorners, isClockwise, scaleRef.current || defaultScale, setbacks);
           propertyRef.current = _property;
@@ -703,13 +703,10 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       // ALL THINGS APPROACH
       if (stepSelectorRefs.approach.current && !isDragging.approach) {
         if (!propertyRef.current) return;
-        if (isPolygonClosed && lineIndex !== -1) {
+        if (isPolygonClosed && lineIndex !== -1 && !approachRef.current) {
           const property = propertyRef.current;
           selectedLineIndexRef.current = lineIndex;
-
-
           lines[lineIndex].isApproach = !lines[lineIndex].isApproach;
-
           let approachIndex = lineIndex;
 
           // Get point closest to the edgepoint
@@ -718,7 +715,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           property.approachEdge = approachEdge
           property.approachEdgeIndex = approachIndex
 
-          const approachWidth = initialFormData.approachWidth / property.scale;
+          const approachWidth = property.approachWidth / property.scale;
           const approachAngle = approachEdge.calculateAngle();
 
           approachRef.current = new Approach(p, midpoint, approachWidth, 20, approachAngle, ESitePlanObjects.Approach, property.scale);
@@ -1150,16 +1147,16 @@ function updateGlobalVariables(
     property.buildingCoveragePercentage = formData.buildingCoveragePercentage;
     property.enableAngles = formData.enableAngles;
     property.enableLineLengths = formData.enableLineLengths;
+    property.approachWidth = formData.approachWidth;
   }
 
 
   // Pull in the data from above.
   if (approach) {
-    approach.approachWidth = formData.approachWidth
     approach.propertyEntranceCount = formData.propertyEntranceCount
 
-
     if (property) {
+      property.approachWidth = formData.approachWidth
       approach.updateWidth(Number(formData.approachWidth) / property.scale)
     }
 

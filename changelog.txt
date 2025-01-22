@@ -1,0 +1,5 @@
+[X] Changing parking angle changes the building angle
+[X] Fixed the inverse setback bug because clockwise was inverting setback - 1-22-2025
+[X] Added opacity to images with a slider 1/22/2025
+[X] Approach issues, not deleting, width changing on drag, on reset, not taking in the dataForm value.
+[X] Fix property line bug where indexes were being revered because of this line: linesRef.current = [firstLine, ...restLines]; 1/22/2025

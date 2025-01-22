@@ -1,5 +1,5 @@
 import p5 from "p5";
-import { angularDistance360, calculateAngle, calculateArea, expandPolygon, polyPoint } from "../../../utils/SiteplanGeneratorUtils";
+import { angularDistance360, calculateAngle, calculateArea, expandPolygon, initialFormData, polyPoint } from "../../../utils/SiteplanGeneratorUtils";
 // import { SitePlanElement } from "./SitePlanElement";
 import { Edge } from "./Edge";
 import { IPoint, Line } from "../SitePlanDesigner";
@@ -27,6 +27,7 @@ export class Property {
   public imperviousPercentage: number;
   public enableAngles: boolean;
   public enableLineLengths: boolean;
+  public approachWidth: number;
 
   constructor(p: p5, propertyCorners: p5.Vector[], isClockwise: boolean, scale: number, setbacks: number[]) {
     this.p = p;
@@ -45,6 +46,7 @@ export class Property {
     this.drivewayWidth = 24;
     this.enableAngles = true;
     this.enableLineLengths = true;
+    this.approachWidth = initialFormData.approachWidth;
   }
 
 
@@ -128,8 +130,9 @@ export class Property {
     this.p.stroke('black');
     this.p.strokeWeight(1)
 
-    this.propertyCorners.forEach(corner => {
+    this.propertyCorners.forEach((corner) => {
       this.p.ellipse(corner.x, corner.y, 6, 6);
+      // this.p.text(i,corner.x, corner.y);
     })
   }
 
@@ -187,6 +190,8 @@ export class Property {
         this.p.textSize(14);
         this.p.text(`${length.toFixed(1)} ft`, 0, 0);
         this.p.pop();
+
+
       }
     })
   }

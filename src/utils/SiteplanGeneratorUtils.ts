@@ -828,16 +828,20 @@ export const getIsClockwise = (polygon: p5.Vector[]): boolean => {
   return sum < 0;
 };
 
-export function getReversedIndex(oldIndex: number, listLength: number): number {
 
+// function createArray(n:number) {
+//   return Array.from({ length: n }, (_, i) => i);
+// }
+
+
+export function getReversedIndex(oldIndex: number, listLength: number): number {
   // 0 -> 4
   // 1 -> 3
   // 2 -> 2
   // 3 -> 1
   // 4 -> 0
 
-
-
+  
   return listLength - oldIndex - 1;
 };
 
@@ -1198,9 +1202,13 @@ export function drawProtoPropertyLines(p: p5,
   }
 
   p.fill(255, 0, 0);
+  let i = 0
   for (const point of points) {
     p.noStroke();
+
     p.ellipse(point.x, point.y, 10, 10);
+    p.text(`${length.toFixed(1)} ft`, point.x, point.y);
+    i++;
   }
   p.ellipse(p.mouseX, p.mouseY, 10, 10);
 
