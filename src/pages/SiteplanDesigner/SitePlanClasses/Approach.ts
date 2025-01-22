@@ -74,8 +74,10 @@ export class Approach extends SitePlanElement {
     p.translate(midpoint.x,midpoint.y);
     p.rotate(this.angle);
 
+    p.stroke(2);
     p.textAlign("center");
-    p.text('↔', 0, 20)
+    p.textSize(18);
+    p.text('↔', 0, 15)
 
 
 

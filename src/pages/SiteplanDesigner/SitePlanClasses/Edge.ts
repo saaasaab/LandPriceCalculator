@@ -137,7 +137,6 @@ export class Edge {
     // Scale the perpendicular vector by the setback
 
     // p5.Vector.prototype.mult: x, y, or z arguments are either undefined or not a finite number
-
     const offset = perpendicular.mult(this.setback || 0);
 
     // Calculate the offset points for the new parallel edge
@@ -148,6 +147,4 @@ export class Edge {
     this.point1Offset = point1Offset;
     this.point2Offset = point2Offset;
   }
-
-
 }

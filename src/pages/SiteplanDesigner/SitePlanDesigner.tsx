@@ -53,6 +53,7 @@ import { Approach } from './SitePlanClasses/Approach';
 import { Garbage } from './SitePlanClasses/Garbage';
 import { Building } from './SitePlanClasses/Building';
 import { Parking } from './SitePlanClasses/Parking';
+import Slider from '../../components/Slider';
 
 
 const initialMetrics: SiteMetrics = {
@@ -85,7 +86,6 @@ const SitePlanGenerator: React.FC = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
 
-
   // const [outboundMetrics, setOutboundMetrics] = useState<SiteMetrics>(initialMetrics);
 
 
@@ -100,6 +100,8 @@ const SitePlanGenerator: React.FC = () => {
   const setbacksRef = useRef<number[]>([]);
   const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
+  const imageOpacityRef = useRef<number>(50);
+
 
 
   const isUploadingImageRef = useRef<boolean>(true);
@@ -166,6 +168,7 @@ const SitePlanGenerator: React.FC = () => {
 
     formData,
 
+    imageOpacityRef,
 
 
     propertyRef,
@@ -251,8 +254,6 @@ const SitePlanGenerator: React.FC = () => {
     newLines[index].setback = parsedValue || 0; // Fallback to 0 if undefined
     linesRef.current = newLines;
 
-
-
     const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
     setOffsetPoints(offsets);
 
@@ -272,7 +273,6 @@ const SitePlanGenerator: React.FC = () => {
       stepSelectorRefs[refKey].current = false; // Update the current value of the ref
     });
   }
-
 
   const startUploadingImage = () => {
     setMode('upload')
@@ -387,6 +387,22 @@ const SitePlanGenerator: React.FC = () => {
             onChange={(e) => (e)}
           />
         </div>
+
+        {imageURL !== null ?
+          <div className="site-plan-generator__slider">
+            <Slider
+              id="imageOpacity"
+              label="Image Opacity"
+              min={0}
+              max={100}
+              value={imageOpacityRef.current}
+              onChange={(value) => imageOpacityRef.current = value}
+            />
+
+          </div>
+
+          : <></>}
+
 
 
         {propertyRef.current ?

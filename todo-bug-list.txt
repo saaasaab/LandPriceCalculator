@@ -1,1 +1,2 @@
 [X] Changing parking angle changes the building angle
+[X] Fixed the inverse setback bug because clockwise was inverting setback - 1-22-2025

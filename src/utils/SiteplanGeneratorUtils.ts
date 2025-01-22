@@ -947,7 +947,7 @@ export function getParkingStallArea(parking: Parking) {
 
 
 
-export const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: number, height: number }) => {
+export const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: number, height: number },imageOpacity: number) => {
   if (img) {
     p.background("#f9fafb"); // Default background
     // Resize the image, keeping the aspect ratio and fitting it within the canvas.
@@ -972,7 +972,15 @@ export const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: num
     const y = (rectSize.height - height) / 2;
 
     // Draw the image
+
+    // Set image opacity to 50%
+    p.tint(255, 255*imageOpacity/100); // 255 is full color, 127 is 50% alpha (opacity)
+
+    // Draw the image
     p.image(img, x, y, width, height);
+
+    // Reset tint to avoid affecting other drawings
+    p.noTint();
   } else {
     p.background("#f9fafb"); // Default background
   }

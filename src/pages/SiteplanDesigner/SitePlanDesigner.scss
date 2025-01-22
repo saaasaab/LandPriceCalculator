@@ -47,8 +47,10 @@
     // Section Headers
 
     // Input Groups
+    
     .site-plan-generator__input-group,
-    .site-plan-generator__checkbox {
+    .site-plan-generator__checkbox,
+    .site-plan-generator__slider {
       display: grid;
       grid-template-columns: 3fr 2fr;
       justify-content: space-between;
@@ -95,6 +97,10 @@
           display: flex;
         }
       }
+    }
+
+    .site-plan-generator__slider {
+      grid-template-columns: 1fr;
     }
 
     // Metrics Display

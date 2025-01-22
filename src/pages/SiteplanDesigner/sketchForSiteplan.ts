@@ -57,7 +57,7 @@ interface SketchForSiteplanParams {
   // inboundMetricsRef: React.MutableRefObject<FormDataInputs>;
   // setOutboundMetrics: React.Dispatch<React.SetStateAction<SiteMetrics>>;
   formData: FormDataInputs;
-
+  imageOpacityRef: React.MutableRefObject<number>;
 
   propertyRef: React.MutableRefObject<Property | null>;
   approachRef: React.MutableRefObject<Approach | null>;
@@ -86,6 +86,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     // inboundMetricsRef,
     // setOutboundMetrics,
     formData,
+    imageOpacityRef,
+
 
     propertyRef,
     approachRef,
@@ -147,10 +149,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     propertyRef.current.updateSetbacks(linesRef.current);
   }
 
-  // When an input changes in the component above, set he sketch variable here.
-  if (propertyRef.current) {
-    propertyRef.current.updateSetbacks(linesRef.current);
-  }
 
 
   if (clearEverythingRef.current === true) {
@@ -210,6 +208,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     };
 
     p.draw = () => {
+
       const newX = p.mouseX;
       const newY = p.mouseY;
 
@@ -227,7 +226,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       if (stepSelectorRefs.points.current || stepSelectorRefs.scale.current) {
         calculateScale(inputScaleRef, linesRef, pointsRef, scaleRef, propertyRef);
       }
-      displayImage(p, img, rectSize);
+      
+      displayImage(p, img, rectSize, imageOpacityRef.current);
       drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
 
 
@@ -237,7 +237,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         propertyRef.current.drawSetbackPolygon();
         propertyRef.current.drawLineLengths();
 
-        
+
         if (propertyRef.current.enableAngles) {
           propertyRef.current.drawAnglesBetweenLines()
         }

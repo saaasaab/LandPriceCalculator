@@ -72,7 +72,7 @@ export class Property {
 
   updateSetbacks(lines: Line[]) {
     lines.forEach((line, i) => {
-      this.propertyEdges[i].setback = (this.isClockwise ? 1 : -1) * (line.setback / this.scale)
+      this.propertyEdges[i].setback = (this.isClockwise ? -1 : -1) * (line.setback / this.scale);
     })
     this.calculateCornerOffsetsFromSetbacks()
   }
@@ -198,7 +198,6 @@ export class Property {
       const currentEdge = this.propertyEdges[i];
       currentEdge.createParallelEdge();
     }
-
 
     for (let i = 0; i < this.propertyEdges.length; i++) {
       const currentEdge = this.propertyEdges[i];
