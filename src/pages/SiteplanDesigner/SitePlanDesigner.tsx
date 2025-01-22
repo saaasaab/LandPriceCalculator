@@ -564,16 +564,6 @@ const SitePlanGenerator: React.FC = () => {
               </div>
 
               <div className="site-plan-generator__checkbox">
-                <label htmlFor="taperedDriveway">Tapered Driveway</label>
-
-                <Checkbox
-                  id="taperedDriveway"
-                  checked={formData.taperedDriveway}
-                  onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
-                />
-              </div>
-
-              <div className="site-plan-generator__checkbox">
                 <label htmlFor="deleteDriveway">Delete Driveway</label>
 
                 <Button
@@ -646,6 +636,16 @@ const SitePlanGenerator: React.FC = () => {
             />
           </div>
 
+          <div className="site-plan-generator__checkbox">
+                <label htmlFor="taperedDriveway">Tapered Driveway</label>
+
+                <Checkbox
+                  id="taperedDriveway"
+                  checked={formData.taperedDriveway}
+                  onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
+                />
+              </div>
+              
           <div className="site-plan-generator__input-group">
             <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
             <Checkbox

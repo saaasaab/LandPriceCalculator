@@ -3,7 +3,7 @@ import { ParkingStall } from "./ParkingStall";
 import { SitePlanElement } from "./SitePlanElement";
 import { Property } from "./Property";
 import { Approach } from "./Approach";
-import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices,  drawPerpendicularBezier, countParkingStalls, initialFormData } from "../../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, drawPerpendicularBezier, countParkingStalls, initialFormData } from "../../../utils/SiteplanGeneratorUtils";
 import { Garbage } from "./Garbage";
 import { Point, SitePlanObjects, stallHeight } from "../sketchForSiteplan";
 
@@ -22,18 +22,18 @@ export class Parking extends SitePlanElement {
 
 
 
-     // Input Constraints
-     public parkingStallsNumber: number;
-     public handicappedParkingNum: number;
-     public compactParkingNum : number;
-     public parkingPer1000Max : number;
-     public parkingPer1000Min : number;
-     public parkingPerUnit : number;
-     public landscapeIsland : number;
-     public halfStreetDriveway : boolean;
-     public parkingSide:'left' | 'right';
+  // Input Constraints
+  public parkingStallsNumber: number;
+  public handicappedParkingNum: number;
+  public compactParkingNum: number;
+  public parkingPer1000Max: number;
+  public parkingPer1000Min: number;
+  public parkingPerUnit: number;
+  public landscapeIsland: number;
+  public halfStreetDriveway: boolean;
+  public parkingSide: 'left' | 'right';
 
-     
+
   constructor(
     p: p5,
     center: p5.Vector,
@@ -59,7 +59,7 @@ export class Parking extends SitePlanElement {
 
 
     // Input Constraints
-    this.parkingStallsNumber =initialFormData.parkingStalls;
+    this.parkingStallsNumber = initialFormData.parkingStalls;
     this.handicappedParkingNum = initialFormData.handicappedParkingStalls;
     this.compactParkingNum = initialFormData.compactParkingStalls;
     this.parkingPer1000Max = initialFormData.parkingPer1000Max;
@@ -250,15 +250,15 @@ export class Parking extends SitePlanElement {
 
     // Check if the parking stalls are more than allowed
     const stallCounts = countParkingStalls(this)
-    if(stallCounts.leftStalls + stallCounts.rightStalls   >  this.parkingStallsNumber){
-      if(stallCounts.leftStalls > stallCounts.rightStalls ){
-        
-        
+    if (stallCounts.leftStalls + stallCounts.rightStalls > this.parkingStallsNumber) {
+      if (stallCounts.leftStalls > stallCounts.rightStalls) {
+
+
 
       }
     }
 
-    
+
 
     this.calculateNumberOfFittableStalls(property.propertyCorners)
     this.updateStallCorners(true);
@@ -361,7 +361,7 @@ export class Parking extends SitePlanElement {
   }
 
 
-  drawParkingOutline(p: p5, parking: Parking, garbage: Garbage, approach: Approach) {
+  drawParkingOutline(p: p5, property: Property | null, parking: Parking, garbage: Garbage, approach: Approach) {
     if (!parking.entranceEdge && !garbage) return;
     // This is going counter clockwise
 
@@ -374,11 +374,52 @@ export class Parking extends SitePlanElement {
     const firstLeftStall = leftStalls[0]
     const lastLeftStall = leftStalls[leftStalls.length - 1];
 
+
+
+
+
+
     const parkingOutline = [
-      approach.sitePlanElementCorners[2],
-      approach.sitePlanElementCorners[1],
-      parking.sitePlanElementCorners[2],
+      approach.sitePlanElementCorners[2],  //Pointing in, the right hand side on the outside
+      approach.sitePlanElementCorners[1],//Pointing in, the right hand side on the inside
     ]
+
+
+    // IF THE DRIVEWAY IS NOT TAPERED, ADD ANOTHER POINT HERE
+    // *
+
+    if (!property?.taperedDriveway) {
+
+      const midpoint = parking.sitePlanElementEdges[2].getMidpoint(); //.entranceEdge?
+      const position = parking.sitePlanElementCorners[2]
+      const angle = calculateAngle(position, midpoint);
+
+      if (midpoint) {
+
+
+        const offsetDistance = (parking.width - approach.width) / 2
+        const point = p.createVector(
+          position.x + p.cos(angle) * offsetDistance,
+          position.y + p.sin(angle) * offsetDistance
+        )
+
+        parkingOutline.push(p.createVector(point.x, point.y))
+        // p.ellipse(point.x, point.y, 10, 10);
+        // p.ellipse(midpoint.x, midpoint.y, 5, 5);
+
+        // p.stroke('blue');
+        // p.ellipse(position.x, position.y, 5, 5);
+
+      }
+    }
+
+
+    parkingOutline.push(parking.sitePlanElementCorners[2]); // Bottom-right corner - right of the driveway
+
+    // ]
+
+
+
 
     if (rightStalls.length > 0) {
       parkingOutline.push(
@@ -411,9 +452,32 @@ export class Parking extends SitePlanElement {
 
     parkingOutline.push(
       parking.sitePlanElementCorners[3],
+    )
+
+    if (!property?.taperedDriveway) {
+
+      const midpoint = parking.sitePlanElementEdges[2].getMidpoint(); //.entranceEdge?
+      const position = parking.sitePlanElementCorners[3]
+
+
+      const angle = calculateAngle(position, midpoint);
+
+      if (midpoint) {
+        const offsetDistance = (parking.width - approach.width) / 2
+        const point = p.createVector(
+          position.x + p.cos(angle) * offsetDistance,
+          position.y + p.sin(angle) * offsetDistance
+        )
+
+        parkingOutline.push(p.createVector(point.x, point.y))
+      }
+    }
+
+
+    parkingOutline.push(
       approach.sitePlanElementCorners[0],
       approach.sitePlanElementCorners[3],
-    )
+    );
 
     // Set the this.parkingOutline to the inner layer before the offset is created. 
     this.parkingOutline = parkingOutline;
@@ -456,7 +520,7 @@ export class Parking extends SitePlanElement {
 
       }
 
-      else if (i === points.length - 3 && parking.entranceEdge) {
+      else if (i === points.length - 2 && parking.entranceEdge) {
         drawPerpendicularBezier(
           p,
           parking.entranceEdge.point2,

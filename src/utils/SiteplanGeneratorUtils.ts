@@ -193,6 +193,13 @@ export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph,
   return visibilityGraphSolver
 }
 
+export function projectFromCenter(position: p5.Vector,position2: p5.Vector, distance: number) {
+  const _angle = calculateAngle( position,position2);
+  const newX = position.x + p5.prototype.cos(_angle) * distance;
+  const newY = position.y + p5.prototype.sin(_angle) * distance;
+  return { x: newX, y: newY }
+}
+
 
 export function getIntersectionPercentage(
   edge: Edge,
