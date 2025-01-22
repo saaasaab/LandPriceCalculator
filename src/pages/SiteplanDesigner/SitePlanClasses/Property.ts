@@ -25,6 +25,8 @@ export class Property {
   public taperedDriveway: boolean;
   public buildingCoveragePercentage: number;
   public imperviousPercentage: number;
+  public enableAngles: boolean;
+  public enableLineLengths: boolean;
 
   constructor(p: p5, propertyCorners: p5.Vector[], isClockwise: boolean, scale: number, setbacks: number[]) {
     this.p = p;
@@ -41,9 +43,8 @@ export class Property {
     this.imperviousPercentage = 70;
     this.taperedDriveway = true;
     this.drivewayWidth = 24;
-
-
-
+    this.enableAngles = true;
+    this.enableLineLengths = true;
   }
 
 
@@ -171,18 +172,22 @@ export class Property {
     this.propertyEdges.forEach((edge) => {
       edge.drawLine()
 
-      const midX = (edge.point1.x + edge.point2.x) / 2;
-      const midY = (edge.point1.y + edge.point2.y) / 2;
-      const length = Math.hypot(edge.point2.x - edge.point1.x, edge.point2.y - edge.point1.y) * (this.scale || .25);
+      if (this.enableLineLengths) {
 
-      this.p.noStroke()
-      this.p.fill('black')
-      this.p.push();
-      this.p.translate(midX, midY);
-      this.p.rotate(edge.calculateAngle())
-      this.p.textSize(14);
-      this.p.text(`${length.toFixed(1)} ft`, 0, 0);
-      this.p.pop();
+
+        const midX = (edge.point1.x + edge.point2.x) / 2;
+        const midY = (edge.point1.y + edge.point2.y) / 2;
+        const length = Math.hypot(edge.point2.x - edge.point1.x, edge.point2.y - edge.point1.y) * (this.scale || .25);
+
+        this.p.noStroke()
+        this.p.fill('black')
+        this.p.push();
+        this.p.translate(midX, midY);
+        this.p.rotate(edge.calculateAngle())
+        this.p.textSize(14);
+        this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+        this.p.pop();
+      }
     })
   }
 

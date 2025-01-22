@@ -376,7 +376,8 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Click points on the image to draw your property boundary',
       help: 'Click each corner of your property to create the boundary line. Click the first point again to complete the shape.',
       children: <>
-        <div className="site-plan-generator__input-group">
+
+        <div className="site-plan-generator__input-group disabled">
           <label>Enter a legal description</label>
           <Input
             id="legalDescription"
@@ -386,8 +387,30 @@ const SitePlanGenerator: React.FC = () => {
             onChange={(e) => (e)}
           />
         </div>
+
+
         {propertyRef.current ?
           <div style={{ marginTop: '10px' }}>
+
+            <div className="site-plan-generator__input-group">
+              <label>Enable Angles</label>
+
+              <Checkbox
+                id="enableAngles"
+                checked={formData.enableAngles}
+                onChange={(e) => handleBooleanInput(e, 'enableAngles')}
+              />
+            </div>
+            <div className="site-plan-generator__input-group">
+              <label>Enable Line Lengths</label>
+
+              <Checkbox
+                id="enableAngles"
+                checked={formData.enableLineLengths}
+                onChange={(e) => handleBooleanInput(e, 'enableLineLengths')}
+              />
+            </div>
+
             <div className="site-plan-generator__input-group">
               <label>Max Impervious Percentage</label>
               <Input

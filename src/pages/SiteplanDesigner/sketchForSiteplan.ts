@@ -96,7 +96,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   } = params;
   const defaultScale = 0.25;
 
-
   // const defaultEdges = (p: p5) => {
   //   const globalAngle = 0;
   //   let propertyCorners = [
@@ -182,6 +181,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
 
+
+
   return (p: p5) => {
     let img: p5.Image | null = null;
     let rectSize = { width: 0, height: 0 };
@@ -235,7 +236,11 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         propertyRef.current.drawProperty();
         propertyRef.current.drawSetbackPolygon();
         propertyRef.current.drawLineLengths();
-        propertyRef.current.drawAnglesBetweenLines()
+
+        
+        if (propertyRef.current.enableAngles) {
+          propertyRef.current.drawAnglesBetweenLines()
+        }
       }
       else {
         drawProtoPropertyLines(p, pointsRef, linesRef, scaleRef.current || defaultScale);
@@ -1142,7 +1147,9 @@ function updateGlobalVariables(
 ) {
   if (property) {
     property.imperviousPercentage = formData.imperviousPercentage
-    property.buildingCoveragePercentage = formData.buildingCoveragePercentage
+    property.buildingCoveragePercentage = formData.buildingCoveragePercentage;
+    property.enableAngles = formData.enableAngles;
+    property.enableLineLengths = formData.enableLineLengths;
   }
 
 

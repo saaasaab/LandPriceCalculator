@@ -10,16 +10,14 @@
 [X] Draw arrow on approach
 [X] Limit on Area, and notify somehow that the max area is reached
 [X] Merge the "Site plan boundaries" with the "Generate Site plan" There is no reason they should be completely seperate.
-[ ] Angles on lines on the first page
+[X] Angles on lines on the first page
 [ ] Arrow pointing north and project north
 [ ] Define by angles
 [ ] Legal description to points on the map
 [ ] Show what are standard sizes for different objects
 [ ] question marks on different items to give more explaination
-
 [ ] Add zoom in on map and site plan
 [ ] adding a color palette
-
 [ ] Prune the paths
 [ ] Add taper driveway
 [ ] Fix building area to be double doors
@@ -45,3 +43,6 @@
 [ ] Draw Center lines - Light gray and thin
 [ ] Add Lock to max size option
 [ ] Let user input the width of the building
+[ ] multiple lanes of parking
+[ ] multiple buildings
+[ ] multiple linear parking lots that connect

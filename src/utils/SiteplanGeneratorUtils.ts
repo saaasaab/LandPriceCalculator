@@ -34,7 +34,9 @@ export interface FormDataInputs {
   propertyEntranceCount: number;
   taperedDriveway: boolean;
   parkingSide: 'right' | 'left';
-  parkingPerUnit: 1.5,
+  parkingPerUnit: number,
+  enableAngles: boolean,
+  enableLineLengths: boolean,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -55,6 +57,8 @@ export const initialFormData: FormDataInputs = {
   halfStreetDriveway: false,
   parkingSide: 'left',
   parkingPerUnit: 1.5,
+  enableAngles: true,
+  enableLineLengths: true,
 };
 
 
@@ -946,11 +950,29 @@ export function getParkingStallArea(parking: Parking) {
 export const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: number, height: number }) => {
   if (img) {
     p.background("#f9fafb"); // Default background
-    // Resize the image, keeping the aspect ratio.
-    const ratio = img.width / img.height;
-    const width = rectSize.width;
-    const height = width / ratio;
-    p.image(img, 0, 0, width, height);
+    // Resize the image, keeping the aspect ratio and fitting it within the canvas.
+    const imgRatio = img.width / img.height; // Aspect ratio of the image
+    const canvasRatio = rectSize.width / rectSize.height; // Aspect ratio of the canvas
+
+    let width, height;
+
+    // Check if the image is wider or taller relative to the canvas
+    if (imgRatio > canvasRatio) {
+      // Image is wider than the canvas
+      width = rectSize.width;
+      height = width / imgRatio;
+    } else {
+      // Image is taller than the canvas
+      height = rectSize.height;
+      width = height * imgRatio;
+    }
+
+    // Center the image within the canvas
+    const x = (rectSize.width - width) / 2;
+    const y = (rectSize.height - height) / 2;
+
+    // Draw the image
+    p.image(img, x, y, width, height);
   } else {
     p.background("#f9fafb"); // Default background
   }
@@ -1108,7 +1130,7 @@ export function drawInstructionsToScreen(
 export function drawProtoPropertyLines(p: p5,
   pointsRef: React.MutableRefObject<IPoint[]>,
   linesRef: React.MutableRefObject<Line[]>,
-  scale: number,
+  scale: number
 ) {
   p.push();
   const points = pointsRef.current;
@@ -1177,23 +1199,21 @@ export function drawProtoPropertyLines(p: p5,
   p.pop();
 
 
-
-
   // Draw interior angle curves between consecutive lines
   for (let i = 0; i < points.length - 2; i++) {
-    const p1 = p.createVector(points[i].x,points[i].y);
-    const p2 = p.createVector(points[i + 1].x,points[i + 1].y);
-    const p3 = p.createVector(points[i + 2].x,points[i + 2].y);
+    const p1 = p.createVector(points[i].x, points[i].y);
+    const p2 = p.createVector(points[i + 1].x, points[i + 1].y);
+    const p3 = p.createVector(points[i + 2].x, points[i + 2].y);
 
-    const _angle1 = calculateAngle( p2,p1);
-    const _angle2 = calculateAngle(p2,p3);
+    const _angle1 = calculateAngle(p2, p1);
+    const _angle2 = calculateAngle(p2, p3);
 
-    const angle = angularDistance360(_angle1,_angle2);
+    const angle = angularDistance360(_angle1, _angle2);
 
     const radius = 25;
     p.noFill();
     p.stroke(255, 0, 0);
-    p.arc(p2.x, p2.y, radius * 2, radius * 2,_angle1, _angle2);
+    p.arc(p2.x, p2.y, radius * 2, radius * 2, _angle1, _angle2);
 
     // Display the angle value
     const angleText = `${angle.toFixed(1)}°`;
@@ -1212,18 +1232,18 @@ export function drawProtoPropertyLines(p: p5,
     const lastPoint = points[points.length - 1];
     const secondLastPoint = points[points.length - 2];
 
-    const p1 = p.createVector(secondLastPoint.x,secondLastPoint.y);
-    const p2 = p.createVector(lastPoint.x,lastPoint.y);
-    const p3 = p.createVector(p.mouseX,p.mouseY);
+    const p1 = p.createVector(secondLastPoint.x, secondLastPoint.y);
+    const p2 = p.createVector(lastPoint.x, lastPoint.y);
+    const p3 = p.createVector(p.mouseX, p.mouseY);
 
-    const _angle1 = calculateAngle( p2,p1);
-    const _angle2 = calculateAngle(p2,p3);
+    const _angle1 = calculateAngle(p2, p1);
+    const _angle2 = calculateAngle(p2, p3);
 
-    const angle = angularDistance360(_angle1,_angle2);
-    const radius = 25;  
+    const angle = angularDistance360(_angle1, _angle2);
+    const radius = 25;
     p.noFill();
     p.stroke(255, 0, 0);
-    p.arc(p2.x, p2.y, radius * 2, radius * 2,_angle1, _angle2);
+    p.arc(p2.x, p2.y, radius * 2, radius * 2, _angle1, _angle2);
 
 
     // Display the angle value
