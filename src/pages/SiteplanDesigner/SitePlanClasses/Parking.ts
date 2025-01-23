@@ -374,9 +374,8 @@ export class Parking extends SitePlanElement {
     const firstLeftStall = leftStalls[0]
     const lastLeftStall = leftStalls[leftStalls.length - 1];
 
-
-
-
+    const offsetDistance = p.max((parking.width - approach.width) / 2,0);
+    
 
 
     const parkingOutline = [
@@ -396,30 +395,23 @@ export class Parking extends SitePlanElement {
 
       if (midpoint) {
 
-
-        const offsetDistance = (parking.width - approach.width) / 2
         const point = p.createVector(
           position.x + p.cos(angle) * offsetDistance,
           position.y + p.sin(angle) * offsetDistance
         )
 
         parkingOutline.push(p.createVector(point.x, point.y))
-        // p.ellipse(point.x, point.y, 10, 10);
-        // p.ellipse(midpoint.x, midpoint.y, 5, 5);
+        p.ellipse(point.x, point.y, 10, 10);
+        p.ellipse(midpoint.x, midpoint.y, 5, 5);
 
-        // p.stroke('blue');
-        // p.ellipse(position.x, position.y, 5, 5);
+        p.stroke('blue');
+        p.ellipse(position.x, position.y, 5, 5);
 
       }
     }
 
 
     parkingOutline.push(parking.sitePlanElementCorners[2]); // Bottom-right corner - right of the driveway
-
-    // ]
-
-
-
 
     if (rightStalls.length > 0) {
       parkingOutline.push(
@@ -449,7 +441,7 @@ export class Parking extends SitePlanElement {
       )
 
     }
-
+    
     parkingOutline.push(
       parking.sitePlanElementCorners[3],
     )
@@ -463,13 +455,18 @@ export class Parking extends SitePlanElement {
       const angle = calculateAngle(position, midpoint);
 
       if (midpoint) {
-        const offsetDistance = (parking.width - approach.width) / 2
+        // const offsetDistance = p.abs(parking.width - approach.width) / 2
         const point = p.createVector(
           position.x + p.cos(angle) * offsetDistance,
           position.y + p.sin(angle) * offsetDistance
-        )
+        );
 
-        parkingOutline.push(p.createVector(point.x, point.y))
+        parkingOutline.push(p.createVector(point.x, point.y));
+        p.ellipse(point.x, point.y, 10, 10);
+        p.ellipse(midpoint.x, midpoint.y, 5, 5);
+        p.stroke('blue');
+        p.ellipse(position.x, position.y, 5, 5);
+
       }
     }
 
@@ -508,7 +505,8 @@ export class Parking extends SitePlanElement {
     points.forEach((corner, i) => {
 
       // inside Right Parking
-      if (i === 1 && parking.entranceEdge) {
+
+      if (i === 2 && parking.entranceEdge) {
         drawPerpendicularBezier(
           p,
           parkingOutline[1],
@@ -517,23 +515,28 @@ export class Parking extends SitePlanElement {
           parking.entranceEdge,
           true
         );
+        p.text(i, corner.x, corner.y);
+        p.vertex(corner.x, corner.y);
+
 
       }
 
       else if (i === points.length - 2 && parking.entranceEdge) {
         drawPerpendicularBezier(
           p,
-          parking.entranceEdge.point2,
-          approach.sitePlanElementCorners[0],
+          parkingOutline[parkingOutline.length-3],
+          parkingOutline[parkingOutline.length-2],
           parking.entranceEdge,
           approach.sitePlanElementEdges[2],
           false
         );
+        p.text(i, corner.x, corner.y);
+        p.vertex(corner.x, corner.y);
       }
 
       else {
         p.vertex(corner.x, corner.y);
-        // p.text(i, corner.x, corner.y);
+        p.text(i, corner.x, corner.y);
       }
 
     });

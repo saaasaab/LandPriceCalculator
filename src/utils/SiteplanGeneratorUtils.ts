@@ -327,6 +327,7 @@ export function drawPerpendicularBezier(
     point1.x + p.cos(angle1) * controlDistance,
     point1.y + p.sin(angle1) * controlDistance
   );
+  
   const controlPoint2 = p.createVector(
     point2.x + p.cos(angle2) * controlDistance,
     point2.y + p.sin(angle2) * controlDistance
@@ -346,12 +347,14 @@ export function drawPerpendicularBezier(
   );
 
 
-  // // Optional: Draw the line segment and control points for visualization
-  // p.stroke(0);
-  // // p.line(point1.x, point1.y, point2.x, point2.y); // Original line segment
-  // p.fill(255, 0, 0);
-  // p.ellipse(controlPoint1.x, controlPoint1.y, 8, 8); // Control point 1
-  // p.ellipse(controlPoint2.x, controlPoint2.y, 8, 8); // Control point 2
+  // // // Optional: Draw the line segment and control points for visualization
+  p.stroke(0);
+  p.ellipse(controlPoint1.x, controlPoint1.y, 8, 8); // Control point 1
+  p.line(point1.x, point1.y, controlPoint1.x, controlPoint1.y); // Original line segment
+
+  p.ellipse(controlPoint2.x, controlPoint2.y, 8, 8); // Control point 2
+  p.line(point2.x, point2.y, controlPoint2.x, controlPoint2.y); // Original line segment
+
 }
 interface IPoint {
   x: number;

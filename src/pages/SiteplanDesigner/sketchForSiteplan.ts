@@ -250,7 +250,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         approachRef.current.drawApproach();
       }
 
+
       if (parkingRef.current && garbageRef.current && approachRef.current) {
+        // parkingRef.current
         parkingRef.current.drawParkingStalls();
         parkingRef.current.drawParkingOutline(p, propertyRef.current, parkingRef.current, garbageRef.current, approachRef.current)
       }
