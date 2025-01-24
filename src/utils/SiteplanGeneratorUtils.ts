@@ -129,9 +129,9 @@ export const p5VectorToTPoint = (vectors: p5.Vector[]): TPoint[] => {
 export function clampNumber(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 };
-export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
+export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph | null, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
   const obstacles: TPoint[][] = [
-    p5VectorToTPoint(parking.parkingOutline),
+    p5VectorToTPoint(expandPolygon(p5.prototype, parking.parkingOutline, -10) ),
     p5VectorToTPoint(garbage.sitePlanElementCorners),
     p5VectorToTPoint(building.sitePlanElementCorners),
   ];
@@ -1311,7 +1311,8 @@ export const handleBuildingDrag = (
   buildingDragMode: string | null,
   resizeCorner: number | null,
   resizeEdge: number | null,
-  resizingbuildingRef: React.MutableRefObject<boolean>
+  resizingbuildingRef: React.MutableRefObject<boolean>,
+  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
 ) => {
   if (!property || !approach || !parking || !building || !garbage) return;
   // let visibilityGraphSolver: VisibilityGraph;
@@ -1382,6 +1383,7 @@ export const handleBuildingDrag = (
 
     building.updateBuildingCenter(newCenterGlobal.x, newCenterGlobal.y);
 
+    visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
     const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
     if (!pointsInBoundary) {
@@ -1389,6 +1391,8 @@ export const handleBuildingDrag = (
       building.height = _height;
       building.updateBuildingCenter(_center.x, _center.y);
       building.hasStopped = true;
+      visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+
       return;
     }
 
@@ -1430,6 +1434,8 @@ export const handleBuildingDrag = (
 
     building.updateBuildingCenter(newPoint1X, newPoint1Y);
 
+    visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+
     const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
     if (!pointsInBoundary) {
       if (
@@ -1439,6 +1445,8 @@ export const handleBuildingDrag = (
         building.height = _height;
         building.updateBuildingCenter(_center.x, _center.y);
         building.hasStopped = true;
+        visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+
         return
       }
     }
@@ -1456,6 +1464,8 @@ export const handleBuildingDrag = (
         p.atan2(handle.y - building.center.y, handle.x - building.center.x);
 
       building.updateAngle(building.angle + a)
+      visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+
     }
 
   }
@@ -1465,6 +1475,8 @@ export const handleBuildingDrag = (
 
 
     building.updateBuildingCenter(p.mouseX, p.mouseY);
+    visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+
     const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
     if (!pointsInBoundary) {
 
@@ -1475,6 +1487,8 @@ export const handleBuildingDrag = (
         building.updateBuildingCenter(_center.x, _center.y);
         building.hasStopped = true;
         garbage.updateCenterGarbage(parking);
+        visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+
         return
       }
     }
@@ -1506,7 +1520,8 @@ export const handleApproachDrag = (
   p: p5,
   property: Property, approach: Approach, parking: Parking | null, garbage: Garbage | null, building: Building | null,
   isRotationFrozenRef: React.MutableRefObject<boolean>,
-  approachDragMode: string | null
+  approachDragMode: string | null,
+  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
 
 ) => {
 
@@ -1582,6 +1597,10 @@ export const handleApproachDrag = (
     if (parking && garbage) {
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
     }
+
+    if (building && parking && garbage) {
+      visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+    }
   }
 
 
@@ -1591,7 +1610,8 @@ export const handleParkingDrag = (
   p: p5,
   property: Property, approach: Approach, parking: Parking, garbage: Garbage, building: Building | null,
   parkingDragMode: string | null,
-  isRotationFrozenRef: React.MutableRefObject<boolean>
+  isRotationFrozenRef: React.MutableRefObject<boolean>,
+  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
 ) => {
 
   if (!property || !approach || !parking || !garbage) return;
@@ -1702,8 +1722,6 @@ export const handleParkingDrag = (
     parking.updateAngle(normalizeAngle(angle));
     garbage.updateAngle(normalizeAngle(angle));
 
-
-
     if (building) {
       building?.updateEntrances();
 
@@ -1728,7 +1746,9 @@ export const handleParkingDrag = (
     // parking.parkingOutline.slice(3, -3)
     const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
     // const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
-
+    if (building) {
+      visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+    }
     if (truthChecker(allPointsInBoundary)) {
 
       parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);

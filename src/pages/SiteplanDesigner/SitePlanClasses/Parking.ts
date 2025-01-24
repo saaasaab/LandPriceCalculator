@@ -486,12 +486,9 @@ export class Parking extends SitePlanElement {
     // const points = [...offsetParking, ...parkingOutline.reverse()];
     const points = [...parkingOutline];
 
-    this.parkingOutlineDoubleLayer = points;
+    // this.parkingOutlineDoubleLayer = points;
 
-
-
-
-
+    
 
     // Double stroke
     p.push();
@@ -506,7 +503,6 @@ export class Parking extends SitePlanElement {
     points.forEach((corner, i) => {
 
       // inside Right Parking
-
       if (i === 2 && parking.entranceEdge) {
         drawPerpendicularBezier(
           p,
