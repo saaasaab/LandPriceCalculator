@@ -3,7 +3,7 @@ import { ParkingStall } from "./ParkingStall";
 import { SitePlanElement } from "./SitePlanElement";
 import { Property } from "./Property";
 import { Approach } from "./Approach";
-import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, drawPerpendicularBezier, countParkingStalls, initialFormData } from "../../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, truthChecker, calculateAngle, normalizeAngle, getParkingStallArea, calculateStallPosition, calculateCentroid, pointsAreInBoundary, calculatePointPosition, getAdjacentIndices, drawPerpendicularBezier, countParkingStalls, initialFormData, expandPolygon } from "../../../utils/SiteplanGeneratorUtils";
 import { Garbage } from "./Garbage";
 import { Point, SitePlanObjects, stallHeight } from "../sketchForSiteplan";
 
@@ -488,7 +488,6 @@ export class Parking extends SitePlanElement {
 
     // this.parkingOutlineDoubleLayer = points;
 
-    
 
     // Double stroke
     p.push();

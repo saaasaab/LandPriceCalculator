@@ -131,7 +131,7 @@ export function clampNumber(value: number, min: number, max: number) {
 };
 export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph | null, building: Building, parking: Parking, property: Property, garbage: Garbage, approach: Approach) {
   const obstacles: TPoint[][] = [
-    p5VectorToTPoint(expandPolygon(p5.prototype, parking.parkingOutline, -10) ),
+    p5VectorToTPoint([...parking.parkingOutline].reverse()),
     p5VectorToTPoint(garbage.sitePlanElementCorners),
     p5VectorToTPoint(building.sitePlanElementCorners),
   ];

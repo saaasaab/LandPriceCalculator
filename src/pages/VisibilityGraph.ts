@@ -118,6 +118,8 @@ export class VisibilityGraph {
 
 
 
+
+    
     // Convert obstacle vertices to nodes
     this.obstaclesOffset.forEach(obstacle => {
       obstacle.forEach(vertex => {
