@@ -1173,6 +1173,7 @@ function updateGlobalVariables(
     parking.parkingPer1000Min = formData.parkingPerUnit;
     parking.landscapeIsland = formData.landscapeIsland;
     parking.halfStreetDriveway = formData.halfStreetDriveway;
+    parking.showDrivewayControlPoints = formData.showDrivewayControlPoints;
     parking.parkingSide = formData.parkingSide;
   }
 

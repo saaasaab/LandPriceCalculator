@@ -655,6 +655,15 @@ const SitePlanGenerator: React.FC = () => {
             />
           </div>
 
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="showDrivewayControlPoints">Show Driveway Control Points</label>
+            <Checkbox
+              id="showDrivewayControlPoints"
+              checked={formData.showDrivewayControlPoints}
+              onChange={(e) => handleBooleanInput(e, 'showDrivewayControlPoints')}
+            />
+          </div>
+
           {formData.halfStreetDriveway ?
             //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
             <div className="site-plan-generator__input-group subgroup-1">

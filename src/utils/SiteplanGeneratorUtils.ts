@@ -37,6 +37,7 @@ export interface FormDataInputs {
   parkingPerUnit: number,
   enableAngles: boolean,
   enableLineLengths: boolean,
+  showDrivewayControlPoints: boolean,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -59,6 +60,7 @@ export const initialFormData: FormDataInputs = {
   parkingPerUnit: 1.5,
   enableAngles: true,
   enableLineLengths: true,
+  showDrivewayControlPoints: false,
 };
 
 
@@ -193,8 +195,8 @@ export function runVisibilityGraphSolver(visibilityGraphSolver: VisibilityGraph,
   return visibilityGraphSolver
 }
 
-export function projectFromCenter(position: p5.Vector,position2: p5.Vector, distance: number) {
-  const _angle = calculateAngle( position,position2);
+export function projectFromCenter(position: p5.Vector, position2: p5.Vector, distance: number) {
+  const _angle = calculateAngle(position, position2);
   const newX = position.x + p5.prototype.cos(_angle) * distance;
   const newY = position.y + p5.prototype.sin(_angle) * distance;
   return { x: newX, y: newY }
@@ -313,7 +315,8 @@ export function drawPerpendicularBezier(
   point2: p5.Vector,
   edge1: Edge,
   edge2: Edge,
-  goingUp: boolean
+  goingUp: boolean,
+  showDrivewayControlPoints = false,
   // controlDistance: number
 ): void {
   // Define the two control points
@@ -327,7 +330,7 @@ export function drawPerpendicularBezier(
     point1.x + p.cos(angle1) * controlDistance,
     point1.y + p.sin(angle1) * controlDistance
   );
-  
+
   const controlPoint2 = p.createVector(
     point2.x + p.cos(angle2) * controlDistance,
     point2.y + p.sin(angle2) * controlDistance
@@ -348,13 +351,14 @@ export function drawPerpendicularBezier(
 
 
   // // // Optional: Draw the line segment and control points for visualization
-  p.stroke(0);
-  p.ellipse(controlPoint1.x, controlPoint1.y, 8, 8); // Control point 1
-  p.line(point1.x, point1.y, controlPoint1.x, controlPoint1.y); // Original line segment
+  if (showDrivewayControlPoints) {
+    p.stroke(0);
+    p.ellipse(controlPoint1.x, controlPoint1.y, 8, 8); // Control point 1
+    p.line(point1.x, point1.y, controlPoint1.x, controlPoint1.y); // Original line segment
 
-  p.ellipse(controlPoint2.x, controlPoint2.y, 8, 8); // Control point 2
-  p.line(point2.x, point2.y, controlPoint2.x, controlPoint2.y); // Original line segment
-
+    p.ellipse(controlPoint2.x, controlPoint2.y, 8, 8); // Control point 2
+    p.line(point2.x, point2.y, controlPoint2.x, controlPoint2.y); // Original line segment
+  }
 }
 interface IPoint {
   x: number;
@@ -851,7 +855,7 @@ export function getReversedIndex(oldIndex: number, listLength: number): number {
   // 3 -> 1
   // 4 -> 0
 
-  
+
   return listLength - oldIndex - 1;
 };
 
@@ -961,7 +965,7 @@ export function getParkingStallArea(parking: Parking) {
 
 
 
-export const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: number, height: number },imageOpacity: number) => {
+export const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: number, height: number }, imageOpacity: number) => {
   if (img) {
     p.background("#f9fafb"); // Default background
     // Resize the image, keeping the aspect ratio and fitting it within the canvas.
@@ -988,7 +992,7 @@ export const displayImage = (p: p5, img: p5.Image | null, rectSize: { width: num
     // Draw the image
 
     // Set image opacity to 50%
-    p.tint(255, 255*imageOpacity/100); // 255 is full color, 127 is 50% alpha (opacity)
+    p.tint(255, 255 * imageOpacity / 100); // 255 is full color, 127 is 50% alpha (opacity)
 
     // Draw the image
     p.image(img, x, y, width, height);
@@ -1196,12 +1200,13 @@ export function drawProtoPropertyLines(p: p5,
 
   if (points.length > 0) {
     p.stroke(0, 20, 220);
+    p.strokeWeight(2);
     p.line(lastPoint.x, lastPoint.y, p.mouseX, p.mouseY);
 
-    p.strokeWeight(2);
+
     p.noStroke();
 
-    p.fill(0, 20, 220);
+    p.fill(20, 30, 220);
     const midX = (lastPoint.x + p.mouseX) / 2;
     const midY = (lastPoint.y + p.mouseY) / 2;
     const length = Math.hypot(lastPoint.x - p.mouseX, lastPoint.y - p.mouseY) * (scale);
@@ -1212,13 +1217,11 @@ export function drawProtoPropertyLines(p: p5,
   }
 
   p.fill(255, 0, 0);
-  let i = 0
   for (const point of points) {
     p.noStroke();
 
     p.ellipse(point.x, point.y, 10, 10);
-    p.text(`${length.toFixed(1)} ft`, point.x, point.y);
-    i++;
+
   }
   p.ellipse(p.mouseX, p.mouseY, 10, 10);
 
@@ -1238,7 +1241,7 @@ export function drawProtoPropertyLines(p: p5,
 
     const radius = 25;
     p.noFill();
-    p.stroke(255, 0, 0);
+    p.stroke(220, 32, 10);
     p.arc(p2.x, p2.y, radius * 2, radius * 2, _angle1, _angle2);
 
     // Display the angle value
@@ -1249,7 +1252,7 @@ export function drawProtoPropertyLines(p: p5,
 
     p.textSize(12);
     p.noStroke();
-    p.fill(255, 0, 0);
+    p.stroke(220, 32, 10);
     p.text(angleText, textX, textY);
   }
 
@@ -1268,12 +1271,11 @@ export function drawProtoPropertyLines(p: p5,
     const angle = angularDistance360(_angle1, _angle2);
     const radius = 25;
     p.noFill();
-    p.stroke(255, 0, 0);
+    p.stroke(220, 32, 10);
     p.arc(p2.x, p2.y, radius * 2, radius * 2, _angle1, _angle2);
 
 
     // Display the angle value
-
     const angleText = `${angle.toFixed(1)}°`;
     const angleMid = _angle1 + angle / 2;
     const textX = lastPoint.x + p.cos(angleMid) * (radius + 10);
@@ -1281,7 +1283,7 @@ export function drawProtoPropertyLines(p: p5,
 
     p.textSize(12);
     p.noStroke();
-    p.fill(0, 255, 0);
+    p.stroke(220, 32, 10);
     p.text(angleText, textX, textY);
   }
 
