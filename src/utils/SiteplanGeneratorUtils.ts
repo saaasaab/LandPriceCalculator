@@ -38,6 +38,7 @@ export interface FormDataInputs {
   enableAngles: boolean,
   enableLineLengths: boolean,
   showDrivewayControlPoints: boolean,
+  enableBuildingDimensions: boolean,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -61,6 +62,8 @@ export const initialFormData: FormDataInputs = {
   enableAngles: true,
   enableLineLengths: true,
   showDrivewayControlPoints: false,
+  enableBuildingDimensions: true,
+
 };
 
 

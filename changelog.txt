@@ -4,3 +4,5 @@
 [X] Approach issues, not deleting, width changing on drag, on reset, not taking in the dataForm value.
 [X] Fix property line bug where indexes were being revered because of this line: linesRef.current = [firstLine, ...restLines]; 1/22/2025
 [X] Fix the taper offset bug with bezier curves 1/22/2025
+[X] Update entrances so they show show and update
+[X] Adding  enableBuildingDimensions

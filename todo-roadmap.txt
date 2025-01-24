@@ -11,34 +11,31 @@
 [X] Limit on Area, and notify somehow that the max area is reached
 [X] Merge the "Site plan boundaries" with the "Generate Site plan" There is no reason they should be completely seperate.
 [X] Angles on lines on the first page
+[X] Add taper driveway
+[ ] Bike parking
 [ ] Arrow pointing north and project north
 [ ] Define by angles
-[ ] Legal description to points on the map
-[ ] Show what are standard sizes for different objects
-[ ] question marks on different items to give more explaination
-[ ] Add zoom in on map and site plan
-[ ] adding a color palette
+
 [ ] Prune the paths
-[ ] Add taper driveway
 [ ] Fix building area to be double doors
 [ ] ADA and compact parking
+[ ] Add easements
+[ ] question marks on different items to give more explaination
+[ ] Add zoom in on map and site plan
 [ ] diagonal parking.
 [ ] Add utilities
-[ ] Geohazard and NROD areas
-[ ] Add easements
 [ ] Connect to calculators
-[ ] Cost estimates
-[ ] Bike parking
+[ ] Dimensions
+[ ] Tree Locations
 [ ] Multiple entrances to property
 [ ] different fire apparatus
 [ ] Export to PDF
 [ ] Snap to edges
+[ ] Cost estimates
 [ ] Parking numbers - strive for equal parking but not linked
 [ ] Total impervious surface area
 [ ] Add loading areas - Determine if you need loading areas because the person probably doesn't know
 [ ] Building elevations
-[ ] Dimensions
-[ ] Tree Locations
 [ ] Slope Map
 [ ] Draw Center lines - Light gray and thin
 [ ] Add Lock to max size option
@@ -46,3 +43,7 @@
 [ ] multiple lanes of parking
 [ ] multiple buildings
 [ ] multiple linear parking lots that connect
+[ ] Show what are standard sizes for different objects
+[ ] Geohazard and NROD areas
+[ ] Legal description to points on the map
+[ ] adding a color palette

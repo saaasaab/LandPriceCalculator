@@ -757,6 +757,16 @@ const SitePlanGenerator: React.FC = () => {
       children: <div style={{ marginTop: '10px' }}>
 
         <div className="site-plan-generator__input-group">
+              <label>Enable Dimensions</label>
+
+              <Checkbox
+                id="enableBuildingDimensions"
+                checked={formData.enableBuildingDimensions}
+                onChange={(e) => handleBooleanInput(e, 'enableBuildingDimensions')}
+              />
+            </div>
+
+        <div className="site-plan-generator__input-group">
           <label htmlFor="buildingAreaTarget">Max Building Area (sq ft)</label>
           <Input
             id="buildingAreaTarget"

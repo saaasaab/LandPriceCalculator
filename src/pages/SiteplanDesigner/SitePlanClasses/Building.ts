@@ -20,6 +20,7 @@ export class Building extends SitePlanElement {
   // Input Constraints
   public buildingAreaTarget: number;
   public buildingCount: number;
+  public enableBuildingDimensions: boolean;
 
   constructor(
     p: p5,
@@ -41,7 +42,8 @@ export class Building extends SitePlanElement {
 
     // Input Constraints
     this.buildingAreaTarget = initialFormData.buildingAreaTarget
-    this.buildingCount = initialFormData.buildingCount
+    this.buildingCount = initialFormData.buildingCount;
+    this.enableBuildingDimensions = initialFormData.enableBuildingDimensions;
   }
 
   initializeBuilding(x: number, y: number,) {
@@ -156,32 +158,35 @@ export class Building extends SitePlanElement {
       this.p.pop();
 
 
-      this.p.textAlign(this.p.CENTER, this.p.BOTTOM);
-      this.sitePlanElementEdges.forEach((edge) => {
-        const mid = edge.getMidpoint();
-        const length = edge.getLineLength() * this.scale;
+
+      if (this.enableBuildingDimensions) {
+        this.p.textAlign(this.p.CENTER, this.p.BOTTOM);
+        this.sitePlanElementEdges.forEach((edge) => {
+          const mid = edge.getMidpoint();
+          const length = edge.getLineLength() * this.scale;
+
+          this.p.push();
+          this.p.noStroke()
+          this.p.fill('black')
+          this.p.translate(mid.x, mid.y);
+          this.p.rotate(edge.calculateAngle())
+          this.p.textSize(14);
+          this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+          this.p.pop();
+        })
+
+        this.entrances.forEach(entrance => {
+          entrance.drawEnterance();
+        })
+
+
 
         this.p.push();
-        this.p.noStroke()
-        this.p.fill('black')
-        this.p.translate(mid.x, mid.y);
-        this.p.rotate(edge.calculateAngle())
-        this.p.textSize(14);
-        this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+        this.p.textSize(16)
+        this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 2)
+        this.p.textAlign(this.p.CENTER, this.p.CENTER);
         this.p.pop();
-      })
-
-      this.entrances.forEach(entrance => {
-        entrance.drawEnterance();
-      })
-
-
-
-      this.p.push();
-      this.p.textSize(16)
-      this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 2)
-      this.p.textAlign(this.p.CENTER, this.p.CENTER);
-      this.p.pop();
+      }
     }
   }
 

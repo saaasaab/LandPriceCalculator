@@ -1150,6 +1150,7 @@ function updateGlobalVariables(
   if (building) {
     building.buildingAreaTarget = formData.buildingAreaTarget;
     building.buildingCount = formData.buildingCount
+    building.enableBuildingDimensions = formData.enableBuildingDimensions;
 
     building.updateBuildingArea(Number(formData.buildingAreaTarget))
 
