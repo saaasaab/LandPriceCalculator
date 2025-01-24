@@ -1573,7 +1573,9 @@ export const handleApproachDrag = (
 
       // building.updateEntrances();
       parking.createRotationHandles();
-
+      if (building) {
+        visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+      }
       // updateVisibilityGraph();
 
     }
@@ -1646,6 +1648,9 @@ export const handleParkingDrag = (
 
       garbage.updateCenterGarbage(parking);
 
+      if (building) {
+        visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+      }
       const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
       const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
 
@@ -1684,6 +1689,9 @@ export const handleParkingDrag = (
         }
         garbage.updateCenter(_garbageCenter.x, _garbageCenter.y)
         garbage.updateCenterGarbage(parking);
+        if (building) {
+          visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+        }
         return;
       }
       parking.createRotationHandles();
