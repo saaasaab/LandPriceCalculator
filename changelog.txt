@@ -4,5 +4,7 @@
 [X] Approach issues, not deleting, width changing on drag, on reset, not taking in the dataForm value.
 [X] Fix property line bug where indexes were being revered because of this line: linesRef.current = [firstLine, ...restLines]; 1/22/2025
 [X] Fix the taper offset bug with bezier curves 1/22/2025
-[X] Update entrances so they show show and update
-[X] Adding  enableBuildingDimensions
+[X] Update entrances so they show show and update 1/24/2025
+[X] Adding  enableBuildingDimensions 1/24/2025
+[X] Added bike parking but turned it off because I don't like it and don't want to deal with designing it right now. 1/24/2025
+[X] Add back in output metrics. Only connected one, but it is working pretty good.  1/24/2025

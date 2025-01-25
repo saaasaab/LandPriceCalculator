@@ -13,6 +13,7 @@ import { Garbage } from "./SitePlanClasses/Garbage";
 import { Approach } from "./SitePlanClasses/Approach";
 import { Entrance } from "./SitePlanClasses/Entrance";
 import { VisibilityGraph } from "../VisibilityGraph";
+import { BikeParking } from "./SitePlanClasses/BikeParking";
 // import { VisibilityGraph } from "../VisibilityGraph";
 
 
@@ -53,6 +54,7 @@ interface SketchForSiteplanParams {
     parking: React.MutableRefObject<boolean>;
     building: React.MutableRefObject<boolean>;
     entrances: React.MutableRefObject<boolean>;
+    bikeParking: React.MutableRefObject<boolean>;
   };
   clearEverythingRef: React.MutableRefObject<boolean>;
 
@@ -60,13 +62,12 @@ interface SketchForSiteplanParams {
   // setOutboundMetrics: React.Dispatch<React.SetStateAction<SiteMetrics>>;
   formData: FormDataInputs;
   imageOpacityRef: React.MutableRefObject<number>;
-
   propertyRef: React.MutableRefObject<Property | null>;
   approachRef: React.MutableRefObject<Approach | null>;
   parkingRef: React.MutableRefObject<Parking | null>;
   buildingRef: React.MutableRefObject<Building | null>;
   garbageRef: React.MutableRefObject<Garbage | null>;
-
+  bikeParkingRef: React.MutableRefObject<BikeParking | null>;
 }
 
 export default function sketchForSiteplan(params: SketchForSiteplanParams) {
@@ -96,10 +97,13 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     parkingRef,
     buildingRef,
     garbageRef,
+    bikeParkingRef,
 
   } = params;
   const defaultScale = 0.25;
-let pathCellIndex = 0;
+  let pathCellIndex = 0;
+
+
   // const defaultEdges = (p: p5) => {
   //   const globalAngle = 0;
   //   let propertyCorners = [
@@ -118,7 +122,7 @@ let pathCellIndex = 0;
 
 
   updateGlobalVariables(
-    propertyRef.current, approachRef.current, parkingRef.current, buildingRef.current, garbageRef.current,
+    propertyRef.current, approachRef.current, parkingRef.current, buildingRef.current, garbageRef.current, bikeParkingRef.current,
     formData
   )
   // if (bikeParkingRef.current) {
@@ -126,11 +130,12 @@ let pathCellIndex = 0;
   // }
 
 
-  let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null) 
+  let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null)
 
   let buildingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
   let parkingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
   let approachDragMode: string | null = null; // null, 'center', 'edge', 'corner'
+  let bikeParkingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
 
   let resizeEdge: number | null = null;
   // let resizeEdges: number[] | null = null
@@ -161,6 +166,8 @@ let pathCellIndex = 0;
     parkingRef.current = null
     buildingRef.current = null
     garbageRef.current = null
+    bikeParkingRef.current = null
+
 
 
 
@@ -261,7 +268,7 @@ let pathCellIndex = 0;
 
       if (buildingRef.current) {
         buildingRef.current.drawBuilding();
-        if (buildingRef.current.showRotationHandles && 
+        if (buildingRef.current.showRotationHandles &&
           !stepSelectorRefs.entrances.current) {
           buildingRef.current.drawRotationHandles();
         }
@@ -275,6 +282,9 @@ let pathCellIndex = 0;
 
       }
 
+      if (bikeParkingRef.current) {
+        bikeParkingRef.current.drawSitePlanElement()
+      }
 
 
 
@@ -358,7 +368,7 @@ let pathCellIndex = 0;
 
           // clampNumber()
           // const area = Math.abs(building.width * building.height);
-          if (distance < 20){ // && buildingRef.current.hasStopped) {
+          if (distance < 20) { // && buildingRef.current.hasStopped) {
 
             // get the point on the line where the entrance should interesect
             const angle = closestEdge.calculateAngle() - 90;
@@ -595,13 +605,13 @@ let pathCellIndex = 0;
       let lineIndex = calculateLineIndexOfClosestLine(points, lines, mx, my)
 
 
-    
+
       const property = propertyRef.current;
       const approach = approachRef.current;
       const parking = parkingRef.current;
       const building = buildingRef.current;
       const garbage = garbageRef.current;
-
+      const bikeParking = bikeParkingRef.current;
       const isHovered = {
         approach: false,
         approachOffset: false,
@@ -611,7 +621,8 @@ let pathCellIndex = 0;
         building: false,
         buildingOffset: false,
         buildingHandle: false,
-        garbage: false
+        garbage: false,
+        bikeParking: false,
       };
 
       if (approach) {
@@ -630,6 +641,9 @@ let pathCellIndex = 0;
       }
       if (garbage) {
         isHovered.garbage = garbage.isMouseHovering();
+      }
+      if (bikeParking) {
+        isHovered.bikeParking = bikeParking.isMouseHovering();
       }
 
 
@@ -815,7 +829,7 @@ let pathCellIndex = 0;
       // ALL THINGS BUILDING ENTRANCES
       else if (stepSelectorRefs.entrances.current) {
 
-        if (isHovered.buildingOffset&& buildingRef.current && propertyRef.current && parkingRef.current && garbageRef.current && approachRef.current) {
+        if (isHovered.buildingOffset && buildingRef.current && propertyRef.current && parkingRef.current && garbageRef.current && approachRef.current) {
           // HIDING ENTRANCE AND SOLVER FOR NOW
 
           const mouse = p.createVector(p.mouseX, p.mouseY)
@@ -824,7 +838,7 @@ let pathCellIndex = 0;
           // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
 
 
-        // get the point on the line where the entrance should interesect
+          // get the point on the line where the entrance should interesect
           const angle = closestEdge.calculateAngle() - 90;
           const intersection = closestEdge.calculateClosestIntercept(
             p.mouseX,
@@ -845,7 +859,7 @@ let pathCellIndex = 0;
 
           // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
 
-          if (minDistance <( 5 / propertyRef.current.scale)) {
+          if (minDistance < (5 / propertyRef.current.scale)) {
             // THEN DELETE THE ENTRANCE
 
             buildingRef.current.entrances = buildingRef.current.entrances.filter((_, i) => i !== minDistanceIndex)
@@ -876,12 +890,38 @@ let pathCellIndex = 0;
       }
 
 
+      // ALL THINGS BIKE PARKING
+      else if (stepSelectorRefs.bikeParking.current && !bikeParkingDragMode) {
+        if (!propertyRef.current || !approachRef.current || bikeParkingRef.current?.isInitialized) return;
+
+        const clickIsInProperty = allPointsInPolygon(propertyRef.current.propertyCorners, [p.createVector(mx, my)]);
+
+
+        // Place the bike parking
+        if (!bikeParkingRef.current?.isInitialized &&
+          !isHovered.approach &&
+          !isHovered.parking &&
+          !isHovered.parkingOffset &&
+          !isHovered.parkingHandle &&
+          !isHovered.garbage &&
+          !isHovered.building &&
+          truthChecker(clickIsInProperty)) {
+
+
+          const approachAngle = (propertyRef.current.approachEdge?.calculateAngle() || 0) + 180;
+          const bikeParkingDefault = 10 / propertyRef.current.scale;
+          bikeParkingRef.current = new BikeParking(p, p.createVector(p.width / 2, p.height / 2), bikeParkingDefault, bikeParkingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale);
+          bikeParkingRef.current.initialize();
+
+        }
+      }
+
+
 
       else {
         // Somthing happened, just go back 
         return
       }
-
 
       if (!property) return;
 
@@ -921,7 +961,8 @@ let pathCellIndex = 0;
 
 
           if (property) {
-            property.updateCornersAndEdgesPositions(points)
+            property.updateCornersAndEdgesPositions(points);
+            
           }
         }
       }
@@ -1110,7 +1151,7 @@ let pathCellIndex = 0;
 }
 
 function updateGlobalVariables(
-  property: Property | null, approach: Approach | null, parking: Parking | null, building: Building | null, garbage: Garbage | null,
+  property: Property | null, approach: Approach | null, parking: Parking | null, building: Building | null, garbage: Garbage | null, bikeParking: BikeParking | null,
   formData: FormDataInputs
 ) {
   if (property) {
@@ -1151,13 +1192,12 @@ function updateGlobalVariables(
     building.buildingAreaTarget = formData.buildingAreaTarget;
     building.buildingCount = formData.buildingCount
     building.enableBuildingDimensions = formData.enableBuildingDimensions;
-
     building.updateBuildingArea(Number(formData.buildingAreaTarget))
-
   }
 
 
   if (garbage) { }
+  if (bikeParking) { }
 
   if (approach && parking && property) {
     property.drivewayWidth = formData.drivewayWidth;

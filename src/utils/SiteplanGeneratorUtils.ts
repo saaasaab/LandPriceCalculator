@@ -39,6 +39,8 @@ export interface FormDataInputs {
   enableLineLengths: boolean,
   showDrivewayControlPoints: boolean,
   enableBuildingDimensions: boolean,
+  enableBikeParking: boolean,
+  bikeCount: number,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -63,6 +65,9 @@ export const initialFormData: FormDataInputs = {
   enableLineLengths: true,
   showDrivewayControlPoints: false,
   enableBuildingDimensions: true,
+  enableBikeParking: true,
+  bikeCount: 4,
+
 
 };
 

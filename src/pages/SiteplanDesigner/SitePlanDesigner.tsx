@@ -37,7 +37,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 
-import { Map, ArrowRight, Ruler, FileImage, Delete, Car } from 'lucide-react'; //Box,
+import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Bike } from 'lucide-react'; //Box,
 
 import { Button, Card, CardContent, Checkbox, Input } from '../../components/ui';
 
@@ -47,13 +47,14 @@ import ImageUploader from './ImageUploader';
 import './SitePlanDesigner.scss';
 import CollapsibleSection from './CollapsibleSection';
 import AlphaBanner from './AlphaBanner';
-import { FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUtils';
+import { countParkingStalls, FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUtils';
 import { Property } from './SitePlanClasses/Property';
 import { Approach } from './SitePlanClasses/Approach';
 import { Garbage } from './SitePlanClasses/Garbage';
 import { Building } from './SitePlanClasses/Building';
 import { Parking } from './SitePlanClasses/Parking';
 import Slider from '../../components/Slider';
+import { BikeParking } from './SitePlanClasses/BikeParking';
 
 
 const initialMetrics: SiteMetrics = {
@@ -75,9 +76,9 @@ const initialMetrics: SiteMetrics = {
 
 const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormDataInputs>(initialFormData);
-  const [metrics, _setMetrics] = useState<SiteMetrics>(initialMetrics);
+  const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
-  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'entrances'>('upload'); // Interaction mode
+  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'bike' | 'entrances'>('upload'); // Interaction mode
 
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
@@ -87,8 +88,6 @@ const SitePlanGenerator: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
 
   // const [outboundMetrics, setOutboundMetrics] = useState<SiteMetrics>(initialMetrics);
-
-
 
   // const [isHelpVisible, setIsHelpVisible] = useState(true);
 
@@ -111,7 +110,10 @@ const SitePlanGenerator: React.FC = () => {
   const isSelectingSetbackRef = useRef<boolean>(false);
   const isSettingParkingLotRef = useRef<boolean>(false);
   const isPlacingBuildingRef = useRef<boolean>(false);
+  const isPlacingBikeParkingRef = useRef<boolean>(false);
   const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
+
+
 
   const stepSelectorRefs = {
     upload: isUploadingImageRef,
@@ -121,7 +123,9 @@ const SitePlanGenerator: React.FC = () => {
     setback: isSelectingSetbackRef,
     parking: isSettingParkingLotRef,
     building: isPlacingBuildingRef,
+    bikeParking: isPlacingBikeParkingRef,
     entrances: isPlacingBuildingEntrancesRef,
+
   }
 
   const isPolygonClosedRef = useRef<boolean>(false);
@@ -136,8 +140,61 @@ const SitePlanGenerator: React.FC = () => {
   const parkingRef = useRef<Parking | null>(null);
   const buildingRef = useRef<Building | null>(null);
   const garbageRef = useRef<Garbage | null>(null);
+  const bikeParkingRef = useRef<BikeParking | null>(null);
 
 
+  useEffect(() => {
+    const updateVariables = () => {
+      const property = propertyRef.current;
+      const approach = approachRef.current;
+      const parking = parkingRef.current;
+      const building = buildingRef.current;
+      const garbage = garbageRef.current;
+      const bikeParking = bikeParkingRef.current;
+
+      console.log("There be danger here")
+
+      setMetrics
+      // const { leftStalls, rightStalls } = countParkingStalls(parking);
+
+
+      const _metrics: SiteMetrics = {
+        ...metrics
+      }
+
+      _metrics.propertyArea = property?.areaOfProperty || initialMetrics.propertyArea;
+
+
+      setMetrics(_metrics)
+
+      // setAreaOfProperty(visualizer.current?.property?.areaOfProperty || 0);
+      // setImperviousSurface(visualizer.current?.property?.areaOfProperty || 0);
+      // setDrivewayArea(visualizer.current?.drivewayArea || 0);
+      // setParkingArea(visualizer.current?.parking?.parkingArea || 0);
+      // setParkingStallsArea(visualizer.current?.parking?.parkingStallsArea || 0);
+      // setHandicappedStalls(visualizer.current?.parking?.handicappedParkingNum || 0);
+      // setParkingStalls(leftStalls + rightStalls);
+      // setSidewalkArea(visualizer.current?.sidewalkArea || 0);
+      // setGarbageArea(visualizer.current?.garbage?.area || 0);
+      // setActualBuildingArea(visualizer.current?.building?.buildingAreaActual || 0);
+      // setApproachArea(visualizer.current?.approach?.approachArea || 0);
+      // setBikeParkingArea(visualizer.current?.bikeParkingArea || 0);
+
+
+      metrics
+    };
+
+
+
+    // if (visualizer.current) {
+    const interval = setInterval(updateVariables, 1000); // Check for changes periodically
+
+    return () => clearInterval(interval);
+
+
+  }, []);
+
+  const buildingArea = buildingRef.current?.buildingAreaActual || metrics.actualBuildingArea;
 
 
   useEffect(() => {
@@ -165,7 +222,7 @@ const SitePlanGenerator: React.FC = () => {
 
     // inboundMetricsRef,
     // setOutboundMetrics,
-
+    // 
     formData,
 
     imageOpacityRef,
@@ -175,7 +232,8 @@ const SitePlanGenerator: React.FC = () => {
     approachRef,
     parkingRef,
     buildingRef,
-    garbageRef
+    garbageRef,
+    bikeParkingRef
   };
   const sketch = sketchForSiteplan(params);
 
@@ -223,8 +281,8 @@ const SitePlanGenerator: React.FC = () => {
     return key.replace(/([A-Z])/g, ' $1').trim().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  // useEffect(() => {
 
+  // useEffect(() => {
   //   const updatedGlobals = {
   //     approachWidth: formData.approachWidth,
   //     parkingStallsNum: formData.parkingStalls,
@@ -236,13 +294,16 @@ const SitePlanGenerator: React.FC = () => {
 
   //   console.log(`formData.parkingStalls`, formData.parkingStalls)
 
-  //   // setBigBucketOfFormData(updatedGlobals)
-  //   // setNumberOfParkingStalls(formData.parkingStalls)
-  //   // inboundMetricsRef.current.parkingStalls = formData.parkingStalls;
-  //   // visualizer.current?.updateGlobalVariables(updatedGlobals)
+  //   setBigBucketOfFormData(updatedGlobals)
+  //   setNumberOfParkingStalls(formData.parkingStalls)
+  //   inboundMetricsRef.current.parkingStalls = formData.parkingStalls;
+  //   visualizer.current?.updateGlobalVariables(updatedGlobals)
+
   // }, [formData, globalAngle])
 
   // Update setback for a specific line
+
+
   const updateSetback = (index: number, value: string) => {
 
     const lines = linesRef.current;
@@ -256,7 +317,6 @@ const SitePlanGenerator: React.FC = () => {
 
     const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
     setOffsetPoints(offsets);
-
   };
 
   const falsifyRefs = () => {
@@ -290,7 +350,6 @@ const SitePlanGenerator: React.FC = () => {
   const defineScale = () => {
     falsifyRefs()
     isDefiningScaleRef.current = true;
-
     setMode('scale')
   }
 
@@ -318,6 +377,12 @@ const SitePlanGenerator: React.FC = () => {
     setMode('building');
   }
 
+  const createBikeParking = () => {
+    falsifyRefs();
+    isPlacingBikeParkingRef.current = true;
+    setMode('bike');
+  }
+
   const createBuildingEntrances = () => {
     falsifyRefs();
     isPlacingBuildingEntrancesRef.current = true;
@@ -341,24 +406,8 @@ const SitePlanGenerator: React.FC = () => {
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
     inputScaleRef.current = null;
-
-
     setMode('upload');
   };
-
-
-
-
-  // const generateSitePlan = () => {
-
-
-  //   // const points = pointsRef.current;
-  //   // const lines = linesRef.current;
-  //   // const scale = scaleRef.current;
-  //   // falsifyRefs();
-  //   // visualizer.current = new SiteplanGenerator(points, lines, scale || .35)
-  // }
-
 
   const steps = [
     {
@@ -540,42 +589,42 @@ const SitePlanGenerator: React.FC = () => {
       children:
         <>
           {/* {approachRef.current ? */}
-            <div style={{ marginTop: '10px' }}>
-              <div className="site-plan-generator__input-group">
-                <label htmlFor="approachWidth">Approach Width (ft)</label>
-                <Input
-                  id="approachWidth"
-                  type="number"
-                  min={0}
-                  value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
-                  onChange={(e) => handleNumberInput(e, 'approachWidth')}
-                />
-              </div>
-
-              <div className="site-plan-generator__input-group">
-                <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
-                <Input
-                  id="propertyEntranceCount"
-                  type="number"
-                  min={0}
-                  value={formData.propertyEntranceCount || ""}
-                  onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
-                />
-              </div>
-
-              <div className="site-plan-generator__checkbox">
-                <label htmlFor="deleteDriveway">Delete Driveway</label>
-
-                <Button
-                  id="deleteDriveway"
-                  
-                  onClick={()=>{approachRef.current = null;}}
-                />
-              </div>
-
-
+          <div style={{ marginTop: '10px' }}>
+            <div className="site-plan-generator__input-group">
+              <label htmlFor="approachWidth">Approach Width (ft)</label>
+              <Input
+                id="approachWidth"
+                type="number"
+                min={0}
+                value={formData.approachWidth || ""} // Show an empty string if the value is null or undefined
+                onChange={(e) => handleNumberInput(e, 'approachWidth')}
+              />
             </div>
-            {/* : <></>
+
+            <div className="site-plan-generator__input-group">
+              <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
+              <Input
+                id="propertyEntranceCount"
+                type="number"
+                min={0}
+                value={formData.propertyEntranceCount || ""}
+                onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
+              />
+            </div>
+
+            <div className="site-plan-generator__checkbox">
+              <label htmlFor="deleteDriveway">Delete Driveway</label>
+
+              <Button
+                id="deleteDriveway"
+
+                onClick={() => { approachRef.current = null; }}
+              />
+            </div>
+
+
+          </div>
+          {/* : <></>
           } */}
         </>,
 
@@ -637,15 +686,15 @@ const SitePlanGenerator: React.FC = () => {
           </div>
 
           <div className="site-plan-generator__checkbox">
-                <label htmlFor="taperedDriveway">Tapered Driveway</label>
+            <label htmlFor="taperedDriveway">Tapered Driveway</label>
 
-                <Checkbox
-                  id="taperedDriveway"
-                  checked={formData.taperedDriveway}
-                  onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
-                />
-              </div>
-              
+            <Checkbox
+              id="taperedDriveway"
+              checked={formData.taperedDriveway}
+              onChange={(e) => handleBooleanInput(e, 'taperedDriveway')}
+            />
+          </div>
+
           <div className="site-plan-generator__input-group">
             <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
             <Checkbox
@@ -757,14 +806,14 @@ const SitePlanGenerator: React.FC = () => {
       children: <div style={{ marginTop: '10px' }}>
 
         <div className="site-plan-generator__input-group">
-              <label>Enable Dimensions</label>
+          <label>Enable Dimensions</label>
 
-              <Checkbox
-                id="enableBuildingDimensions"
-                checked={formData.enableBuildingDimensions}
-                onChange={(e) => handleBooleanInput(e, 'enableBuildingDimensions')}
-              />
-            </div>
+          <Checkbox
+            id="enableBuildingDimensions"
+            checked={formData.enableBuildingDimensions}
+            onChange={(e) => handleBooleanInput(e, 'enableBuildingDimensions')}
+          />
+        </div>
 
         <div className="site-plan-generator__input-group">
           <label htmlFor="buildingAreaTarget">Max Building Area (sq ft)</label>
@@ -793,9 +842,42 @@ const SitePlanGenerator: React.FC = () => {
       </div>,
       disabled: !isPolygonClosedRef.current//!parkingRef.current
     },
+    // {
+    //   id: 'bike',
+    //   title: '8. Bike Parking',
+    //   icon: <Bike/>,
+    //   description: 'Places the Bike Parking',
+    //   help: 'Place the bike parking near the building for most ',
+    //   onClick: () => { createBikeParking() },
+    //   children: <div style={{ marginTop: '10px' }}>
+
+    //     <div className="site-plan-generator__input-group">
+    //       <label>Enable Bike Parking</label>
+    //       <Checkbox
+    //         id="enableBuildingDimensions"
+    //         checked={formData.enableBikeParking}
+    //         onChange={(e) => handleBooleanInput(e, 'enableBikeParking')}
+    //       />
+    //     </div>
+
+    //     <div className="site-plan-generator__input-group">
+    //       <label htmlFor="buildingCount">Number of Bike Spots</label>
+    //       <Input
+    //         id="bikeCount"
+    //         type="number"
+    //         min={0}
+    //         value={formData.bikeCount || ""}
+    //         onChange={(e) => handleNumberInput(e, 'bikeCount')}
+    //       />
+    //     </div>
+
+
+    //   </div>,
+    //   disabled: !isPolygonClosedRef.current//!parkingRef.current
+    // },
     {
       id: 'buildingEntrance',
-      title: '8. Place Building Entrances',
+      title: '9. Place Building Entrances',
       icon: <Car />,
       description: 'Places the building entrances',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',

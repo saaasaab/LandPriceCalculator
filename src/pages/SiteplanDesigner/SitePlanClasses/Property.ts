@@ -99,9 +99,14 @@ export class Property {
     })
 
     this.calculateCornerOffsetsFromSetbacks()
+    this.updateArea()
 
   }
 
+  updateArea(){
+    const area = calculateArea(this.propertyCorners) * Math.pow(this.scale, 2);
+    this.areaOfProperty = area;
+  }
 
   updateEdges(points: IPoint[]) {
     points.forEach((point, i) => {
