@@ -159,6 +159,8 @@ export class Building extends SitePlanElement {
 
 
 
+
+
       if (this.enableBuildingDimensions) {
         this.p.textAlign(this.p.CENTER, this.p.BOTTOM);
         this.sitePlanElementEdges.forEach((edge) => {
@@ -171,7 +173,7 @@ export class Building extends SitePlanElement {
           this.p.translate(mid.x, mid.y);
           this.p.rotate(edge.calculateAngle())
           this.p.textSize(14);
-          this.p.text(`${length.toFixed(1)} ft`, 0, 0);
+          this.p.text(`${length.toFixed(1)} ft`, 0, -15);
           this.p.pop();
         })
 
@@ -183,7 +185,7 @@ export class Building extends SitePlanElement {
 
         this.p.push();
         this.p.textSize(16)
-        this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 2)
+        this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 4)
         this.p.textAlign(this.p.CENTER, this.p.CENTER);
         this.p.pop();
       }

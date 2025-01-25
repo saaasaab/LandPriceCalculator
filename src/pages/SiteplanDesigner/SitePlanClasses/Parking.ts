@@ -316,7 +316,6 @@ export class Parking extends SitePlanElement {
     const { left: stallCornerLeft, right: stallCornerRight } = calculatePointPosition(this.p, entranceEdge, parkingAngle, this.parkingStalls, this.scale);
 
     // Expand the parking size
-
     const sideNumber = getAdjacentIndices(this.entranceEdgeIndex || 0, propertyCorners.length);
 
     // check if new points are inside the boundary;

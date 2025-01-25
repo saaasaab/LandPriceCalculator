@@ -407,8 +407,6 @@ export class VisibilityGraph {
     this.removeDeadEndMidNodes()
 
 
-
-
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = i + 1; j < this.nodes.length; j++) {
         const node1 = this.nodes[i];
@@ -419,6 +417,9 @@ export class VisibilityGraph {
         }
       }
     }
+
+
+    // Combine the paths, then search the nodes for the quickest route to all lines 
 
     // Now create the edges
   }
@@ -495,7 +496,7 @@ export class VisibilityGraph {
     this.sideWalkPolygons.forEach(polygon => {
       p.push()
       p.fill(150, 150, 150);
-      // p.noStroke()
+      p.noStroke()
       p.beginShape()
 
       polygon.forEach(ring => {

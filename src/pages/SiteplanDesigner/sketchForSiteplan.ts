@@ -5,7 +5,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, rotateCorners, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
@@ -14,6 +14,7 @@ import { Approach } from "./SitePlanClasses/Approach";
 import { Entrance } from "./SitePlanClasses/Entrance";
 import { VisibilityGraph } from "../VisibilityGraph";
 import { BikeParking } from "./SitePlanClasses/BikeParking";
+import { Clock1 } from "lucide-react";
 // import { VisibilityGraph } from "../VisibilityGraph";
 
 
@@ -55,6 +56,7 @@ interface SketchForSiteplanParams {
     building: React.MutableRefObject<boolean>;
     entrances: React.MutableRefObject<boolean>;
     bikeParking: React.MutableRefObject<boolean>;
+    everything: React.MutableRefObject<boolean>;
   };
   clearEverythingRef: React.MutableRefObject<boolean>;
 
@@ -68,6 +70,7 @@ interface SketchForSiteplanParams {
   buildingRef: React.MutableRefObject<Building | null>;
   garbageRef: React.MutableRefObject<Garbage | null>;
   bikeParkingRef: React.MutableRefObject<BikeParking | null>;
+
 }
 
 export default function sketchForSiteplan(params: SketchForSiteplanParams) {
@@ -90,8 +93,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     // setOutboundMetrics,
     formData,
     imageOpacityRef,
-
-
     propertyRef,
     approachRef,
     parkingRef,
@@ -104,22 +105,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   let pathCellIndex = 0;
 
 
-  // const defaultEdges = (p: p5) => {
-  //   const globalAngle = 0;
-  //   let propertyCorners = [
-  //     p.createVector(140, 80),
-  //     p.createVector(p.width - 180, 50),
-  //     p.createVector(p.width - 180, p.height / 2 + 10),
-  //     p.createVector(p.width - 135, p.height - 120),
-  //     p.createVector(p.width / 2 - 140, p.height - 150),
-  //     p.createVector(108, p.height - 220),
-  //   ];
-  //   propertyCorners = rotateCorners(p, propertyCorners, globalAngle);
-
-  //   return propertyCorners;
-  // }
-
-
 
   updateGlobalVariables(
     propertyRef.current, approachRef.current, parkingRef.current, buildingRef.current, garbageRef.current, bikeParkingRef.current,
@@ -128,7 +113,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   // if (bikeParkingRef.current) {
 
   // }
-
 
   let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null)
 
@@ -196,11 +180,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     let rectSize = { width: 0, height: 0 };
     const defaultVector = p.createVector(0, 0);
 
-
     p.preload = () => {
       if (imageURL) {
         img = p.loadImage(imageURL);
       }
+
+
     };
 
     p.setup = () => {
@@ -282,9 +267,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       }
 
-      if (bikeParkingRef.current) {
-        bikeParkingRef.current.drawSitePlanElement()
-      }
+      // if (bikeParkingRef.current) {
+      //   bikeParkingRef.current.drawSitePlanElement()
+      // }
 
 
 
@@ -326,14 +311,13 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
       if (visibilityGraphSolverRef.current) {
-        pathCellIndex++
-
-        // visibilityGraphSolver.displaySolution(p, this.pathCellIndex)
+        // pathCellIndex++
+        // visibilityGraphSolverRef.current.displaySolution(p, pathCellIndex)
 
 
         // Display the shortest path for a specific start-end pair
         visibilityGraphSolverRef.current.displayShortestPaths(p);
-        // visibilityGraphSolver.displayPathsAsPolygons(p);
+        // visibilityGraphSolverRef.current.displayPathsAsPolygons(p);
 
         const maxPathStatesLength = visibilityGraphSolverRef.current.edges.length;
         if (pathCellIndex > maxPathStatesLength + 30) {
@@ -645,6 +629,77 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       if (bikeParking) {
         isHovered.bikeParking = bikeParking.isMouseHovering();
       }
+
+
+      // ALL THINGS CREATE EVERYTIHNG
+
+      if (stepSelectorRefs.everything.current === true) {
+        const defaultEdges = (p: p5) => {
+          const globalAngle = 0;
+          let propertyCorners = [
+            p.createVector(140, 80),
+            p.createVector(p.width - 180, 50),
+            p.createVector(p.width - 180, p.height / 2 + 10),
+            p.createVector(p.width - 135, p.height - 120),
+            p.createVector(p.width / 2 - 140, p.height - 150),
+            p.createVector(108, p.height - 220),
+          ];
+          propertyCorners = rotateCorners(p, propertyCorners, globalAngle);
+          return propertyCorners;
+        }
+
+
+
+        const propertyCorners = defaultEdges(p);
+        const isClockwise = getIsClockwise(propertyCorners)
+        const setbacks = [5, 5, 5, 0, 0, 10];
+
+        const _property = new Property(p, propertyCorners, isClockwise, scaleRef.current || defaultScale, setbacks);
+        propertyRef.current = _property;
+        propertyRef.current.initialize()
+        propertyRef.current.propertyCorners = propertyCorners;
+        propertyRef.current.calculateCornerOffsetsFromSetbacks();
+
+
+        const property = propertyRef.current;
+        const approachIndex = 0;
+        const approachEdge = propertyRef.current.propertyEdges[approachIndex]
+        const midpoint = approachEdge.getMidpoint();
+        const approachWidth = property.approachWidth / property.scale;
+        const approachAngle = approachEdge.calculateAngle();
+        const centerOfProperty = calculateCentroid(propertyRef.current.cornerOffsetsFromSetbacks)
+        const parkingWidth = 24 / propertyRef.current.scale;
+        const buildingDefault = 30 / propertyRef.current.scale;
+        const bikeParkingDefault = 10 / propertyRef.current.scale;
+
+        property.approachEdge = approachEdge
+        property.approachEdgeIndex = approachIndex
+
+
+        approachRef.current = new Approach(p, midpoint, approachWidth, 20, approachAngle + 180, ESitePlanObjects.Approach, property.scale);
+        approachRef.current.initialize();
+
+        parkingRef.current = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, propertyRef.current.scale);
+        parkingRef.current.initializeParking(propertyRef.current, approachRef.current)
+        parkingRef.current.calculateNumberOfFittableStalls(propertyRef.current.cornerOffsetsFromSetbacks);
+        parkingRef.current.updateStallCorners();
+        parkingRef.current.updateParkingHeight(propertyRef.current.cornerOffsetsFromSetbacks);
+
+        garbageRef.current = new Garbage(p, getCenterPoint(p, parkingRef.current.sitePlanElementEdges[0].point1, parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 12 / propertyRef.current.scale, 5 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
+        garbageRef.current.initialize();
+
+        buildingRef.current = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale, 20);
+        buildingRef.current.initializeBuilding(300, 400);
+
+        bikeParkingRef.current = new BikeParking(p, p.createVector(400, 500), bikeParkingDefault, bikeParkingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale);
+        bikeParkingRef.current.initialize();
+
+
+
+        stepSelectorRefs.everything.current = false;
+        stepSelectorRefs.building.current = true;
+      }
+
 
 
 
@@ -962,7 +1017,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
           if (property) {
             property.updateCornersAndEdgesPositions(points);
-            
+
           }
         }
       }

@@ -171,6 +171,40 @@
       color: #4b5563;
       cursor: pointer;
     }
+
+    // input {
+    //   width: 100px; /* Width of the input */
+    //   height: 20px; /* Height of the input */
+    //   display: flex; /* Use flexbox */
+    //   justify-content: center; /* Horizontally center the checkbox */
+    //   align-items: center; /* Vertically center the checkbox */
+    //   appearance: none; /* Remove default styles for better control */
+    //   background-color: #f0f0f0; /* Optional: set background color */
+    //   border: 1px solid #ccc; /* Optional: border styling */
+    //   position: relative; /* For custom styling if needed */
+    // }
+    
+    // input::before {
+    //   content: 'X'; /* Create a pseudo-element for the "check" */
+    //   display: block;
+    //   width: 14px; /* Customize the checkmark size */
+    //   height: 14px;
+    //   // border: 2px solid #333;
+    //   background-color: #fff;
+    //   border-radius: 2px; /* Optional: rounded edges */
+    //   position: absolute;
+    //   text-align: center;
+    //   top: 50%;
+    //   left: 50%;
+    //   transform: translate(-50%, -50%);
+    // }
+    
+    // input:checked::before {
+    //   background-color:  #2563eb;; /* Change background on check */
+    //   // border-color:
+    // }
+
+
   }
 
   // Responsive adjustments

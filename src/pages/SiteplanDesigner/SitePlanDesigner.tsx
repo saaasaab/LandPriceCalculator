@@ -112,6 +112,7 @@ const SitePlanGenerator: React.FC = () => {
   const isPlacingBuildingRef = useRef<boolean>(false);
   const isPlacingBikeParkingRef = useRef<boolean>(false);
   const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
+  const isCreateEverythingRef = useRef<boolean>(false);
 
 
 
@@ -125,6 +126,7 @@ const SitePlanGenerator: React.FC = () => {
     building: isPlacingBuildingRef,
     bikeParking: isPlacingBikeParkingRef,
     entrances: isPlacingBuildingEntrancesRef,
+    everything: isCreateEverythingRef,
 
   }
 
@@ -219,7 +221,7 @@ const SitePlanGenerator: React.FC = () => {
     setIsPolygonClosedState,
     stepSelectorRefs,
     clearEverythingRef,
-
+    isCreateEverythingRef,
     // inboundMetricsRef,
     // setOutboundMetrics,
     // 
@@ -233,7 +235,10 @@ const SitePlanGenerator: React.FC = () => {
     parkingRef,
     buildingRef,
     garbageRef,
-    bikeParkingRef
+    bikeParkingRef,
+
+
+
   };
   const sketch = sketchForSiteplan(params);
 
@@ -347,6 +352,15 @@ const SitePlanGenerator: React.FC = () => {
     setCurrentStep(1); // should point to the adjust step
     setMode('adjust')
   }
+
+  const createEverything = ()=>{
+    falsifyRefs();
+    isCreateEverythingRef.current = true;
+    isPolygonClosedRef.current = true;
+    setMode('building');
+  }
+
+  
   const defineScale = () => {
     falsifyRefs()
     isDefiningScaleRef.current = true;
@@ -504,6 +518,15 @@ const SitePlanGenerator: React.FC = () => {
       </>,
 
       onClick: () => { createPoints() },
+    },
+    {
+      id: 'imLucky',
+      title: `2.5 I'm feeling lucky`,
+      icon: <Map />,
+      description: "Click to just create all the components so I don't have to keep clicking through all the steps to test something",
+      help: 'Click',
+ 
+      onClick: () => { createEverything() },
     },
     {
       id: 'scale',
