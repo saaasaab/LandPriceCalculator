@@ -6,9 +6,10 @@ import classifyPoint from "robust-point-in-polygon"
 import { TNode } from "../utils/BreadthFirstSearchBiDirectional";
 import { findShortestPathsAstar } from "../utils/AStarBiDirectional";
 import { TTwoPoints } from "../utils/SiteplanGeneratorUtils";
+import { simulatedAnnealing } from "../utils/SteinerTreeSearch";
 
 
-interface IPoint {x: number; y: number;}
+interface IPoint { x: number; y: number; }
 export type TPoint = { x: number; y: number };
 type Point = [number, number];
 
@@ -48,22 +49,29 @@ export class VisibilityGraph {
     end: CNode;
     path: CNode[];
   }[];
+
+  steinerPathBase: {
+    terminals: CNode[];
+    steinerPoints: CNode[];
+    connections: [CNode, CNode][]
+  } | null;
   startIndices: number[];
   startProjectionIndices: number[];
   endIndices: number[];
   sideWalkPolygons: [number, number][][];//polygonClipping.MultiPolygon
   scale: number;
 
-  
 
-  constructor(startPoints: TTwoPoints[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[],scale:number) {
+
+  constructor(startPoints: TTwoPoints[], endPoints: TPoint[], obstacles: TPoint[][], boundary: TPoint[], scale: number) {
     // Initialize nodes
     this.nodes = [];
     this.obstaclesOffset = [];
     this.obstacles = obstacles;
     this.boundary = boundary;
     this.nodeCount = 0;
-    this.shortestPaths = []
+    this.shortestPaths = [];
+    this.steinerPathBase = null;
     this.startIndices = [];
     this.startProjectionIndices = []
     this.endIndices = [];
@@ -80,7 +88,7 @@ export class VisibilityGraph {
       const isOutsideBoundary = classifyPoint(_boundary, [point.x, point.y]) === 1 || boundary.length === 0
       const isProjectionOutsideBoundary = classifyPoint(_boundary, [point.x2, point.y2]) === 1 || boundary.length === 0
 
-      if (!isOutsideBoundary && !isProjectionOutsideBoundary ) {
+      if (!isOutsideBoundary && !isProjectionOutsideBoundary) {
         this.nodes.push(new CNode(point.x, point.y, this.nodeCount, "startNode"));
         startIndices.push(this.nodeCount)
         this.nodeCount++;
@@ -112,14 +120,14 @@ export class VisibilityGraph {
         _obstacle.push(newNode);
       }
 
-      const offset = this.expandPolygon(_obstacle, 7/this.scale);
+      const offset = this.expandPolygon(_obstacle, 7 / this.scale);
       this.obstaclesOffset.push(offset);
     }
 
 
 
 
-    
+
     // Convert obstacle vertices to nodes
     this.obstaclesOffset.forEach(obstacle => {
       obstacle.forEach(vertex => {
@@ -266,7 +274,7 @@ export class VisibilityGraph {
       let line = line2Polygon(points, 3 / scale);
       _polys.push(line)
     })
-    this.sideWalkPolygons  = _polys// [polygonClipping.union(_polys)]
+    this.sideWalkPolygons = _polys// [polygonClipping.union(_polys)]
 
 
   }
@@ -344,7 +352,7 @@ export class VisibilityGraph {
 
 
   removeDeadEndMidNodes() {
-// nodes: CNode[],
+    // nodes: CNode[],
   }
 
 
@@ -404,6 +412,7 @@ export class VisibilityGraph {
 
 
 
+
     this.removeDeadEndMidNodes()
 
 
@@ -419,7 +428,14 @@ export class VisibilityGraph {
     }
 
 
+    // this.createSteinerPathBase()
+
+    // console.log(` this.shortestPaths`, this.shortestPaths, this.steinerPathBase)
+
     // Combine the paths, then search the nodes for the quickest route to all lines 
+
+
+
 
     // Now create the edges
   }
@@ -437,8 +453,6 @@ export class VisibilityGraph {
     if (pathCellIndex >= this.edges.length) {
       pathCellIndex = this.edges.length
     }
-
-
 
     p.fill(200, 100, 100, 20);
     for (const polygon of this.obstacles) {
@@ -492,7 +506,96 @@ export class VisibilityGraph {
     }
   }
 
-  displayPathsAsPolygons(p:p5){
+
+
+  createSteinerPathBase() {
+
+
+    interface SteinerPathBase {
+      terminals: CNode[];
+      steinerPoints: CNode[];
+      connections: [CNode, CNode][];
+    }
+
+
+    // Initialize the structure for steinerPathBase
+    const steinerPathBase: SteinerPathBase = {
+      terminals: [],
+      steinerPoints: [],
+      connections: []
+    };
+
+    // Use a Map to store nodes by index for efficient lookups
+    const nodesByIndex: Map<number, CNode> = new Map();
+
+    // Helper function to create or retrieve a node
+    function getNode(node: CNode): CNode {
+      if (!nodesByIndex.has(node.index)) {
+        nodesByIndex.set(node.index, node);
+        // Add the node to the appropriate list
+        if (node.nodeType === "startNode" || node.nodeType === "startProjectionNode" || node.nodeType === "endNode") {
+          steinerPathBase.terminals.push(nodesByIndex.get(node.index)!);
+        } else {
+          steinerPathBase.steinerPoints.push(nodesByIndex.get(node.index)!);
+        }
+      }
+      return nodesByIndex.get(node.index)!;
+    }
+
+    // Process the paths array
+    for (const pathObj of this.shortestPaths) {
+      const { path } = pathObj;
+
+      // Iterate through the path to create connections
+      for (let i = 0; i < path.length - 1; i++) {
+        const startNode = getNode(path[i]);
+        const endNode = getNode(path[i + 1]);
+
+        // Add the connection
+        steinerPathBase.connections.push([startNode, endNode]);
+      }
+    }
+
+    this.steinerPathBase = simulatedAnnealing(steinerPathBase);
+    // console.log(`object`, this.steinerPathBase);
+
+
+  }
+
+
+  displaySteinerTree(p: p5) {
+
+    // Draw connections
+    p.stroke(0);
+    p.strokeWeight(2);
+    this.steinerPathBase?.connections.forEach(([nodeA, nodeB]) => {
+      p.line(nodeA.x, nodeA.y, nodeB.x, nodeB.y);
+    });
+
+    // Draw terminals
+    p.fill(0, 255, 0);
+    p.noStroke();
+    this.steinerPathBase?.terminals.forEach(node => {
+      p.ellipse(node.x, node.y, 10, 10);
+    });
+
+    // Draw Steiner points
+    p.fill(255, 0, 0);
+    this.steinerPathBase?.steinerPoints.forEach(node => {
+      p.ellipse(node.x, node.y, 10, 10);
+    });
+
+    // Add labels for nodes
+    p.fill(0);
+    p.textSize(12);
+    this.steinerPathBase?.terminals.forEach(node => {
+      p.text(`T${node.index}`, node.x + 5, node.y - 5);
+    });
+    this.steinerPathBase?.steinerPoints.forEach(node => {
+      p.text(`S${node.index}`, node.x + 5, node.y - 5);
+    });
+  }
+  displayPathsAsPolygons(p: p5) {
     this.sideWalkPolygons.forEach(polygon => {
       p.push()
       p.fill(150, 150, 150);
@@ -501,7 +604,7 @@ export class VisibilityGraph {
 
       polygon.forEach(ring => {
 
-        if(!ring) return
+        if (!ring) return
         p.vertex(ring[0], ring[1])
 
         // if (!ring) return

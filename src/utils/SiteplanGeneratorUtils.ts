@@ -41,6 +41,7 @@ export interface FormDataInputs {
   enableBuildingDimensions: boolean,
   enableBikeParking: boolean,
   bikeCount: number,
+  showbuildingArea: boolean,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -67,6 +68,7 @@ export const initialFormData: FormDataInputs = {
   enableBuildingDimensions: true,
   enableBikeParking: true,
   bikeCount: 4,
+  showbuildingArea: true,
 
 
 };

@@ -14,7 +14,6 @@ import { Approach } from "./SitePlanClasses/Approach";
 import { Entrance } from "./SitePlanClasses/Entrance";
 import { VisibilityGraph } from "../VisibilityGraph";
 import { BikeParking } from "./SitePlanClasses/BikeParking";
-import { Clock1 } from "lucide-react";
 // import { VisibilityGraph } from "../VisibilityGraph";
 
 
@@ -70,6 +69,7 @@ interface SketchForSiteplanParams {
   buildingRef: React.MutableRefObject<Building | null>;
   garbageRef: React.MutableRefObject<Garbage | null>;
   bikeParkingRef: React.MutableRefObject<BikeParking | null>;
+  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
 
 }
 
@@ -100,6 +100,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     garbageRef,
     bikeParkingRef,
 
+    visibilityGraphSolverRef,
+
   } = params;
   const defaultScale = 0.25;
   let pathCellIndex = 0;
@@ -113,8 +115,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   // if (bikeParkingRef.current) {
 
   // }
-
-  let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null)
 
   let buildingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
   let parkingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
@@ -317,6 +317,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         // Display the shortest path for a specific start-end pair
         visibilityGraphSolverRef.current.displayShortestPaths(p);
+        // visibilityGraphSolverRef.current.displaySteinerTree(p);
+
         // visibilityGraphSolverRef.current.displayPathsAsPolygons(p);
 
         const maxPathStatesLength = visibilityGraphSolverRef.current.edges.length;
@@ -335,7 +337,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           buildingRef.current.tempBuilding();
         }
 
-        if ((isHovered.building || isHovered.buildingOffset) && isInboundary && buildingRef.current.isInitialized) {
+        const isAddingEntrances = stepSelectorRefs.entrances.current;
+        if (isAddingEntrances) {
 
 
           // ----  Show the entrance ----
@@ -581,8 +584,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       const mx = p.mouseX;
       const my = p.mouseY;
-
-
 
       if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
 
@@ -923,7 +924,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
           else {
             // Draw the entrance
-            const isAddingEntrances = true;
+            const isAddingEntrances = stepSelectorRefs.entrances.current;
             if (isAddingEntrances) {
               // Hold off on adding entrances for now
               let lerpPos = getIntersectionPercentage(
@@ -1178,8 +1179,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       isDragging.parkingOffset = false;
       isDragging.building = false;
 
-
-
       buildingDragMode = null;
       parkingDragMode = null;
       approachDragMode = null;
@@ -1247,7 +1246,8 @@ function updateGlobalVariables(
     building.buildingAreaTarget = formData.buildingAreaTarget;
     building.buildingCount = formData.buildingCount
     building.enableBuildingDimensions = formData.enableBuildingDimensions;
-    building.updateBuildingArea(Number(formData.buildingAreaTarget))
+    building.updateBuildingArea(Number(formData.buildingAreaTarget));
+    building.showbuildingArea = formData.showbuildingArea;
   }
 
 

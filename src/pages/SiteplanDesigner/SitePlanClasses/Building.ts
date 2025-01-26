@@ -21,6 +21,7 @@ export class Building extends SitePlanElement {
   public buildingAreaTarget: number;
   public buildingCount: number;
   public enableBuildingDimensions: boolean;
+  public showbuildingArea: boolean;
 
   constructor(
     p: p5,
@@ -44,6 +45,7 @@ export class Building extends SitePlanElement {
     this.buildingAreaTarget = initialFormData.buildingAreaTarget
     this.buildingCount = initialFormData.buildingCount;
     this.enableBuildingDimensions = initialFormData.enableBuildingDimensions;
+    this.showbuildingArea = initialFormData.showbuildingArea;
   }
 
   initializeBuilding(x: number, y: number,) {
@@ -182,12 +184,14 @@ export class Building extends SitePlanElement {
         })
 
 
+        if (this.showbuildingArea) {
 
-        this.p.push();
-        this.p.textSize(16)
-        this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 4)
-        this.p.textAlign(this.p.CENTER, this.p.CENTER);
-        this.p.pop();
+          this.p.push();
+          this.p.textSize(16)
+          this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 4)
+          this.p.textAlign(this.p.CENTER, this.p.CENTER);
+          this.p.pop();
+        }
       }
     }
   }

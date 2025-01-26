@@ -1,13 +1,33 @@
 
 
 export interface SiteMetrics {
+  zoning: string;
+  setbacks: {
+    front: number;
+    side: number;
+    rear: number;
+  };
+  maximumHeight: {
+    proposed: number;
+    allowed: number;
+  };
+  buildingCoveragePercentage: number;
+  buildingCoveragePercentageAllowed: number;
+  imperviousSurfaceArea: number;
+  imperviousSurfaceAllowed: number;
+  landscapeRequired: number;
+  landscape: number;
+  offStreetParkingRequired: number;
+  offStreetParkingRequiredByType: string;
+  
+
   actualBuildingArea: number;
   approachArea: number;
   bikeParkingArea: number;
   drivewayArea: number;
   garbageArea: number;
   handicappedStallsCount: number;
-  imperviousSurface: number;
+
   parkingArea: number;
   parkingStallsArea: number;
   propertyArea: number;
@@ -37,7 +57,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 
-import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Bike } from 'lucide-react'; //Box,
+import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Bike, Footprints } from 'lucide-react'; //Box,
 
 import { Button, Card, CardContent, Checkbox, Input } from '../../components/ui';
 
@@ -55,11 +75,27 @@ import { Building } from './SitePlanClasses/Building';
 import { Parking } from './SitePlanClasses/Parking';
 import Slider from '../../components/Slider';
 import { BikeParking } from './SitePlanClasses/BikeParking';
-
+import { VisibilityGraph } from '../VisibilityGraph';
 
 const initialMetrics: SiteMetrics = {
+  zoning: "C-M Commercial Manufacturing",
+  setbacks: { front: 10, side: 10, rear: 10 },
+  maximumHeight: { proposed: 28.0, allowed: 45.0 },
+  buildingCoveragePercentage: 69,
+  buildingCoveragePercentageAllowed: 70,
+  imperviousSurfaceArea: 12192,
+  imperviousSurfaceAllowed: 12192,
+  landscapeRequired: 15,
+  landscape: 27.2,
+
+
+  offStreetParkingRequired: 10,
+  offStreetParkingRequiredByType: '2 spaces / 1,000 S.F.',
+
+
+  actualBuildingArea: 1500,
   propertyArea: 12192,
-  imperviousSurface: 12192,
+  
   drivewayArea: 521,
   parkingArea: 936,
   parkingStallsArea: 1156,
@@ -67,7 +103,7 @@ const initialMetrics: SiteMetrics = {
   totalParkingStalls: 8,
   sidewalkArea: 0,
   garbageArea: 2808,
-  actualBuildingArea: 1500,
+  
   approachArea: 62,
   bikeParkingArea: 0,
   totalAreaDedicatedToSetbacks: 1000,
@@ -112,8 +148,8 @@ const SitePlanGenerator: React.FC = () => {
   const isPlacingBuildingRef = useRef<boolean>(false);
   const isPlacingBikeParkingRef = useRef<boolean>(false);
   const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
+  const isGeneratingSidewalksRef = useRef<boolean>(false);
   const isCreateEverythingRef = useRef<boolean>(false);
-
 
 
   const stepSelectorRefs = {
@@ -126,8 +162,8 @@ const SitePlanGenerator: React.FC = () => {
     building: isPlacingBuildingRef,
     bikeParking: isPlacingBikeParkingRef,
     entrances: isPlacingBuildingEntrancesRef,
+    sidewalks: isGeneratingSidewalksRef,
     everything: isCreateEverythingRef,
-
   }
 
   const isPolygonClosedRef = useRef<boolean>(false);
@@ -144,6 +180,7 @@ const SitePlanGenerator: React.FC = () => {
   const garbageRef = useRef<Garbage | null>(null);
   const bikeParkingRef = useRef<BikeParking | null>(null);
 
+  let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null)
 
   useEffect(() => {
     const updateVariables = () => {
@@ -228,8 +265,6 @@ const SitePlanGenerator: React.FC = () => {
     formData,
 
     imageOpacityRef,
-
-
     propertyRef,
     approachRef,
     parkingRef,
@@ -237,15 +272,11 @@ const SitePlanGenerator: React.FC = () => {
     garbageRef,
     bikeParkingRef,
 
-
-
+    visibilityGraphSolverRef
   };
+
+
   const sketch = sketchForSiteplan(params);
-
-
-
-
-
   useEffect(() => {
     const p5Instance = new p5(sketch);
     return () => {
@@ -353,14 +384,14 @@ const SitePlanGenerator: React.FC = () => {
     setMode('adjust')
   }
 
-  const createEverything = ()=>{
+  const createEverything = () => {
     falsifyRefs();
     isCreateEverythingRef.current = true;
     isPolygonClosedRef.current = true;
     setMode('building');
   }
 
-  
+
   const defineScale = () => {
     falsifyRefs()
     isDefiningScaleRef.current = true;
@@ -402,6 +433,14 @@ const SitePlanGenerator: React.FC = () => {
     isPlacingBuildingEntrancesRef.current = true;
     setMode('entrances');
   }
+
+  const generateSideWalks = () => {
+    falsifyRefs();
+    isGeneratingSidewalksRef.current = true;
+    setMode('entrances');
+  }
+
+
 
 
   stepSelectorRefs.parking
@@ -525,7 +564,7 @@ const SitePlanGenerator: React.FC = () => {
       icon: <Map />,
       description: "Click to just create all the components so I don't have to keep clicking through all the steps to test something",
       help: 'Click',
- 
+
       onClick: () => { createEverything() },
     },
     {
@@ -728,6 +767,15 @@ const SitePlanGenerator: React.FC = () => {
           </div>
 
           <div className="site-plan-generator__input-group">
+            <label htmlFor="halfStreetDriveway">Has Garbage Enclosure</label>
+            <Checkbox
+              id="halfStreetDriveway"
+              checked={formData.halfStreetDriveway}
+              onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
+            />
+          </div>
+
+          <div className="site-plan-generator__input-group">
             <label htmlFor="showDrivewayControlPoints">Show Driveway Control Points</label>
             <Checkbox
               id="showDrivewayControlPoints"
@@ -849,6 +897,15 @@ const SitePlanGenerator: React.FC = () => {
           />
         </div>
 
+        <div className="site-plan-generator__input-group">
+          <label htmlFor="showbuildingArea">Show Building Area</label>
+          <Checkbox
+            id="showbuildingArea"
+            checked={formData.showbuildingArea}
+            onChange={(e) => handleBooleanInput(e, 'showbuildingArea')}
+          />
+        </div>
+
 
         <div className="site-plan-generator__input-group">
           <label htmlFor="buildingCount">Number of Buildings</label>
@@ -900,11 +957,21 @@ const SitePlanGenerator: React.FC = () => {
     // },
     {
       id: 'buildingEntrance',
-      title: '9. Place Building Entrances',
+      title: '8. Place Building Entrances',
       icon: <Car />,
       description: 'Places the building entrances',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuildingEntrances() },
+      disabled: !isPolygonClosedRef.current// !buildingRef.current
+    },
+
+    {
+      id: 'sidewalks',
+      title: '9. Generate Sidewalks',
+      icon: <Footprints />,
+      description: 'Automatically generates the sidewalks for the site plan',
+      help: 'Automatically generates the sidewalks based on the building entrances, parking, and approach.',
+      onClick: () => { generateSideWalks() },
       disabled: !isPolygonClosedRef.current// !buildingRef.current
     },
 
