@@ -53,13 +53,10 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
     const mort = mortTop / mortBottom;
 
-    const operatingIncome = monthlyLeaseRatesPerSQFT * (1 - (removeCommas(expensePercentage) / 100));
+    const operatingIncome = monthlyLeaseRatesPerSQFT * (1 - removeCommas(expensePercentage) / 100);
+    // const downAsDecimal = removeCommas(downPayment) / 100;
+    const pricePerSQFT = (monthlyLeaseRatesPerSQFT * (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
 
-    const downAsDecimal = removeCommas(downPayment) / 100;
-
-    const pricePerSQFT =
-        operatingIncome /
-        (downAsDecimal  * cashOnCashReturnMonthly + (1 - (downAsDecimal * mort)));
 
 
     // OH, pricePerSQFT is just calculating the NOI per sqft

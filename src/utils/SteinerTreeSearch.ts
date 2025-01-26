@@ -1,6 +1,6 @@
 import { CNode } from "../pages/VisibilityGraph";
 
-type NodeType = "startProjectionNode" | "endNode" | "midNode" | "startNode";
+// type NodeType = "startProjectionNode" | "endNode" | "midNode" | "startNode";
 
 interface SteinerPathBase {
     terminals: CNode[];

@@ -57,7 +57,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 
-import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Bike, Footprints } from 'lucide-react'; //Box,
+import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Footprints } from 'lucide-react'; //Box,
 
 import { Button, Card, CardContent, Checkbox, Input } from '../../components/ui';
 
@@ -67,7 +67,7 @@ import ImageUploader from './ImageUploader';
 import './SitePlanDesigner.scss';
 import CollapsibleSection from './CollapsibleSection';
 import AlphaBanner from './AlphaBanner';
-import { countParkingStalls, FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUtils';
+import { FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUtils';
 import { Property } from './SitePlanClasses/Property';
 import { Approach } from './SitePlanClasses/Approach';
 import { Garbage } from './SitePlanClasses/Garbage';
@@ -185,11 +185,11 @@ const SitePlanGenerator: React.FC = () => {
   useEffect(() => {
     const updateVariables = () => {
       const property = propertyRef.current;
-      const approach = approachRef.current;
-      const parking = parkingRef.current;
-      const building = buildingRef.current;
-      const garbage = garbageRef.current;
-      const bikeParking = bikeParkingRef.current;
+      // const approach = approachRef.current;
+      // const parking = parkingRef.current;
+      // const building = buildingRef.current;
+      // const garbage = garbageRef.current;
+      // const bikeParking = bikeParkingRef.current;
 
       console.log("There be danger here")
 
@@ -233,7 +233,7 @@ const SitePlanGenerator: React.FC = () => {
 
   }, []);
 
-  const buildingArea = buildingRef.current?.buildingAreaActual || metrics.actualBuildingArea;
+  // const buildingArea = buildingRef.current?.buildingAreaActual || metrics.actualBuildingArea;
 
 
   useEffect(() => {
@@ -422,11 +422,11 @@ const SitePlanGenerator: React.FC = () => {
     setMode('building');
   }
 
-  const createBikeParking = () => {
-    falsifyRefs();
-    isPlacingBikeParkingRef.current = true;
-    setMode('bike');
-  }
+  // const createBikeParking = () => {
+  //   falsifyRefs();
+  //   isPlacingBikeParkingRef.current = true;
+  //   setMode('bike');
+  // }
 
   const createBuildingEntrances = () => {
     falsifyRefs();
