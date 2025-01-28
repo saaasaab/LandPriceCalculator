@@ -23,11 +23,11 @@
     text-align: center;
     background: white;
     cursor: pointer;
-    &.hover-add-icon-active{
+    &.hover-add-icon-active {
       display: block;
     }
     &:hover {
-      opacity: .9;
+      opacity: 0.9;
     }
   }
   &:hover {
@@ -265,4 +265,39 @@ $breakpoint-tablet: 768px;
   &.copied {
     background-color: #2196f3;
   }
+}
+
+.divisor {
+  height: 1px;
+  width: 100%;
+  background: black;
+}
+.top,
+.bottom {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.math-equation {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--base-black);
+}
+.math-equation mi {
+  font-size: 14px;
+}
+.math-equation mn {
+  font-size: 10px;
+}
+
+.math-equation:hover {
+  background: skyblue;
 }

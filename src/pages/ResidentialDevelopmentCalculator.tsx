@@ -187,7 +187,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
 
         [OutputKeys.OfferToLandOwner]: {
-            title: "Breakeven Offer Price",
+            title: "Offer Price to land owner",
             value: Math.round(perLotOfferToLandOwner).toLocaleString(),
             value2: Math.round(totalOfferToLandOwner).toLocaleString(),
             description: "Total offer from the buyer to the land owner or seller.",
@@ -296,6 +296,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["House Price - per Sq Ft", housePricePerSqFt]}
                         description="The average price per square foot for houses in this area, determined by local research."
                         isMobile={isMobile}
+                        isGreyedOut={ removeCommas(multifamilyPricePerUnit) > 0}
                     />
                     {/* House Price Per Sq Ft */}
                     <InputRow

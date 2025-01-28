@@ -50,7 +50,8 @@
     
     .site-plan-generator__input-group,
     .site-plan-generator__checkbox,
-    .site-plan-generator__slider {
+    .site-plan-generator__slider,
+    .site-plan-generator__button {
       display: grid;
       grid-template-columns: 3fr 2fr;
       justify-content: space-between;
@@ -101,6 +102,16 @@
 
     .site-plan-generator__slider {
       grid-template-columns: 1fr;
+    }
+
+    .site-plan-generator__button{
+      button{
+        border:1px solid #2563eb;
+        &:hover{
+          background:#2563eb;
+        }
+      }
+
     }
 
     // Metrics Display

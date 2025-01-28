@@ -47,6 +47,9 @@
       align-items: center;
       padding: 0 10px 0 10px;
 
+      &.is-greyed-out{
+         background-color: #ececec;
+      }
       .input-cell {
         input {
           border: 1px solid #b1b1b1;

@@ -465,7 +465,7 @@ const SitePlanGenerator: React.FC = () => {
   const steps = [
     {
       id: 'upload',
-      title: '1. Upload Property Image',
+      title: '1. Upload Property Line Image',
       icon: <FileImage />,
       description: 'Start by uploading an overhead satellite image of your property',
       help: 'Use a clear aerial photo or satellite image of your property. The clearer the image, the easier it will be to mark boundaries.',
@@ -663,7 +663,7 @@ const SitePlanGenerator: React.FC = () => {
               />
             </div>
 
-            <div className="site-plan-generator__input-group">
+            <div className="site-plan-generator__input-group disabled">
               <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
               <Input
                 id="propertyEntranceCount"
@@ -674,7 +674,7 @@ const SitePlanGenerator: React.FC = () => {
               />
             </div>
 
-            <div className="site-plan-generator__checkbox">
+            <div className="site-plan-generator__button">
               <label htmlFor="deleteDriveway">Delete Driveway</label>
 
               <Button
@@ -765,25 +765,6 @@ const SitePlanGenerator: React.FC = () => {
               onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
             />
           </div>
-
-          <div className="site-plan-generator__input-group">
-            <label htmlFor="halfStreetDriveway">Has Garbage Enclosure</label>
-            <Checkbox
-              id="halfStreetDriveway"
-              checked={formData.halfStreetDriveway}
-              onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
-            />
-          </div>
-
-          <div className="site-plan-generator__input-group">
-            <label htmlFor="showDrivewayControlPoints">Show Driveway Control Points</label>
-            <Checkbox
-              id="showDrivewayControlPoints"
-              checked={formData.showDrivewayControlPoints}
-              onChange={(e) => handleBooleanInput(e, 'showDrivewayControlPoints')}
-            />
-          </div>
-
           {formData.halfStreetDriveway ?
             //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
             <div className="site-plan-generator__input-group subgroup-1">
@@ -816,6 +797,26 @@ const SitePlanGenerator: React.FC = () => {
 
           }
 
+
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="halfStreetDriveway">Has Garbage Enclosure</label>
+            <Checkbox
+              id="halfStreetDriveway"
+              checked={formData.halfStreetDriveway}
+              onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
+            />
+          </div>
+
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="showDrivewayControlPoints">Show Driveway Control Points</label>
+            <Checkbox
+              id="showDrivewayControlPoints"
+              checked={formData.showDrivewayControlPoints}
+              onChange={(e) => handleBooleanInput(e, 'showDrivewayControlPoints')}
+            />
+          </div>
+
+        
 
           <div className="site-plan-generator__input-group">
             <label htmlFor="landscapeIsland">Stalls per group</label>
@@ -988,8 +989,6 @@ const SitePlanGenerator: React.FC = () => {
 
   ];
   return (
-
-
     <div className="site-plan-generator">
       <AlphaBanner />
       <div className="site-plan-generator__container">

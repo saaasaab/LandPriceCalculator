@@ -9,13 +9,15 @@ const InputRow = ({
     setInput,
     cellValues,
     isPercent,
+    isGreyedOut
 }:
     {
         cellValues: (string | number | boolean | undefined)[];
         description?: string;
         setInput?: (value: string) => void;
         isMobile: boolean;
-        isPercent?: boolean
+        isPercent?: boolean;
+        isGreyedOut?: boolean;
 
     }) => {
     const [cell, setCell] = useState((`${cellValues[1]}`) as (string | number | readonly string[] | undefined));
@@ -54,7 +56,7 @@ const InputRow = ({
 
     // ${isMobile?"is-mobile":""}
     return (
-        <div className={`input-row`}>
+        <div className={`input-row ${ isGreyedOut?"is-greyed-out":""}` }>
             <div className="info-cell" onClick={() => setIsClicked(!isClicked)}>
                 <h4>{cellValues[0]}</h4>
                 {/* && isMobile */}
@@ -77,7 +79,6 @@ const InputRow = ({
                         onChange={handleChange}
                         onWheel={(value) => (value.target as HTMLElement).blur()}
                         onFocus={(value) => value.target.select()} // Select the input text on focus
-                        
                     />
                 </label>
             </div>

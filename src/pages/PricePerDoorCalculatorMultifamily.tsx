@@ -10,6 +10,7 @@ import './DynamicTable.scss';
 
 
 
+
 const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
 
     const queryParams = new URLSearchParams(window.location.search)
@@ -51,6 +52,9 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const mort = mortTop / mortBottom;
 
     const pricePerUnit = (removeCommas(rents) * (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
+   
+
+
     const operatingIncome = removeCommas(rents) * (1 - removeCommas(expensePercentage) / 100);
 
     const mortgagePayment = (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
@@ -133,11 +137,12 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
 
             <div className="output-fields-container">
-
+        
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Price per unit you should pay ", "$" + roundAndLocalString(pricePerUnit)]}
-                    description="This is the max you should pay per unit to achive the desired returns"
+                    cellValues={["Price per unit you should pay", "$" + roundAndLocalString(pricePerUnit)]}
+                    description={`This is the max you should pay per unit to achive the desired returns`}
+                    helpLink="https://docs.google.com/document/d/e/2PACX-1vTD8sk8fWqj0tRdPhqENwbbR8TZmuBxJES4a5xTmQ69r9n3bHtSqlgcJK2AFPa-kYmZlqykmZhhAkJF/pub"
                 />
                 <OutputRow
                     isMobile={isMobile}
@@ -175,6 +180,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     isMobile={isMobile}
                     cellValues={["Cap rate (%)", convertToPercent(capRate)]}
                     description="The cap rate of the property based off the operating income and the value of the property."
+                    helpLink="https://docs.google.com/document/d/e/2PACX-1vRt_ChiF_ZoJYXXemimCn-LKxn0-F8wIG66csw4FnybeFH2xh3U1WUhDuinZ-uJlEMDE-bS_XjBvzYp/pub"
                 />
 
                 <OutputRow
