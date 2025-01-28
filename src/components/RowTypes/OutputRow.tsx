@@ -23,7 +23,7 @@ const OutputRow = ({
             <div className={`output-row`}>
                 <div className="info-cell first-cell">
                     <h4>{cellValues[0]}
-                        {!!helpLink ? <QuestionMark helpLink={helpLink} /> : <></>}
+                        {!!helpLink ? <QuestionMark helpLink={helpLink}  /> : <></>}
                     </h4>
 
                     

@@ -22,16 +22,16 @@ const QuestionMark: React.FC<QuestionMarkProps> = ({ helpLink, tooltipText }) =>
                 title={tooltipText || "Learn more"}
                 aria-label="Help link"
             >
-                <svg
+
+                <InfoIcon
                     xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
+                    // fill="currentColor"
                     viewBox="0 0 24 24"
                     width="20"
                     height="20"
                     className="question-mark-icon"
-                >
-                    <InfoIcon />
-                </svg>
+                />
+
             </a>
         </span>
 

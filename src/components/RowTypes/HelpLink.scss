@@ -1,7 +1,10 @@
 .question-mark {
+    position: absolute;
+    top: -0.3rem;
+    right: -0.3rem;
     display: inline-flex;
     align-items: center;
-    margin-left: 0.2rem;
+    // margin-left: 0.2rem;
   
     a {
       color: #007bff;

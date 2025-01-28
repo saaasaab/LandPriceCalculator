@@ -79,6 +79,7 @@
     padding: 20px;
 
     .output-row {
+
       background: rgb(236 253 245);
       text-align: left;
       padding: 10px;
@@ -87,6 +88,9 @@
       justify-content: space-between;
       min-height: 100px;
       border-radius: 10px;
+      .info-cell{
+        position: relative;
+      }
     }
     .output-cell {
       color: rgb(5 150 105);

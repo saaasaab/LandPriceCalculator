@@ -42,9 +42,9 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         cashOnCashReturn: cashOnCashReturn,
     };
 
+    const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
 
     const interestRateMonthly = (removeCommas(interestRate) || .0000001) / 100 / 12;
-    const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
     const numberOfPayments = removeCommas(numberOfYears) * 12;
     const mortTop = interestRateMonthly * Math.pow((1 + interestRateMonthly), numberOfPayments);
     const mortBottom = Math.pow(1 + interestRateMonthly, numberOfPayments) - 1;
@@ -52,7 +52,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const mort = mortTop / mortBottom;
 
     const pricePerUnit = (removeCommas(rents) * (1 - (removeCommas(expensePercentage) / 100))) / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
-   
+
 
 
     const operatingIncome = removeCommas(rents) * (1 - removeCommas(expensePercentage) / 100);
@@ -137,7 +137,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
 
             <div className="output-fields-container">
-        
+
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Price per unit you should pay", "$" + roundAndLocalString(pricePerUnit)]}
@@ -146,8 +146,9 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                 />
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Operating income per unit ", "$" + roundAndLocalString(operatingIncome)]}
+                    cellValues={["Operating income per unit", "$" + roundAndLocalString(operatingIncome)]}
                     description="The operating income per unit"
+                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vTfgj_1vPDOl_cr3VD5beGl4kcMDstWAcPownovQ71hQhTgPCcoETEZg0a69Z5y42ds9PDirE0vscWl/pub"}
                 />
 
 
@@ -155,12 +156,14 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     isMobile={isMobile}
                     cellValues={["Mortgage Payment ", "$" + roundAndLocalString(mortgagePayment)]}
                     description="The payment for the mortgage per unit"
+                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vSqIxRzLoXKwnS9ZqPx_i6O3RE8netRC3KeBNPfbe-KMMlfFVExpuO4WOBgKX0M2M0j96SrmSrPzwmF/pub"}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Cash flow per unit", "$" + roundAndLocalString(cashFlowPerUnit)]}
                     description="The cash flow per unit"
+                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vTP6gEErgaXV_5Z1JDvgAT-ZGldWq5675VWWVVojQyyZ0zRya7dGUCvLVcydkMTTDG5j5UadJt9psQk/pub"}
                 />
 
 
@@ -168,12 +171,14 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     isMobile={isMobile}
                     cellValues={["Debt service coverage ratio (DSCR)", Math.round(DSCR * 100) / 100 + "X"]}
                     description="A bank normally is looking for 1.25 or greater"
+                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNoMpWgbOK0f32XSoQ2eVfe8-JmhdiCHjTPVP1jb9TYud-plRzGgtsHoAYSQzEExSZQ-Qp0fDJyxVg/pub"}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Gross Rent Multiplier", roundToDecimal(grossRentMultiplier, 2) + "X"]}
                     description="The GRM is calculated by dividing the value of the property by the annual gross rents. Generally the lower the better."
+                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNOZB6PpTBa-0JePEknv2nrFYtA-sK4Yz_yrUD1kRVTC9DNplG1o5iQdzpN6-1ZpUyds0waI83EHPx/pub"}
                 />
 
                 <OutputRow
@@ -187,12 +192,14 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     isMobile={isMobile}
                     cellValues={["Total Building Value", "$" + roundAndLocalString(totalPrice)]}
                     description="This is the total value of the building based on the per unit price"
+                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vRn3jgo32H_h1Jw4oeodBPqrvw4TQt2OnN9nUC-Knok_FieP8xqK-chi-iOORGuAY6NnpzvoFyO2Xbz/pub"}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
                     description="This is the total you will offer to the seller including closing costs"
+                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vTTnUs2pOKas85TqnynslZWKFLTaPyx7jiGnKexqv87tCcJvrdYRHgN1WyeIkP-T8sooUTCT1Sc1_6V/pub"}
                 />
 
             </div>
