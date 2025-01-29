@@ -1,4 +1,4 @@
-import { calculateBuildingSqft,convertInputsToNumbers } from "./utils";
+import { calculateBuildingSqft, convertInputsToNumbers } from "./utils";
 import { SQ_FT_PER_ACRE } from "./constants";
 import { BuildingCalculationResult } from "./types";
 
@@ -37,12 +37,13 @@ type TIndustrialDevelopmentCalculationsOutputs = {
     totalOfferToLandOwner: number;
     totalCosts: number;
     netBuildableAcres: number;
-    resultCalculateBuildingSqftIndustrial: BuildingCalculationResult  & {
+    resultCalculateBuildingSqftIndustrial: BuildingCalculationResult & {
         leaseableBuildingSpace: number;
     };
-    annualLeasingIncome:number;
+    annualLeasingIncome: number;
     propertyNOI: number;
     propertyCapRate: number;
+    totalSoftCost: number;
 };
 
 const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalculationsInputs): TIndustrialDevelopmentCalculationsOutputs => {
@@ -54,6 +55,7 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
         maxImperviousSurfaceRatio,
         commonSpacePercentage,
         catchAll,
+
         buildingPricePerSqFt,
         hardCostPerSqFt,
         permits,
@@ -68,7 +70,7 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
         SDCFees,
     } = convertInputsToNumbers(inputs);
 
-    
+
 
     // Constants
 
@@ -78,23 +80,27 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
     // Calculate total buildable square feet, adjusted for infrastructure
     const totalBuildableSqFt = netBuildableAcres * SQ_FT_PER_ACRE;
 
-    const resultCalculateBuildingSqftIndustrial= calculateBuildingSqft(totalBuildableSqFt, numberOfFloors, parkingRatio / 1000, maxImperviousSurfaceRatio / 100, commonSpacePercentage, catchAll);
+    const resultCalculateBuildingSqftIndustrial = calculateBuildingSqft(totalBuildableSqFt, numberOfFloors, parkingRatio / 1000, maxImperviousSurfaceRatio / 100, commonSpacePercentage, catchAll);
     const buildingSalePrice = resultCalculateBuildingSqftIndustrial.totalBuildingSqft * buildingPricePerSqFt;
 
     const hardCostTotal = resultCalculateBuildingSqftIndustrial.totalBuildingSqft * hardCostPerSqFt + permits + miscCosts;
     const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostTotal;
     const totalHardCosts = hardCostTotal + homeBuilderProfit;
     const reAgentCommission = (realEstateCommissionPercentage / 100) * buildingSalePrice;
+
     const finishedLotValue = buildingSalePrice - totalHardCosts - reAgentCommission;
     const landPercentage = finishedLotValue / buildingSalePrice;
+
+
     const landDeveloperProfit = (landDeveloperProfitPercentage / 100) * finishedLotValue;
+    const totalSoftCost = costToDevelop + landDeveloperProfit + SDCFees
 
-    const totalOfferToLandOwner = Math.max(ownedLandCost ? ownedLandCost : finishedLotValue - costToDevelop - landDeveloperProfit - SDCFees,0);
-    const totalCosts = totalOfferToLandOwner + costToDevelop + landDeveloperProfit + totalHardCosts;
-    const annualLeasingIncome = annualLeaseRatesPerSQFT* resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace;
-    const propertyNOI = annualLeasingIncome*(1-percentageOfIncomeToExpenses/100)
+    const totalOfferToLandOwner = Math.max(ownedLandCost ? ownedLandCost : finishedLotValue - totalSoftCost, 0);
+    const totalCosts = totalOfferToLandOwner + totalHardCosts + totalSoftCost;
+    const annualLeasingIncome = annualLeaseRatesPerSQFT * resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace;
+    const propertyNOI = annualLeasingIncome * (1 - percentageOfIncomeToExpenses / 100)
 
-    const propertyCapRate= propertyNOI/totalCosts;
+    const propertyCapRate = propertyNOI / totalCosts;
 
     return {
         totalBuildableSqFt,
@@ -113,6 +119,7 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
         annualLeasingIncome,
         propertyNOI,
         propertyCapRate,
+        totalSoftCost,
     };
 };
 

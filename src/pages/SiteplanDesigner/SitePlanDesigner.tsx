@@ -2,11 +2,11 @@
 
 export interface SiteMetrics {
   zoning: string;
-  setbacks: {
-    front: number;
-    side: number;
-    rear: number;
-  };
+  // setbacks: {
+  //   front: number;
+  //   side: number;
+  //   rear: number;
+  // };
   // maximumHeight: {
   //   proposed: number;
   //   allowed: number;
@@ -80,7 +80,7 @@ import { VisibilityGraph } from '../VisibilityGraph';
 
 const initialMetrics: SiteMetrics = {
   zoning: "C-M Commercial Manufacturing",
-  setbacks: { front: 10, side: 10, rear: 10 },
+  // setbacks: { front: 10, side: 10, rear: 10 },
   // maximumHeight: { proposed: 28.0, allowed: 45.0 },
   maximumHeight: 35,
 

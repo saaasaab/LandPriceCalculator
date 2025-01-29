@@ -21,8 +21,6 @@
 
 
 
-
-
 [ ] mulplie 
 [ ] Building Price - per Sq Ft ($) NOT CLEAR
 [ ] breakout the formulas - NOI

@@ -25,7 +25,7 @@ const AlphaBanner: React.FC = () => {
     return (
         <div style={styles.banner}>
             <p style={styles.text}>
-                This page is in <strong>alpha development</strong>. Please do not expect
+                This page is in <strong>alpha development</strong>. It will not work on mobile. Please do not expect
                 a final product. We welcome your feedback. Email me at{" "}
                 <a href="mailto:ExpanseInvestments@gmail.com" style={styles.link}>
                     ExpanseInvestments@gmail.com

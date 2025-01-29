@@ -30,7 +30,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
     const [hardCostPerSqFt, setHardCostPerSqFt] = usePersistedState2(page, EAllStates.hardCostPerSqFt, DEFAULT_VALUES[page].hardCostPerSqFt, queryParams);
     const [homeBuilderProfitPercentage, setHomeBuilderProfitPercentage] = usePersistedState2(page, EAllStates.homeBuilderProfitPercentage, DEFAULT_VALUES[page].homeBuilderProfitPercentage, queryParams);
     const [housePricePerSqFt, setHousePricePerSqFt] = usePersistedState2(page, EAllStates.housePricePerSqFt, DEFAULT_VALUES[page].housePricePerSqFt, queryParams);
-    const [multifamilyPricePerUnit, setMultifamilyPricePerUnit] = usePersistedState2(page, EAllStates.multifamilyPricePerUnit, DEFAULT_VALUES[page].multifamilyPricePerUnit, queryParams);
+    const [residentialPricePerHome, setresidentialPricePerHome] = usePersistedState2(page, EAllStates.residentialPricePerHome, DEFAULT_VALUES[page].residentialPricePerHome, queryParams);
     const [houseSize, setHouseSize] = usePersistedState2(page, EAllStates.houseSize, DEFAULT_VALUES[page].houseSize, queryParams);
     const [landDeveloperProfitPercentage, setLandDeveloperProfitPercentage] = usePersistedState2(page, EAllStates.landDeveloperProfitPercentage, DEFAULT_VALUES[page].landDeveloperProfitPercentage, queryParams);
     const [miscCosts, setMiscCosts] = usePersistedState2(page, EAllStates.miscCosts, DEFAULT_VALUES[page].miscCosts, queryParams);
@@ -50,7 +50,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         unitsPerAcre,
         houseSize,
         housePricePerSqFt,
-        multifamilyPricePerUnit,
+        residentialPricePerHome,
         hardCostPerSqFt,
         permits,
         miscCosts,
@@ -187,7 +187,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
 
         [OutputKeys.OfferToLandOwner]: {
-            title: "Offer Price to land owner",
+            title: "Max Offer Price to land owner",
             value: Math.round(perLotOfferToLandOwner).toLocaleString(),
             value2: Math.round(totalOfferToLandOwner).toLocaleString(),
             description: "Total offer from the buyer to the land owner or seller.",
@@ -226,7 +226,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
             title: "Total Profit",
             value: roundAndLocalString(totalProfits / totalLotYield),
             value2: roundAndLocalString(totalProfits),
-            description: "Total profit if sold at the projected sell price.",
+            description: "Total profit if sold at the projected sell price. At the max offer price, profits will be 0.",
         },
         [OutputKeys.FinancialAssumptions]: {
             title: "Financial Assumptions",
@@ -277,6 +277,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["Zoning - Sq Ft per Lot (SQFT)", sqFtPerLot]}
                         description="The jurisdiction gives a zoning requirement or desired lot size (e.g., R-5 = 5,000 sq ft per lot)."
                         isMobile={isMobile}
+                        // isGreyedOut={  removeCommas(unitsPerAcre) > 0}
+
                     />
 
                     <InputRow
@@ -296,12 +298,12 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["House Price - per Sq Ft", housePricePerSqFt]}
                         description="The average price per square foot for houses in this area, determined by local research."
                         isMobile={isMobile}
-                        isGreyedOut={ removeCommas(multifamilyPricePerUnit) > 0}
+                        isGreyedOut={ removeCommas(residentialPricePerHome) > 0}
                     />
                     {/* House Price Per Sq Ft */}
                     <InputRow
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.multifamilyPricePerUnit}`); setMultifamilyPricePerUnit(value) }}
-                        cellValues={["House Price - per Home", removeCommas(multifamilyPricePerUnit) === 0 ? '' : multifamilyPricePerUnit]}
+                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.residentialPricePerHome}`); setresidentialPricePerHome(value) }}
+                        cellValues={["House Price - per Home", removeCommas(residentialPricePerHome) === 0 ? '' : residentialPricePerHome]}
                         description="The price each home will sell, determined by local research."
                         isMobile={isMobile}
                     />

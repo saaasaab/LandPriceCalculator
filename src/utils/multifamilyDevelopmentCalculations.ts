@@ -29,10 +29,11 @@ interface IMultifamilyDevelopmentCalculationsOutputs {
     totalMultifamilySalePrice: number;
     perUnitSalePrice: number;
     totalHardCosts: number;
-    perUnitHardCosts: number;
+    hardCostsForBuild: number;
+    perUnitHardCostsForBuild: number;
+    perUnitTotalHardCosts: number;
     totalPermitsCost: number;
     totalMiscCosts: number;
-    totalBuildingCosts: number;
     totalBuilderProfit: number;
     perUnitBuilderProfit: number;
     totalREAgentCommission: number;
@@ -42,8 +43,7 @@ interface IMultifamilyDevelopmentCalculationsOutputs {
     landPercentage: number;
     perUnitlandDeveloperProfit: number;
     totalLandDeveloperProfit: number;
-    perUnitOfferToLandOwner: number;
-    totalOfferToLandOwner: number;
+ 
     totalActualToLandOwner: number;
     perUnitActualToLandOwner: number;
     totalSoftCosts: number;
@@ -53,7 +53,7 @@ interface IMultifamilyDevelopmentCalculationsOutputs {
 }
 
 
-const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalculationsInputs,requiresHandicappedParking:boolean): IMultifamilyDevelopmentCalculationsOutputs => {
+const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalculationsInputs, requiresHandicappedParking: boolean): IMultifamilyDevelopmentCalculationsOutputs => {
     const {
         grossAcres,
         unbuildableAcres,
@@ -73,8 +73,8 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
         builderProfitPercentage,
         costToDevelopPerUnit
     } = convertInputsToNumbers(inputs);
-    
-    
+
+
 
 
     // Calculate net buildable acres
@@ -96,12 +96,14 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
     const totalBuildingSqft = resultCalculateBuildingSqftResidential.totalBuildingSqft;
     // Calculations
 
-    const totalMultifamilySalePrice = multifamilyPricePerUnit > 0? multifamilyPricePerUnit*numberOfUnits :  totalBuildingSqft * multifamilyPricePerSqFt;
+    const totalMultifamilySalePrice = multifamilyPricePerUnit > 0 ? multifamilyPricePerUnit * numberOfUnits : totalBuildingSqft * multifamilyPricePerSqFt;
     const perUnitSalePrice = totalMultifamilySalePrice / numberOfUnits;
 
 
-    const totalHardCosts = totalBuildingSqft * hardCostPerSqFt;
-    const perUnitHardCosts = totalHardCosts / numberOfUnits;
+
+    const hardCostsForBuild = totalBuildingSqft * hardCostPerSqFt;
+    const perUnitHardCostsForBuild = hardCostsForBuild / numberOfUnits;
+
 
 
 
@@ -109,10 +111,11 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
     const totalMiscCosts = miscCosts * numberOfUnits;
 
 
-    const totalBuildingCosts = totalHardCosts + totalPermitsCost + totalMiscCosts;
+    const totalHardCosts = hardCostsForBuild + totalPermitsCost + totalMiscCosts;
+    const perUnitTotalHardCosts = totalHardCosts / numberOfUnits;
 
 
-    const totalBuilderProfit = (builderProfitPercentage / 100) * totalBuildingCosts;
+    const totalBuilderProfit = (builderProfitPercentage / 100) * totalHardCosts;
     const perUnitBuilderProfit = totalBuilderProfit / numberOfUnits;
 
 
@@ -120,7 +123,7 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
     const totalREAgentCommission = (realEstateCommissionPercentage / 100) * totalMultifamilySalePrice;
 
 
-    const totalFinishedUnitValue = totalMultifamilySalePrice - totalBuildingCosts - totalBuilderProfit - totalREAgentCommission;
+    const totalFinishedUnitValue = totalMultifamilySalePrice - totalHardCosts - totalBuilderProfit - totalREAgentCommission;
 
     const perUnitFinishedUnitValue = totalFinishedUnitValue / numberOfUnits;
 
@@ -133,12 +136,13 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
     const totalOfferToLandOwner = perUnitOfferToLandOwner * numberOfUnits;
 
 
-    const totalActualToLandOwner = (ownedLandCost ? ownedLandCost : perUnitOfferToLandOwner * numberOfUnits);
+    const totalActualToLandOwner = (ownedLandCost ? ownedLandCost : totalOfferToLandOwner);
     const perUnitActualToLandOwner = totalActualToLandOwner / numberOfUnits;
 
-    const totalSoftCosts = costToDevelopPerUnit * numberOfUnits + totalLandDeveloperProfit
-    const totalCosts = totalActualToLandOwner + costToDevelopPerUnit * numberOfUnits + totalLandDeveloperProfit + totalHardCosts
 
+
+    const totalSoftCosts = costToDevelopPerUnit * numberOfUnits + totalLandDeveloperProfit
+    const totalCosts = totalActualToLandOwner + totalSoftCosts + totalHardCosts
     const totalProfits = totalMultifamilySalePrice - totalCosts
 
     return {
@@ -149,10 +153,10 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
         totalMultifamilySalePrice,
         perUnitSalePrice,
         totalHardCosts,
-        perUnitHardCosts,
+        perUnitHardCostsForBuild,
         totalPermitsCost,
         totalMiscCosts,
-        totalBuildingCosts,
+        perUnitTotalHardCosts,
         totalBuilderProfit,
         perUnitBuilderProfit,
         totalREAgentCommission,
@@ -162,14 +166,15 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
         landPercentage,
         perUnitlandDeveloperProfit,
         totalLandDeveloperProfit,
-        perUnitOfferToLandOwner,
-        totalOfferToLandOwner,
+       
         totalActualToLandOwner,
         perUnitActualToLandOwner,
         totalSoftCosts,
         totalCosts,
         totalProfits,
-        resultCalculateBuildingSqftResidential
+        resultCalculateBuildingSqftResidential,
+        hardCostsForBuild,
+
     };
 };
 

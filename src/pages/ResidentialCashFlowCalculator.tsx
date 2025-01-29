@@ -631,7 +631,7 @@ const ResidentialCashFlowCalculator = ({ isMobile, page }: { isMobile: boolean; 
           />
 
           <DynamicRow
-            cellValues={["Debt Service", roundAndLocalString(monthlyMorgagePayment * 12)]}
+            cellValues={["Annual Debt Service", roundAndLocalString(monthlyMorgagePayment * 12)]}
             isMobile={isMobile}
             numberOfCells={2}
           />

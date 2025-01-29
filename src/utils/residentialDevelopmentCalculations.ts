@@ -49,26 +49,19 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         sqFtPerLot,
         unitsPerAcre,
         houseSize,
+
+
         housePricePerSqFt,
-        multifamilyPricePerUnit,
+        residentialPricePerHome,
         hardCostPerSqFt,
         permits,
         miscCosts,
         homeBuilderProfitPercentage,
         // realEstateCommissionPercentage,
         landDeveloperProfitPercentage,
+        ownedLandCost,
         costToDevelopPerLot,
-        ownedLandCost
     } = convertInputsToNumbers(inputs);
-
-    // Calculations
-    const houseSalePrice = multifamilyPricePerUnit != 0 ? multifamilyPricePerUnit : houseSize * housePricePerSqFt;
-    const hardCostLessProfit = houseSize * hardCostPerSqFt + permits + miscCosts;
-    const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostLessProfit;
-    const totalHardCostsPerUnit = hardCostLessProfit + homeBuilderProfit;
-    // const reAgentCommission = (realEstateCommissionPercentage / 100) * houseSalePrice;
-    const finishedLotValue = houseSalePrice - totalHardCostsPerUnit;// - reAgentCommission;
-    const landPercentage = finishedLotValue / houseSalePrice;
 
     // Calculate net buildable acres
     const netBuildableAcres = grossAcres - unbuildableAcres;
@@ -82,16 +75,35 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
     // Calculate total lot yield based on zoning (sq ft per lot)
     const totalLotYield = Math.min(yieldBySQFT, yieldByUnitsPerAcre);
 
+
+
+    const houseSalePrice = residentialPricePerHome !== 0 ? residentialPricePerHome : houseSize * housePricePerSqFt;
+    const hardCostLessProfit = houseSize * hardCostPerSqFt + permits + miscCosts;
+    const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostLessProfit;
+    const totalHardCostsPerUnit = hardCostLessProfit + homeBuilderProfit;
+    // const reAgentCommission = (realEstateCommissionPercentage / 100) * houseSalePrice;
+
+
+    const finishedLotValue = houseSalePrice - totalHardCostsPerUnit; // - reAgentCommission;
+    const landPercentage = finishedLotValue / houseSalePrice;
+
     const landDeveloperProfitPerLot = (landDeveloperProfitPercentage / 100) * finishedLotValue;
     const landDeveloperProfit = landDeveloperProfitPerLot * totalLotYield;
-    const perLotOfferToLandOwner = finishedLotValue - costToDevelopPerLot - landDeveloperProfitPerLot;
-    const totalOfferToLandOwner = ownedLandCost ? ownedLandCost : perLotOfferToLandOwner * totalLotYield;
+    
+    
+    const perLotOfferToLandOwner = ownedLandCost ? ownedLandCost/totalLotYield : finishedLotValue - costToDevelopPerLot - landDeveloperProfitPerLot;
+    const totalOfferToLandOwner = perLotOfferToLandOwner * totalLotYield;
 
     const totalHardCosts = totalHardCostsPerUnit * totalLotYield;
     const totalSoftCosts = costToDevelopPerLot * totalLotYield + landDeveloperProfit;
-    const totalCosts = totalOfferToLandOwner + costToDevelopPerLot * totalLotYield + landDeveloperProfit + totalHardCostsPerUnit * totalLotYield;
+    const totalCosts = totalOfferToLandOwner + totalSoftCosts + totalHardCosts
+
     const totalProfits = houseSalePrice * totalLotYield - totalCosts;
     // const totalClosingCosts = reAgentCommission
+
+
+
+    
     return {
         houseSalePrice,
         hardCostLessProfit,

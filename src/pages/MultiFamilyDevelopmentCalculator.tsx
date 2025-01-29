@@ -76,7 +76,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         totalMultifamilySalePrice,
         perUnitSalePrice,
         totalHardCosts,
-        perUnitHardCosts,
+        perUnitTotalHardCosts,
         totalPermitsCost,
         totalMiscCosts,
         totalBuilderProfit,
@@ -88,8 +88,8 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         landPercentage,
         perUnitlandDeveloperProfit,
         totalLandDeveloperProfit,
-        perUnitOfferToLandOwner,
-        totalOfferToLandOwner,
+        hardCostsForBuild,
+        perUnitHardCostsForBuild,
         totalActualToLandOwner,
         perUnitActualToLandOwner,
         totalSoftCosts,
@@ -145,8 +145,14 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
             description: "The builder's profit based on a percentage of the hard costs, permits, and miscellaneous costs.",
         },
         [OutputKeys.HardCosts]: {
-            title: "Hard Cost",
-            value: roundAndLocalString(perUnitHardCosts),
+            title: "Hard Cost for Build ($)",
+            value: roundAndLocalString(perUnitHardCostsForBuild),
+            value2: roundAndLocalString(hardCostsForBuild),
+            description: "The total hard costs, including construction and miscellaneous costs.",
+        },
+        [OutputKeys.TotalHardCosts]: {
+            title: "Total Build ($)",
+            value: roundAndLocalString(perUnitTotalHardCosts),
             value2: roundAndLocalString(totalHardCosts),
             description: "The total hard costs, including construction and miscellaneous costs.",
         },
@@ -185,10 +191,10 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
             description: "Costs for engineering, clearing, demolition, utilities, and SDCs.",
         },
         [OutputKeys.TotalOfferToLandOwner]: {
-            title: "Total Offer for the Land",
+            title: "Max Offer for the Land",
             value: roundAndLocalString(perUnitActualToLandOwner),
             value2: roundAndLocalString(totalActualToLandOwner),
-            description: "Total offer from the buyer to the land owner or seller.",
+            description: "Total offer from the buyer to the land owner or seller. At the max offer, Total Profits will be 0.",
         },
         [OutputKeys.TotalCosts]: {
             title: "Total Costs",
@@ -198,15 +204,15 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
         [OutputKeys.TotalProfit]: {
             title: "Total Profit",
             value: roundAndLocalString(totalProfits),
-            description: "Total profit if sold at the projected sell price.",
+            description: "Total profit if sold at the projected sell price. At the max offer price, profits will be 0.",
         },
-        [OutputKeys.CalculatedValueToLandOwner]: {
-            title: "Calculated Value to Land Owner/Seller",
-            value: roundAndLocalString(perUnitOfferToLandOwner),
-            value2: roundAndLocalString(totalOfferToLandOwner),
-            description:
-                "The value of each lot after development, as perceived by the landowner or seller.",
-        },
+        // [OutputKeys.CalculatedValueToLandOwner]: {
+        //     title: "Calculated Value to Land Owner/Seller",
+        //     value: roundAndLocalString(perUnitOfferToLandOwner),
+        //     value2: roundAndLocalString(totalOfferToLandOwner),
+        //     description:
+        //         "The value of each lot after development, as perceived by the landowner or seller.",
+        // },
         [OutputKeys.TotalParkingSpots]: {
             title: "Total Parking Spots",
             value: resultCalculateBuildingSqftResidential.parkingSpotsRequired.toLocaleString(),

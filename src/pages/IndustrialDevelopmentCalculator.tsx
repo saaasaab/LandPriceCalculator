@@ -88,6 +88,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         annualLeasingIncome,
         propertyNOI,
         propertyCapRate,
+        totalSoftCost,
     } = industrialDevelopmentCalculations(inputs)
 
 
@@ -240,7 +241,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
             description: "If you own the property already, enter in the price of the property here.",
         },
         [OutputKeys.OfferToLandOwner]: {
-            title: "Offer to Land Owner/Seller",
+            title: "Max Offer to Land Owner/Seller",
             value: roundAndLocalString(totalOfferToLandOwner),
             description: "Total offer from the buyer to the land owner or seller.",
         },
@@ -256,7 +257,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         },
         [OutputKeys.SoftCosts]: {
             title: "Soft Costs",
-            value: roundAndLocalString(removeCommas(costToDevelop) + landDeveloperProfit + removeCommas(SDCFees)),
+            value: roundAndLocalString(totalSoftCost),
             description: null,
         },
         [OutputKeys.HardCosts]: {
@@ -272,7 +273,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         [OutputKeys.TotalProfit]: {
             title: "Total Profit",
             value: roundAndLocalString(buildingSalePrice - totalCosts),
-            description: "Total profit if sold at the projected sell price.",
+            description: "Total profit if sold at the projected sell price. At the max offer price, profits will be 0.",
         },
 
     };
