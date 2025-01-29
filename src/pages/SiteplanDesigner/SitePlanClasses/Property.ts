@@ -24,10 +24,28 @@ export class Property {
   public drivewayWidth: number;
   public taperedDriveway: boolean;
   public buildingCoveragePercentage: number;
-  public imperviousPercentage: number;
+  public imperviousSurfacePercentageAllowed: number;
   public enableAngles: boolean;
   public enableLineLengths: boolean;
   public approachWidth: number;
+  public buildingCoveragePercentageAllowed: number;
+  public drivewayArea: number;
+  public imperviousSurfaceAllowed: number;
+  public landscapeRequiredPercent: number;
+  public zoning: string;
+
+
+
+  // OUTPUT CONSTRAINTS 
+  public imperviousSurfacePercentageActual: number;
+  public landscapeArea: number;
+  public imperviousSurfaceArea: number;
+  public totalAreaDedicatedToSetbacks: number;
+
+
+
+
+
 
   constructor(p: p5, propertyCorners: p5.Vector[], isClockwise: boolean, scale: number, setbacks: number[]) {
     this.p = p;
@@ -41,12 +59,35 @@ export class Property {
 
     //INPUT CONTSTRAINTS
     this.buildingCoveragePercentage = 70;
-    this.imperviousPercentage = 70;
+    this.imperviousSurfacePercentageAllowed = 70;
     this.taperedDriveway = true;
     this.drivewayWidth = 24;
     this.enableAngles = true;
     this.enableLineLengths = true;
     this.approachWidth = initialFormData.approachWidth;
+    this.buildingCoveragePercentageAllowed = initialFormData.buildingCoveragePercentageAllowed;
+  
+  
+  
+    this.imperviousSurfaceAllowed= initialFormData.imperviousSurfacePercentageAllowed;
+    this.landscapeRequiredPercent = initialFormData.landscapeRequiredPercent;
+    this.zoning = initialFormData.zoning;
+
+
+
+
+    // OUTPUT CONSTRAINTS
+    this.drivewayArea = 0;
+    this.imperviousSurfacePercentageActual = 0;
+
+    this.imperviousSurfaceArea=0;
+    this.landscapeArea= 0
+    this.totalAreaDedicatedToSetbacks= 0;
+
+
+
+
+
   }
 
 

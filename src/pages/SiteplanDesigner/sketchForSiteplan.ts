@@ -1209,7 +1209,7 @@ function updateGlobalVariables(
   formData: FormDataInputs
 ) {
   if (property) {
-    property.imperviousPercentage = formData.imperviousPercentage
+    property.imperviousSurfacePercentageAllowed = formData.imperviousSurfacePercentageAllowed
     property.buildingCoveragePercentage = formData.buildingCoveragePercentage;
     property.enableAngles = formData.enableAngles;
     property.enableLineLengths = formData.enableLineLengths;

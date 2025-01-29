@@ -177,7 +177,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Gross Rent Multiplier", roundToDecimal(grossRentMultiplier, 2) + "X"]}
-                    description="The GRM is calculated by dividing the value of the property by the annual gross rents. Generally the lower the better."
+                    description="The GRM is calculated by dividing the value of the property by the annual gross rents."
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNOZB6PpTBa-0JePEknv2nrFYtA-sK4Yz_yrUD1kRVTC9DNplG1o5iQdzpN6-1ZpUyds0waI83EHPx/pub"}
                 />
 

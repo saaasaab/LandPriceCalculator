@@ -22,6 +22,7 @@ export class Building extends SitePlanElement {
   public buildingCount: number;
   public enableBuildingDimensions: boolean;
   public showbuildingArea: boolean;
+  public maximumHeight: number;
 
   constructor(
     p: p5,
@@ -46,6 +47,7 @@ export class Building extends SitePlanElement {
     this.buildingCount = initialFormData.buildingCount;
     this.enableBuildingDimensions = initialFormData.enableBuildingDimensions;
     this.showbuildingArea = initialFormData.showbuildingArea;
+    this.maximumHeight = initialFormData.maximumHeight;
   }
 
   initializeBuilding(x: number, y: number,) {

@@ -28,11 +28,13 @@ export class Parking extends SitePlanElement {
   public compactParkingNum: number;
   public parkingPer1000Max: number;
   public parkingPer1000Min: number;
+  public offStreetParkingRequired: number;
   public parkingPerUnit: number;
   public landscapeIsland: number;
   public halfStreetDriveway: boolean;
   public parkingSide: 'left' | 'right';
   public showDrivewayControlPoints: boolean;
+
 
 
   constructor(
@@ -71,6 +73,7 @@ export class Parking extends SitePlanElement {
     this.halfStreetDriveway = initialFormData.halfStreetDriveway;
     this.parkingSide = initialFormData.parkingSide;
     this.showDrivewayControlPoints = initialFormData.showDrivewayControlPoints;
+    this.offStreetParkingRequired = initialFormData.offStreetParkingRequired;
 
 
   }

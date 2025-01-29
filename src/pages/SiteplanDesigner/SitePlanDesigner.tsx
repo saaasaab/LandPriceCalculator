@@ -7,19 +7,20 @@ export interface SiteMetrics {
     side: number;
     rear: number;
   };
-  maximumHeight: {
-    proposed: number;
-    allowed: number;
-  };
+  // maximumHeight: {
+  //   proposed: number;
+  //   allowed: number;
+  // };
+  maximumHeight: number;
   buildingCoveragePercentage: number;
   buildingCoveragePercentageAllowed: number;
   imperviousSurfaceArea: number;
   imperviousSurfaceAllowed: number;
-  landscapeRequired: number;
+  landscapeRequiredPercent: number;
   landscape: number;
   offStreetParkingRequired: number;
-  offStreetParkingRequiredByType: string;
-  
+  parkingPer1000Min: number;
+  parkingPer1000Max: number;
 
   actualBuildingArea: number;
   approachArea: number;
@@ -57,7 +58,7 @@ export interface Line {
 import p5 from 'p5';
 import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 
-import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Footprints } from 'lucide-react'; //Box,
+import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Footprints, BuildingIcon, DoorOpen } from 'lucide-react'; //Box, Bike
 
 import { Button, Card, CardContent, Checkbox, Input } from '../../components/ui';
 
@@ -80,22 +81,24 @@ import { VisibilityGraph } from '../VisibilityGraph';
 const initialMetrics: SiteMetrics = {
   zoning: "C-M Commercial Manufacturing",
   setbacks: { front: 10, side: 10, rear: 10 },
-  maximumHeight: { proposed: 28.0, allowed: 45.0 },
+  // maximumHeight: { proposed: 28.0, allowed: 45.0 },
+  maximumHeight: 35,
+
   buildingCoveragePercentage: 69,
   buildingCoveragePercentageAllowed: 70,
   imperviousSurfaceArea: 12192,
   imperviousSurfaceAllowed: 12192,
-  landscapeRequired: 15,
+  landscapeRequiredPercent: 15,
   landscape: 27.2,
-
-
   offStreetParkingRequired: 10,
-  offStreetParkingRequiredByType: '2 spaces / 1,000 S.F.',
+
+  parkingPer1000Min: 1.5,
+  parkingPer1000Max: 2.4,
 
 
   actualBuildingArea: 1500,
   propertyArea: 12192,
-  
+
   drivewayArea: 521,
   parkingArea: 936,
   parkingStallsArea: 1156,
@@ -103,10 +106,14 @@ const initialMetrics: SiteMetrics = {
   totalParkingStalls: 8,
   sidewalkArea: 0,
   garbageArea: 2808,
-  
+
   approachArea: 62,
   bikeParkingArea: 0,
   totalAreaDedicatedToSetbacks: 1000,
+
+
+
+
 };
 
 
@@ -185,11 +192,11 @@ const SitePlanGenerator: React.FC = () => {
   useEffect(() => {
     const updateVariables = () => {
       const property = propertyRef.current;
-      // const approach = approachRef.current;
-      // const parking = parkingRef.current;
-      // const building = buildingRef.current;
-      // const garbage = garbageRef.current;
-      // const bikeParking = bikeParkingRef.current;
+      const approach = approachRef.current;
+      const parking = parkingRef.current;
+      const building = buildingRef.current;
+      const garbage = garbageRef.current;
+      const bikeParking = bikeParkingRef.current;
 
       console.log("There be danger here")
 
@@ -201,26 +208,37 @@ const SitePlanGenerator: React.FC = () => {
         ...metrics
       }
 
+
+      _metrics.actualBuildingArea = building?.buildingAreaActual || initialMetrics.actualBuildingArea;
+      _metrics.approachArea = approach?.area || initialMetrics.approachArea;
+      _metrics.bikeParkingArea = bikeParking?.area || initialMetrics.bikeParkingArea;
+      _metrics.buildingCoveragePercentage = property?.buildingCoveragePercentage || initialMetrics.buildingCoveragePercentage
+      _metrics.buildingCoveragePercentageAllowed = property?.buildingCoveragePercentageAllowed || initialMetrics.buildingCoveragePercentageAllowed
+      _metrics.drivewayArea = property?.drivewayArea || initialMetrics.drivewayArea;
+      _metrics.garbageArea = garbage?.area || initialMetrics.garbageArea;
+      _metrics.handicappedStallsCount = parking?.handicappedParkingNum || initialMetrics.handicappedStallsCount;
+      _metrics.imperviousSurfaceAllowed = property?.imperviousSurfaceAllowed || initialMetrics.imperviousSurfaceAllowed;
+      _metrics.imperviousSurfaceArea = property?.imperviousSurfaceArea || initialMetrics.imperviousSurfaceArea;
+      _metrics.landscape = property?.landscapeArea || initialMetrics.landscape;
+      _metrics.landscapeRequiredPercent = property?.landscapeRequiredPercent || initialMetrics.landscapeRequiredPercent;
+      _metrics.maximumHeight = building?.maximumHeight || initialMetrics.maximumHeight;
+      _metrics.offStreetParkingRequired = parking?.offStreetParkingRequired || initialMetrics.offStreetParkingRequired;
+      _metrics.parkingArea = parking?.parkingArea || initialMetrics.parkingArea;
+      _metrics.parkingPer1000Max = parking?.parkingPer1000Max || initialMetrics.parkingPer1000Max;
+      _metrics.parkingPer1000Min = parking?.parkingPer1000Min || initialMetrics.parkingPer1000Min;
+      _metrics.parkingStallsArea = parking?.parkingStallsArea || initialMetrics.parkingStallsArea;
       _metrics.propertyArea = property?.areaOfProperty || initialMetrics.propertyArea;
+      _metrics.totalAreaDedicatedToSetbacks = property?.totalAreaDedicatedToSetbacks || initialMetrics.totalAreaDedicatedToSetbacks;
+      _metrics.totalParkingStalls = parking?.parkingStallsNumber || initialMetrics.totalParkingStalls;
+      _metrics.zoning = property?.zoning || initialMetrics.zoning;
+
+
+
+      // _metrics.setbacks =  || initialMetrics.;
+      // _metrics.sidewalkArea =  || initialMetrics.;
 
 
       setMetrics(_metrics)
-
-      // setAreaOfProperty(visualizer.current?.property?.areaOfProperty || 0);
-      // setImperviousSurface(visualizer.current?.property?.areaOfProperty || 0);
-      // setDrivewayArea(visualizer.current?.drivewayArea || 0);
-      // setParkingArea(visualizer.current?.parking?.parkingArea || 0);
-      // setParkingStallsArea(visualizer.current?.parking?.parkingStallsArea || 0);
-      // setHandicappedStalls(visualizer.current?.parking?.handicappedParkingNum || 0);
-      // setParkingStalls(leftStalls + rightStalls);
-      // setSidewalkArea(visualizer.current?.sidewalkArea || 0);
-      // setGarbageArea(visualizer.current?.garbage?.area || 0);
-      // setActualBuildingArea(visualizer.current?.building?.buildingAreaActual || 0);
-      // setApproachArea(visualizer.current?.approach?.approachArea || 0);
-      // setBikeParkingArea(visualizer.current?.bikeParkingArea || 0);
-
-
-      metrics
     };
 
 
@@ -291,8 +309,14 @@ const SitePlanGenerator: React.FC = () => {
     }));
   };
 
-  const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormDataInputs): void => {
+  const handleTextChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormDataInputs): void => {
     const value = e.target.value; // Value is a string ('right' or 'left')
+    handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
+  };
+
+
+  const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormDataInputs): void => {
+    const value = e.target.value; 
     handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
   };
 
@@ -490,6 +514,8 @@ const SitePlanGenerator: React.FC = () => {
           />
         </div>
 
+
+
         {imageURL !== null ?
           <div className="site-plan-generator__slider">
             <Slider
@@ -532,11 +558,11 @@ const SitePlanGenerator: React.FC = () => {
             <div className="site-plan-generator__input-group">
               <label>Max Impervious Percentage</label>
               <Input
-                id="imperviousPercentage"
+                id="imperviousSurfacePercentageAllowed"
                 type="number"
                 min={0}
-                value={formData.imperviousPercentage || ""}
-                onChange={(e) => handleNumberInput(e, 'imperviousPercentage')}
+                value={formData.imperviousSurfacePercentageAllowed || ""}
+                onChange={(e) => handleNumberInput(e, 'imperviousSurfacePercentageAllowed')}
               />
             </div>
 
@@ -550,6 +576,19 @@ const SitePlanGenerator: React.FC = () => {
                 onChange={(e) => handleNumberInput(e, 'buildingCoveragePercentage')}
               />
             </div>
+
+            <div className="site-plan-generator__input-group">
+              <label>Property Zoning</label>
+              <Input
+                id="zoning"
+                type="text" 
+                value={formData.zoning || ""}
+                onChange={(e) =>  handleTextChange(e, 'zoning')}
+
+               
+              />
+            </div>
+
 
 
           </div> : <>  </>}
@@ -816,7 +855,7 @@ const SitePlanGenerator: React.FC = () => {
             />
           </div>
 
-        
+
 
           <div className="site-plan-generator__input-group">
             <label htmlFor="landscapeIsland">Stalls per group</label>
@@ -871,7 +910,7 @@ const SitePlanGenerator: React.FC = () => {
     {
       id: 'building',
       title: '7. Place Building',
-      icon: <Car />,
+      icon: <BuildingIcon />,
       description: 'Places the Building',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuilding() },
@@ -959,7 +998,7 @@ const SitePlanGenerator: React.FC = () => {
     {
       id: 'buildingEntrance',
       title: '8. Place Building Entrances',
-      icon: <Car />,
+      icon: <DoorOpen />,
       description: 'Places the building entrances',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuildingEntrances() },

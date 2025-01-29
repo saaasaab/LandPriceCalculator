@@ -23,11 +23,14 @@ export interface FormDataInputs {
   buildingCount: number;
   drivewayWidth: number;
   halfStreetDriveway: boolean;
-  imperviousPercentage: number;
+  imperviousSurfacePercentageAllowed: number;
+  imperviousSurfacePercentageActual: number;
   buildingCoveragePercentage: number;
+  buildingCoveragePercentageAllowed: number;
   landscapeIsland: number;
   parkingPer1000Min: number;
   parkingPer1000Max: number;
+  offStreetParkingRequired: number;
   parkingStalls: number;
   handicappedParkingStalls: number;
   compactParkingStalls: number;
@@ -42,6 +45,9 @@ export interface FormDataInputs {
   enableBikeParking: boolean,
   bikeCount: number,
   showbuildingArea: boolean,
+  maximumHeight: number,
+  landscapeRequiredPercent: number,
+  zoning: string,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -57,8 +63,12 @@ export const initialFormData: FormDataInputs = {
   landscapeIsland: 7,
   parkingPer1000Min: 2.4,
   parkingPer1000Max: 4.5,
-  imperviousPercentage: 70,
+  offStreetParkingRequired: 4,
+  imperviousSurfacePercentageAllowed: 70,
+  imperviousSurfacePercentageActual: 69,
+
   buildingCoveragePercentage: 70,
+  buildingCoveragePercentageAllowed:70,
   halfStreetDriveway: false,
   parkingSide: 'left',
   parkingPerUnit: 1.5,
@@ -69,8 +79,9 @@ export const initialFormData: FormDataInputs = {
   enableBikeParking: true,
   bikeCount: 4,
   showbuildingArea: true,
-
-
+  maximumHeight: 35,
+  landscapeRequiredPercent: 2,
+  zoning: "r-1"
 };
 
 
