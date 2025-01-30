@@ -6,31 +6,36 @@ import Hamburger from './Hamburger';
 import { EPageTitles } from '../utils/types';
 
 
+
 export const routes = {
-  MULTIFAMILY_DEVELOPMENT:"/residential-development",
-  INDUSTRIAL_DEVELOPMENT :"/industrial-development",
+  MULTIFAMILY_DEVELOPMENT: "/residential-development",
+  INDUSTRIAL_DEVELOPMENT: "/industrial-development",
   RESIDENTIAL_DEVELOPMENT: "/residential-development",
   MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
   INDUSTRIAL_PRICE_PER_SQFT: "industrial-price-per-sqft-calculator",
-  MULTIFAMILY_ANALYSIS:"/multifamily-analysis",
-  HOW_TO_LAND_FOR_MULTIFAMILY:"/how-to-analyzis-land-for-multifamily",
-  IRR_CALCULATOR:"/irr-calculator",
+  MULTIFAMILY_ANALYSIS: "/multifamily-analysis",
+  HOW_TO_LAND_FOR_MULTIFAMILY: "/how-to-analyzis-land-for-multifamily",
+  IRR_CALCULATOR: "/irr-calculator",
   LENDING_COST: "/lending-costs",
   WATERFALL: "/waterfall-generator",
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
   SITE_PLAN_BUILDER: "/site-plan-builder",
-  
+
 }
 
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const handleToggleMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
   };
 
 
+
+
   return (
+
     <nav className={`navbar ${isMobileMenuOpen ? 'is-open' : ''}`}>
 
       <Hamburger isOpen={isMobileMenuOpen} onClick={handleToggleMenu} />
@@ -64,18 +69,18 @@ const Navbar = () => {
             {/* <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link> */}
             {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
             {/* <Link onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link> */}
-            
+
           </div>
         </li>
 
         <li className="dropdown">
-            <Link className="dropdown-title" onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link>
-      
-        </li>
-        
+          <Link className="dropdown-title" onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link>
 
-         {/* Howto and Blogs */}
-         {/* <li className="dropdown">
+        </li>
+
+
+        {/* Howto and Blogs */}
+        {/* <li className="dropdown">
           <span className="dropdown-title">Education Center</span>
           <div className="dropdown-content">
             <Link onClick={handleToggleMenu} to={routes.HOW_TO_LAND_FOR_MULTIFAMILY}>How to analyze land for multifamily</Link>
@@ -83,6 +88,13 @@ const Navbar = () => {
           </div>
         </li> */}
       </ul>
+
+
+      {/* <div className="navbar-auth">
+        <Link to="/login" className="login-btn">Login</Link>
+      </div> */}
+
+
     </nav>
 
   );

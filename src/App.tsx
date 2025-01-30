@@ -1,5 +1,5 @@
 
-import { useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import NotFound from './pages/NotFound';
@@ -10,6 +10,9 @@ import { EPageNames } from './utils/types';
 import './App.css'
 import BlogPost from './futureItems/BlogPost';
 import SitePlanDesigner from './pages/SiteplanDesigner/SitePlanDesigner';
+import Login from './components/Auth/Login';
+import ForgotPassword from './components/Auth/ForgotPassword';
+import Register from './components/Auth/Register';
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -48,7 +51,10 @@ function App() {
           <Route path={routes.LENDING_COST} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.LENDING_COST} />} />
           <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL} />} />
           <Route path={routes.CONSTRUCTION_BUDGET} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_BUDGET} />} />
-          <Route path={routes.SITE_PLAN_BUILDER} element={<SitePlanDesigner/>} />
+          <Route path={routes.SITE_PLAN_BUILDER} element={<SitePlanDesigner />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/register" element={<Register />} />
 
 
           <Route path="*" element={<NotFound />} />

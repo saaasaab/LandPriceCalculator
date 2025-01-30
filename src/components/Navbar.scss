@@ -4,7 +4,7 @@
   box-sizing: border-box;
   padding: 10px 20px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 30px;
   align-items: center;
   background-color: #333;
@@ -17,7 +17,6 @@
     font-weight: bold;
     display: flex;
     align-items: center;
-
 
     img {
       max-width: 50px;
@@ -48,7 +47,7 @@
         cursor: pointer;
         color: #fff;
         text-decoration: none;
-          text-align: left;
+        text-align: left;
       }
 
       .dropdown-content {
@@ -92,7 +91,7 @@
     display: block;
     flex-direction: column;
     padding: 10px;
-  
+
     .navbar-logo {
       padding: 0;
       img {
@@ -143,8 +142,24 @@
         margin: 10px 0;
       }
     }
-    .is-open{
+    .is-open {
       display: flex;
+    }
+  }
+
+ 
+}
+
+.navbar-auth {
+
+  a.login-btn {
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+
+    &:visited,&:hover,&:active,   &:focus {
+      text-decoration: none;
+      color: white;
     }
   }
 }
