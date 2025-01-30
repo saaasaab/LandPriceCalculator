@@ -12,7 +12,6 @@ export function usePersistedState<T>(
   const combinedKey = `${page}_${key}`;
   const fromLocal = localStorage.getItem(combinedKey);
   const storedValue = fromLocal ? fromLocal : null;
-
   const initial = queryParamValue !== undefined ? queryParamValue
     : storedValue ? JSON.parse(storedValue)
       : initialValue;
@@ -40,6 +39,9 @@ export function usePersistedState2<T>(
   // Check if there's a query param value, use it if available
 
   const _queryParamValue = getQueryParamNumber(key, queryParams);
+
+  console.log(`_queryParamValue`, key,_queryParamValue)
+
   let queryParamValue;
   if(booleanStates.includes(key)){
     queryParamValue =  Boolean(_queryParamValue);

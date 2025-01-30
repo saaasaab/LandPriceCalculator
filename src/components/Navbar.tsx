@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import logo from '../assets/LandCalculatorLogo.svg'
 import './Navbar.scss';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import Hamburger from './Hamburger';
 import { EPageTitles } from '../utils/types';
-import { AuthContext, useAuth } from '../context/AuthContext';
+import {useAuth } from '../context/AuthContext';
 
 
 

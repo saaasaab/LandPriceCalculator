@@ -16,7 +16,7 @@ const Login: React.FC = () => {
 
     try {
       const data = await postRequest<{ token: string; user: { email: string } }>(
-        'http://localhost:8080/login',
+        '/login',
         { email, password }
       );
 

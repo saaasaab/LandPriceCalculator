@@ -316,7 +316,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
   const handleRadioChange = (e: ChangeEvent<HTMLInputElement>, field: keyof FormDataInputs): void => {
-    const value = e.target.value; 
+    const value = e.target.value;
     handleInputChange(field, value); // No error since 'parkingSide' now accepts strings
   };
 
@@ -581,11 +581,11 @@ const SitePlanGenerator: React.FC = () => {
               <label>Property Zoning</label>
               <Input
                 id="zoning"
-                type="text" 
+                type="text"
                 value={formData.zoning || ""}
-                onChange={(e) =>  handleTextChange(e, 'zoning')}
+                onChange={(e) => handleTextChange(e, 'zoning')}
 
-               
+
               />
             </div>
 
@@ -597,15 +597,17 @@ const SitePlanGenerator: React.FC = () => {
 
       onClick: () => { createPoints() },
     },
-    {
-      id: 'imLucky',
-      title: `2.5 I'm feeling lucky`,
-      icon: <Map />,
-      description: "Click to just create all the components so I don't have to keep clicking through all the steps to test something",
-      help: 'Click',
 
-      onClick: () => { createEverything() },
-    },
+    window.location.hostname === "localhost" ?
+      {
+        id: 'imLucky',
+        title: `2.5 I'm feeling lucky`,
+        icon: <Map />,
+        description: "Click to just create all the components so I don't have to keep clicking through all the steps to test something",
+        help: 'Click',
+
+        onClick: () => { createEverything() },
+      } : undefined,
     {
       id: 'scale',
       title: '3. Set Property Scale',
@@ -1042,37 +1044,43 @@ const SitePlanGenerator: React.FC = () => {
                 <div className="site-plan-generator__sidebar">
 
                   <div className="site-plan-generator__sidebar-content">
-                    {steps.map((step, index) => (
+                    {steps.map((step, index) => {
+                      if(!step) return <></>
+
+                      return (
 
 
-                      <div
-                        key={step.id}
-                        className={`site-plan-generator__step 
+
+                        <div
+                          key={step.id}
+                          className={`site-plan-generator__step 
                         ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
                         ${index < currentStep ? 'site-plan-generator__step--completed' : ''}
                         ${step?.disabled ? 'disabled' : ''}
 
                           `}
-                        onClick={() => {
-                          if (step?.disabled) return;
-                          setCurrentStep(index);
-                          step.onClick()
-                        }}
-                      >
-                        <div className="site-plan-generator__step-content">
-                          <div className={`site-plan-generator__step-icon ${index === currentStep ? 'site-plan-generator__step-icon--active' : ''
-                            }`}>
-                            {step.icon}
+                          onClick={() => {
+                            if (step?.disabled) return;
+                            setCurrentStep(index);
+                            step.onClick()
+                          }}
+                        >
+                          <div className="site-plan-generator__step-content">
+                            <div className={`site-plan-generator__step-icon ${index === currentStep ? 'site-plan-generator__step-icon--active' : ''
+                              }`}>
+                              {step.icon}
+                            </div>
+                            <div className="site-plan-generator__step-info">
+                              <h3>{step.title}</h3>
+                              <p>{step.description}</p>
+                            </div>
                           </div>
-                          <div className="site-plan-generator__step-info">
-                            <h3>{step.title}</h3>
-                            <p>{step.description}</p>
-                          </div>
-                        </div>
 
-                        {index === currentStep ? step.children : <></>}
-                      </div>
-                    ))}
+                          {index === currentStep ? step.children : <></>}
+                        </div>
+                      )
+                    }
+                    )}
 
 
 

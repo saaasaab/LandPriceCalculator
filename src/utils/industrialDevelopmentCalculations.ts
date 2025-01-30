@@ -85,10 +85,11 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
 
     const hardCostTotal = resultCalculateBuildingSqftIndustrial.totalBuildingSqft * hardCostPerSqFt + permits + miscCosts;
     const homeBuilderProfit = (homeBuilderProfitPercentage / 100) * hardCostTotal;
-    const totalHardCosts = hardCostTotal + homeBuilderProfit;
     const reAgentCommission = (realEstateCommissionPercentage / 100) * buildingSalePrice;
 
-    const finishedLotValue = buildingSalePrice - totalHardCosts - reAgentCommission;
+    const totalHardCosts = hardCostTotal + homeBuilderProfit + reAgentCommission;
+
+    const finishedLotValue = buildingSalePrice - totalHardCosts;
     const landPercentage = finishedLotValue / buildingSalePrice;
 
 
@@ -96,7 +97,9 @@ const industrialDevelopmentCalculations = (inputs: TIndustrialDevelopmentCalcula
     const totalSoftCost = costToDevelop + landDeveloperProfit + SDCFees
 
     const totalOfferToLandOwner = Math.max(ownedLandCost ? ownedLandCost : finishedLotValue - totalSoftCost, 0);
+    
     const totalCosts = totalOfferToLandOwner + totalHardCosts + totalSoftCost;
+   
     const annualLeasingIncome = annualLeaseRatesPerSQFT * resultCalculateBuildingSqftIndustrial.leaseableBuildingSpace;
     const propertyNOI = annualLeasingIncome * (1 - percentageOfIncomeToExpenses / 100)
 
