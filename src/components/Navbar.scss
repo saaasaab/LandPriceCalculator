@@ -163,3 +163,28 @@
     }
   }
 }
+
+
+
+
+.logout-btn {
+  background-color: #dc3545; // Red color for logout
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+
+  &:hover {
+    background-color: #c82333; // Darker red on hover
+    transform: scale(1.05);
+  }
+
+  &:active {
+    background-color: #a71d2a; // Even darker on click
+    transform: scale(0.95);
+  }
+}
