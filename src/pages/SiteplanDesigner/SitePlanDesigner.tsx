@@ -126,6 +126,7 @@ const SitePlanGenerator: React.FC = () => {
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
   const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
+  const [_inputValueForScale, setInputValueForScale] = useState<number | "">(""); 
 
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -379,6 +380,21 @@ const SitePlanGenerator: React.FC = () => {
     setOffsetPoints(offsets);
   };
 
+  const updateScale = (index: number, value: string) => {
+
+    const lines = linesRef.current;
+    const newLines = [...lines];
+
+    // Handle empty string explicitly to allow deleting the value
+    const parsedValue = value === "" ? undefined : parseFloat(value);
+
+    newLines[index].setback = parsedValue || 0; // Fallback to 0 if undefined
+    linesRef.current = newLines;
+
+    const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
+    setOffsetPoints(offsets);
+  };
+
   const falsifyRefs = () => {
     // isUploadingImageRef.current = true; // step 1
     // isUpdatingBoundaryPointsRef.current = false; // step 2
@@ -489,7 +505,7 @@ const SitePlanGenerator: React.FC = () => {
   const steps = [
     {
       id: 'upload',
-      title: '1. Upload Property Line Image',
+      title: '1. Upload Property Line Image (Optional)',
       icon: <FileImage />,
       description: 'Start by uploading an overhead satellite image of your property',
       help: 'Use a clear aerial photo or satellite image of your property. The clearer the image, the easier it will be to mark boundaries.',
@@ -617,13 +633,22 @@ const SitePlanGenerator: React.FC = () => {
       onClick: () => { defineScale() },
       children: <div style={{ marginTop: '10px' }}>
         <label>Edge Length (ft): </label>
-        <input
-          // ref={setbackInputRef} // Attach ref for auto-focus
+
+        <Input
           type="number"
-          value={inputScaleRef.current || undefined}
+          min={0}
+          value={inputScaleRef.current ?? ""}
+
           onChange={(e) => {
-            inputScaleRef.current = Number(e.target.value)
+            const newValue = e.target.value === "" ? "" : Number(e.target.value);
+            setInputValueForScale(newValue); // Update state for immediate UI response
+            inputScaleRef.current = newValue === "" ? null : newValue; // Keep ref updated
           }}
+
+          // onChange={(e) => {
+          //   const newValue = e.target.value === "" ? null : Number(e.target.value);
+          //   inputScaleRef.current = newValue;
+          // }}
           autoFocus
         />
       </div>,
@@ -1045,7 +1070,7 @@ const SitePlanGenerator: React.FC = () => {
 
                   <div className="site-plan-generator__sidebar-content">
                     {steps.map((step, index) => {
-                      if(!step) return <></>
+                      if (!step) return <></>
 
                       return (
 

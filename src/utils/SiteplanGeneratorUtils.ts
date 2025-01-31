@@ -68,7 +68,7 @@ export const initialFormData: FormDataInputs = {
   imperviousSurfacePercentageActual: 69,
 
   buildingCoveragePercentage: 70,
-  buildingCoveragePercentageAllowed:70,
+  buildingCoveragePercentageAllowed: 70,
   halfStreetDriveway: false,
   parkingSide: 'left',
   parkingPerUnit: 1.5,
@@ -1340,6 +1340,8 @@ export const handleBuildingDrag = (
 
   building.hasStopped = false
 
+  const minBuildingWidth = 5 / property.scale;
+
   const newX = p.mouseX;
   const newY = p.mouseY;
   const _center = p.createVector(building.center.x, building.center.y);
@@ -1384,8 +1386,8 @@ export const handleBuildingDrag = (
     const newLocalGrabby = toLocal(p, building, newX, newY);
 
     // Calculate the new width and height
-    const newWidth = Math.abs(localOpposite.x - newLocalGrabby.x);
-    const newHeight = Math.abs(localOpposite.y - newLocalGrabby.y);
+    const newWidth = Math.max(Math.abs(localOpposite.x - newLocalGrabby.x), minBuildingWidth);
+    const newHeight = Math.max(Math.abs(localOpposite.y - newLocalGrabby.y), minBuildingWidth);
 
     // Calculate the new center in the local coordinate system
     const newCenterLocal = {
@@ -1437,17 +1439,15 @@ export const handleBuildingDrag = (
     const _angle = calculateAngle(center, midpoint);
 
     if (edgeIndex === 0 || edgeIndex === 2) {
-      const newHeight = building.height + distance * newPointIsInsideMultiplier;
-      if (newHeight > 5) {
-        building.height = newHeight
-      }
+      
+      building.height = Math.max(Math.abs( building.height + distance * newPointIsInsideMultiplier), minBuildingWidth);
+      // if (newHeight > 5) {
+      //  
+      // }
 
     }
     else {
-      const newWidth = building.width + distance * newPointIsInsideMultiplier;
-      if (newWidth > 5) {
-        building.width = newWidth
-      }
+      building.width = Math.max(Math.abs( building.width + distance * newPointIsInsideMultiplier), minBuildingWidth);
     }
 
     const newPoint1X = building.center.x + distance / 2 * p.cos(_angle) * newPointIsInsideMultiplier;
@@ -1588,7 +1588,7 @@ export const handleApproachDrag = (
       parking.updateStallCorners(false, true);
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       if (building) {
-        building.buildingLocator(p, building, parking, property, garbage);
+        // building.buildingLocator(p, building, parking, property, garbage);
       }
       garbage.updateCenterGarbage(parking);
 
@@ -1644,7 +1644,7 @@ export const handleParkingDrag = (
   const newX = p.mouseX;
   const newY = p.mouseY;
 
-  const _angle = parking.angle;
+  // const _angle = parking.angle;
 
   if (parkingDragMode === "rotate") {
 
@@ -1657,7 +1657,7 @@ export const handleParkingDrag = (
       const a = p.atan2(mouse.y - parking.center.y, mouse.x - parking.center.x) -
         p.atan2(handle.y - parking.center.y, handle.x - parking.center.x);
 
-      const _garbageCenter = p.createVector(garbage.center.x, garbage.center.y);
+      // const _garbageCenter = p.createVector(garbage.center.x, garbage.center.y);
 
       parking.updateAngle(parking.angle + a)
       garbage.updateAngle(parking.angle + a)
@@ -1672,8 +1672,8 @@ export const handleParkingDrag = (
       if (building) {
         visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
       }
-      const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
-      const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+      // const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+      // const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
 
 
       if (building) {
@@ -1696,25 +1696,25 @@ export const handleParkingDrag = (
       }
 
 
-      if (!parkingInBoundary || !garbageInBoundary) {
+      // if (!parkingInBoundary || !garbageInBoundary) {
 
-        // If I'm moving the parking lot close to the center, then let the new point stand.
-        parking.updateAngle(_angle);
-        garbage.updateAngle(_angle);
+      //   // If I'm moving the parking lot close to the center, then let the new point stand.
+      //   parking.updateAngle(_angle);
+      //   garbage.updateAngle(_angle);
 
-        parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-        parking.updateStallCorners();
-        parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-        if (building) {
-          building.hasStopped = false;
-        }
-        garbage.updateCenter(_garbageCenter.x, _garbageCenter.y)
-        garbage.updateCenterGarbage(parking);
-        if (building) {
-          visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
-        }
-        return;
-      }
+      //   parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+      //   parking.updateStallCorners();
+      //   parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+      //   if (building) {
+      //     building.hasStopped = false;
+      //   }
+      //   garbage.updateCenter(_garbageCenter.x, _garbageCenter.y)
+      //   garbage.updateCenterGarbage(parking);
+      //   if (building) {
+      //     visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+      //   }
+      //   return;
+      // }
       parking.createRotationHandles();
 
 
@@ -1870,6 +1870,60 @@ export function drawNeonLine(p: p5,
   // Restore the drawing state
   p.pop();
 }
+
+export function drawNeonEllipse(
+  p: p5,
+  x: number, // x-coordinate of the ellipse center
+  y: number, // y-coordinate of the ellipse center
+  w: number, // Width of the ellipse
+  h: number, // Height of the ellipse
+  neonColor: p5.Color,
+  glowSize = 20
+): void {
+  // Save the current drawing state
+  p.push();
+
+  // Disable the stroke outline
+  p.noStroke();
+
+  // Calculate the number of layers for the glow effect
+  const layers = 15;
+
+  // Calculate the alpha step for each layer
+  const alphaStep = 255 / layers;
+
+  // Calculate the size step for each layer
+  const sizeStep = glowSize / layers;
+
+  // Draw multiple layers from outside to inside
+  for (let i = layers; i >= 0; i--) {
+    // Calculate the current alpha and size
+    const currentAlpha = (layers - i) * alphaStep;
+    const currentSize = i * sizeStep;
+
+    // Set the color with current alpha
+    const c = p.color(
+      p.red(neonColor),
+      p.green(neonColor),
+      p.blue(neonColor),
+      currentAlpha
+    );
+    p.drawingContext.shadowColor = c; // Apply the shadow color
+    p.drawingContext.shadowBlur = currentSize; // Apply the shadow blur
+
+    // Draw the ellipse with the glow layer
+    p.fill(c);
+    p.ellipse(x, y, w, h);
+  }
+
+  // Draw the bright center ellipse
+  p.fill(neonColor);
+  p.ellipse(x, y, w, h);
+
+  // Restore the drawing state
+  p.pop();
+}
+
 
 export function drawNeonShape(
   p: p5,

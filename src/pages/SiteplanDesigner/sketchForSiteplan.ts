@@ -5,7 +5,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, rotateCorners, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, rotateCorners, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
@@ -217,7 +217,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       const isPolygonClosed = isPolygonClosedRef.current;
       if (isUploadingImage) return
 
-
       if (stepSelectorRefs.points.current || stepSelectorRefs.scale.current) {
         calculateScale(inputScaleRef, linesRef, pointsRef, scaleRef, propertyRef);
       }
@@ -244,7 +243,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         approachRef.current.drawApproach();
       }
 
-
       if (parkingRef.current && garbageRef.current && approachRef.current) {
         // parkingRef.current
         parkingRef.current.drawParkingStalls();
@@ -259,7 +257,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         }
 
         if (!buildingRef.current.hasStopped && buildingRef.current.isInitialized && parkingRef.current && propertyRef.current && garbageRef.current) {
-          buildingRef.current.buildingLocator(p, buildingRef.current, parkingRef.current, propertyRef.current, garbageRef.current);
+          // buildingRef.current.buildingLocator(p, buildingRef.current, parkingRef.current, propertyRef.current, garbageRef.current);
 
           // STOP THE GROWING FOR NOW.
           // building.buildingGrower(property, parking);
@@ -389,15 +387,16 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
 
+
       if (
         parking && (
           isHovered.parkingOffset ||
           isHovered.parking ||
-          isHovered.parkingHandle ||
-          parking?.isRotating)) {
+          isHovered.parkingHandle) ||
+        parking?.isRotating) {
 
         if (building) building.showRotationHandles = false;
-        parkingDragMode = null;
+        // parkingDragMode = null;
         approachDragMode = null;
 
         parking.showRotationHandles = true;
@@ -570,6 +569,29 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         resizeEdge = null;
         p.cursor('default')
       }
+
+
+
+      if (property && stepSelectorRefs.points.current) {
+
+        const pointIndex = property.propertyCorners.findIndex((point) => p.dist(point.x, point.y, newX, newY) < 20);
+        const point = property.propertyCorners[pointIndex];
+
+        if (point) {
+          p.ellipse(point.x, point.y, 10, 10);
+
+          const neonBlue = p.color(59, 130, 246);
+          drawNeonEllipse(
+            p,
+            point.x, point.y, 10, 10,
+            neonBlue, 30);
+
+          p.cursor('grab');
+        }
+      }
+
+
+
     };
 
     p.mousePressed = () => {
@@ -700,9 +722,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         stepSelectorRefs.everything.current = false;
         stepSelectorRefs.building.current = true;
       }
-
-
-
 
       // ALL THINGS UPLOAD
       if (stepSelectorRefs.upload.current) { return }
@@ -971,13 +990,11 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         }
       }
-
-
-
       else {
         // Somthing happened, just go back 
         return
       }
+
 
       if (!property) return;
 
