@@ -15,8 +15,30 @@
 [ ] Bike parking
 [ ] Arrow pointing north and project north
 [ ] Define by angles
-
+[X] Make point glow when hovering
+[ ] No outline rect for building
+[ ] add some to map
+[ ] Are you sure you want to clear everything?
 [ ] Prune the paths
+[ ] Add scale on the side. Need to know how large an inch is
+[ ] square check box.
+[ ] Inside white and outside grey
+[ ] Move the help text to the left
+[ ] add suggestions box at the top
+[ ] Self-craft and drag
+[ ] for Option 5., pro... show shost image of approach
+[ ] Add ghost images for everything
+[ ] Don't know what a setback is
+[ ] Add dimensions to approach
+[X] Parking lot, fix rotation issue.
+[ ] Click anywhere to drag, not jsut the Center
+[ ] Glow the active element
+[ ] Add (ft) (%) (#)
+[ ] Mark what garbage is
+[ ] phantom building
+
+
+
 [ ] Fix building area to be double doors
 [ ] ADA and compact parking
 [ ] Add easements

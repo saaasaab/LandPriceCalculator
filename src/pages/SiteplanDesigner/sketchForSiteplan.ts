@@ -5,7 +5,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, rotateCorners, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, countParkingStalls, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, rotateCorners, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Building } from "./SitePlanClasses/Building";
@@ -31,6 +31,9 @@ export enum ESitePlanObjects {
 }
 export const stallWidth = 17;
 export const stallHeight = 8.5;
+export const handicappedStallHeight = 17;
+export const compacyStallHeight = 8;
+
 
 interface SketchForSiteplanParams {
   canvasContainerRef: React.RefObject<HTMLDivElement>;
@@ -135,6 +138,16 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   };
 
 
+  // let isRecalculatingParking = false;
+
+  let zoom = 1; // Initial zoom level
+  let offsetX = 0;
+  let offsetY = 0; // Offset for translation
+  let prevMouseX = 0;
+  let prevMouseY = 0; // To track panning
+
+
+
   // When an input changes in the component above, set he sketch variable here.
   if (propertyRef.current) {
     propertyRef.current.updateSetbacks(linesRef.current);
@@ -172,6 +185,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   }
 
 
+  let _scale = scaleRef.current || defaultScale;
 
 
 
@@ -201,11 +215,65 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         canvas.parent(canvasRef.current);
       }
     };
+    // Zoom functionality using mouse wheel
+    // p.mouseWheel = (event: { deltaY: number }) => {
+    //   if (!event) return;
+
+    //   const newX = (p.mouseX + offsetX) * zoom;
+    //   const newY = (p.mouseY + offsetY) * zoom;
+
+    //   const zoomFactor = 1.05; // Zoom intensity
+    //   const direction = event.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
+
+    //   // Get mouse position before zoom
+    //   const worldX = (newX - p.width / 2 - offsetX) / zoom;
+    //   const worldY = (newY - p.height / 2 - offsetY) / zoom;
+
+    //   // Apply zoom
+    //   zoom *= direction;
+
+    //   // Adjust offset to keep zoom centered on mouse
+    //   offsetX = newX - p.width / 2 - worldX * zoom;
+    //   offsetY = newY - p.height / 2 - worldY * zoom;
+
+
+
+    //   const property = propertyRef.current;
+    //   const approach = approachRef.current;
+    //   const parking = parkingRef.current;
+    //   const building = buildingRef.current;
+    //   const garbage = garbageRef.current;
+    //   const bikeParking = bikeParkingRef.current;
+
+
+    //   const elements = [property, approach, parking, building, garbage, bikeParking];
+    //   elements.forEach(element => {
+    //     if (element === null) return
+    //     element.zoom = zoom;
+    //     element.offsetX = offsetX;
+    //     element.offsetY = offsetY;
+    //   })
+      
+
+    //   return false; // Prevent page scrolling
+    // };
 
     p.draw = () => {
 
-      const newX = p.mouseX;
-      const newY = p.mouseY;
+      // p.push();
+      // p.translate(p.width / 2 + offsetX, p.height / 2 + offsetY);
+      // p.scale(zoom);
+      // p.translate(-p.width / 2, -p.height / 2);
+
+      // Example neon shape
+      // p.fill(255, 0, 0);
+      // p.ellipse(400, 300, 150, 100);
+
+
+
+
+      const newX = p.mouseX
+      const newY = p.mouseY
 
       const property = propertyRef.current;
       const approach = approachRef.current;
@@ -215,6 +283,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       const isUploadingImage = stepSelectorRefs.upload.current;
       const isPolygonClosed = isPolygonClosedRef.current;
+
       if (isUploadingImage) return
 
       if (stepSelectorRefs.points.current || stepSelectorRefs.scale.current) {
@@ -288,6 +357,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       };
 
 
+
+
       if (approach) {
         isHovered.approach = approach.isMouseHovering();
         isHovered.approachOffset = approach.isMouseHoveringOffset();
@@ -296,18 +367,43 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         isHovered.parking = parking.isMouseHovering();
         isHovered.parkingOffset = parking.isMouseHoveringOffset();
         isHovered.parkingHandle = parking.isMouseHoveringRotateHandle();
+
+
+        // // if the parking lot needs to be recalculated. 
+
+        // const stalls = countParkingStalls(parking);
+        // const maxStallCount = Math.max(stalls.leftStalls, stalls.rightStalls);
+
+
+        // if (maxStallCount !== parking.parkingStallsNumber) {
+        //   isRecalculatingParking = true
+        // }
+        // else{
+        //   isRecalculatingParking = false
+        // }
+
+        // console.log(`isRecalculatingParking`, isRecalculatingParking)
+        // if (isRecalculatingParking) {
+
+
+
+        //     parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+        //     parking.updateStallCorners(true);
+        //     parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+
+        //     console.log(`1234`, 1234)
+        //     // garbage.updateCenterGarbage(parking);
+
+        // }
       }
       if (building) {
         isHovered.building = building.isMouseHovering();
         isHovered.buildingOffset = building.isMouseHoveringOffset();
         isHovered.buildingHandle = building.isMouseHoveringRotateHandle();
       }
-
       if (parking && parking.showRotationHandles) {
         parking.drawRotationHandles();
       }
-
-
       if (visibilityGraphSolverRef.current) {
         // pathCellIndex++
         // visibilityGraphSolverRef.current.displaySolution(p, pathCellIndex)
@@ -324,10 +420,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           pathCellIndex = 0
         }
       }
-
-
       if (buildingRef.current) {
-        const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [p.mouseX, p.mouseY]) === -1
+        const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [newX, newY]) === -1
 
         if (!isHovered.approach && !isHovered.parking && !buildingRef.current.isInitialized && isInboundary && !isHovered.parkingOffset && !isHovered.parkingHandle) {
 
@@ -345,7 +439,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           // show the entrance being drawn in the right orientation and the right position
           // Get the position % of the entrance. 
           // Remove entrance by clicking again within X px of enteracne
-          const mouse = p.createVector(p.mouseX, p.mouseY)
+          const mouse = p.createVector(newX, newY)
           const closestEdgeIndex = findClosestEdge(buildingRef.current.sitePlanElementEdges, mouse)
           const closestEdge = buildingRef.current.sitePlanElementEdges[closestEdgeIndex];
           const distance = calculatePointToEdgeDistance(closestEdge, mouse);
@@ -358,8 +452,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             // get the point on the line where the entrance should interesect
             const angle = closestEdge.calculateAngle() - 90;
             const intersection = closestEdge.calculateClosestIntercept(
-              p.mouseX,
-              p.mouseY,
+              newX, newY,
               p
             )
 
@@ -500,7 +593,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         }
         if (!anyCornerHover) {
-          const mouse = p.createVector(p.mouseX, p.mouseY)
+          const mouse = p.createVector(newX, newY)
           const closestEdgeIndex = findClosestEdge(building.sitePlanElementEdges, mouse)
           const closestEdge = building.sitePlanElementEdges[closestEdgeIndex];
           const distance = calculatePointToEdgeDistance(closestEdge, mouse);
@@ -592,9 +685,14 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
 
+      // p.pop();
+
     };
 
+
     p.mousePressed = () => {
+      prevMouseX = p.mouseX
+      prevMouseY = p.mouseY
       const points = pointsRef.current;
       const lines = linesRef.current;
       const setbacks = setbacksRef.current;
@@ -604,8 +702,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       // const setbackHasInput = setbackHasInputRef.current;
       const isPolygonClosed = isPolygonClosedRef.current;
 
-      const mx = p.mouseX;
-      const my = p.mouseY;
+      const mx = p.mouseX
+      const my = p.mouseY
 
       if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
 
@@ -710,6 +808,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         garbageRef.current = new Garbage(p, getCenterPoint(p, parkingRef.current.sitePlanElementEdges[0].point1, parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 12 / propertyRef.current.scale, 5 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
         garbageRef.current.initialize();
+        garbageRef.current.updateCenterGarbage(parkingRef.current);
 
         buildingRef.current = new Building(p, p.createVector(p.width / 2, p.height / 2), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale, 20);
         buildingRef.current.initializeBuilding(300, 400);
@@ -876,6 +975,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         garbageRef.current = new Garbage(p, getCenterPoint(p, parkingRef.current.sitePlanElementEdges[0].point1, parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 12 / propertyRef.current.scale, 5 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
         garbageRef.current.initialize();
+        garbageRef.current.updateCenterGarbage(parkingRef.current);
       }
 
       // ALL THINGS BUILDING
@@ -907,7 +1007,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         if (isHovered.buildingOffset && buildingRef.current && propertyRef.current && parkingRef.current && garbageRef.current && approachRef.current) {
           // HIDING ENTRANCE AND SOLVER FOR NOW
 
-          const mouse = p.createVector(p.mouseX, p.mouseY)
+          const mouse = p.createVector(mx, my)
           const closestEdgeIndex = findClosestEdge(buildingRef.current.sitePlanElementEdges, mouse)
           const closestEdge = buildingRef.current.sitePlanElementEdges[closestEdgeIndex];
           // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
@@ -916,8 +1016,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           // get the point on the line where the entrance should interesect
           const angle = closestEdge.calculateAngle() - 90;
           const intersection = closestEdge.calculateClosestIntercept(
-            p.mouseX,
-            p.mouseY,
+            mx, my,
             p
           );
 
@@ -1019,6 +1118,18 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     };
 
     p.mouseDragged = () => {
+      const newX = p.mouseX
+      const newY = p.mouseY
+
+      if (p.keyIsDown(p.SHIFT)) {
+        offsetX += newX - prevMouseX;
+        offsetY += newY - prevMouseY;
+        prevMouseX = newX;
+        prevMouseY = newY;
+        return
+      }
+
+
 
       // ALL THINGS UPLOAD
       if (stepSelectorRefs.upload.current) { return }
@@ -1030,7 +1141,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         const draggingPointIndex = draggingPointIndexRef.current;
         if (draggingPointIndex !== null) {
           const points = pointsRef.current;
-          points[draggingPointIndex] = { x: p.mouseX, y: p.mouseY };
+          points[draggingPointIndex] = { x: newX, y: newY };
 
 
           if (property) {

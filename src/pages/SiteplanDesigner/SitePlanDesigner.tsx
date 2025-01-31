@@ -126,7 +126,7 @@ const SitePlanGenerator: React.FC = () => {
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
   const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
-  const [_inputValueForScale, setInputValueForScale] = useState<number | "">(""); 
+  const [_inputValueForScale, setInputValueForScale] = useState<number | "">("");
 
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -185,6 +185,8 @@ const SitePlanGenerator: React.FC = () => {
   const approachRef = useRef<Approach | null>(null);
   const parkingRef = useRef<Parking | null>(null);
   const buildingRef = useRef<Building | null>(null);
+  // const buildingRef = useRef<(Building | null)[]>(null);
+
   const garbageRef = useRef<Garbage | null>(null);
   const bikeParkingRef = useRef<BikeParking | null>(null);
 
@@ -379,6 +381,14 @@ const SitePlanGenerator: React.FC = () => {
     const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
     setOffsetPoints(offsets);
   };
+
+  const addBuilding = () => {
+    // propertyRef?.current?.createNewBuilding(buildingRef.current)
+    if(propertyRef.current === null) return;
+    propertyRef.current.isAddingNewBuilding = true;
+
+    
+  }
 
   const updateScale = (index: number, value: string) => {
 
@@ -942,6 +952,18 @@ const SitePlanGenerator: React.FC = () => {
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuilding() },
       children: <div style={{ marginTop: '10px' }}>
+
+
+
+        <div className="site-plan-generator__button">
+          <label htmlFor="addBuilding">Add Building</label>
+
+          <Button
+            id="addBuilding"
+
+            onClick={() => addBuilding}
+          />
+        </div>
 
         <div className="site-plan-generator__input-group">
           <label>Enable Dimensions</label>

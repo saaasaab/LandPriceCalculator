@@ -111,6 +111,8 @@ export class Parking extends SitePlanElement {
 
         this.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
+        
+
       }
       else {
         this.updateParkingHeight(property.cornerOffsetsFromSetbacks);
@@ -254,17 +256,12 @@ export class Parking extends SitePlanElement {
 
 
     // Check if the parking stalls are more than allowed
-    const stallCounts = countParkingStalls(this)
-    if (stallCounts.leftStalls + stallCounts.rightStalls > this.parkingStallsNumber) {
-      if (stallCounts.leftStalls > stallCounts.rightStalls) {
+    // const stallCounts = countParkingStalls(this)
+    // if (stallCounts.leftStalls + stallCounts.rightStalls > this.parkingStallsNumber) {
+    //   if (stallCounts.leftStalls > stallCounts.rightStalls) {
 
-
-
-      }
-    }
-
-
-
+    //   }
+    // }
     this.calculateNumberOfFittableStalls(property.propertyCorners)
     this.updateStallCorners(true);
     this.updateParkingHeight(property.cornerOffsetsFromSetbacks);

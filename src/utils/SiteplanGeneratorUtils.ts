@@ -1783,6 +1783,7 @@ export const handleParkingDrag = (
       parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
       parking.updateStallCorners(false, isRotationFrozenRef.current);
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+      garbage.updateCenterGarbage(parking);
       if (building) {
         building.hasStopped = false;
       }
@@ -1797,6 +1798,7 @@ export const handleParkingDrag = (
       parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
       parking.updateStallCorners(false, isRotationFrozenRef.current);
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
+      garbage.updateCenterGarbage(parking);
       // parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
     }
   }

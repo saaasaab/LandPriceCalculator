@@ -35,6 +35,9 @@ export class SitePlanElement {
   public lineColor: p5.Color;
   public offsetSize: number;
   public isSelected: boolean;
+  public zoom: number;
+  public offsetX: number;
+  public offsetY: number
 
   constructor(p: p5, center: p5.Vector, width: number, height: number, angle: number, elementType: SitePlanObjects, scale: number, offsetSize: number = 30) {
     this.angle = angle;
@@ -59,9 +62,12 @@ export class SitePlanElement {
     this.showRotationAnimationCount = 0;
     this.showRotationHandles = false;
     this.rotationImage = p.loadImage(RotateArrow);
-    this.lineColor = p.color(20,20,20);
+    this.lineColor = p.color(20, 20, 20);
     this.offsetSize = offsetSize;
     this.isSelected = false;
+    this.zoom = 1; // Initial zoom level
+    this.offsetX = 0;
+    this.offsetY = 0; // Offset for translation
   }
 
   initialize() {
@@ -160,7 +166,7 @@ export class SitePlanElement {
     return targetPoint;
   };
 
-  setLineColors(color: p5.Color){
+  setLineColors(color: p5.Color) {
     this.lineColor = color;
   }
 
@@ -239,20 +245,34 @@ export class SitePlanElement {
   }
 
   isMouseHovering(): boolean {
-    return polyPoint(this.sitePlanElementCorners, this.p.mouseX, this.p.mouseY);
+
+
+    // const newX=(this.p.mouseX- this.offsetX) * this.zoom
+    // const newY =(this.p.mouseY- this.offsetY) * this.zoom
+
+    const newX = this.p.mouseX;
+    const newY = this.p.mouseY;
+
+    // this.p.fill('gold');
+    // this.p.ellipse(newX, newY, 10, 10)
+
+
+
+    return polyPoint(this.sitePlanElementCorners, newX, newY);
   }
 
   isMouseHoveringOffset(): boolean {
-    return polyPoint(this.offsetSitePlanElementCorners, this.p.mouseX, this.p.mouseY);
+    return polyPoint(this.offsetSitePlanElementCorners, (this.p.mouseX) * this.zoom, (this.p.mouseY) * this.zoom);
   }
 
   isMouseHoveringRotateHandle(distance = 20): boolean {
 
     // Set the hovered index so it can be used later
     let hoverHandles = this.rotationHandles.map((handle, i) => {
-      const dist = this.p.dist(this.p.mouseX, this.p.mouseY, handle.x, handle.y) < distance
+      const dist = this.p.dist((this.p.mouseX) * this.zoom, (this.p.mouseY) * this.zoom, handle.x, handle.y) < distance
       if (dist) {
         this.hoverHandleIndex = i;
+
       }
       return dist
     })
@@ -262,7 +282,7 @@ export class SitePlanElement {
   getMouseHoveringRotateHandleIndex(distance = 20): number {
     let handleIndex = -1;
     this.rotationHandles.forEach((handle, i) => {
-      if (this.p.dist(this.p.mouseX, this.p.mouseY, handle.x, handle.y) < distance) {
+      if (this.p.dist((this.p.mouseX) * this.zoom, (this.p.mouseY) * this.zoom, handle.x, handle.y) < distance) {
         handleIndex = i;
       }
     })
@@ -278,7 +298,7 @@ export class SitePlanElement {
 
   }
 
-  createOffsetPolygon( offsetSize: number) {
+  createOffsetPolygon(offsetSize: number) {
     this.offsetSitePlanElementCorners = expandPolygon(this.p, this.sitePlanElementCorners, offsetSize);
   }
 
@@ -291,10 +311,10 @@ export class SitePlanElement {
       if (this.rotationImage) {
         this.p.push()
         this.p.imageMode(this.p.CENTER);
-        this.p.translate( handle.x, handle.y);
+        this.p.translate(handle.x, handle.y);
 
         this.p.rotate(this.angle);
-        this.p.image(this.rotationImage,0,0)
+        this.p.image(this.rotationImage, 0, 0)
         this.p.pop()
       }
       this.p.ellipse(handle.x, handle.y, 25, 25);

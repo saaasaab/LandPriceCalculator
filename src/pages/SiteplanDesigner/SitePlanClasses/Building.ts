@@ -125,7 +125,6 @@ export class Building extends SitePlanElement {
   tempBuilding() {
 
     this.p.rectMode(this.p.CENTER);
-
     this.p.strokeWeight(2)
     const speed = 1
     this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);

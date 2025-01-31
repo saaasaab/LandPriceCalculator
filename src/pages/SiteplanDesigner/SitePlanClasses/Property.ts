@@ -3,6 +3,7 @@ import { angularDistance360, calculateAngle, calculateArea, expandPolygon, initi
 // import { SitePlanElement } from "./SitePlanElement";
 import { Edge } from "./Edge";
 import { IPoint, Line } from "../SitePlanDesigner";
+import { Building } from "./Building";
 
 export class Property {
   private p: p5;
@@ -18,7 +19,10 @@ export class Property {
   public cornerOffsetsFromSetbacks: p5.Vector[] = [];
   public setbacks: number[];
   public areaOfProperty: number;
-
+  public zoom: number;
+  public offsetX: number;
+  public offsetY: number
+  public isAddingNewBuilding: boolean;
 
   // INPUT CONTSTRAINTS
   public drivewayWidth: number;
@@ -46,7 +50,6 @@ export class Property {
 
 
 
-
   constructor(p: p5, propertyCorners: p5.Vector[], isClockwise: boolean, scale: number, setbacks: number[]) {
     this.p = p;
     this.propertyCorners = propertyCorners;
@@ -54,8 +57,10 @@ export class Property {
     this.isClockwise = isClockwise;
     this.scale = scale;
     this.setbacks = setbacks;
-    this.areaOfProperty = 0;
-
+    this.zoom = 1; // Initial zoom level
+    this.offsetX = 0;
+    this.offsetY = 0; // Offset for translation
+    this.isAddingNewBuilding = false;
 
     //INPUT CONTSTRAINTS
     this.buildingCoveragePercentage = 70;
@@ -77,12 +82,15 @@ export class Property {
 
 
     // OUTPUT CONSTRAINTS
+    this.areaOfProperty = 0;
+
     this.drivewayArea = 0;
     this.imperviousSurfacePercentageActual = 0;
 
     this.imperviousSurfaceArea=0;
     this.landscapeArea= 0
     this.totalAreaDedicatedToSetbacks= 0;
+
 
 
 
@@ -113,6 +121,12 @@ export class Property {
   }
 
 
+  createNewBuilding(building: Building | null){
+    if(building===null) return;
+
+    
+    
+  }
   updateSetbacks(lines: Line[]) {
     lines.forEach((line, i) => {
       this.propertyEdges[i].setback = (this.isClockwise ? -1 : -1) * (line.setback / this.scale);
