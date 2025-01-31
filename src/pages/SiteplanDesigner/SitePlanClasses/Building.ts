@@ -9,7 +9,6 @@ import { Point, SitePlanObjects } from "../sketchForSiteplan";
 
 export class Building extends SitePlanElement {
   public isInitialized = false;
-  public frameCount = 0;
   public entrances: Entrance[] = [];
   public buildingAreaActual: number;
   public hasStopped: boolean;
@@ -48,6 +47,8 @@ export class Building extends SitePlanElement {
     this.enableBuildingDimensions = initialFormData.enableBuildingDimensions;
     this.showbuildingArea = initialFormData.showbuildingArea;
     this.maximumHeight = initialFormData.maximumHeight;
+
+    this.initializeBuilding(this.center.x, this.center.y)
   }
 
   initializeBuilding(x: number, y: number,) {
@@ -64,18 +65,28 @@ export class Building extends SitePlanElement {
 
     this.createRotationHandles()
 
-
-    this.buildingAreaActual = Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale);
+    this.updateBuildingActualArea();
+  }
+  calculateArea(){
+    return Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale)
   }
 
   updateBuildingCenter(newX: number, newY: number) {
     this.updateCenter(newX, newY);
     this.updateEntrances();
+
   }
 
-  updateBuildingArea(area: number) {
+  updateBuildingTargetArea(area: number) {
     // Should be in sqrt ft
     this.buildingAreaTarget = area;
+  }
+
+  updateBuildingActualArea() {
+
+    const area = this.calculateArea();
+    // Should be in sqrt ft
+    this.buildingAreaActual = area;
   }
   drawBuildingEditOptions() {
     const p = this.p;
@@ -122,17 +133,9 @@ export class Building extends SitePlanElement {
     // center circle
     p.ellipse(building.center.x, building.center.y, 20, 20)
   }
-  tempBuilding() {
 
-    this.p.rectMode(this.p.CENTER);
-    this.p.strokeWeight(2)
-    const speed = 1
-    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);
-    this.frameCount++;
 
-    if (this.frameCount * speed > 50) this.frameCount = 0
 
-  }
   drawBuilding() {
     if (this.isInitialized) {
 

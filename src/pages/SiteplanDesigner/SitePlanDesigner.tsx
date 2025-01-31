@@ -77,6 +77,7 @@ import { Parking } from './SitePlanClasses/Parking';
 import Slider from '../../components/Slider';
 import { BikeParking } from './SitePlanClasses/BikeParking';
 import { VisibilityGraph } from '../VisibilityGraph';
+import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup';
 
 const initialMetrics: SiteMetrics = {
   zoning: "C-M Commercial Manufacturing",
@@ -121,7 +122,7 @@ const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormDataInputs>(initialFormData);
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
-  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'bike' | 'entrances'>('upload'); // Interaction mode
+  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'bike' | 'entrances' | 'moving'>('upload'); // Interaction mode
 
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
@@ -153,10 +154,12 @@ const SitePlanGenerator: React.FC = () => {
   const isDefiningScaleRef = useRef<boolean>(false);
   const isSelectingSetbackRef = useRef<boolean>(false);
   const isSettingParkingLotRef = useRef<boolean>(false);
-  const isPlacingBuildingRef = useRef<boolean>(false);
+  const isPlacingbuildingsRef = useRef<boolean>(false);
   const isPlacingBikeParkingRef = useRef<boolean>(false);
   const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
   const isGeneratingSidewalksRef = useRef<boolean>(false);
+  const isMovingElementsRef = useRef<boolean>(false);
+  
   const isCreateEverythingRef = useRef<boolean>(false);
 
 
@@ -167,10 +170,11 @@ const SitePlanGenerator: React.FC = () => {
     scale: isDefiningScaleRef,
     setback: isSelectingSetbackRef,
     parking: isSettingParkingLotRef,
-    building: isPlacingBuildingRef,
+    building: isPlacingbuildingsRef,
     bikeParking: isPlacingBikeParkingRef,
     entrances: isPlacingBuildingEntrancesRef,
     sidewalks: isGeneratingSidewalksRef,
+    moving: isMovingElementsRef,
     everything: isCreateEverythingRef,
   }
 
@@ -184,8 +188,8 @@ const SitePlanGenerator: React.FC = () => {
   const propertyRef = useRef<Property | null>(null);
   const approachRef = useRef<Approach | null>(null);
   const parkingRef = useRef<Parking | null>(null);
-  const buildingRef = useRef<Building | null>(null);
-  // const buildingRef = useRef<(Building | null)[]>(null);
+  // const buildingsGroupRef = useRef<Building | null>(null);
+  const buildingsGroupRef = useRef<(BuildingsGroup | null)>(null);
 
   const garbageRef = useRef<Garbage | null>(null);
   const bikeParkingRef = useRef<BikeParking | null>(null);
@@ -197,14 +201,11 @@ const SitePlanGenerator: React.FC = () => {
       const property = propertyRef.current;
       const approach = approachRef.current;
       const parking = parkingRef.current;
-      const building = buildingRef.current;
+      const buildingsGroup = buildingsGroupRef.current;
       const garbage = garbageRef.current;
       const bikeParking = bikeParkingRef.current;
 
       console.log("There be danger here")
-
-      setMetrics
-      // const { leftStalls, rightStalls } = countParkingStalls(parking);
 
 
       const _metrics: SiteMetrics = {
@@ -212,7 +213,8 @@ const SitePlanGenerator: React.FC = () => {
       }
 
 
-      _metrics.actualBuildingArea = building?.buildingAreaActual || initialMetrics.actualBuildingArea;
+
+      // _metrics.actualBuildingArea = building?.buildingAreaActual || initialMetrics.actualBuildingArea;
       _metrics.approachArea = approach?.area || initialMetrics.approachArea;
       _metrics.bikeParkingArea = bikeParking?.area || initialMetrics.bikeParkingArea;
       _metrics.buildingCoveragePercentage = property?.buildingCoveragePercentage || initialMetrics.buildingCoveragePercentage
@@ -224,7 +226,7 @@ const SitePlanGenerator: React.FC = () => {
       _metrics.imperviousSurfaceArea = property?.imperviousSurfaceArea || initialMetrics.imperviousSurfaceArea;
       _metrics.landscape = property?.landscapeArea || initialMetrics.landscape;
       _metrics.landscapeRequiredPercent = property?.landscapeRequiredPercent || initialMetrics.landscapeRequiredPercent;
-      _metrics.maximumHeight = building?.maximumHeight || initialMetrics.maximumHeight;
+      // _metrics.maximumHeight = building?.maximumHeight || initialMetrics.maximumHeight;
       _metrics.offStreetParkingRequired = parking?.offStreetParkingRequired || initialMetrics.offStreetParkingRequired;
       _metrics.parkingArea = parking?.parkingArea || initialMetrics.parkingArea;
       _metrics.parkingPer1000Max = parking?.parkingPer1000Max || initialMetrics.parkingPer1000Max;
@@ -254,7 +256,7 @@ const SitePlanGenerator: React.FC = () => {
 
   }, []);
 
-  // const buildingArea = buildingRef.current?.buildingAreaActual || metrics.actualBuildingArea;
+  // const buildingArea = buildingsGroupRef.current?.buildingAreaActual || metrics.actualBuildingArea;
 
 
   useEffect(() => {
@@ -280,16 +282,13 @@ const SitePlanGenerator: React.FC = () => {
     stepSelectorRefs,
     clearEverythingRef,
     isCreateEverythingRef,
-    // inboundMetricsRef,
-    // setOutboundMetrics,
-    // 
     formData,
 
     imageOpacityRef,
     propertyRef,
     approachRef,
     parkingRef,
-    buildingRef,
+    buildingsGroupRef,
     garbageRef,
     bikeParkingRef,
 
@@ -383,11 +382,11 @@ const SitePlanGenerator: React.FC = () => {
   };
 
   const addBuilding = () => {
-    // propertyRef?.current?.createNewBuilding(buildingRef.current)
-    if(propertyRef.current === null) return;
+    // propertyRef?.current?.createNewBuilding(buildingsGroupRef.current)
+    if (propertyRef.current === null) return;
     propertyRef.current.isAddingNewBuilding = true;
 
-    
+
   }
 
   const updateScale = (index: number, value: string) => {
@@ -412,7 +411,7 @@ const SitePlanGenerator: React.FC = () => {
     // isSelectingSetbackRef.current = false;  // step 4
     // isSelectingApproachRef.current = false; // step 5
     // isSettingParkingLotRef.current = false; // step 6
-    // isPlacingBuildingRef.current = false; // step 7
+    // isPlacingbuildingsRef.current = false; // step 7
 
     Object.keys(stepSelectorRefs).forEach((key) => {
       const refKey = key as keyof typeof stepSelectorRefs; // Cast the key as a valid key of stepSelectorRefs
@@ -438,7 +437,7 @@ const SitePlanGenerator: React.FC = () => {
     falsifyRefs();
     isCreateEverythingRef.current = true;
     isPolygonClosedRef.current = true;
-    setMode('building');
+    setMode('parking');
   }
 
 
@@ -468,7 +467,7 @@ const SitePlanGenerator: React.FC = () => {
 
   const createBuilding = () => {
     falsifyRefs();
-    isPlacingBuildingRef.current = true;
+    isPlacingbuildingsRef.current = true;
     setMode('building');
   }
 
@@ -477,6 +476,12 @@ const SitePlanGenerator: React.FC = () => {
   //   isPlacingBikeParkingRef.current = true;
   //   setMode('bike');
   // }
+
+  const  moveElements = () => {
+    falsifyRefs();
+    isMovingElementsRef.current = true;
+    setMode('moving');
+  }
 
   const createBuildingEntrances = () => {
     falsifyRefs();
@@ -489,11 +494,6 @@ const SitePlanGenerator: React.FC = () => {
     isGeneratingSidewalksRef.current = true;
     setMode('entrances');
   }
-
-
-
-
-  stepSelectorRefs.parking
 
   const clearCanvas = () => {
     setImageURL(null);
@@ -1045,23 +1045,33 @@ const SitePlanGenerator: React.FC = () => {
     //   disabled: !isPolygonClosedRef.current//!parkingRef.current
     // },
     {
+      id: 'moveComponents',
+      title: '8. Move Elements',
+      icon: <DoorOpen />,
+      description: 'Click and move all the parts of the site plan',
+      help: 'Click and drag any of your placed elements',
+      onClick: () => { moveElements() },
+      disabled: !isPolygonClosedRef.current// !buildingsGroupRef.current
+    },
+
+    {
       id: 'buildingEntrance',
-      title: '8. Place Building Entrances',
+      title: '9. Place Building Entrances',
       icon: <DoorOpen />,
       description: 'Places the building entrances',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuildingEntrances() },
-      disabled: !isPolygonClosedRef.current// !buildingRef.current
+      disabled: !isPolygonClosedRef.current// !buildingsGroupRef.current
     },
 
     {
       id: 'sidewalks',
-      title: '9. Generate Sidewalks',
+      title: '10. Generate Sidewalks',
       icon: <Footprints />,
       description: 'Automatically generates the sidewalks for the site plan',
       help: 'Automatically generates the sidewalks based on the building entrances, parking, and approach.',
       onClick: () => { generateSideWalks() },
-      disabled: !isPolygonClosedRef.current// !buildingRef.current
+      disabled: !isPolygonClosedRef.current// !buildingsGroupRef.current
     },
 
 

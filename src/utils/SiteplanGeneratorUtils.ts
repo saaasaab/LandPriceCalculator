@@ -437,6 +437,8 @@ export function findGridCells(inputArray: IPoint[], solverScale: number, cols: n
 }
 
 export function truthChecker(arr: boolean[]) { return arr.every(v => v === true) };
+export function falseChecker(arr: boolean[]) { return arr.every(v => v === false) };
+
 
 export function calculateAngle(point1: p5.Vector, point2: p5.Vector): number {
   const deltaY = Math.round(point2.y - point1.y);
@@ -1332,7 +1334,7 @@ export const handleBuildingDrag = (
   buildingDragMode: string | null,
   resizeCorner: number | null,
   resizeEdge: number | null,
-  resizingbuildingRef: React.MutableRefObject<boolean>,
+  resizingbuildingsRef: React.MutableRefObject<boolean>,
   visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
 ) => {
   if (!property || !approach || !parking || !building || !garbage) return;
@@ -1372,7 +1374,7 @@ export const handleBuildingDrag = (
   if (buildingDragMode === "corner" && resizeCorner !== null) {
     p.cursor('nesw-resize');
 
-    resizingbuildingRef.current = true
+    resizingbuildingsRef.current = true
     // Grab the corner being dragged
 
     // Calculate the opposite corner index
@@ -1405,7 +1407,7 @@ export const handleBuildingDrag = (
     }
 
     building.updateBuildingCenter(newCenterGlobal.x, newCenterGlobal.y);
-
+    building.updateBuildingActualArea();
     visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
     const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
@@ -1424,7 +1426,7 @@ export const handleBuildingDrag = (
   else if (buildingDragMode === "edge" && resizeEdge !== null) {
     p.cursor('ew-resize'); // Adjust cursor based on edge direction (horizontal/vertical)
 
-    resizingbuildingRef.current = true;
+    resizingbuildingsRef.current = true;
 
     // Determine which edge is being dragged
     const edgeIndex = resizeEdge;
@@ -1439,22 +1441,22 @@ export const handleBuildingDrag = (
     const _angle = calculateAngle(center, midpoint);
 
     if (edgeIndex === 0 || edgeIndex === 2) {
-      
-      building.height = Math.max(Math.abs( building.height + distance * newPointIsInsideMultiplier), minBuildingWidth);
+
+      building.height = Math.max(Math.abs(building.height + distance * newPointIsInsideMultiplier), minBuildingWidth);
       // if (newHeight > 5) {
       //  
       // }
 
     }
     else {
-      building.width = Math.max(Math.abs( building.width + distance * newPointIsInsideMultiplier), minBuildingWidth);
+      building.width = Math.max(Math.abs(building.width + distance * newPointIsInsideMultiplier), minBuildingWidth);
     }
 
     const newPoint1X = building.center.x + distance / 2 * p.cos(_angle) * newPointIsInsideMultiplier;
     const newPoint1Y = building.center.y + distance / 2 * p.sin(_angle) * newPointIsInsideMultiplier;
 
     building.updateBuildingCenter(newPoint1X, newPoint1Y);
-
+    building.updateBuildingActualArea();
     visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
     const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
@@ -1484,7 +1486,8 @@ export const handleBuildingDrag = (
       const a = p.atan2(mouse.y - building.center.y, mouse.x - building.center.x) -
         p.atan2(handle.y - building.center.y, handle.x - building.center.x);
 
-      building.updateAngle(building.angle + a)
+      building.updateAngle(building.angle + a);
+      building.updateBuildingActualArea();
       visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
     }
@@ -1508,6 +1511,7 @@ export const handleBuildingDrag = (
         building.updateBuildingCenter(_center.x, _center.y);
         building.hasStopped = true;
         garbage.updateCenterGarbage(parking);
+        building.updateBuildingActualArea();
         visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
         return
@@ -1539,7 +1543,7 @@ export const handleBuildingDrag = (
 
 export const handleApproachDrag = (
   p: p5,
-  property: Property, approach: Approach, parking: Parking | null, garbage: Garbage | null, building: Building | null,
+  property: Property, approach: Approach, parking: Parking | null, garbage: Garbage | null, buildings: Building[],
   isRotationFrozenRef: React.MutableRefObject<boolean>,
   approachDragMode: string | null,
   visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
@@ -1580,22 +1584,29 @@ export const handleApproachDrag = (
       garbage.updateAngle(angle);
       // building.updateAngle(angle);
 
-      if (building) {
-        building.hasStopped = false
+      if (buildings) {
+        buildings.forEach(building => {
+          building.hasStopped = false
+        })
       }
 
       parking.calculateNumberOfFittableStalls(property.propertyCorners);
       parking.updateStallCorners(false, true);
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
-      if (building) {
-        // building.buildingLocator(p, building, parking, property, garbage);
+      if (buildings) {
+        buildings.forEach(building => {
+
+          // building.buildingLocator(p, building, parking, property, garbage);
+        })
       }
       garbage.updateCenterGarbage(parking);
 
       // building.updateEntrances();
       parking.createRotationHandles();
-      if (building) {
-        visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+      if (buildings) {
+        buildings.forEach(building => {
+          visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+        });
       }
       // updateVisibilityGraph();
 
@@ -1613,17 +1624,19 @@ export const handleApproachDrag = (
     }
 
 
-    if (building) {
+    if (buildings) {
+      buildings.forEach(building => {
       building.hasStopped = true;
+      })
     }
     approach.updateCenter(newX, newY);
     if (parking && garbage) {
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
     }
 
-    if (building && parking && garbage) {
-      visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
-    }
+    // if (buildings && parking && garbage) {
+    //   visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+    // }
   }
 
 
@@ -1631,7 +1644,7 @@ export const handleApproachDrag = (
 
 export const handleParkingDrag = (
   p: p5,
-  property: Property, approach: Approach, parking: Parking, garbage: Garbage, building: Building | null,
+  property: Property, approach: Approach, parking: Parking, garbage: Garbage, buildings: Building[] | null,
   parkingDragMode: string | null,
   isRotationFrozenRef: React.MutableRefObject<boolean>,
   visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
@@ -1669,29 +1682,32 @@ export const handleParkingDrag = (
 
       garbage.updateCenterGarbage(parking);
 
-      if (building) {
-        visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
-      }
+      // if (buildings) {
+      //   visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+      // }
       // const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
       // const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
 
 
-      if (building) {
-        building.hasStopped = false;
+      if (buildings) {
 
-        const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
-          const pointClassification = classifyPoint(building?.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
-          return pointClassification === 1
-        }))
+        buildings.forEach(building => {
+          building.hasStopped = false;
 
-        const buildingIsOutOfParking = building?.pointIsOutOfPolygon(parking.parkingOutline);
+          const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
+            const pointClassification = classifyPoint(building?.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
+            return pointClassification === 1
+          }))
 
-        if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
-          parking.setLineColors(p.color(250, 20, 20))
-        }
-        else {
-          parking.setLineColors(p.color(20, 20, 20))
-        }
+          const buildingIsOutOfParking = building?.pointIsOutOfPolygon(parking.parkingOutline);
+
+          if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
+            parking.setLineColors(p.color(250, 20, 20))
+          }
+          else {
+            parking.setLineColors(p.color(20, 20, 20))
+          }
+        })
 
       }
 
@@ -1751,23 +1767,27 @@ export const handleParkingDrag = (
     parking.updateAngle(normalizeAngle(angle));
     garbage.updateAngle(normalizeAngle(angle));
 
-    if (building) {
-      building?.updateEntrances();
+    if (buildings) {
 
-      const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
-        const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
-        return pointClassification === 1
-      }))
+      buildings.forEach(building => {
 
-      const buildingIsOutOfParking = building?.pointIsOutOfPolygon(parking.parkingOutline);
+        building?.updateEntrances();
+
+        const parkingIsOutOfBuilding = truthChecker(parking.parkingOutline.map(sitePlanCorner => {
+          const pointClassification = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [sitePlanCorner.x, sitePlanCorner.y])
+          return pointClassification === 1
+        }))
+
+        const buildingIsOutOfParking = building?.pointIsOutOfPolygon(parking.parkingOutline);
 
 
-      if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
-        parking.setLineColors(p.color(250, 20, 20))
-      }
-      else {
-        parking.setLineColors(p.color(20, 20, 20))
-      }
+        if (!parkingIsOutOfBuilding || !buildingIsOutOfParking) {
+          parking.setLineColors(p.color(250, 20, 20))
+        }
+        else {
+          parking.setLineColors(p.color(20, 20, 20))
+        }
+      })
 
     }
 
@@ -1775,24 +1795,33 @@ export const handleParkingDrag = (
     // parking.parkingOutline.slice(3, -3)
     const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
     // const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
-    if (building) {
-      visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
-    }
+    // if (building) {
+    //   visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+    // }
     if (truthChecker(allPointsInBoundary)) {
 
       parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
       parking.updateStallCorners(false, isRotationFrozenRef.current);
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       garbage.updateCenterGarbage(parking);
-      if (building) {
-        building.hasStopped = false;
+
+
+      if (buildings) {
+        buildings.forEach(building => {
+
+          building.hasStopped = false;
+        })
+
       }
+
       parking.createRotationHandles();
       // UNCOMMENT WHEN I'M READY TO PUT BACK IN ENTRANCES
       // updateVisibilityGraph();
     } else {
-      if (building) {
-        building.hasStopped = true;
+      if (buildings) {
+        buildings.forEach(building => {
+          building.hasStopped = true;
+        })
       }
 
       parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);

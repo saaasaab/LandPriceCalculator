@@ -23,6 +23,7 @@ export class Property {
   public offsetX: number;
   public offsetY: number
   public isAddingNewBuilding: boolean;
+  public frameCount = 0;
 
   // INPUT CONTSTRAINTS
   public drivewayWidth: number;
@@ -125,7 +126,6 @@ export class Property {
     if(building===null) return;
 
     
-    
   }
   updateSetbacks(lines: Line[]) {
     lines.forEach((line, i) => {
@@ -136,7 +136,6 @@ export class Property {
 
   setApproachIndex(approachIndex: number) {
     this.approachEdgeIndex = approachIndex;
-
     this.approachEdge = this.propertyEdges[this.approachEdgeIndex];
     const initialApproachAngle = this.approachEdge?.calculateAngle();
     this.approachAngle = initialApproachAngle;
@@ -307,6 +306,18 @@ export class Property {
     p.endShape(p.CLOSE); // Close the polygon
     p.pop();
   }
+
+  tempObject() {
+    this.p.rectMode(this.p.CENTER);
+    this.p.strokeWeight(2)
+    const speed = 4
+    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);
+    this.frameCount++;
+
+    // this.p.frameRate();
+
+    if (this.frameCount * speed > 50) this.frameCount = 0
+  } 
 
 
   getIntersection(edge1: Edge, edge2: Edge): p5.Vector | null {
