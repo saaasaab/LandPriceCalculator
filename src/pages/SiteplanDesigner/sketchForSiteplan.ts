@@ -457,6 +457,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       if (buildingsGroup) {
         buildingsGroup.buildings.forEach((building, buildingIndex) => {
+
           if (building === null) return;
           building.drawBuilding();
           if (building.showRotationHandles &&
@@ -469,6 +470,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             // STOP THE GROWING FOR NOW.
             // building.buildingGrower(property, parking);
           }
+
+
 
           isHovered.buildings[buildingIndex] = building.isMouseHovering();
           isHovered.buildingsOffset[buildingIndex] = building.isMouseHoveringOffset();
@@ -530,13 +533,20 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             }
           }
 
+
           // Check if we're hovering over a building corner, edge, or center
           if ((isHovered.buildings[buildingIndex] ||
             isHovered.buildingsOffset[buildingIndex] ||
             isHovered.buildingsHandle[buildingIndex] ||
             building.isRotating
-          ) && building.isInitialized) {
+          ) && building.isInitialized
+          
+          // isNoOtherIsTrue(buildingsGroup.buildings.map(building=>building.isSelected),buildingIndex)
+          // No other building is being dragged
+          ) {
 
+
+            
             parkingDragMode = null;
             approachDragMode = null;
 
@@ -748,6 +758,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       const mx = p.mouseX
       const my = p.mouseY
 
+
       if (mx < 0 || mx > p.width || my < 0 || my > p.height) return;
 
       let lineIndex = calculateLineIndexOfClosestLine(points, lines, mx, my)
@@ -757,33 +768,34 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       const parking = parkingRef.current;
       const buildings = buildingsGroupRef.current;
       const garbage = garbageRef.current;
-      const bikeParking = bikeParkingRef.current;
+      // const bikeParking = bikeParkingRef.current;
 
-      if (approach) {
-        isHovered.approach = approach.isMouseHovering();
-        isHovered.approachOffset = approach.isMouseHoveringOffset();
-      }
-      if (parking) {
-        isHovered.parking = parking.isMouseHovering();
-        isHovered.parkingOffset = parking.isMouseHoveringOffset();
-        isHovered.parkingHandle = parking.isMouseHoveringRotateHandle();
-      }
 
-      if (buildings?.buildings?.length) {
-        buildings.buildings.forEach((building, buildingIndex) => {
-          if (building === null) return;
-          isHovered.buildings[buildingIndex] = building.isMouseHovering();
-          isHovered.buildingsOffset[buildingIndex] = building.isMouseHoveringOffset();
-          isHovered.buildingsHandle[buildingIndex] = building.isMouseHoveringRotateHandle();
-        })
+      // if (approach) {
+      //   isHovered.approach = approach.isMouseHovering();
+      //   isHovered.approachOffset = approach.isMouseHoveringOffset();
+      // }
+      // if (parking) {
+      //   isHovered.parking = parking.isMouseHovering();
+      //   isHovered.parkingOffset = parking.isMouseHoveringOffset();
+      //   isHovered.parkingHandle = parking.isMouseHoveringRotateHandle();
+      // }
 
-      }
-      if (garbage) {
-        isHovered.garbage = garbage.isMouseHovering();
-      }
-      if (bikeParking) {
-        isHovered.bikeParking = bikeParking.isMouseHovering();
-      }
+      // if (buildings?.buildings?.length) {
+      //   buildings.buildings.forEach((building, buildingIndex) => {
+      //     if (building === null) return;
+      //     isHovered.buildings[buildingIndex] = building.isMouseHovering();
+      //     isHovered.buildingsOffset[buildingIndex] = building.isMouseHoveringOffset();
+      //     isHovered.buildingsHandle[buildingIndex] = building.isMouseHoveringRotateHandle();
+      //   })
+
+      // }
+      // if (garbage) {
+      //   isHovered.garbage = garbage.isMouseHovering();
+      // }
+      // if (bikeParking) {
+      //   isHovered.bikeParking = bikeParking.isMouseHovering();
+      // }
 
 
       // ALL THINGS CREATE EVERYTIHNG
@@ -1017,10 +1029,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       // ALL THINGS BUILDING
       else if (stepSelectorRefs.building.current && !buildingDragMode) {
 
-        console.log(`stepSelectorRefs`, stepSelectorRefs)
+
         if (!propertyRef.current || !approachRef.current) return;
-
-
 
         const clickIsInProperty = allPointsInPolygon(propertyRef.current.propertyCorners, [p.createVector(mx, my)]);
 
@@ -1037,8 +1047,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           const approachAngle = (propertyRef.current.approachEdge?.calculateAngle() || 0) + 180;
           const buildingDefault = 30 / propertyRef.current.scale;
           buildingsGroupRef?.current?.addBuilding(p, p.createVector(mx, my), buildingDefault, buildingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale, 20);
-
-          console.log(`buildingsGroupRef?.current`, buildingsGroupRef?.current)
         }
       }
 
@@ -1104,37 +1112,37 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       }
 
-
       // ALL THINGS BIKE PARKING
       else if (stepSelectorRefs.bikeParking.current && !bikeParkingDragMode) {
-        if (!propertyRef.current || !approachRef.current || bikeParkingRef.current?.isInitialized) return;
+        // if (!propertyRef.current || !approachRef.current || bikeParkingRef.current?.isInitialized) return;
 
-        const clickIsInProperty = allPointsInPolygon(propertyRef.current.propertyCorners, [p.createVector(mx, my)]);
-
-
-        // Place the bike parking
-        if (!bikeParkingRef.current?.isInitialized &&
-          !isHovered.approach &&
-          !isHovered.parking &&
-          !isHovered.parkingOffset &&
-          !isHovered.parkingHandle &&
-          !isHovered.garbage &&
-          !Object.values(isHovered.buildings).some(Boolean) &&
-          truthChecker(clickIsInProperty)) {
+        // const clickIsInProperty = allPointsInPolygon(propertyRef.current.propertyCorners, [p.createVector(mx, my)]);
 
 
-          const approachAngle = (propertyRef.current.approachEdge?.calculateAngle() || 0) + 180;
-          const bikeParkingDefault = 10 / propertyRef.current.scale;
-          bikeParkingRef.current = new BikeParking(p, p.createVector(p.width / 2, p.height / 2), bikeParkingDefault, bikeParkingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale);
-          bikeParkingRef.current.initialize();
+        // // Place the bike parking
+        // if (!bikeParkingRef.current?.isInitialized &&
+        //   !isHovered.approach &&
+        //   !isHovered.parking &&
+        //   !isHovered.parkingOffset &&
+        //   !isHovered.parkingHandle &&
+        //   !isHovered.garbage &&
+        //   !Object.values(isHovered.buildings).some(Boolean) &&
+        //   truthChecker(clickIsInProperty)) {
 
-        }
+
+        //   const approachAngle = (propertyRef.current.approachEdge?.calculateAngle() || 0) + 180;
+        //   const bikeParkingDefault = 10 / propertyRef.current.scale;
+        //   bikeParkingRef.current = new BikeParking(p, p.createVector(p.width / 2, p.height / 2), bikeParkingDefault, bikeParkingDefault, approachAngle, ESitePlanObjects.Building, propertyRef.current.scale);
+        //   bikeParkingRef.current.initialize();
+
+        // }
       }
 
-      else {
-        // Somthing happened, just go back 
-        return
-      }
+      // else {
+      //   // Somthing happened, just go back 
+      //   return
+      // }
+
 
       if (!property) return;
 
@@ -1152,11 +1160,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
 
-
       if (isHovered.approach && approach) approach.isSelected = true;
       else if (isHovered.parking && parking) parking.isSelected = true;
       else if (Object.values(isHovered.buildings).some(Boolean) && buildings) {
-        const index = buildings.buildings.findIndex(Boolean)
+        const index =isHovered.buildings.findIndex(value=>value === true);
+        // Set all the other buildings selected to false 
+        buildings.buildings.forEach(building => building.isSelected = false)
         if (index !== -1) {
           buildings.buildings[index].isSelected = true;
         }
@@ -1266,10 +1275,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       }
 
-
-
-
-
+      
+      
       if (buildings?.buildings?.length) {
         buildings.buildings.forEach((building, buildingIndex) => {
 
@@ -1279,10 +1286,16 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
               isHovered.buildingsOffset[buildingIndex] ||
               isHovered.buildingsHandle[buildingIndex] ||
               buildings?.buildings[buildingIndex].hoverHandleIndex !== -1
+            )) &&
+            buildings?.buildings[buildingIndex].isInitialized && 
 
-            )) && buildings?.buildings[buildingIndex].isInitialized) {
+            isNoOtherIsTrue(isDragging.buildings, buildingIndex)
+
+            
+          ) {
 
 
+            
             isDragging.buildings[buildingIndex] = true;
 
             handleBuildingDrag(
@@ -1443,6 +1456,8 @@ function updateGlobalVariables(
       building.buildingAreaTarget = formData.buildingAreaTarget;
       building.buildingCount = formData.buildingCount
       building.enableBuildingDimensions = formData.enableBuildingDimensions;
+      building.buildingDimensionsDisplayedOnTheInside = formData.buildingDimensionsDisplayedOnTheInside;
+
       building.updateBuildingTargetArea(Number(formData.buildingAreaTarget));
       building.showbuildingArea = formData.showbuildingArea;
     })
@@ -1472,4 +1487,10 @@ function updateGlobalVariables(
 
 
 
+}
+
+
+
+function  isNoOtherIsTrue(array: boolean[], currentIndex: number): boolean {
+  return array.filter((_element,index)=>index!=currentIndex).every(value => value===false);
 }

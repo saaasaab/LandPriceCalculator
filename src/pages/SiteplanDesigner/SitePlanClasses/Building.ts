@@ -12,7 +12,7 @@ export class Building extends SitePlanElement {
   public entrances: Entrance[] = [];
   public buildingAreaActual: number;
   public hasStopped: boolean;
-  public ismoving: boolean;
+  public isMoving: boolean;
   public areaExceeded: boolean;
 
 
@@ -22,6 +22,7 @@ export class Building extends SitePlanElement {
   public enableBuildingDimensions: boolean;
   public showbuildingArea: boolean;
   public maximumHeight: number;
+  public buildingDimensionsDisplayedOnTheInside : boolean;
 
   constructor(
     p: p5,
@@ -37,7 +38,7 @@ export class Building extends SitePlanElement {
     super(p, center, width, height, angle, elementType, scale, offsetSize);
     this.buildingAreaActual = 0;
     this.hasStopped = true;
-    this.ismoving = false;
+    this.isMoving = false;
     this.areaExceeded = false;
 
 
@@ -45,6 +46,7 @@ export class Building extends SitePlanElement {
     this.buildingAreaTarget = initialFormData.buildingAreaTarget
     this.buildingCount = initialFormData.buildingCount;
     this.enableBuildingDimensions = initialFormData.enableBuildingDimensions;
+    this.buildingDimensionsDisplayedOnTheInside = initialFormData.buildingDimensionsDisplayedOnTheInside;
     this.showbuildingArea = initialFormData.showbuildingArea;
     this.maximumHeight = initialFormData.maximumHeight;
 
@@ -179,7 +181,11 @@ export class Building extends SitePlanElement {
           this.p.translate(mid.x, mid.y);
           this.p.rotate(edge.calculateAngle())
           this.p.textSize(14);
-          this.p.text(`${length.toFixed(1)} ft`, 0, -15);
+
+          
+          const direction = this.buildingDimensionsDisplayedOnTheInside ? 15: -15
+          this.p.text(`${length.toFixed(1)} ft`, 0, direction);
+        
           this.p.pop();
         })
 

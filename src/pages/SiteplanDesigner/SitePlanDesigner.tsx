@@ -78,6 +78,7 @@ import Slider from '../../components/Slider';
 import { BikeParking } from './SitePlanClasses/BikeParking';
 import { VisibilityGraph } from '../VisibilityGraph';
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup';
+import ConfirmationModal from '../../components/ConfirmationModal';
 
 const initialMetrics: SiteMetrics = {
   zoning: "C-M Commercial Manufacturing",
@@ -123,7 +124,7 @@ const SitePlanGenerator: React.FC = () => {
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
   const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'bike' | 'entrances' | 'moving'>('upload'); // Interaction mode
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
 
   const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
@@ -159,7 +160,7 @@ const SitePlanGenerator: React.FC = () => {
   const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
   const isGeneratingSidewalksRef = useRef<boolean>(false);
   const isMovingElementsRef = useRef<boolean>(false);
-  
+
   const isCreateEverythingRef = useRef<boolean>(false);
 
 
@@ -354,7 +355,6 @@ const SitePlanGenerator: React.FC = () => {
   //     taperParking: formData.taperedDriveway
   //   }
 
-  //   console.log(`formData.parkingStalls`, formData.parkingStalls)
 
   //   setBigBucketOfFormData(updatedGlobals)
   //   setNumberOfParkingStalls(formData.parkingStalls)
@@ -477,7 +477,7 @@ const SitePlanGenerator: React.FC = () => {
   //   setMode('bike');
   // }
 
-  const  moveElements = () => {
+  const moveElements = () => {
     falsifyRefs();
     isMovingElementsRef.current = true;
     setMode('moving');
@@ -496,6 +496,9 @@ const SitePlanGenerator: React.FC = () => {
   }
 
   const clearCanvas = () => {
+
+    setIsModalOpen(false)
+    setCurrentStep(0);
     setImageURL(null);
     clearEverythingRef.current = true;
     pointsRef.current = [];
@@ -750,14 +753,14 @@ const SitePlanGenerator: React.FC = () => {
               />
             </div>
             <div className="site-plan-generator__input-group">
-          <label>Enable Dimensions</label>
+              <label>Enable Dimensions</label>
 
-          <Checkbox
-            id="enableApproachDimensions"
-            checked={formData.enableApproachDimensions}
-            onChange={(e) => handleBooleanInput(e, 'enableApproachDimensions')}
-          />
-        </div>
+              <Checkbox
+                id="enableApproachDimensions"
+                checked={formData.enableApproachDimensions}
+                onChange={(e) => handleBooleanInput(e, 'enableApproachDimensions')}
+              />
+            </div>
 
 
 
@@ -836,6 +839,17 @@ const SitePlanGenerator: React.FC = () => {
             />
           </div>
 
+          <div className="site-plan-generator__input-group">
+            <label htmlFor="parkingLotShape">Parking Lot Shape</label>
+            <Input
+              id="parkingLotShape"
+              type="number"
+              min={0}
+              value={formData.parkingLotShape || ""}
+              onChange={(e) => handleNumberInput(e, 'parkingLotShape')}
+            />
+          </div>
+
           <div className="site-plan-generator__checkbox">
             <label htmlFor="taperedDriveway">Tapered Driveway</label>
 
@@ -846,7 +860,7 @@ const SitePlanGenerator: React.FC = () => {
             />
           </div>
 
-          <div className="site-plan-generator__input-group">
+          <div className="site-plan-generator__checkbox">
             <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
             <Checkbox
               id="halfStreetDriveway"
@@ -980,13 +994,24 @@ const SitePlanGenerator: React.FC = () => {
 
         <div className="site-plan-generator__input-group">
           <label>Enable Dimensions</label>
-
           <Checkbox
             id="enableBuildingDimensions"
             checked={formData.enableBuildingDimensions}
             onChange={(e) => handleBooleanInput(e, 'enableBuildingDimensions')}
           />
         </div>
+
+
+        {formData.enableBuildingDimensions ?
+          <div className="site-plan-generator__input-group">
+            <label>Dimensions Displayed on the inside</label>
+
+            <Checkbox
+              id="buildingDimensionsDisplayedOnTheInside"
+              checked={formData.buildingDimensionsDisplayedOnTheInside}
+              onChange={(e) => handleBooleanInput(e, 'buildingDimensionsDisplayedOnTheInside')}
+            />
+          </div> : <></>}
 
         <div className="site-plan-generator__input-group">
           <label htmlFor="buildingAreaTarget">Max Building Area (sq ft)</label>
@@ -1156,7 +1181,7 @@ const SitePlanGenerator: React.FC = () => {
 
                     <div
                       className={`site-plan-generator__step`}
-                      onClick={() => { setCurrentStep(0); clearCanvas(); }}
+                      onClick={() => { setIsModalOpen(true) }}
                     >
                       <div className="site-plan-generator__step-content">
                         <div className={`site-plan-generator__step-icon`}>
@@ -1213,6 +1238,14 @@ const SitePlanGenerator: React.FC = () => {
 
         </div>
       </div>
+
+      {/* Use the Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={clearCanvas}
+        message="Are you sure you want to clear the site plan? This action cannot be undone."
+      />
     </div>
   );
 };

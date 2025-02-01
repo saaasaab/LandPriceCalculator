@@ -5,7 +5,7 @@
 [X] Add back button
 [X] Drag on top and glow red
 [X] Put a curve on the approach
-[X] add steps to follow when creating the site plan with EVERYTHINH laid out on the side panel
+[X] Add steps to follow when creating the site plan with EVERYTHINH laid out on the side panel
 [X] Change rotation circle to arrow and only 
 [X] Draw arrow on approach
 [X] Limit on Area, and notify somehow that the max area is reached
@@ -19,63 +19,67 @@
 [X] square check box.
 [X] Add dimensions to approach
 [X] Add enable dimensions to approach
+[X] Prevent selecting text
 
-[ ] Bike parking
-[ ] Arrow pointing north and project north
-[ ] Define by angles
-[ ] No outline rect for building
-[ ] add some to map
-[ ] Are you sure you want to clear everything?
-[ ] Prune the paths
-[ ] Add scale on the side. Need to know how large an inch is
-[ ] Inside white and outside grey
-[ ] Move the help text to the left
-[ ] add suggestions box at the top
-[ ] Self-craft and drag
-[ ] for Option 5., pro... show shost image of approach
-[ ] Add ghost images for everything
-[ ] Don't know what a setback is
-[ ] Click anywhere to drag, not jsut the Center
-[ ] Glow the active element
-[ ] Mark what garbage is
-[ ] Fix building area to be double doors
+
+
+[ ] Grab icon is not right. It only is grabbing when the mouse is moving
+[ ] Arrows on resize are not always pointing the right angle. 
 [ ] ADA and compact parking
 [ ] Add easements
-[ ] question marks on different items to give more explaination
-[ ] Add zoom in on map and site plan
-[ ] diagonal parking.
-[ ] Add utilities
-[ ] Connect to calculators
-[ ] Dimensions
-[ ] Tree Locations
-[ ] Multiple entrances to property
-[ ] different fire apparatus
-[ ] Export to PDF
-[ ] Snap to edges
-[ ] Cost estimates
-[ ] Parking numbers - strive for equal parking but not linked
-[ ] Total impervious surface area
+[ ] Add ghost images for everything
 [ ] Add loading areas - Determine if you need loading areas because the person probably doesn't know
-[ ] Building elevations
-[ ] Slope Map
-[ ] Draw Center lines - Light gray and thin
 [ ] Add Lock to max size option
-[ ] Let user input the width of the building
-[ ] multiple lanes of parking
-[ ] multiple buildings
-[ ] multiple linear parking lots that connect
-[ ] Show what are standard sizes for different objects
-[ ] Geohazard and NROD areas
-[ ] Legal description to points on the map
-[ ] adding a color palette
-
-[ ] Daniel - Ability to zoom in and out 
+[ ] Add scale on the side. Need to know how large an inch is
+[ ] Add some to map
+[ ] Add suggestions box at the top
+[ ] Add utilities
+[ ] Add zoom in on map and site plan
+[ ] Adding a color palette
+[X] Are you sure you want to clear everything?
+[ ] Arrow pointing north and project north
+[ ] Bike parking
+[ ] Building elevations
+[ ] Click anywhere to drag, not jsut the Center
+[ ] Connect to calculators
+[ ] Cost estimates
 [ ] Daniel - Ability to undo last action
+[ ] Daniel - Ability to zoom in and out 
+[ ] Daniel - Add multiple buildings
+[ ] Daniel - Add multiple driveways
 [ ] Daniel - Click/delete option
 [ ] Daniel - Copy/past option to repeat building, driveway
-[ ] Daniel - measure distance feature
-[ ] Daniel - add multiple driveways
-[ ] Daniel - Add multiple buildings
-[ ] Daniel - setback between buildings
-[ ] Daniel - Parking stalls bug where stalls don't update
 [ ] Daniel - easement limitations
+[ ] Daniel - measure distance feature
+[ ] Daniel - Parking stalls bug where stalls don't update
+[ ] Daniel - setback between buildings
+[ ] Define by angles
+[ ] diagonal parking.
+[ ] different fire apparatus
+[ ] Dimensions
+[ ] Don't know what a setback is
+[ ] Draw Center lines - Light gray and thin
+[ ] Export to PDF
+[ ] Fix building area to be double doors
+[ ] for Option 5., pro... show shost image of approach
+[ ] Geohazard and NROD areas
+[ ] Glow the active element
+[ ] Inside white and outside grey
+[ ] Legal description to points on the map
+[ ] Let user input the width of the building
+[ ] Mark what garbage is
+[ ] Move the help text to the left
+[ ] Multiple buildings
+[ ] Multiple entrances to property
+[ ] Multiple lanes of parking
+[ ] Multiple linear parking lots that connect
+[ ] No outline rect for building
+[ ] Parking numbers - strive for equal parking but not linked
+[ ] Prune the paths
+[ ] !uestion marks on different items to give more explaination
+[ ] Self-craft and drag
+[ ] Show what are standard sizes for different objects
+[ ] Slope Map
+[ ] Snap to edges
+[ ] Total impervious surface area
+[ ] Tree Locations

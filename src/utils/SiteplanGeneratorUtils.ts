@@ -49,6 +49,8 @@ export interface FormDataInputs {
   maximumHeight: number,
   landscapeRequiredPercent: number,
   zoning: string,
+  parkingLotShape: 'the-rocket' | 't-bar',
+  buildingDimensionsDisplayedOnTheInside: boolean,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -78,12 +80,15 @@ export const initialFormData: FormDataInputs = {
   showDrivewayControlPoints: false,
   enableApproachDimensions: true,
   enableBuildingDimensions: true,
+  buildingDimensionsDisplayedOnTheInside: true,
   enableBikeParking: true,
   bikeCount: 4,
   showbuildingArea: true,
   maximumHeight: 35,
   landscapeRequiredPercent: 2,
-  zoning: "r-1"
+  zoning: "r-1",
+  parkingLotShape:"the-rocket",
+
 };
 
 
