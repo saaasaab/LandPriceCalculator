@@ -22,7 +22,7 @@ export class Building extends SitePlanElement {
   public enableBuildingDimensions: boolean;
   public showbuildingArea: boolean;
   public maximumHeight: number;
-  public buildingDimensionsDisplayedOnTheInside : boolean;
+  public buildingDimensionsDisplayedOnTheInside: boolean;
 
   constructor(
     p: p5,
@@ -69,7 +69,7 @@ export class Building extends SitePlanElement {
 
     this.updateBuildingActualArea();
   }
-  calculateArea(){
+  calculateArea() {
     return Math.round(calculateArea(this.sitePlanElementCorners) * this.scale * this.scale)
   }
 
@@ -125,6 +125,7 @@ export class Building extends SitePlanElement {
 
 
       p.fill("#f9fafb");
+      p.stroke(0);
       p.rectMode(p.CENTER);
       p.rect(0, 0, 30, 5, 3, 3, 3, 3);
 
@@ -170,24 +171,29 @@ export class Building extends SitePlanElement {
 
 
       if (this.enableBuildingDimensions) {
+        this.p.push();
         this.p.textAlign(this.p.CENTER, this.p.BOTTOM);
+
         this.sitePlanElementEdges.forEach((edge) => {
+          this.p.push();
           const mid = edge.getMidpoint();
           const length = edge.getLineLength() * this.scale;
 
-          this.p.push();
           this.p.noStroke()
           this.p.fill('black')
           this.p.translate(mid.x, mid.y);
           this.p.rotate(edge.calculateAngle())
           this.p.textSize(14);
 
-          
-          const direction = this.buildingDimensionsDisplayedOnTheInside ? 15: -15
+          const direction = this.buildingDimensionsDisplayedOnTheInside ? 15 : -15
           this.p.text(`${length.toFixed(1)} ft`, 0, direction);
-        
           this.p.pop();
         })
+
+
+        this.p.pop();
+
+
 
         this.entrances.forEach(entrance => {
           entrance.drawEnterance();
@@ -195,12 +201,10 @@ export class Building extends SitePlanElement {
 
 
         if (this.showbuildingArea) {
-
-          this.p.push();
           this.p.textSize(16)
+          this.p.noStroke();
           this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 4)
           this.p.textAlign(this.p.CENTER, this.p.CENTER);
-          this.p.pop();
         }
       }
     }

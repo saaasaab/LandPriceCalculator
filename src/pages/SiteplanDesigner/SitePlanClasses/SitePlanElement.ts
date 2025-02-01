@@ -246,17 +246,8 @@ export class SitePlanElement {
 
   isMouseHovering(): boolean {
 
-
-    // const newX=(this.p.mouseX- this.offsetX) * this.zoom
-    // const newY =(this.p.mouseY- this.offsetY) * this.zoom
-
     const newX = this.p.mouseX;
     const newY = this.p.mouseY;
-
-    // this.p.fill('gold');
-    // this.p.ellipse(newX, newY, 10, 10)
-
-
 
     return polyPoint(this.sitePlanElementCorners, newX, newY);
   }
@@ -306,17 +297,19 @@ export class SitePlanElement {
     this.p.push()
     this.p.stroke(100, 100, 100)
 
-
     this.rotationHandles.forEach(handle => {
       if (this.rotationImage) {
         this.p.push()
+        this.p.stroke(0)
         this.p.imageMode(this.p.CENTER);
         this.p.translate(handle.x, handle.y);
 
         this.p.rotate(this.angle);
         this.p.image(this.rotationImage, 0, 0)
-        this.p.pop()
+        this.p.pop();
       }
+      this.p.noFill();
+      this.p.stroke(0);
       this.p.ellipse(handle.x, handle.y, 25, 25);
     })
     this.p.pop()

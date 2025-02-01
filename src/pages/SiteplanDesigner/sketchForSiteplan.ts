@@ -13,6 +13,7 @@ import { Approach } from "./SitePlanClasses/Approach";
 import { VisibilityGraph } from "../VisibilityGraph";
 import { BikeParking } from "./SitePlanClasses/BikeParking";
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup'
+import { ConfirmDialog } from "./SitePlanClasses/ConfirmDialog";
 // import { VisibilityGraph } from "../VisibilityGraph";
 
 
@@ -118,6 +119,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   // if (bikeParkingRef.current) {
 
   // }
+  let dialog: ConfirmDialog;
 
   let buildingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
   let parkingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
@@ -409,7 +411,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
           if (parkingDragMode !== null) {
-            p.push()
+            p.push();
             p.noFill();
             p.stroke(30, 60, 200);
             p.strokeWeight(3)
@@ -520,10 +522,10 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
               // Draw the entrance
               const enteranceWidth = 8;
+              p.push();
+
               p.stroke('red')
               p.strokeWeight(2)
-
-              p.push();
               p.translate(intersection.x, intersection.y)
               p.rotate(angle - 180)
               p.textSize(14);
@@ -540,13 +542,13 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             isHovered.buildingsHandle[buildingIndex] ||
             building.isRotating
           ) && building.isInitialized
-          
-          // isNoOtherIsTrue(buildingsGroup.buildings.map(building=>building.isSelected),buildingIndex)
-          // No other building is being dragged
+
+            // isNoOtherIsTrue(buildingsGroup.buildings.map(building=>building.isSelected),buildingIndex)
+            // No other building is being dragged
           ) {
 
 
-            
+
             parkingDragMode = null;
             approachDragMode = null;
 
@@ -712,6 +714,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         const pointIndex = property.propertyCorners.findIndex((point) => p.dist(point.x, point.y, newX, newY) < 20);
         const point = property.propertyCorners[pointIndex];
 
+        p.push();
+
         if (point) {
           p.ellipse(point.x, point.y, 10, 10);
 
@@ -723,6 +727,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
           p.cursor('grab');
         }
+
+        p.pop();
+
       }
 
 
@@ -742,10 +749,37 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       // p.pop();
 
+
+      dialog?.draw(p);
+
     };
 
 
+    p.keyPressed = (key: { key: string }) => {
+
+      // DELETES THE BUILDING
+      if (key.key === "Backspace" && Object.values(isHovered.buildings).some(Boolean)) {
+        const index = isHovered.buildings.findIndex(value => value === true);
+
+        dialog = new ConfirmDialog(p, p.width / 2, p.height / 2, 300, 120,
+          () => {
+            if (buildingsGroupRef.current === null) return
+
+            buildingsGroupRef.current.buildings = buildingsGroupRef.current.buildings.filter((_building, buildingIndex) => buildingIndex !== index)
+          },
+          () => console.log("Canceled!"));
+        dialog.show();
+        return
+      }
+    }
     p.mousePressed = () => {
+
+
+      if (dialog?.isVisible) {
+        dialog.mousePressed(p);
+        return; // Prevents further event propagation when dialog is open
+      }
+
       prevMouseX = p.mouseX
       prevMouseY = p.mouseY
       const points = pointsRef.current;
@@ -1160,12 +1194,16 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
 
+
+
       if (isHovered.approach && approach) approach.isSelected = true;
       else if (isHovered.parking && parking) parking.isSelected = true;
-      else if (Object.values(isHovered.buildings).some(Boolean) && buildings) {
-        const index =isHovered.buildings.findIndex(value=>value === true);
+      else if (Object.values(isHovered.buildings).some(Boolean) && buildings && buildings?.buildings.length > 0) {
+        const index = isHovered.buildings.findIndex(value => value === true);
         // Set all the other buildings selected to false 
         buildings.buildings.forEach(building => building.isSelected = false)
+
+
         if (index !== -1) {
           buildings.buildings[index].isSelected = true;
         }
@@ -1175,6 +1213,11 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     };
 
     p.mouseDragged = () => {
+      if (dialog?.isVisible) {
+        return; // Prevents further event propagation when dialog is open
+      }
+
+
       const newX = p.mouseX
       const newY = p.mouseY
 
@@ -1275,8 +1318,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       }
 
-      
-      
+
+
       if (buildings?.buildings?.length) {
         buildings.buildings.forEach((building, buildingIndex) => {
 
@@ -1287,15 +1330,15 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
               isHovered.buildingsHandle[buildingIndex] ||
               buildings?.buildings[buildingIndex].hoverHandleIndex !== -1
             )) &&
-            buildings?.buildings[buildingIndex].isInitialized && 
+            buildings?.buildings[buildingIndex].isInitialized &&
 
             isNoOtherIsTrue(isDragging.buildings, buildingIndex)
 
-            
+
           ) {
 
 
-            
+
             isDragging.buildings[buildingIndex] = true;
 
             handleBuildingDrag(
@@ -1491,6 +1534,6 @@ function updateGlobalVariables(
 
 
 
-function  isNoOtherIsTrue(array: boolean[], currentIndex: number): boolean {
-  return array.filter((_element,index)=>index!=currentIndex).every(value => value===false);
+function isNoOtherIsTrue(array: boolean[], currentIndex: number): boolean {
+  return array.filter((_element, index) => index != currentIndex).every(value => value === false);
 }

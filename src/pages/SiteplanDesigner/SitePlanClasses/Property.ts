@@ -72,10 +72,10 @@ export class Property {
     this.enableLineLengths = true;
     this.approachWidth = initialFormData.approachWidth;
     this.buildingCoveragePercentageAllowed = initialFormData.buildingCoveragePercentageAllowed;
-  
-  
-  
-    this.imperviousSurfaceAllowed= initialFormData.imperviousSurfacePercentageAllowed;
+
+
+
+    this.imperviousSurfaceAllowed = initialFormData.imperviousSurfacePercentageAllowed;
     this.landscapeRequiredPercent = initialFormData.landscapeRequiredPercent;
     this.zoning = initialFormData.zoning;
 
@@ -88,9 +88,9 @@ export class Property {
     this.drivewayArea = 0;
     this.imperviousSurfacePercentageActual = 0;
 
-    this.imperviousSurfaceArea=0;
-    this.landscapeArea= 0
-    this.totalAreaDedicatedToSetbacks= 0;
+    this.imperviousSurfaceArea = 0;
+    this.landscapeArea = 0
+    this.totalAreaDedicatedToSetbacks = 0;
 
 
 
@@ -122,10 +122,10 @@ export class Property {
   }
 
 
-  createNewBuilding(building: Building | null){
-    if(building===null) return;
+  createNewBuilding(building: Building | null) {
+    if (building === null) return;
 
-    
+
   }
   updateSetbacks(lines: Line[]) {
     lines.forEach((line, i) => {
@@ -157,7 +157,7 @@ export class Property {
 
   }
 
-  updateArea(){
+  updateArea() {
     const area = calculateArea(this.propertyCorners) * Math.pow(this.scale, 2);
     this.areaOfProperty = area;
   }
@@ -185,6 +185,7 @@ export class Property {
 
 
   drawProperty() {
+    this.p.push();
     this.p.noFill();
     this.p.stroke('black');
     this.p.strokeWeight(1)
@@ -193,9 +194,11 @@ export class Property {
       this.p.ellipse(corner.x, corner.y, 6, 6);
       // this.p.text(i,corner.x, corner.y);
     })
+    this.p.pop();
   }
 
   drawAnglesBetweenLines() {
+    this.p.push();
     // Draw interior angle curves between consecutive lines
     for (let i = 0; i < this.propertyCorners.length; i++) {
 
@@ -228,9 +231,12 @@ export class Property {
       this.p.fill(255, 0, 0);
       this.p.text(angleText, textX, textY);
     }
+    this.p.pop();
   }
 
   drawLineLengths() {
+
+
     this.propertyEdges.forEach((edge) => {
       edge.drawLine()
 
@@ -240,10 +246,10 @@ export class Property {
         const midX = (edge.point1.x + edge.point2.x) / 2;
         const midY = (edge.point1.y + edge.point2.y) / 2;
         const length = Math.hypot(edge.point2.x - edge.point1.x, edge.point2.y - edge.point1.y) * (this.scale || .25);
-
-        this.p.noStroke()
-        this.p.fill('black')
         this.p.push();
+
+        this.p.noStroke();
+        this.p.fill('black');
         this.p.translate(midX, midY);
         this.p.rotate(edge.calculateAngle())
         this.p.textSize(14);
@@ -280,12 +286,13 @@ export class Property {
 
   drawSetbackPolygon() {
     const p = this.p;
+    p.push()
+
     p.fill(100, 200, 255, 50); // Fill color with transparency
     p.stroke(0); // Outline color
     p.strokeWeight(1);
 
 
-    p.push()
 
     p.fill(100, 200, 255, 50); // Fill color with transparency
 
@@ -308,16 +315,19 @@ export class Property {
   }
 
   tempObject() {
+    this.p.push();
+
     this.p.rectMode(this.p.CENTER);
     this.p.strokeWeight(2)
     const speed = 4
     this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);
     this.frameCount++;
+    this.p.pop();
 
     // this.p.frameRate();
 
     if (this.frameCount * speed > 50) this.frameCount = 0
-  } 
+  }
 
 
   getIntersection(edge1: Edge, edge2: Edge): p5.Vector | null {

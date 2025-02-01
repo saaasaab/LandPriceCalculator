@@ -41,12 +41,16 @@ export class BuildingsGroup {
 
 
   tempBuilding() {
+
+    this.p.push();
+
     this.p.rectMode(this.p.CENTER);
     this.p.strokeWeight(2)
     const speed = 4
     this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);
     this.frameCount++;
 
+    this.p.pop();
     // this.p.frameRate();
 
     if (this.frameCount * speed > 50) this.frameCount = 0

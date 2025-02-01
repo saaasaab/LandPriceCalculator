@@ -20,9 +20,13 @@
 [X] Add dimensions to approach
 [X] Add enable dimensions to approach
 [X] Prevent selecting text
+[X] Are you sure you want to clear everything?
+[X] Daniel - Add multiple buildings
+[X] Multiple buildings
 
 
 
+[ ] Different parking configurations
 [ ] Grab icon is not right. It only is grabbing when the mouse is moving
 [ ] Arrows on resize are not always pointing the right angle. 
 [ ] ADA and compact parking
@@ -36,7 +40,6 @@
 [ ] Add utilities
 [ ] Add zoom in on map and site plan
 [ ] Adding a color palette
-[X] Are you sure you want to clear everything?
 [ ] Arrow pointing north and project north
 [ ] Bike parking
 [ ] Building elevations
@@ -45,7 +48,6 @@
 [ ] Cost estimates
 [ ] Daniel - Ability to undo last action
 [ ] Daniel - Ability to zoom in and out 
-[ ] Daniel - Add multiple buildings
 [ ] Daniel - Add multiple driveways
 [ ] Daniel - Click/delete option
 [ ] Daniel - Copy/past option to repeat building, driveway
@@ -69,7 +71,6 @@
 [ ] Let user input the width of the building
 [ ] Mark what garbage is
 [ ] Move the help text to the left
-[ ] Multiple buildings
 [ ] Multiple entrances to property
 [ ] Multiple lanes of parking
 [ ] Multiple linear parking lots that connect

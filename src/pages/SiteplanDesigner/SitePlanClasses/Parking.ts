@@ -141,6 +141,7 @@ export class Parking extends SitePlanElement {
   }
 
   drawParkingStalls() {
+    this.p.push();
     this.parkingStalls.right.forEach((stall) => {
       if (!stall.isEmptySlot) {
         stall.drawParkingStall();
@@ -152,6 +153,7 @@ export class Parking extends SitePlanElement {
         stall.drawParkingStall();
       }
     })
+    this.p.pop();
   }
 
 

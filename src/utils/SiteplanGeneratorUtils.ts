@@ -1107,6 +1107,8 @@ export function drawInstructionsToScreen(
   isSelectingSetbackRef: React.MutableRefObject<boolean>,
 ) {
 
+
+  p.push();
   // Draw lines connecting points
   const points = pointsRef.current;
 
@@ -1179,6 +1181,8 @@ export function drawInstructionsToScreen(
     p.text("For each property edge, enter the setback required for the zoning.\nEntering nothing means a setback of 0 feet", p.width - 10, p.height - 10);
     p.pop()
   }
+
+  p.pop();
   // const isPolygonClosed = isPolygonClosedRef.current;
 
 }
@@ -1258,6 +1262,7 @@ export function drawProtoPropertyLines(p: p5,
   p.pop();
 
 
+  p.push();
   // Draw interior angle curves between consecutive lines
   for (let i = 0; i < points.length - 2; i++) {
     const p1 = p.createVector(points[i].x, points[i].y);
@@ -1316,6 +1321,8 @@ export function drawProtoPropertyLines(p: p5,
     p.stroke(220, 32, 10);
     p.text(angleText, textX, textY);
   }
+
+  p.pop();
 
 }
 
@@ -1601,10 +1608,10 @@ export const handleApproachDrag = (
       parking.updateStallCorners(false, true);
       parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       if (buildings) {
-        buildings.forEach(building => {
+        // buildings.forEach(building => {
 
-          // building.buildingLocator(p, building, parking, property, garbage);
-        })
+        //   // building.buildingLocator(p, building, parking, property, garbage);
+        // })
       }
       garbage.updateCenterGarbage(parking);
 
@@ -1689,9 +1696,9 @@ export const handleParkingDrag = (
 
       garbage.updateCenterGarbage(parking);
 
-      // if (buildings) {
-      //   visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
-      // }
+      if (buildings) {
+        visibilityGraphSolverRef.current = null;//runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+      }
       // const parkingInBoundary = parking.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
       // const garbageInBoundary = garbage.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
 
