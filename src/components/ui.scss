@@ -146,13 +146,13 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 .checkbox {
   $checkbox-size: 1rem;
 
-  &__container {
+  .checkbox__container {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
   }
 
-  &__input {
+  .checkbox__input {
     appearance: none;
     width: $checkbox-size;
     height: $checkbox-size;
@@ -191,7 +191,7 @@ $box-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     }
   }
 
-  &__label {
+  .checkbox__label {
     font-size: 0.875rem;
     color: $text-color;
     cursor: pointer;

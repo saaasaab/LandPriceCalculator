@@ -12,16 +12,22 @@
 [X] Merge the "Site plan boundaries" with the "Generate Site plan" There is no reason they should be completely seperate.
 [X] Angles on lines on the first page
 [X] Add taper driveway
+[X] Parking lot, fix rotation issue.
+[X] Add (ft) (%) (#)
+[X] phantom building
+[X] Make point glow when hovering
+[X] square check box.
+[X] Add dimensions to approach
+[X] Add enable dimensions to approach
+
 [ ] Bike parking
 [ ] Arrow pointing north and project north
 [ ] Define by angles
-[X] Make point glow when hovering
 [ ] No outline rect for building
 [ ] add some to map
 [ ] Are you sure you want to clear everything?
 [ ] Prune the paths
 [ ] Add scale on the side. Need to know how large an inch is
-[ ] square check box.
 [ ] Inside white and outside grey
 [ ] Move the help text to the left
 [ ] add suggestions box at the top
@@ -29,16 +35,9 @@
 [ ] for Option 5., pro... show shost image of approach
 [ ] Add ghost images for everything
 [ ] Don't know what a setback is
-[ ] Add dimensions to approach
-[X] Parking lot, fix rotation issue.
 [ ] Click anywhere to drag, not jsut the Center
 [ ] Glow the active element
-[ ] Add (ft) (%) (#)
 [ ] Mark what garbage is
-[ ] phantom building
-
-
-
 [ ] Fix building area to be double doors
 [ ] ADA and compact parking
 [ ] Add easements
@@ -69,3 +68,14 @@
 [ ] Geohazard and NROD areas
 [ ] Legal description to points on the map
 [ ] adding a color palette
+
+[ ] Daniel - Ability to zoom in and out 
+[ ] Daniel - Ability to undo last action
+[ ] Daniel - Click/delete option
+[ ] Daniel - Copy/past option to repeat building, driveway
+[ ] Daniel - measure distance feature
+[ ] Daniel - add multiple driveways
+[ ] Daniel - Add multiple buildings
+[ ] Daniel - setback between buildings
+[ ] Daniel - Parking stalls bug where stalls don't update
+[ ] Daniel - easement limitations

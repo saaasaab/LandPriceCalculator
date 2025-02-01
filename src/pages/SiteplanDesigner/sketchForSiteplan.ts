@@ -5,13 +5,11 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, countParkingStalls, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, falseChecker, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, pointsAreInBoundary, rotateCorners, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, falseChecker, findClosestEdge, FormDataInputs, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, rotateCorners, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
-import { Building } from "./SitePlanClasses/Building";
 import { Garbage } from "./SitePlanClasses/Garbage";
 import { Approach } from "./SitePlanClasses/Approach";
-import { Entrance } from "./SitePlanClasses/Entrance";
 import { VisibilityGraph } from "../VisibilityGraph";
 import { BikeParking } from "./SitePlanClasses/BikeParking";
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup'
@@ -158,7 +156,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
   // let isRecalculatingParking = false;
 
-  let zoom = 1; // Initial zoom level
+  // let zoom = 1; // Initial zoom level
   let offsetX = 0;
   let offsetY = 0; // Offset for translation
   let prevMouseX = 0;
@@ -198,7 +196,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   }
 
 
-  let _scale = scaleRef.current || defaultScale;
+  // let _scale = scaleRef.current || defaultScale;
 
 
   return (p: p5) => {
@@ -477,7 +475,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           isHovered.buildingsHandle[buildingIndex] = building.isMouseHoveringRotateHandle();
 
 
-          const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [newX, newY]) === -1
+          // const isInboundary = pointsAreInBoundary(property.cornerOffsetsFromSetbacks, [newX, newY]) === -1
 
           // if (!isHovered.approach && !isHovered.parking && !building.isInitialized && isInboundary && !isHovered.parkingOffset && !isHovered.parkingHandle) {
 
@@ -1416,7 +1414,8 @@ function updateGlobalVariables(
 
   // Pull in the data from above.
   if (approach) {
-    approach.propertyEntranceCount = formData.propertyEntranceCount
+    approach.propertyEntranceCount = formData.propertyEntranceCount;
+    approach.enableApproachDimensions = formData.enableApproachDimensions;
 
     if (property) {
       property.approachWidth = formData.approachWidth

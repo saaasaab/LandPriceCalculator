@@ -72,7 +72,7 @@ import { FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUt
 import { Property } from './SitePlanClasses/Property';
 import { Approach } from './SitePlanClasses/Approach';
 import { Garbage } from './SitePlanClasses/Garbage';
-import { Building } from './SitePlanClasses/Building';
+// import { Building } from './SitePlanClasses/Building';
 import { Parking } from './SitePlanClasses/Parking';
 import Slider from '../../components/Slider';
 import { BikeParking } from './SitePlanClasses/BikeParking';
@@ -201,7 +201,7 @@ const SitePlanGenerator: React.FC = () => {
       const property = propertyRef.current;
       const approach = approachRef.current;
       const parking = parkingRef.current;
-      const buildingsGroup = buildingsGroupRef.current;
+      // const buildingsGroup = buildingsGroupRef.current;
       const garbage = garbageRef.current;
       const bikeParking = bikeParkingRef.current;
 
@@ -389,20 +389,20 @@ const SitePlanGenerator: React.FC = () => {
 
   }
 
-  const updateScale = (index: number, value: string) => {
+  // const updateScale = (index: number, value: string) => {
 
-    const lines = linesRef.current;
-    const newLines = [...lines];
+  //   const lines = linesRef.current;
+  //   const newLines = [...lines];
 
-    // Handle empty string explicitly to allow deleting the value
-    const parsedValue = value === "" ? undefined : parseFloat(value);
+  //   // Handle empty string explicitly to allow deleting the value
+  //   const parsedValue = value === "" ? undefined : parseFloat(value);
 
-    newLines[index].setback = parsedValue || 0; // Fallback to 0 if undefined
-    linesRef.current = newLines;
+  //   newLines[index].setback = parsedValue || 0; // Fallback to 0 if undefined
+  //   linesRef.current = newLines;
 
-    const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
-    setOffsetPoints(offsets);
-  };
+  //   const offsets = calculatecornerOffsetsFromSetbacks(linesRef.current, pointsRef.current);
+  //   setOffsetPoints(offsets);
+  // };
 
   const falsifyRefs = () => {
     // isUploadingImageRef.current = true; // step 1
@@ -582,7 +582,7 @@ const SitePlanGenerator: React.FC = () => {
             </div>
 
             <div className="site-plan-generator__input-group">
-              <label>Max Impervious Percentage</label>
+              <label>Max Impervious Percentage (%)</label>
               <Input
                 id="imperviousSurfacePercentageAllowed"
                 type="number"
@@ -593,7 +593,7 @@ const SitePlanGenerator: React.FC = () => {
             </div>
 
             <div className="site-plan-generator__input-group">
-              <label>Max Building Coverage</label>
+              <label>Max Building Coverage (%)</label>
               <Input
                 id="buildingCoveragePercentage"
                 type="number"
@@ -749,6 +749,17 @@ const SitePlanGenerator: React.FC = () => {
                 onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
               />
             </div>
+            <div className="site-plan-generator__input-group">
+          <label>Enable Dimensions</label>
+
+          <Checkbox
+            id="enableApproachDimensions"
+            checked={formData.enableApproachDimensions}
+            onChange={(e) => handleBooleanInput(e, 'enableApproachDimensions')}
+          />
+        </div>
+
+
 
             <div className="site-plan-generator__button">
               <label htmlFor="deleteDriveway">Delete Driveway</label>
@@ -759,6 +770,8 @@ const SitePlanGenerator: React.FC = () => {
                 onClick={() => { approachRef.current = null; }}
               />
             </div>
+
+
 
 
           </div>
@@ -779,7 +792,7 @@ const SitePlanGenerator: React.FC = () => {
         <div style={{ marginTop: '10px' }}>
 
           <div className="site-plan-generator__input-group">
-            <label htmlFor="parkingStalls">Parking Stalls</label>
+            <label htmlFor="parkingStalls">Parking Stalls (#)</label>
             <Input
               id="parkingStalls"
               type="number"
@@ -790,7 +803,7 @@ const SitePlanGenerator: React.FC = () => {
           </div>
 
           <div className="site-plan-generator__input-group">
-            <label htmlFor="drivewayWidth">Driveway Width</label>
+            <label htmlFor="drivewayWidth">Driveway Width (ft)</label>
             <Input
               id="drivewayWidth"
               type="number"

@@ -8,7 +8,8 @@ export class Approach extends SitePlanElement {
   public approachArea: number
 
   public approachWidth: number
-  public propertyEntranceCount: number
+  public propertyEntranceCount: number;
+  public enableApproachDimensions: boolean;
 
 
   constructor(
@@ -26,6 +27,7 @@ export class Approach extends SitePlanElement {
     // Input Constraints
     this.approachWidth = initialFormData.approachWidth;
     this.propertyEntranceCount = initialFormData.propertyEntranceCount;
+    this.enableApproachDimensions = initialFormData.enableApproachDimensions;
   }
 
   drawApproach() {
@@ -46,7 +48,7 @@ export class Approach extends SitePlanElement {
     });
 
 
- 
+
     p.endShape(p.CLOSE); // Close the polygon
 
     p.ellipse(this.center.x, this.center.y, 10, 10);
@@ -68,10 +70,10 @@ export class Approach extends SitePlanElement {
 
 
 
-    const arrowEdge =  this.sitePlanElementEdges[2];
+    const arrowEdge = this.sitePlanElementEdges[2];
     const midpoint = arrowEdge.getMidpoint();
 
-    p.translate(midpoint.x,midpoint.y);
+    p.translate(midpoint.x, midpoint.y);
     p.rotate(this.angle);
 
     p.stroke(2);
@@ -81,7 +83,14 @@ export class Approach extends SitePlanElement {
 
 
 
+    if (this.enableApproachDimensions) {
+      p.rotate(-this.angle);
+      p.text(Math.round(this.width * this.scale), 0, 40)
+    }
+
+
     p.pop()
+
 
 
   }
