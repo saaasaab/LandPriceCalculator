@@ -24,7 +24,7 @@ export class BuildingsGroup {
     scale: number,
     offsetSize: number
   ) {
-    const building = new Building( p,
+    const building = new Building(p,
       center,
       width,
       height,
@@ -34,10 +34,10 @@ export class BuildingsGroup {
       offsetSize);
 
 
-      this.buildings.push(building)
+    this.buildings.push(building)
   }
 
-  removeBuilding(){}
+  removeBuilding() { }
 
 
   tempBuilding() {

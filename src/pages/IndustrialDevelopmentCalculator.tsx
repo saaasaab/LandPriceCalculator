@@ -361,7 +361,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.buildingPricePerSqFt}`); setBuildingPricePerSqFt(value) }}
-                        cellValues={["Building Price - per Sq Ft ($)", buildingPricePerSqFt]}
+                        cellValues={["Building Sale Price - per Sq Ft ($)", buildingPricePerSqFt]}
                         isMobile={isMobile}
                         description="The average price per square foot for industrial/commercial buildins in this area, determined by local research."
                     />

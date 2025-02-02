@@ -133,6 +133,11 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   let isRotationFrozenRef = useRef<boolean>(false);
   let resizingbuildingsRef = useRef<boolean>(false);
 
+  let approachTempX = 0;
+  let approachTempY = 0;
+  let approachTempAngle = 0;
+
+
   let isDragging = {
     parking: false,
     approach: false,
@@ -733,13 +738,60 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
 
+
+
       else if (stepSelectorRefs.building.current && !buildingDragMode && !parkingDragMode) {
         buildingsGroup?.tempBuilding();
       }
 
 
-      else if (stepSelectorRefs.parking.current && !buildingDragMode && !parkingDragMode && !parking?.isInitialized) {
+      else if (
+        stepSelectorRefs.parking.current &&
+        !buildingDragMode &&
+        !parkingDragMode &&
+        !parking?.isInitialized) {
         property?.tempObject();
+      }
+
+
+      else if (
+        stepSelectorRefs.approach.current &&
+        !approachDragMode &&
+        !buildingDragMode &&
+        !parkingDragMode &&
+        !approach?.isInitialized) {
+
+        if (prevMouseX !== p.mouseX && prevMouseY !== p.mouseY) {
+
+
+          if (!property) return;
+          prevMouseX = p.mouseX;
+          prevMouseY = p.mouseY;
+
+
+
+          const mouse = p.createVector(p.mouseX, p.mouseY);
+          const closestEdgeIndex = findClosestEdge(property.propertyEdges, mouse)
+          const closestEdge = property.propertyEdges[closestEdgeIndex];
+          // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
+
+
+          // get the point on the line where the entrance should interesect
+          const angle = closestEdge.calculateAngle();
+          const intersection = closestEdge.calculateClosestIntercept(
+            p.mouseX, p.mouseY,
+            p
+          );
+
+          approachTempX = intersection.x;
+          approachTempY = intersection.y;
+          approachTempAngle = angle
+        }
+        
+
+        if (approachTempX !== 0 && approachTempY !== 0) {
+          tempApproach(p, approachTempX, approachTempY, approachTempAngle);
+        }
       }
 
 
@@ -1027,14 +1079,14 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
           // Get point closest to the edgepoint
           const approachEdge = propertyRef.current.propertyEdges[approachIndex]
-          const midpoint = approachEdge.getMidpoint();
+          // const midpoint = approachEdge.getMidpoint();
           property.approachEdge = approachEdge
           property.approachEdgeIndex = approachIndex
 
           const approachWidth = property.approachWidth / property.scale;
-          const approachAngle = approachEdge.calculateAngle();
+          // const approachAngle = approachEdge.calculateAngle();
 
-          approachRef.current = new Approach(p, midpoint, approachWidth, 20, approachAngle, ESitePlanObjects.Approach, property.scale);
+          approachRef.current = new Approach(p, p.createVector(approachTempX, approachTempY), approachWidth, 20, approachTempAngle, ESitePlanObjects.Approach, property.scale);
           approachRef.current.initialize();
 
         }
@@ -1536,4 +1588,19 @@ function updateGlobalVariables(
 
 function isNoOtherIsTrue(array: boolean[], currentIndex: number): boolean {
   return array.filter((_element, index) => index != currentIndex).every(value => value === false);
+}
+
+function tempApproach(p: p5, x: number, y: number, angle: number) {
+  const speed = 4
+  if (p.frameCount * speed > 50) p.frameCount = 0
+
+  p.push();
+
+  p.rectMode(p.CENTER);
+  p.translate(x, y);
+  p.rotate(angle)
+  p.strokeWeight(2)
+  p.rect(0, 0, p.frameCount * speed, p.frameCount * speed, 4);
+  p.pop();
+
 }

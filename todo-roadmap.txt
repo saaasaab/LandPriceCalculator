@@ -23,6 +23,9 @@
 [X] Are you sure you want to clear everything?
 [X] Daniel - Add multiple buildings
 [X] Multiple buildings
+[X] Fix approach color
+[X] for Option 5., pro... show shost image of approach
+
 
 
 
@@ -63,7 +66,6 @@
 [ ] Draw Center lines - Light gray and thin
 [ ] Export to PDF
 [ ] Fix building area to be double doors
-[ ] for Option 5., pro... show shost image of approach
 [ ] Geohazard and NROD areas
 [ ] Glow the active element
 [ ] Inside white and outside grey

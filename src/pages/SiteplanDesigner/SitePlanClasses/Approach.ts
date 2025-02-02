@@ -10,7 +10,7 @@ export class Approach extends SitePlanElement {
   public approachWidth: number
   public propertyEntranceCount: number;
   public enableApproachDimensions: boolean;
-
+  public frameCount: number;
 
   constructor(
     p: p5,
@@ -28,6 +28,7 @@ export class Approach extends SitePlanElement {
     this.approachWidth = initialFormData.approachWidth;
     this.propertyEntranceCount = initialFormData.propertyEntranceCount;
     this.enableApproachDimensions = initialFormData.enableApproachDimensions;
+    this.frameCount = 0;
   }
 
   drawApproach() {
@@ -35,10 +36,8 @@ export class Approach extends SitePlanElement {
     p.push()
 
     p.angleMode(p.DEGREES);
-
     // Draw the polygon using the corner vectors
     p.beginShape();
-    p.fill(100, 200, 255, 150); // Fill color with transparency
     p.stroke(0); // Outline color
     p.strokeWeight(2);
 
@@ -52,22 +51,6 @@ export class Approach extends SitePlanElement {
     p.endShape(p.CLOSE); // Close the polygon
 
     p.ellipse(this.center.x, this.center.y, 10, 10);
-
-
-    // p.text(p.round(this.angle), this.center.x, this.center.y);
-
-    // this.sitePlanElementEdges.forEach(edge => {
-    //   const center = getCenterPoint(this.p, edge.point1, edge.point2);
-    //   p.fill(200, 20, 40);
-    //   p.ellipse(center.x, center.y, 10, 10);
-    //   p.strokeWeight(1)
-    //   p.fill(40, 200, 20);
-
-
-    //   // p.text(p.round(edge.calculateAngle()), center.x, center.y);
-    // })
-
-
 
 
     const arrowEdge = this.sitePlanElementEdges[2];
@@ -94,7 +77,4 @@ export class Approach extends SitePlanElement {
 
 
   }
-
-
-
 }

@@ -40,8 +40,6 @@ export function usePersistedState2<T>(
 
   const _queryParamValue = getQueryParamNumber(key, queryParams);
 
-  console.log(`_queryParamValue`, key,_queryParamValue)
-
   let queryParamValue;
   if(booleanStates.includes(key)){
     queryParamValue =  Boolean(_queryParamValue);
