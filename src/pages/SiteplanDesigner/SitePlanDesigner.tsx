@@ -843,10 +843,9 @@ const SitePlanGenerator: React.FC = () => {
             <label htmlFor="parkingLotShape">Parking Lot Shape</label>
             <Input
               id="parkingLotShape"
-              type="number"
-              min={0}
+              type="text"
               value={formData.parkingLotShape || ""}
-              onChange={(e) => handleNumberInput(e, 'parkingLotShape')}
+              onChange={(e) => handleTextChange(e, 'parkingLotShape')}
             />
           </div>
 

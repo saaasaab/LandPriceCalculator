@@ -1204,7 +1204,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         buildings.buildings.forEach(building => building.isSelected = false)
 
 
-        if (index !== -1) {
+        if (index !== -1 && index < buildings.buildings.length) {
           buildings.buildings[index].isSelected = true;
         }
       }
