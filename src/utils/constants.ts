@@ -140,7 +140,7 @@ export const DEFAULT_VALUES = {
         commonSpacePercentage: "40",
         parkingRatio: "2",
         catchAll: "1.8",
-        buildingPricePerSqFt: "300",
+        buildingPricePerSqFt: "200",
         hardCostPerSqFt: "135",
         permits: "12,000",
         miscCosts: "7,500",

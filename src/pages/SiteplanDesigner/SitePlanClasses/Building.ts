@@ -90,12 +90,11 @@ export class Building extends SitePlanElement {
     // Should be in sqrt ft
     this.buildingAreaActual = area;
   }
+
   drawBuildingEditOptions() {
     const p = this.p;
     const building = this
     const offset = expandPolygon(this.p, building.offsetSitePlanElementCorners, -this.offsetSize / 2);
-
-
 
     // Lines for all the edges
     p.push()
@@ -201,10 +200,12 @@ export class Building extends SitePlanElement {
 
 
         if (this.showbuildingArea) {
+
           this.p.textSize(16)
           this.p.noStroke();
-          this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 4)
           this.p.textAlign(this.p.CENTER, this.p.CENTER);
+
+          this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 4)
         }
       }
     }
@@ -292,7 +293,6 @@ export class Building extends SitePlanElement {
     else {
       this.areaExceeded = false;
     }
-
   }
 
   reset() {
