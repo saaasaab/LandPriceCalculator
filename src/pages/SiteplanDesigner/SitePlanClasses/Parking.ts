@@ -422,14 +422,21 @@ export class Parking extends SitePlanElement {
         lastRightStall.stallCorners[1],
       )
     }
+    parkingOutline.push(
 
+      parking.sitePlanElementCorners[1]
+    )
+
+    if(property?.hasGarbageEnclosure){
+      parkingOutline.push(
+        garbage.sitePlanElementCorners[2],
+        garbage.sitePlanElementCorners[1],
+        garbage.sitePlanElementCorners[0],
+        garbage.sitePlanElementCorners[3]
+      )
+    }
 
     parkingOutline.push(
-      parking.sitePlanElementCorners[1],
-      garbage.sitePlanElementCorners[2],
-      garbage.sitePlanElementCorners[1],
-      garbage.sitePlanElementCorners[0],
-      garbage.sitePlanElementCorners[3],
       parking.sitePlanElementCorners[0],
     )
 

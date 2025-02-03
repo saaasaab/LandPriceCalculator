@@ -1565,6 +1565,9 @@ function updateGlobalVariables(
   if (approach && parking && property) {
     property.drivewayWidth = formData.drivewayWidth;
     property.taperedDriveway = formData.taperedDriveway;
+    
+
+    property.hasGarbageEnclosure = formData.hasGarbageEnclosure;
 
     parking.updateParkingStallsNumber(property, formData.parkingStalls);
     parking.updateWidth(Number(formData.drivewayWidth) / property.scale);

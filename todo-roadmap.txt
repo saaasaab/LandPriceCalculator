@@ -29,7 +29,7 @@
 
 
 
-
+[ ] link has garbage enclosure
 [ ] Different parking configurations
 [ ] Grab icon is not right. It only is grabbing when the mouse is moving
 [ ] Arrows on resize are not always pointing the right angle. 

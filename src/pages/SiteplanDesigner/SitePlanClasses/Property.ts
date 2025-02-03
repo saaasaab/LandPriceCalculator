@@ -38,6 +38,7 @@ export class Property {
   public imperviousSurfaceAllowed: number;
   public landscapeRequiredPercent: number;
   public zoning: string;
+  public hasGarbageEnclosure : boolean;
 
 
 
@@ -78,7 +79,7 @@ export class Property {
     this.imperviousSurfaceAllowed = initialFormData.imperviousSurfacePercentageAllowed;
     this.landscapeRequiredPercent = initialFormData.landscapeRequiredPercent;
     this.zoning = initialFormData.zoning;
-
+    this.hasGarbageEnclosure  = initialFormData.hasGarbageEnclosure;
 
 
 

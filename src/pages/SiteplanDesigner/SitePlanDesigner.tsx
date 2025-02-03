@@ -901,11 +901,11 @@ const SitePlanGenerator: React.FC = () => {
 
 
           <div className="site-plan-generator__input-group">
-            <label htmlFor="halfStreetDriveway">Has Garbage Enclosure</label>
+            <label htmlFor="hasGarbageEnclosure">Has Garbage Enclosure</label>
             <Checkbox
-              id="halfStreetDriveway"
-              checked={formData.halfStreetDriveway}
-              onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
+              id="hasGarbageEnclosure"
+              checked={formData.hasGarbageEnclosure}
+              onChange={(e) => handleBooleanInput(e, 'hasGarbageEnclosure')}
             />
           </div>
 
