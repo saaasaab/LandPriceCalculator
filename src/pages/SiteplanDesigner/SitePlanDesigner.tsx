@@ -531,7 +531,7 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Click points on the image to draw your property boundary',
       help: 'Click each corner of your property to create the boundary line. Click the first point again to complete the shape.',
       children: <>
-
+{/* 
         <div className="site-plan-generator__input-group disabled">
           <label>Enter a legal description</label>
           <Input
@@ -543,7 +543,7 @@ const SitePlanGenerator: React.FC = () => {
           />
         </div>
 
-
+ */}
 
         {imageURL !== null ?
           <div className="site-plan-generator__slider">
@@ -742,7 +742,7 @@ const SitePlanGenerator: React.FC = () => {
               />
             </div>
 
-            <div className="site-plan-generator__input-group disabled">
+            {/* <div className="site-plan-generator__input-group disabled">
               <label htmlFor="propertyEntranceCount">Property Entrance Count</label>
               <Input
                 id="propertyEntranceCount"
@@ -751,7 +751,7 @@ const SitePlanGenerator: React.FC = () => {
                 value={formData.propertyEntranceCount || ""}
                 onChange={(e) => handleNumberInput(e, 'propertyEntranceCount')}
               />
-            </div>
+            </div> */}
             <div className="site-plan-generator__input-group">
               <label>Enable Dimensions</label>
 
@@ -859,14 +859,14 @@ const SitePlanGenerator: React.FC = () => {
             />
           </div>
 
-          <div className="site-plan-generator__checkbox">
+          {/* <div className="site-plan-generator__checkbox">
             <label htmlFor="halfStreetDriveway">Half Street Driveway</label>
             <Checkbox
               id="halfStreetDriveway"
               checked={formData.halfStreetDriveway}
               onChange={(e) => handleBooleanInput(e, 'halfStreetDriveway')}
             />
-          </div>
+          </div> */}
           {formData.halfStreetDriveway ?
             //  {/* ADD THESE TO A DROPDOWN THAT SHOWS WHEN THIS IS ENABLED
             <div className="site-plan-generator__input-group subgroup-1">

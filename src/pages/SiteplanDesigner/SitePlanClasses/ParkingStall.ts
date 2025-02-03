@@ -17,6 +17,7 @@ export class ParkingStall {
     public scale: number;
     public cementOffset: number
     public center: p5.Vector;
+    public parkingStallType: "normal" | "handicapped" | "compact";
   
     constructor(p: p5, side: number, stallNumber: number, angle: number, stallCorners: p5.Vector[], entranceEdge: Edge, scale: number, cementOffset: number, center: p5.Vector) {
       this.p = p;
@@ -31,8 +32,8 @@ export class ParkingStall {
       this.isEmptySlot = false;
       this.scale = scale;
       this.cementOffset = cementOffset;
-      this.center = center
-  
+      this.center = center;
+      this.parkingStallType = "normal";
     }
   
     initialize() {
@@ -44,7 +45,6 @@ export class ParkingStall {
       const p = this.p;
   
       if (this.isEmptySlot) return;
-  
   
       p.beginShape();
       p.stroke(0); // Outline color
@@ -66,7 +66,6 @@ export class ParkingStall {
       p.rotate(this.angle);
       p.rectMode(p.CENTER);
       p.rect(
-        
         Math.sign(this.cementOffset) * stallWidth / this.scale / 2 - this.cementOffset / this.scale,
         0 , 
         .5 / this.scale, 

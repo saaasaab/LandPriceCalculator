@@ -26,10 +26,12 @@
 [X] Fix approach color
 [X] for Option 5., pro... show shost image of approach
 [X] Add ghost images for everything
+[X] link has garbage enclosure
+[X] Add zoom in on map and site plan
+[X] Daniel - Ability to zoom in and out 
 
 
 
-[ ] link has garbage enclosure
 [ ] Different parking configurations
 [ ] Grab icon is not right. It only is grabbing when the mouse is moving
 [ ] Arrows on resize are not always pointing the right angle. 
@@ -41,7 +43,6 @@
 [ ] Add some to map
 [ ] Add suggestions box at the top
 [ ] Add utilities
-[ ] Add zoom in on map and site plan
 [ ] Adding a color palette
 [ ] Arrow pointing north and project north
 [ ] Bike parking
@@ -50,7 +51,6 @@
 [ ] Connect to calculators
 [ ] Cost estimates
 [ ] Daniel - Ability to undo last action
-[ ] Daniel - Ability to zoom in and out 
 [ ] Daniel - Add multiple driveways
 [ ] Daniel - Click/delete option
 [ ] Daniel - Copy/past option to repeat building, driveway
@@ -79,7 +79,7 @@
 [ ] No outline rect for building
 [ ] Parking numbers - strive for equal parking but not linked
 [ ] Prune the paths
-[ ] !uestion marks on different items to give more explaination
+[ ] Question marks on different items to give more explaination
 [ ] Self-craft and drag
 [ ] Show what are standard sizes for different objects
 [ ] Slope Map

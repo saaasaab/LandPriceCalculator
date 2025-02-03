@@ -163,7 +163,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
   // let isRecalculatingParking = false;
 
-  // let zoom = 1; // Initial zoom level
+  let zoom = 1; // Initial zoom level
   let offsetX = 0;
   let offsetY = 0; // Offset for translation
   let prevMouseX = 0;
@@ -231,65 +231,94 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         const canvas = p.createCanvas(rect.width - 20, rect.height - 20);
         canvas.parent(canvasRef.current);
       }
+
+      p.noCursor();
     };
 
     buildingsGroupRef.current = new BuildingsGroup(p);
 
+
+
+
     // Zoom functionality using mouse wheel
-    // p.mouseWheel = (event: { deltaY: number }) => {
-    //   if (!event) return;
+    p.mouseWheel = (event: WheelEvent) => {
 
-    //   const newX = (p.mouseX + offsetX) * zoom;
-    //   const newY = (p.mouseY + offsetY) * zoom;
+      const canvasBounds = canvasRef.current?.getBoundingClientRect();
 
-    //   const zoomFactor = 1.05; // Zoom intensity
-    //   const direction = event.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
+      if (!canvasBounds) return;
 
-    //   // Get mouse position before zoom
-    //   const worldX = (newX - p.width / 2 - offsetX) / zoom;
-    //   const worldY = (newY - p.height / 2 - offsetY) / zoom;
+      const insideCanvas =
+        event.clientX >= canvasBounds.left &&
+        event.clientX <= canvasBounds.right &&
+        event.clientY >= canvasBounds.top &&
+        event.clientY <= canvasBounds.bottom;
 
-    //   // Apply zoom
-    //   zoom *= direction;
+      if (!event || !insideCanvas) return;
 
-    //   // Adjust offset to keep zoom centered on mouse
-    //   offsetX = newX - p.width / 2 - worldX * zoom;
-    //   offsetY = newY - p.height / 2 - worldY * zoom;
+      // const newX = (p.mouseX + offsetX) * zoom;
+      // const newY = (p.mouseY + offsetY) * zoom;
 
+      // Convert screen mouse coordinates to world coordinates before zoom
+      const { worldX, worldY } = screenToWorld(p, p.mouseX, p.mouseY, zoom, offsetX, offsetY);
 
-
-    //   const property = propertyRef.current;
-    //   const approach = approachRef.current;
-    //   const parking = parkingRef.current;
-    //   const building = buildingsGroupRef.current;
-    //   const garbage = garbageRef.current;
-    //   const bikeParking = bikeParkingRef.current;
+      // Convert screen mouse coordinates to world coordinates before zoom
 
 
-    //   const elements = [property, approach, parking, building, garbage, bikeParking];
-    //   elements.forEach(element => {
-    //     if (element === null) return
-    //     element.zoom = zoom;
-    //     element.offsetX = offsetX;
-    //     element.offsetY = offsetY;
-    //   })
+      const zoomFactor = 1.05; // Zoom intensity
+      const direction = event.deltaY > 0 ? 1 / zoomFactor : zoomFactor;
 
 
-    //   return false; // Prevent page scrolling
-    // };
+      // Apply zoom
+      zoom *= direction;
+
+      // Adjust offset to keep zoom centered on mouse
+      offsetX = p.mouseX - p.width / 2 - worldX * zoom;
+      offsetY = p.mouseY - p.height / 2 - worldY * zoom;
+
+
+
+
+      // Recalculate offset to ensure the mouse stays in the same world position
+
+
+      //  return false; // Prevent page scrolling
+
+
+
+
+      // const property = propertyRef.current;
+      // const approach = approachRef.current;
+      // const parking = parkingRef.current;
+      // const buildings = buildingsGroupRef.current;
+      // const garbage = garbageRef.current;
+      // const bikeParking = bikeParkingRef.current;
+
+
+
+
+      // const elements = [property, approach, parking, buildings, garbage, bikeParking];
+      // elements.forEach(element => {
+      //   if (element === null) return
+      //   element.zoom = zoom;
+      //   element.offsetX = offsetX;
+      //   element.offsetY = offsetY;
+      // })
+
+
+      event.preventDefault();
+      return false; // Prevent page scrolling
+    };
 
     p.draw = () => {
 
-      // p.push();
-      // p.translate(p.width / 2 + offsetX, p.height / 2 + offsetY);
-      // p.scale(zoom);
-      // p.translate(-p.width / 2, -p.height / 2);
+      p.push();
+      p.translate(p.width / 2 + offsetX, p.height / 2 + offsetY);
+      p.scale(zoom);
+      p.translate(-p.width / 2, -p.height / 2);
 
       // Example neon shape
       // p.fill(255, 0, 0);
       // p.ellipse(400, 300, 150, 100);
-
-
 
       const newX = p.mouseX
       const newY = p.mouseY
@@ -310,9 +339,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
       displayImage(p, img, rectSize, imageOpacityRef.current);
-      drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
 
-      drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || defaultScale);
 
 
       if (property) {
@@ -796,14 +823,21 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
 
+      p.fill("#3b82f6")
+      p.ellipse(p.mouseX, p.mouseY, 10, 10)
+      // Draw the custom cursor
+      drawCustomCursor();
+      p.pop();
 
 
+      p.push();
 
-      // p.pop();
-
-
+      drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || defaultScale);
+      drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
       dialog?.draw(p);
 
+ 
+      p.pop();
     };
 
 
@@ -1503,6 +1537,17 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
     };
+
+    // Draw a custom cursor (Crosshair or Custom Image)
+    const drawCustomCursor = () => {
+      p.push();
+      p.stroke(25, 25, 25);
+      p.strokeWeight(2);
+      p.line(p.mouseX - 10, p.mouseY, p.mouseX + 10, p.mouseY); // Horizontal line
+      p.line(p.mouseX, p.mouseY - 10, p.mouseX, p.mouseY + 10); // Vertical line
+      p.pop();
+    };
+
   };
 }
 
@@ -1565,7 +1610,7 @@ function updateGlobalVariables(
   if (approach && parking && property) {
     property.drivewayWidth = formData.drivewayWidth;
     property.taperedDriveway = formData.taperedDriveway;
-    
+
 
     property.hasGarbageEnclosure = formData.hasGarbageEnclosure;
 
@@ -1606,3 +1651,11 @@ function tempApproach(p: p5, x: number, y: number, angle: number) {
   p.pop();
 
 }
+
+
+// Function to convert screen mouse coordinates to world coordinates
+const screenToWorld = (p: p5, mx: number, my: number, zoom: number, offsetX: number, offsetY: number) => {
+  const worldX = (mx - p.width / 2 - offsetX) / zoom;
+  const worldY = (my - p.height / 2 - offsetY) / zoom;
+  return { worldX, worldY };
+};
