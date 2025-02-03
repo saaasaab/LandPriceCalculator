@@ -787,7 +787,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           approachTempY = intersection.y;
           approachTempAngle = angle
         }
-        
+
 
         if (approachTempX !== 0 && approachTempY !== 0) {
           tempApproach(p, approachTempX, approachTempY, approachTempAngle);
@@ -1380,18 +1380,17 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
               isHovered.buildings[buildingIndex] ||
               isHovered.buildingsOffset[buildingIndex] ||
               isHovered.buildingsHandle[buildingIndex] ||
-              buildings?.buildings[buildingIndex].hoverHandleIndex !== -1
+              buildings?.buildings[buildingIndex].hoverHandleIndex !== -1 ||
+              isDragging.buildings[buildingIndex]
+
             )) &&
             buildings?.buildings[buildingIndex].isInitialized &&
 
             isNoOtherIsTrue(isDragging.buildings, buildingIndex)
 
-
           ) {
-
-
-
             isDragging.buildings[buildingIndex] = true;
+
 
             handleBuildingDrag(
               p,

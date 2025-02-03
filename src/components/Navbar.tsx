@@ -4,7 +4,7 @@ import './Navbar.scss';
 import { useState } from 'react';
 import Hamburger from './Hamburger';
 import { EPageTitles } from '../utils/types';
-import {useAuth } from '../context/AuthContext';
+// import {useAuth } from '../context/AuthContext';
 
 
 
@@ -27,7 +27,7 @@ export const routes = {
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  // const { user, logout } = useAuth();
 
   const handleToggleMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -92,16 +92,15 @@ const Navbar = () => {
       </ul>
 
 
-      <div className="navbar-auth">
+      {/* <div className="navbar-auth">
         {user ? (
           <>
-            {/* <span>Welcome, {user.email}</span> */}
             <button onClick={logout} className="logout-btn">Logout</button>
           </>
         ) : (
           <Link to="/login" className="login-btn">Login</Link>
         )}
-      </div>
+      </div> */}
 
 
     </nav>

@@ -87,7 +87,7 @@ export const initialFormData: FormDataInputs = {
   maximumHeight: 35,
   landscapeRequiredPercent: 2,
   zoning: "r-1",
-  parkingLotShape:"the-rocket",
+  parkingLotShape: "the-rocket",
 
 };
 
@@ -515,7 +515,7 @@ export function calculatePointToEdgeDistance(edge: Edge, point: p5.Vector): numb
   const t = p5.Vector.dot(startToPoint, startToEnd) / startToEnd.magSq();
 
   // Clamp t to the range [0, 1] to stay within the segment
-  const clampedT = Math.max(0, Math.min(1, t));
+  const clampedT = Math.max(.01, Math.min(.99, t));
 
   // Closest point on the line segment
   const closestPoint = p5.Vector.add(
@@ -524,7 +524,8 @@ export function calculatePointToEdgeDistance(edge: Edge, point: p5.Vector): numb
   );
 
   // Distance from the point to the closest point on the line
-  return p5.Vector.dist(point, closestPoint);
+  const dist = p5.Vector.dist(point, closestPoint);
+  return dist;
 }
 
 export function getAdjacentIndices(index: number, length: number): [number, number] {
@@ -1109,6 +1110,8 @@ export function drawInstructionsToScreen(
 
 
   p.push();
+
+  p.noStroke();
   // Draw lines connecting points
   const points = pointsRef.current;
 
@@ -1183,7 +1186,6 @@ export function drawInstructionsToScreen(
   }
 
   p.pop();
-  // const isPolygonClosed = isPolygonClosedRef.current;
 
 }
 
@@ -1354,6 +1356,7 @@ export const handleBuildingDrag = (
   if (!property || !approach || !parking || !building || !garbage) return;
   // let visibilityGraphSolver: VisibilityGraph;
 
+
   building.hasStopped = false
 
   const minBuildingWidth = 5 / property.scale;
@@ -1449,18 +1452,23 @@ export const handleBuildingDrag = (
     const center = p.createVector(building.center.x, building.center.y);
 
     const midpoint = building.sitePlanElementEdges[edgeIndex].getMidpoint()
-    const distance = calculatePointToEdgeDistance(building.sitePlanElementEdges[edgeIndex], mouse)
+
+    const distanceToMidpoint = p.dist(midpoint.x, midpoint.y, mouse.x, mouse.y);
+
+
+    const distance = p.min(distanceToMidpoint, calculatePointToEdgeDistance(building.sitePlanElementEdges[edgeIndex], mouse))
+
+
+
+
 
     const newPointIsInsideMultiplier = classifyPoint(building.sitePlanElementCorners.map(corner => [corner.x, corner.y]) as Point[], [newX, newY])
+
+
     const _angle = calculateAngle(center, midpoint);
 
     if (edgeIndex === 0 || edgeIndex === 2) {
-
       building.height = Math.max(Math.abs(building.height + distance * newPointIsInsideMultiplier), minBuildingWidth);
-      // if (newHeight > 5) {
-      //  
-      // }
-
     }
     else {
       building.width = Math.max(Math.abs(building.width + distance * newPointIsInsideMultiplier), minBuildingWidth);
@@ -1481,6 +1489,7 @@ export const handleBuildingDrag = (
         building.width = _width;
         building.height = _height;
         building.updateBuildingCenter(_center.x, _center.y);
+        building.updateBuildingActualArea();
         building.hasStopped = true;
         visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
@@ -1513,6 +1522,8 @@ export const handleBuildingDrag = (
 
 
     building.updateBuildingCenter(p.mouseX, p.mouseY);
+    building.updateBuildingActualArea();
+
     visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
     const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks)
@@ -1640,7 +1651,7 @@ export const handleApproachDrag = (
 
     if (buildings) {
       buildings.forEach(building => {
-      building.hasStopped = true;
+        building.hasStopped = true;
       })
     }
     approach.updateCenter(newX, newY);

@@ -25,6 +25,7 @@
 [X] Multiple buildings
 [X] Fix approach color
 [X] for Option 5., pro... show shost image of approach
+[X] Add ghost images for everything
 
 
 
@@ -34,7 +35,6 @@
 [ ] Arrows on resize are not always pointing the right angle. 
 [ ] ADA and compact parking
 [ ] Add easements
-[ ] Add ghost images for everything
 [ ] Add loading areas - Determine if you need loading areas because the person probably doesn't know
 [ ] Add Lock to max size option
 [ ] Add scale on the side. Need to know how large an inch is
