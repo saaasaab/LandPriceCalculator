@@ -30,12 +30,17 @@
 [X] Add zoom in on map and site plan
 [X] Daniel - Ability to zoom in and out 
 
+[X] Daniel - Parking stalls bug where stalls don't update
+
+
+[ ] Parking numbers - strive for equal parking but not linked
+[ ] ADA and compact parking
+[ ] The confirm button has no cursor
 
 
 [ ] Different parking configurations
 [ ] Grab icon is not right. It only is grabbing when the mouse is moving
 [ ] Arrows on resize are not always pointing the right angle. 
-[ ] ADA and compact parking
 [ ] Add easements
 [ ] Add loading areas - Determine if you need loading areas because the person probably doesn't know
 [ ] Add Lock to max size option
@@ -43,7 +48,6 @@
 [ ] Add some to map
 [ ] Add suggestions box at the top
 [ ] Add utilities
-[ ] Adding a color palette
 [ ] Arrow pointing north and project north
 [ ] Bike parking
 [ ] Building elevations
@@ -56,7 +60,6 @@
 [ ] Daniel - Copy/past option to repeat building, driveway
 [ ] Daniel - easement limitations
 [ ] Daniel - measure distance feature
-[ ] Daniel - Parking stalls bug where stalls don't update
 [ ] Daniel - setback between buildings
 [ ] Define by angles
 [ ] diagonal parking.
@@ -77,7 +80,6 @@
 [ ] Multiple lanes of parking
 [ ] Multiple linear parking lots that connect
 [ ] No outline rect for building
-[ ] Parking numbers - strive for equal parking but not linked
 [ ] Prune the paths
 [ ] Question marks on different items to give more explaination
 [ ] Self-craft and drag

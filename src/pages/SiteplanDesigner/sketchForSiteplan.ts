@@ -30,9 +30,9 @@ export enum ESitePlanObjects {
   Building = "Building"
 }
 export const stallWidth = 17;
-export const stallHeight = 8.5;
+export const normalStallHeight = 8.5;
 export const handicappedStallHeight = 17;
-export const compacyStallHeight = 8;
+export const compactStallHeight = 8;
 
 
 interface SketchForSiteplanParams {
@@ -383,7 +383,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         //   isRecalculatingParking = false
         // }
 
-        // console.log(`isRecalculatingParking`, isRecalculatingParking)
         // if (isRecalculatingParking) {
 
 
@@ -392,7 +391,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         //     parking.updateStallCorners(true);
         //     parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
-        //     console.log(`1234`, 1234)
         //     // garbage.updateCenterGarbage(parking);
 
         // }
@@ -486,7 +484,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       if (parking && garbage && approach) {
         // parkingRef.current
         parking.drawParkingStalls();
-        parking.drawParkingOutline(p, property, parking, garbage, approach);
+        // parking.drawParkingOutline(p, property, parking, garbage, approach);
       }
 
       if (buildingsGroup) {
@@ -836,7 +834,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
       dialog?.draw(p);
 
- 
+
       p.pop();
     };
 
@@ -968,13 +966,23 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         approachRef.current = new Approach(p, midpoint, approachWidth, 20, approachAngle + 180, ESitePlanObjects.Approach, property.scale);
         approachRef.current.initialize();
 
-        parkingRef.current = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, propertyRef.current.scale);
+        parkingRef.current = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 100, approachAngle + 180, ESitePlanObjects.ParkingWay, propertyRef.current.scale);
         parkingRef.current.initializeParking(propertyRef.current, approachRef.current)
-        parkingRef.current.calculateNumberOfFittableStalls(propertyRef.current.cornerOffsetsFromSetbacks);
-        parkingRef.current.updateStallCorners();
-        parkingRef.current.updateParkingHeight(propertyRef.current.cornerOffsetsFromSetbacks);
 
-        garbageRef.current = new Garbage(p, getCenterPoint(p, parkingRef.current.sitePlanElementEdges[0].point1, parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 12 / propertyRef.current.scale, 5 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
+
+        // // *** TO UNDO
+        parkingRef.current.updateParkingLot(property, buildings?.buildings)
+        // parkingRef.current.calculateNumberOfFittableStalls(propertyRef.current.cornerOffsetsFromSetbacks);
+        // parkingRef.current.updateStallCorners();
+        // parkingRef.current.updateParkingHeight(propertyRef.current.cornerOffsetsFromSetbacks);
+
+
+
+        garbageRef.current = new Garbage(p, getCenterPoint(p, 
+          parkingRef.current.sitePlanElementEdges[0].point1, 
+          parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 
+          12 / propertyRef.current.scale, 
+          7 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
         garbageRef.current.initialize();
         garbageRef.current.updateCenterGarbage(parkingRef.current);
 
@@ -1137,9 +1145,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         parkingRef.current = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, propertyRef.current.scale);
         parkingRef.current.initializeParking(propertyRef.current, approachRef.current)
 
-        parkingRef.current.calculateNumberOfFittableStalls(propertyRef.current.cornerOffsetsFromSetbacks);
-        parkingRef.current.updateStallCorners();
-        parkingRef.current.updateParkingHeight(propertyRef.current.cornerOffsetsFromSetbacks);
+
+        // // *** TO UNDO
+        parkingRef.current.updateParkingLot(propertyRef.current, buildingsGroupRef.current?.buildings)
+        // parkingRef.current.calculateNumberOfFittableStalls(propertyRef.current.cornerOffsetsFromSetbacks);
+        // parkingRef.current.updateStallCorners();
+        // parkingRef.current.updateParkingHeight(propertyRef.current.cornerOffsetsFromSetbacks);
 
         garbageRef.current = new Garbage(p, getCenterPoint(p, parkingRef.current.sitePlanElementEdges[0].point1, parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 12 / propertyRef.current.scale, 5 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
         garbageRef.current.initialize();
@@ -1279,9 +1290,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         if (garbage) garbage.isSelected = false;
       }
 
-
-
-
       if (isHovered.approach && approach) approach.isSelected = true;
       else if (isHovered.parking && parking) parking.isSelected = true;
       else if (Object.values(isHovered.buildings).some(Boolean) && buildings && buildings?.buildings.length > 0) {
@@ -1303,10 +1311,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         return; // Prevents further event propagation when dialog is open
       }
 
-
       const newX = p.mouseX
       const newY = p.mouseY
-
 
       if (p.keyIsDown(p.SHIFT)) {
         offsetX += newX - prevMouseX;
@@ -1577,9 +1583,8 @@ function updateGlobalVariables(
   }
 
   if (parking) {
-    parking.parkingStallsNumber = formData.parkingStalls;
-    parking.handicappedParkingNum = formData.handicappedParkingStalls
-    parking.compactParkingNum = formData.compactParkingStalls
+    parking.handicappedParkingNumTarget = formData.handicappedParkingStalls
+    parking.compactParkingCountTarget = formData.compactParkingStalls
     parking.parkingPer1000Max = formData.parkingPer1000Max;
     parking.parkingPer1000Min = formData.parkingPer1000Min;
     parking.parkingPer1000Min = formData.parkingPerUnit;
@@ -1607,28 +1612,18 @@ function updateGlobalVariables(
   if (garbage) { }
   if (bikeParking) { }
 
-  if (approach && parking && property) {
+  if (approach && parking && property ) {
     property.drivewayWidth = formData.drivewayWidth;
     property.taperedDriveway = formData.taperedDriveway;
 
 
     property.hasGarbageEnclosure = formData.hasGarbageEnclosure;
 
-    parking.updateParkingStallsNumber(property, formData.parkingStalls);
+
+    parking.updateParkingGlobals(property, formData.parkingStalls, buildingsGroup?.buildings);
     parking.updateWidth(Number(formData.drivewayWidth) / property.scale);
 
   }
-
-
-
-
-  // globalAngle,
-  // if (!parking || !property || !approach || !building) return
-
-
-
-
-
 }
 
 

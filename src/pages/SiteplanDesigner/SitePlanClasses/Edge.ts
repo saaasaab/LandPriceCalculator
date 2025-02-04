@@ -129,6 +129,30 @@ export class Edge {
     return closestPoint;
   };
 
+    
+  createPerpendicularPointAtDistance = (
+    p: p5,
+    intersection: p5.Vector,
+    distance: number,
+  ): p5.Vector => {
+    const { point1, point2 } = this;
+
+    // Calculate the edge's direction vector
+    const edgeVector = p5.Vector.sub(point2, point1);
+
+    // Find a perpendicular vector and negate it to reverse direction
+    const perpendicular = p.createVector(edgeVector.y, -edgeVector.x).normalize();
+
+    // Calculate the point at the specified perpendicular distance in the opposite direction
+    const targetPoint = p.createVector(
+      intersection.x + perpendicular.x * distance,
+      intersection.y + perpendicular.y * distance
+    );
+
+    return targetPoint;
+  };
+
+
   createParallelEdge() {
     // Calculate the normalized perpendicular vector
     const direction = p5.Vector.sub(this.point2, this.point1).normalize();

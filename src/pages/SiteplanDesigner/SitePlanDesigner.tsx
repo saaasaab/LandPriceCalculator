@@ -222,7 +222,7 @@ const SitePlanGenerator: React.FC = () => {
       _metrics.buildingCoveragePercentageAllowed = property?.buildingCoveragePercentageAllowed || initialMetrics.buildingCoveragePercentageAllowed
       _metrics.drivewayArea = property?.drivewayArea || initialMetrics.drivewayArea;
       _metrics.garbageArea = garbage?.area || initialMetrics.garbageArea;
-      _metrics.handicappedStallsCount = parking?.handicappedParkingNum || initialMetrics.handicappedStallsCount;
+      _metrics.handicappedStallsCount = parking?.handicappedParkingNumTarget || initialMetrics.handicappedStallsCount;
       _metrics.imperviousSurfaceAllowed = property?.imperviousSurfaceAllowed || initialMetrics.imperviousSurfaceAllowed;
       _metrics.imperviousSurfaceArea = property?.imperviousSurfaceArea || initialMetrics.imperviousSurfaceArea;
       _metrics.landscape = property?.landscapeArea || initialMetrics.landscape;
