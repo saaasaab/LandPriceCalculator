@@ -44,6 +44,8 @@ export class Garbage extends SitePlanElement {
   
       this.center.x = _center.x;
       this.center.y = _center.y;
+
+      this.updateSitePlanElementCorners();
     }
   
     drawGarbageEnclosure() {

@@ -55,7 +55,6 @@ export class ParkingStall {
     // reorderCorners.push(...reorderCorners.splice(0, 1));
     reorderCorners.forEach((corner) => {
       p.vertex(corner.x, corner.y);
-      // p.text(i, corner.x, corner.y)
     })
     p.endShape(); // Close the polygon
 

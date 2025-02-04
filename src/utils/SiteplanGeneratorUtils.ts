@@ -604,44 +604,6 @@ export function getStallHeight(type: "normal" | "handicapped" | "compact") {
   else { return normalStallHeight }
 }
 
-export function calculateStallPosition(p: p5, entranceEdge: Edge, angle: number, parkingStallsOnSide: ParkingStall[], side: "left" | "right", stallIndex: number, scale: number, stallType: "normal" | "handicapped" | "compact") {
-  // Get the entrance points and the direction they are pointing.
-
-  const height = getStallHeight(stallType);
-
-  const _stallHeight = height / scale;
-  const _stallWidth = stallWidth / scale;
-
-  const currentNumberOfStalls = parkingStallsOnSide.length;
-
-  let sideMultiplier = side === "left" ? -1 : 1;
-  let entrancePoint = side === "left" ? entranceEdge.point2 : entranceEdge.point1;
-  let firstPoint = currentNumberOfStalls === 0 ?
-    entrancePoint :
-    p.createVector(
-      entrancePoint.x + p.cos(angle - 90) * _stallHeight * stallIndex,
-      entrancePoint.y + p.sin(angle - 90) * _stallHeight * stallIndex
-    );
-  const secondPoint = [
-    firstPoint.x + p.cos(angle - 90) * _stallHeight, firstPoint.y + p.sin(angle - 90) * _stallHeight]
-
-
-  const thirdAndFourthPoint = [ // pointing to the right
-    [firstPoint.x + sideMultiplier * p.cos(angle) * _stallWidth, firstPoint.y + sideMultiplier * p.sin(angle) * _stallWidth],
-    [secondPoint[0] + sideMultiplier * p.cos(angle) * _stallWidth, secondPoint[1] + sideMultiplier * p.sin(angle) * _stallWidth],
-  ];
-
-
-  const stallCorners = [
-    firstPoint,
-    p.createVector(secondPoint[0], secondPoint[1]),
-    p.createVector(thirdAndFourthPoint[1][0], thirdAndFourthPoint[1][1]),
-    p.createVector(thirdAndFourthPoint[0][0], thirdAndFourthPoint[0][1]),
-  ]
-
-  return stallCorners;
-}
-
 export function moveVector(
   vector1: p5.Vector,
   vector2: p5.Vector,
@@ -1634,8 +1596,7 @@ export const handleApproachDrag = (
       }
 
       // // *** TO UNDO
-      // parking.updateParkingLot(property, buildings)
-      // parking.calculateNumberOfFittableStalls(property.propertyCorners);
+      parking.updateParkingLot(property, buildings,garbage,approach)
       // parking.updateStallCorners(false, true);
       // parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       if (buildings) {
@@ -1723,8 +1684,7 @@ export const handleParkingDrag = (
       garbage.updateAngle(parking.angle + a)
 
       // // *** TO UNDO
-      parking.updateParkingLot(property, buildings)
-      // parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+      parking.updateParkingLot(property, buildings,garbage,approach)
       // parking.updateStallCorners();
       // parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
@@ -1767,7 +1727,6 @@ export const handleParkingDrag = (
       //   parking.updateAngle(_angle);
       //   garbage.updateAngle(_angle);
 
-      //   parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
       //   parking.updateStallCorners();
       //   parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       //   if (building) {
@@ -1837,8 +1796,7 @@ export const handleParkingDrag = (
     if (truthChecker(allPointsInBoundary)) {
 
       // // *** TO UNDO
-      parking.updateParkingLot(property, buildings)
-      // parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
+      parking.updateParkingLot(property, buildings,garbage,approach)
       // parking.updateStallCorners(false, isRotationFrozenRef.current);
       // parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
       garbage.updateCenterGarbage(parking);
@@ -1865,9 +1823,7 @@ export const handleParkingDrag = (
 
 
       // // *** TO UNDO
-      parking.updateParkingLot(property, buildings)
-      // parking.calculateNumberOfFittableStalls(property.cornerOffsetsFromSetbacks);
-      // parking.updateStallCorners(false, isRotationFrozenRef.current);
+      parking.updateParkingLot(property, buildings,garbage,approach)
       // parking.updateParkingHeight(property.cornerOffsetsFromSetbacks);
 
 

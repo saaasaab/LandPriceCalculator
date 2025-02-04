@@ -29,12 +29,14 @@
 [X] link has garbage enclosure
 [X] Add zoom in on map and site plan
 [X] Daniel - Ability to zoom in and out 
-
 [X] Daniel - Parking stalls bug where stalls don't update
+[X] On start garbage is always sink in
+[X] ADA and compact parking
 
 
+[ ] Calculate the outline away from the draw function
+[ ] Adjust parking height when parking goes out of bounds. 
 [ ] Parking numbers - strive for equal parking but not linked
-[ ] ADA and compact parking
 [ ] The confirm button has no cursor
 
 
