@@ -2042,13 +2042,12 @@ export function getStallLengths(parkingStalls: {
 
 export function sumWidthBetweenClosedStalls(stalls: ParkingStall[]): number {
   // Find indices of first and last closed stalls
-  const firstClosedIndex = stalls.findIndex(stall => !stall.isEmptySlot);
   const lastClosedIndex = stalls.length - 1 - [...stalls].reverse().findIndex(stall => !stall.isEmptySlot);
 
   // If no closed stalls found, return 0
-  if (firstClosedIndex === -1 || lastClosedIndex === -1) return 0;
+  if (lastClosedIndex === -1) return 0;
 
   // Sum the width of stalls between and including first and last closed stalls
-  return stalls.slice(firstClosedIndex, lastClosedIndex + 1).reduce((sum, stall) => sum + getStallHeight(stall.parkingStallType), 0);
+  return stalls.slice(0, lastClosedIndex + 1).reduce((sum, stall) => sum + getStallHeight(stall.parkingStallType), 0);
 }
 

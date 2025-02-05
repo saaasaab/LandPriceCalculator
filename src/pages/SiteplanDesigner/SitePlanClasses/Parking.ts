@@ -198,51 +198,53 @@ export class Parking extends SitePlanElement {
 
 
 
-  reCreateStallPoints(startRow: number) {
+  reCreateStallPoints(startRow: number, side: 'left' | 'right') {
     // RIGHT is point 1
     // LEFT is point 2
     if (!this.entranceEdge) return;
 
     for (let i = startRow; i < this.parkingStallsNumber; i++) {
-      const typeLeft = this.parkingStalls.left[i].parkingStallType;
+
+      const sign = side === 'left' ? -1 : 1;
+      const typeLeft = this.parkingStalls[side][i].parkingStallType;
       const typeRight = this.parkingStalls.right[i].parkingStallType
       const heightLeft = getStallHeight(typeLeft)
       const heightRight = getStallHeight(typeRight)
 
       // LeftSide
-      const point0 = i === 0 ? this.parkingStalls.left[i].stallCorners[0] : this.parkingStalls.left[i - 1].stallCorners[3];
+      const point0 = i === 0 ? this.parkingStalls[side][i].stallCorners[0] : this.parkingStalls[side][i - 1].stallCorners[3];
       const point3 = this.entranceEdge.createPerpendicularPointAtDistance(this.p, point0, -heightLeft / this.scale)
       const edge3To0 = new Edge(this.p, point3, point0, false, 0, 0)
-      const point1 = edge3To0.createPerpendicularPointAtDistance(this.p, point0, -17 / this.scale)
+      const point1 = edge3To0.createPerpendicularPointAtDistance(this.p, point0, 17 * sign / this.scale)
       const edge0To1 = new Edge(this.p, point0, point1, false, 0, 1)
-      const point2 = edge0To1.createPerpendicularPointAtDistance(this.p, point1, -heightLeft / this.scale)
+      const point2 = edge0To1.createPerpendicularPointAtDistance(this.p, point1, sign * heightLeft / this.scale)
       const points = [point0, point1, point2, point3];
       const center = calculateCentroid(points);
 
 
-      this.parkingStalls.left[i].stallCorners[0] = point0;
-      this.parkingStalls.left[i].stallCorners[1] = point1;
-      this.parkingStalls.left[i].stallCorners[2] = point2;
-      this.parkingStalls.left[i].stallCorners[3] = point3;
-      this.parkingStalls.left[i].center = this.p.createVector(center.x, center.y);
+      this.parkingStalls[side][i].stallCorners[0] = point0;
+      this.parkingStalls[side][i].stallCorners[1] = point1;
+      this.parkingStalls[side][i].stallCorners[2] = point2;
+      this.parkingStalls[side][i].stallCorners[3] = point3;
+      this.parkingStalls[side][i].center = this.p.createVector(center.x, center.y);
 
 
-      // RightSide
-      const pointRight0 = i === 0 ? this.parkingStalls.right[i].stallCorners[0] : this.parkingStalls.right[i - 1].stallCorners[3];
-      const pointRight3 = this.entranceEdge.createPerpendicularPointAtDistance(this.p, pointRight0, -heightRight / this.scale)
-      const edge3To0Right = new Edge(this.p, pointRight3, pointRight0, false, 0, 0);
-      const pointRight1 = edge3To0Right.createPerpendicularPointAtDistance(this.p, pointRight0, 17 / this.scale)
-      const edge0To1Right = new Edge(this.p, pointRight0, pointRight1, false, 0, 1);
-      const pointRight2 = edge0To1Right.createPerpendicularPointAtDistance(this.p, pointRight1, heightRight / this.scale)
-      const pointsRight = [pointRight0, pointRight1, pointRight2, pointRight3];
-      const centerRight = calculateCentroid(pointsRight);
+      // // RightSide
+      // const pointRight0 = i === 0 ? this.parkingStalls.right[i].stallCorners[0] : this.parkingStalls.right[i - 1].stallCorners[3];
+      // const pointRight3 = this.entranceEdge.createPerpendicularPointAtDistance(this.p, pointRight0, -heightRight / this.scale)
+      // const edge3To0Right = new Edge(this.p, pointRight3, pointRight0, false, 0, 0);
+      // const pointRight1 = edge3To0Right.createPerpendicularPointAtDistance(this.p, pointRight0, 17 / this.scale)
+      // const edge0To1Right = new Edge(this.p, pointRight0, pointRight1, false, 0, 1);
+      // const pointRight2 = edge0To1Right.createPerpendicularPointAtDistance(this.p, pointRight1, heightRight / this.scale)
+      // const pointsRight = [pointRight0, pointRight1, pointRight2, pointRight3];
+      // const centerRight = calculateCentroid(pointsRight);
 
 
-      this.parkingStalls.right[i].stallCorners[0] = pointRight0;
-      this.parkingStalls.right[i].stallCorners[1] = pointRight1;
-      this.parkingStalls.right[i].stallCorners[2] = pointRight2;
-      this.parkingStalls.right[i].stallCorners[3] = pointRight3;
-      this.parkingStalls.right[i].center = this.p.createVector(centerRight.x, centerRight.y);
+      // this.parkingStalls.right[i].stallCorners[0] = pointRight0;
+      // this.parkingStalls.right[i].stallCorners[1] = pointRight1;
+      // this.parkingStalls.right[i].stallCorners[2] = pointRight2;
+      // this.parkingStalls.right[i].stallCorners[3] = pointRight3;
+      // this.parkingStalls.right[i].center = this.p.createVector(centerRight.x, centerRight.y);
     }
   }
 
@@ -258,7 +260,7 @@ export class Parking extends SitePlanElement {
     });
   }
 
-  statusAssignmentHelper(stall: ParkingStall,property: Property, buildings: Building[] | null | undefined){
+  statusAssignmentHelper(stall: ParkingStall, property: Property, buildings: Building[] | null | undefined) {
     const allInProperty = this.allPointsInPolygon(property.cornerOffsetsFromSetbacks, stall.stallCorners);
 
     const allOutOfBuildings1 = buildings?.map(building => {
@@ -276,74 +278,62 @@ export class Parking extends SitePlanElement {
 
     if (!allInProperty || !truthChecker(allOutOfBuildings1 || []) || !truthChecker(allOutOfBuildings2 || [])) {
       stall.isEmptySlot = true;
-    } 
+      stall.parkingStallType = 'normal'
+    }
     else if (stallCount >= this.parkingStallsNumber) {
       stall.isEmptySlot = true;
+      stall.parkingStallType = 'normal'
     }
     else {
       stall.isEmptySlot = false;
     }
-
-
   }
+
   assignEmptyStatus(property: Property, buildings: Building[] | null | undefined) {
     for (let i = 0; i < this.parkingStallsNumber; i++) {
-      const leftStall = this.parkingStalls.left[i]
-      const rightStall = this.parkingStalls.right[i]
-     
-     this.statusAssignmentHelper(leftStall,property, buildings)
-     this.statusAssignmentHelper(rightStall,property, buildings)
+      const leftStall = this.parkingStalls.left[i];
+      const rightStall = this.parkingStalls.right[i];
 
+      this.statusAssignmentHelper(leftStall, property, buildings)
+      //  Reevaluate everything
 
+      this.statusAssignmentHelper(rightStall, property, buildings)
     }
-
-    // [...value].reverse().forEach(stall => {
-    
-    // });
 
   }
 
 
-  assignStallTypes(i: number) {
+  assignStallTypes(i: number, side: 'left' | 'right', property: Property, buildings: Building[] | null | undefined) {
     // Start with the left side,
-    const stallLeft = this.parkingStalls.left[i];
+    const stall = this.parkingStalls[side][i];
 
-    if (!stallLeft.isEmptySlot) {
-
+    let recalculatePositionsAndEmptiness = false;
+    if (!stall.isEmptySlot) {
       // Check for handicapped.
-  
+
       // This is where I will put landscape.
       // Then add handicapped
       if (this.handicappedParkingNumActual < this.handicappedParkingNumTarget) {
-        stallLeft.parkingStallType = "handicapped";
+        stall.parkingStallType = "handicapped";
         this.handicappedParkingNumActual++;
-
+        recalculatePositionsAndEmptiness = true;
       }
       else if (this.compactParkingCountActual < this.compactParkingCountTarget) {
-        stallLeft.parkingStallType = "compact";
+        stall.parkingStallType = "compact";
         this.compactParkingCountActual++;
+        recalculatePositionsAndEmptiness = true;
       }
     }
 
 
 
-    // Work on the right side next,
-    const stallRight = this.parkingStalls.right[i];
+    if (recalculatePositionsAndEmptiness) {
+      // 4. When a spot is assigned, reevaluate the avaiable spots. 
+      this.reCreateStallPoints(0, 'left');
 
-    if (!stallRight.isEmptySlot) {
-      // Check for handicapped.
-
-      // This is where I will put landscape.
-      // Then add handicapped
-      if (this.handicappedParkingNumActual < this.handicappedParkingNumTarget) {
-        stallRight.parkingStallType = "handicapped";
-        this.handicappedParkingNumActual++;
-      }
-
-      else if (this.compactParkingCountActual < this.compactParkingCountTarget) {
-        stallRight.parkingStallType = "compact";
-        this.compactParkingCountActual++;
-      }
+      // 5. Fill out from the bottom with handicapped groupped on the same side and sharing a drive isle
+      // 6. Left then right zigzagging. 
+      // this.assignEmptyStatus(property, buildings);
     }
   }
 
@@ -359,16 +349,19 @@ export class Parking extends SitePlanElement {
     this.assignEmptyStatus(property, buildings);
 
 
+
+    // REMOVING THIS JUST SETS ALL THE STALLS TO NORMAL AND THE ADJUSTING WORKS GREAT.
     for (let i = 0; i < this.parkingStallsNumber; i++) {
+
       // 3. Start asigning each stall as garbage, handicapped, island, compact, or normal,
-      this.assignStallTypes(i);
+      this.assignStallTypes(i, 'left', property, buildings);
 
-      // 4. When a spot is assigned, reevaluate the avaiable spots. 
-      this.reCreateStallPoints(i);
 
-      // 5. Fill out from the bottom with handicapped groupped on the same side and sharing a drive isle
-      // 6. Left then right zigzagging. 
-      this.assignEmptyStatus(property, buildings);
+      // 3. Start asigning each stall as garbage, handicapped, island, compact, or normal,
+      this.assignStallTypes(i, 'right', property, buildings);
+
+
+
     }
 
 
@@ -417,20 +410,14 @@ export class Parking extends SitePlanElement {
 
   updateParkingHeight() {
     // Take a snapshot to revert
-
     const maxStallheight = getStallLengths(this.parkingStalls) / this.scale;
-
-    console.log(`maxStallheight`, maxStallheight)
     const garbageHeight = 5 / this.scale / 4;
-
     this.updateheight(maxStallheight + garbageHeight);
 
 
     // let parkingNotFit = true;
     // let recalcCount = 1;
 
-
-    console.log(`object`, maxStallheight)
     // while (parkingNotFit && maxParkingStalls - recalcCount > 0) {
 
     //   // Should check with ALL the boundaries
@@ -650,6 +637,22 @@ export class Parking extends SitePlanElement {
     });
     p.endShape(p.CLOSE); // Close the polygon
     p.pop();
+
+
+    p.ellipse(this.parkingStalls.left[0].stallCorners[0].x,
+      this.parkingStalls.left[0].stallCorners[0].y,
+      10, 10);
+    p.ellipse(this.parkingStalls.left[this.parkingStalls.left.length - 1].stallCorners[3].x,
+      this.parkingStalls.left[this.parkingStalls.left.length - 1].stallCorners[3].y,
+      10, 10)
+
+    p.ellipse(this.parkingStalls.right[0].stallCorners[0].x,
+      this.parkingStalls.right[0].stallCorners[0].y,
+      10, 10);
+    p.ellipse(this.parkingStalls.right[this.parkingStalls.right.length - 1].stallCorners[3].x,
+      this.parkingStalls.right[this.parkingStalls.right.length - 1].stallCorners[3].y,
+      10, 10)
+
 
   }
 }

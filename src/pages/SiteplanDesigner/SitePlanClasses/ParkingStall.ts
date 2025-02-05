@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { Edge } from "./Edge";
 import { stallWidth } from "../sketchForSiteplan";
-import { calculateCentroid } from "../../../utils/SiteplanGeneratorUtils";
+import { calculateCentroid, getStallHeight } from "../../../utils/SiteplanGeneratorUtils";
 
 export class ParkingStall {
 
@@ -60,27 +60,20 @@ export class ParkingStall {
 
 
 
-    // p.push();
+    p.push();
 
 
-    // p.translate(this.center.x, this.center.y)
-    // p.rotate(this.angle);
-    // p.rectMode(p.CENTER);
-    
-    
+    p.translate(this.center.x, this.center.y)
+    p.rotate(this.angle);
+    p.rectMode(p.CENTER);
 
-    // const center = calculateCentroid(this.stallCorners);
+    p.rect(
+      Math.sign(this.cementOffset) * stallWidth / this.scale / 2 - this.cementOffset / this.scale,
+      0,
+      .5 / this.scale,
+      (getStallHeight(this.parkingStallType)-2) / this.scale)
 
-    // p.rect(
-    //   Math.sign(this.cementOffset) * stallWidth / this.scale / 2 - this.cementOffset / this.scale,
-    //   0,
-    //   .5 / this.scale,
-    //   7 / this.scale)
-
-    // p.pop()
-
-    // p.fill('gold');
-    // p.ellipse(center.x,center.y,10,10)
+    p.pop()
   }
 
 

@@ -34,9 +34,12 @@
 [X] ADA and compact parking
 
 
-[ ] Calculate the outline away from the draw function
+[X] Parking numbers - strive for equal parking but not linked
+[X] Calculate the outline away from the draw function
+[X] Cement barrier center is not working anymore.
+
+[ ] When parking lot meets a corner, the outline should adjust for that and not continue forward. 
 [ ] Adjust parking height when parking goes out of bounds. 
-[ ] Parking numbers - strive for equal parking but not linked
 [ ] The confirm button has no cursor
 
 
