@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { Edge } from "./Edge";
 import { stallWidth } from "../sketchForSiteplan";
-import { calculateCentroid, getStallHeight } from "../../../utils/SiteplanGeneratorUtils";
+import { getStallHeight } from "../../../utils/SiteplanGeneratorUtils";
 
 export class ParkingStall {
 

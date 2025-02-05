@@ -12,7 +12,6 @@ import { Property } from "../pages/SiteplanDesigner/SitePlanClasses/Property";
 import { SitePlanElement } from "../pages/SiteplanDesigner/SitePlanClasses/SitePlanElement";
 import { compactStallHeight, handicappedStallHeight, normalStallHeight, stallWidth } from "../pages/SiteplanDesigner/sketchForSiteplan";
 import { Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
-import { sum } from "d3";
 
 
 type Point = [number, number];

@@ -797,17 +797,23 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       p.ellipse(p.mouseX, p.mouseY, 10, 10)
       // Draw the custom cursor
       drawCustomCursor();
-      p.pop();
 
-
-      p.push();
 
       drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || defaultScale);
       drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
       dialog?.draw(p);
 
+      p.pop();
+
+
+      p.push();
+
 
       p.pop();
+
+
+    
+
     };
 
 
@@ -816,15 +822,16 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       // DELETES THE BUILDING
       if (key.key === "Backspace" && Object.values(isHovered.buildings).some(Boolean)) {
         const index = isHovered.buildings.findIndex(value => value === true);
+        if (buildingsGroupRef.current === null) return
+        buildingsGroupRef.current.buildings = buildingsGroupRef.current.buildings.filter((_building, buildingIndex) => buildingIndex !== index)
+        // dialog = new ConfirmDialog(p, p.width / 2, p.height / 2, 300, 120,
+        //   () => {
+        //     
 
-        dialog = new ConfirmDialog(p, p.width / 2, p.height / 2, 300, 120,
-          () => {
-            if (buildingsGroupRef.current === null) return
-
-            buildingsGroupRef.current.buildings = buildingsGroupRef.current.buildings.filter((_building, buildingIndex) => buildingIndex !== index)
-          },
-          () => console.log("Canceled!"));
-        dialog.show();
+        //     buildingsGroupRef.current.buildings = buildingsGroupRef.current.buildings.filter((_building, buildingIndex) => buildingIndex !== index)
+        //   },
+        //   () => console.log("Canceled!"));
+        // dialog.show();
         return
       }
     }
@@ -973,7 +980,11 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         stepSelectorRefs.everything.current = false;
         stepSelectorRefs.moving.current = true;
 
+
+        parkingRef.current.updateParkingLot(property, buildings?.buildings, garbageRef.current, approachRef.current)
+        
         parkingRef.current.calculateParkingOutline(p, property, garbageRef.current, approachRef.current);
+
 
       }
 

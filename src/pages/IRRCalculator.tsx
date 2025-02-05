@@ -92,8 +92,6 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
                         description="How much are you wanting to pay for the property"
                         isMobile={isMobile}
                     />
-
-
                 </div>
 
 
