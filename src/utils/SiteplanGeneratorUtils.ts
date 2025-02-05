@@ -12,6 +12,7 @@ import { Property } from "../pages/SiteplanDesigner/SitePlanClasses/Property";
 import { SitePlanElement } from "../pages/SiteplanDesigner/SitePlanClasses/SitePlanElement";
 import { compactStallHeight, handicappedStallHeight, normalStallHeight, stallWidth } from "../pages/SiteplanDesigner/sketchForSiteplan";
 import { Line } from "../pages/SiteplanDesigner/SitePlanDesigner";
+import { sum } from "d3";
 
 
 type Point = [number, number];
@@ -1095,7 +1096,8 @@ export function drawInstructionsToScreen(
   // Draw lines connecting points
   const points = pointsRef.current;
 
-  if (points.length === 0 && !img) {
+
+  if ((points.length === 0 && !img) || !isPolygonClosed) {
     p.push();
     p.textSize(30);
     p.fill(50); // Text color
@@ -2019,5 +2021,34 @@ export function drawNeonShape(
   p.endShape(p.CLOSE);
   // Restore the drawing state
   p.pop();
+}
+
+
+
+export function getStallLengths(parkingStalls: {
+  left: ParkingStall[];
+  right: ParkingStall[];
+}){
+  let largestSide = 0;
+
+  for (const [_key, value] of Object.entries(parkingStalls)) {
+   const length = sumWidthBetweenClosedStalls(value);
+    if (length > largestSide) largestSide = length;
+  }
+  return largestSide;
+}
+
+
+
+export function sumWidthBetweenClosedStalls(stalls: ParkingStall[]): number {
+  // Find indices of first and last closed stalls
+  const firstClosedIndex = stalls.findIndex(stall => !stall.isEmptySlot);
+  const lastClosedIndex = stalls.length - 1 - [...stalls].reverse().findIndex(stall => !stall.isEmptySlot);
+
+  // If no closed stalls found, return 0
+  if (firstClosedIndex === -1 || lastClosedIndex === -1) return 0;
+
+  // Sum the width of stalls between and including first and last closed stalls
+  return stalls.slice(firstClosedIndex, lastClosedIndex + 1).reduce((sum, stall) => sum + getStallHeight(stall.parkingStallType), 0);
 }
 

@@ -906,6 +906,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         }
 
 
+        pointsRef.current =defaultEdges(p).map(point=>({x:point.x,y:point.y}))
+
 
         const propertyCorners = defaultEdges(p);
         const isClockwise = getIsClockwise(propertyCorners)
@@ -958,7 +960,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         garbageRef.current.updateCenterGarbage(parkingRef.current);
 
 
-        console.log(`garbageRef.current`, garbageRef.current)
 
 
 

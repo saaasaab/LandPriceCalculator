@@ -29,7 +29,7 @@ export class ParkingStall {
     this.previousAngle = angle;
     this.entranceEdge = entranceEdge;
     this.previousEntranceEdge = entranceEdge;
-    this.isEmptySlot = false;
+    this.isEmptySlot = true;
     this.scale = scale;
     this.cementOffset = cementOffset;
     this.center = center;
