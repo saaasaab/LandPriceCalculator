@@ -32,11 +32,12 @@
 [X] Daniel - Parking stalls bug where stalls don't update
 [X] On start garbage is always sink in
 [X] ADA and compact parking
-
-
 [X] Parking numbers - strive for equal parking but not linked
 [X] Calculate the outline away from the draw function
 [X] Cement barrier center is not working anymore.
+
+
+[ ] Design ADA parking lot and compact lot
 
 [ ] When parking lot meets a corner, the outline should adjust for that and not continue forward. 
 [ ] Adjust parking height when parking goes out of bounds. 

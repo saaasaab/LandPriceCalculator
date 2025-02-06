@@ -102,7 +102,7 @@ export class Parking extends SitePlanElement {
     this.createFullEmptyParkingLot();
 
 
-    this.calculateParkingOutline(this.p, property, garbage, approach);
+    this.calculateParkingOutline( property, garbage, approach);
 
   }
 
@@ -253,6 +253,7 @@ export class Parking extends SitePlanElement {
       return truthChecker(allOutOfBuilding);
     })
 
+
     const stallCounts = countParkingStalls(this);
     const stallCount = stallCounts.leftStalls + stallCounts.rightStalls;
 
@@ -326,7 +327,7 @@ export class Parking extends SitePlanElement {
 
   updateParkingLot(property: Property, buildings: Building[] | null | undefined, garbage: Garbage | null | undefined, approach: Approach | null | undefined) {
 
-    if (!garbage || !approach) return
+    if (!approach) return
 
     // 1. Start with full lot, this.parkingStallsNumber on each side and garbage at the top
     this.createFullEmptyParkingLot();
@@ -346,7 +347,7 @@ export class Parking extends SitePlanElement {
       this.assignStallTypes(i, 'right');
     }
 
-    garbage.updateCenterGarbage(this)
+    garbage?.updateCenterGarbage(this)
 
 
 
@@ -355,9 +356,7 @@ export class Parking extends SitePlanElement {
 
     this.createRotationHandles();
 
-
-
-    this.calculateParkingOutline(this.p, property, garbage, approach);
+    this.calculateParkingOutline(property, garbage, approach);
 
 
 
@@ -413,7 +412,7 @@ export class Parking extends SitePlanElement {
   }
 
 
-  calculateParkingOutline(p: p5, property: Property | null, garbage: Garbage | null, approach: Approach) {
+  calculateParkingOutline(property: Property | null, garbage: Garbage | null | undefined, approach: Approach) {
     if (!this.entranceEdge) return;
 
     // This is going counter clockwise
@@ -426,7 +425,7 @@ export class Parking extends SitePlanElement {
     const firstLeftStall = leftStalls[0]
     const lastLeftStall = leftStalls[leftStalls.length - 1];
 
-    const offsetDistance = p.max((this.width - approach.width) / 2, 0);
+    const offsetDistance = p5.prototype.max((this.width - approach.width) / 2, 0);
 
 
 
@@ -446,12 +445,12 @@ export class Parking extends SitePlanElement {
       const angle = calculateAngle(position, midpoint);
 
       if (midpoint) {
-        const point = p.createVector(
-          position.x + p.cos(angle) * offsetDistance,
-          position.y + p.sin(angle) * offsetDistance
+        const point = p5.prototype.createVector(
+          position.x + p5.prototype.cos(angle) * offsetDistance,
+          position.y + p5.prototype.sin(angle) * offsetDistance
         )
 
-        parkingOutline.push(p.createVector(point.x, point.y))
+        parkingOutline.push(p5.prototype.createVector(point.x, point.y))
       }
     }
 
@@ -472,7 +471,7 @@ export class Parking extends SitePlanElement {
       this.sitePlanElementCorners[1]
     )
 
-    if (property?.hasGarbageEnclosure && garbage !== null) {
+    if (property?.hasGarbageEnclosure && garbage && garbage !== null) {
       parkingOutline.push(
         garbage.sitePlanElementCorners[2],
         garbage.sitePlanElementCorners[1],
@@ -509,12 +508,12 @@ export class Parking extends SitePlanElement {
 
       if (midpoint) {
         // const offsetDistance = p.abs(this.width - approach.width) / 2
-        const point = p.createVector(
-          position.x + p.cos(angle) * offsetDistance,
-          position.y + p.sin(angle) * offsetDistance
+        const point = p5.prototype.createVector(
+          position.x + p5.prototype.cos(angle) * offsetDistance,
+          position.y + p5.prototype.sin(angle) * offsetDistance
         );
 
-        parkingOutline.push(p.createVector(point.x, point.y));
+        parkingOutline.push(p5.prototype.createVector(point.x, point.y));
       }
     }
 
@@ -593,19 +592,19 @@ export class Parking extends SitePlanElement {
     p.pop();
 
 
-    p.ellipse(this.parkingStalls.left[0].stallCorners[0].x,
-      this.parkingStalls.left[0].stallCorners[0].y,
-      10, 10);
-    p.ellipse(this.parkingStalls.left[this.parkingStalls.left.length - 1].stallCorners[3].x,
-      this.parkingStalls.left[this.parkingStalls.left.length - 1].stallCorners[3].y,
-      10, 10)
+    // p.ellipse(this.parkingStalls.left[0].stallCorners[0].x,
+    //   this.parkingStalls.left[0].stallCorners[0].y,
+    //   10, 10);
+    // p.ellipse(this.parkingStalls.left[this.parkingStalls.left.length - 1].stallCorners[3].x,
+    //   this.parkingStalls.left[this.parkingStalls.left.length - 1].stallCorners[3].y,
+    //   10, 10)
 
-    p.ellipse(this.parkingStalls.right[0].stallCorners[0].x,
-      this.parkingStalls.right[0].stallCorners[0].y,
-      10, 10);
-    p.ellipse(this.parkingStalls.right[this.parkingStalls.right.length - 1].stallCorners[3].x,
-      this.parkingStalls.right[this.parkingStalls.right.length - 1].stallCorners[3].y,
-      10, 10)
+    // p.ellipse(this.parkingStalls.right[0].stallCorners[0].x,
+    //   this.parkingStalls.right[0].stallCorners[0].y,
+    //   10, 10);
+    // p.ellipse(this.parkingStalls.right[this.parkingStalls.right.length - 1].stallCorners[3].x,
+    //   this.parkingStalls.right[this.parkingStalls.right.length - 1].stallCorners[3].y,
+    //   10, 10)
 
 
   }

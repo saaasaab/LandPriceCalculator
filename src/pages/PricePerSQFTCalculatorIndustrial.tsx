@@ -143,7 +143,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Price per SQFT you should pay ", "$" + roundToDecimal(pricePerSQFT)]}
+                    cellValues={["Building value price per SQFT ", "$" + roundToDecimal(pricePerSQFT)]}
                     description="This is the max you should pay per sqft to achive the desired returns"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vS8YsmrbZaugpEsC5jwMyYxLuCaznTDfN1IasxjJjyOKPyWKFPJONfWXBAXdkQvTn5aWKZDSk0-ehmz/pub"}
                 />

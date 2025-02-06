@@ -412,7 +412,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           }
 
 
-          if (parkingDragMode !== null) {
+          if (parkingDragMode !== null ||  isHovered.parking) {
             p.push();
             p.noFill();
             p.stroke(30, 60, 200);
@@ -614,6 +614,27 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             if (buildingDragMode !== null) {
               building.drawBuildingEditOptions();
             }
+
+            
+            p.push();
+            p.noFill();
+            p.stroke(30, 60, 200);
+            p.strokeWeight(3)
+  
+            // // Circles around the the building corners
+            // building.sitePlanElementCorners.forEach(corner=>{
+            //   p.ellipse(corner.x, corner.y, 15, 15)
+            // })
+  
+            // // Lines for all the edges
+            // building.sitePlanElementEdges.forEach(edge=>{
+            //   p.line(edge.point1.x, edge.point1.y, edge.point2.x,edge.point2.y)
+            // });
+  
+            // center circle
+            p.ellipse(building.center.x, building.center.y, 20, 20)
+            p.pop();
+
 
             if (buildingDragMode === "corner") p.cursor('nesw-resize');
             else if (buildingDragMode === "edge") p.cursor('ew-resize');
@@ -983,7 +1004,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         parkingRef.current.updateParkingLot(property, buildings?.buildings, garbageRef.current, approachRef.current)
         
-        parkingRef.current.calculateParkingOutline(p, property, garbageRef.current, approachRef.current);
+        parkingRef.current.calculateParkingOutline(property, garbageRef.current, approachRef.current);
 
 
       }
@@ -1144,6 +1165,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         garbageRef.current = new Garbage(p, getCenterPoint(p, parkingRef.current.sitePlanElementEdges[0].point1, parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 12 / propertyRef.current.scale, 5 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
         garbageRef.current.initialize();
         garbageRef.current.updateCenterGarbage(parkingRef.current);
+
+        parkingRef.current.updateParkingLot(propertyRef.current, buildingsGroupRef.current?.buildings, garbage, approach)
+
       }
 
       // ALL THINGS BUILDING
@@ -1609,6 +1633,9 @@ function updateGlobalVariables(
 
     parking.updateParkingGlobals(property, formData.parkingStalls, garbage, buildingsGroup?.buildings, approach);
     parking.updateWidth(Number(formData.drivewayWidth) / property.scale);
+
+    parking.calculateParkingOutline(property, garbage, approach)
+
 
   }
 }

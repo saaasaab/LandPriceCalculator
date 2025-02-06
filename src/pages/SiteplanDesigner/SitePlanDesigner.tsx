@@ -381,13 +381,6 @@ const SitePlanGenerator: React.FC = () => {
     setOffsetPoints(offsets);
   };
 
-  const addBuilding = () => {
-    // propertyRef?.current?.createNewBuilding(buildingsGroupRef.current)
-    if (propertyRef.current === null) return;
-    propertyRef.current.isAddingNewBuilding = true;
-
-
-  }
 
   // const updateScale = (index: number, value: string) => {
 
@@ -978,18 +971,6 @@ const SitePlanGenerator: React.FC = () => {
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuilding() },
       children: <div style={{ marginTop: '10px' }}>
-
-
-
-        <div className="site-plan-generator__button">
-          <label htmlFor="addBuilding">Add Building</label>
-
-          <Button
-            id="addBuilding"
-
-            onClick={() => addBuilding}
-          />
-        </div>
 
         <div className="site-plan-generator__input-group">
           <label>Enable Dimensions</label>

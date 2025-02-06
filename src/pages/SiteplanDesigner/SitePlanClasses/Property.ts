@@ -22,7 +22,6 @@ export class Property {
   public zoom: number;
   public offsetX: number;
   public offsetY: number
-  public isAddingNewBuilding: boolean;
   public frameCount = 0;
 
   // INPUT CONTSTRAINTS
@@ -62,7 +61,6 @@ export class Property {
     this.zoom = 1; // Initial zoom level
     this.offsetX = 0;
     this.offsetY = 0; // Offset for translation
-    this.isAddingNewBuilding = false;
 
     //INPUT CONTSTRAINTS
     this.buildingCoveragePercentage = 70;

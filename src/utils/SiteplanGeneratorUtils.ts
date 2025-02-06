@@ -57,7 +57,7 @@ export interface FormDataInputs {
 export const initialFormData: FormDataInputs = {
   parkingStalls: 4,
   handicappedParkingStalls: 1,
-  compactParkingStalls: 2,
+  compactParkingStalls: 1,
   approachWidth: 20,
   drivewayWidth: 24,
   buildingAreaTarget: 1500,
