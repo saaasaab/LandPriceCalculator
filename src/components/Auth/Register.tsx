@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 // import axios from 'axios';
 
 import './Auth.scss';
 import { useAuth } from '../../context/AuthContext';
 import { postRequest } from '../../utils/api';
+import { getAppDefaultUrl } from '../../Routes';
 
 
 const Register: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login } = useAuth();
-    const navigate = useNavigate();
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -30,8 +30,15 @@ const Register: React.FC = () => {
             //   });
 
             login({ email: data.user.email, token: data.token });
-            navigate('/');
+
+            const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
+
+            const targetUrl = getAppDefaultUrl(isLocal)
+            
             console.log('✅ Account created:', data);
+
+            window.location.href = targetUrl;
+
         } catch (error) {
             console.error('❌ Registration error:', error);
             alert('Failed to create account. Please try again.');

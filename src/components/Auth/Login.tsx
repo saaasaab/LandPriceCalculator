@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { postRequest } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import { getAppDefaultUrl } from '../../Routes';
 
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth(); // Use custom hook
-  const navigate = useNavigate();
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,7 +23,12 @@ const Login: React.FC = () => {
 
       login({ email: data.user.email, token: data.token }); // Save user data
 
-      navigate('/');
+
+      const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
+
+      const targetUrl = getAppDefaultUrl(isLocal)
+      window.location.href = targetUrl;
+
     } catch (error) {
       alert('Failed to log in. Please check your credentials.');
     }
