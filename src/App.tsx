@@ -14,6 +14,7 @@ import Login from './components/Auth/Login';
 import ForgotPassword from './components/Auth/ForgotPassword';
 import Register from './components/Auth/Register';
 import { AuthProvider } from './context/AuthContext';
+import LandingPage from './pages/LandingPage/LandingPage';
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -57,6 +58,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/landing" element={<LandingPage />} />
 
 
             <Route path="*" element={<NotFound />} />
