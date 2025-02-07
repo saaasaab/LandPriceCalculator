@@ -1,6 +1,6 @@
 export const BASE_URL = () => {
 
-  return window.location.hostname === "localhost"
+  return window.location.hostname.includes("localhost")
     ? "http://localhost:8080"
     : "https://landpricecalculatorapi.onrender.com";
 }

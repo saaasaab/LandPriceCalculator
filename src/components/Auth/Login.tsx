@@ -15,6 +15,8 @@ const Login: React.FC = () => {
     e.preventDefault();
 
     try {
+
+
       const data = await postRequest<{ token: string; user: { email: string } }>(
         '/login',
         { email, password }
@@ -23,7 +25,7 @@ const Login: React.FC = () => {
 
       login({ email: data.user.email, token: data.token }); // Save user data
 
-
+        
       const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
 
       const targetUrl = getAppDefaultUrl(isLocal)
