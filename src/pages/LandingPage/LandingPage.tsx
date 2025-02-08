@@ -26,7 +26,7 @@ const LandingPage: React.FC = () => {
       title: 'Industrial Development Calculator',
       description: 'Advanced calculator for industrial development projects with specialized metrics for warehouse, manufacturing, and logistics facilities.',
       icon: '🏭',
-      link:<Link className="try-button" to={routes.INDUSTRIAL_DEVELOPMENT}>Try Now</Link>
+      link: <Link className="try-button" to={routes.INDUSTRIAL_DEVELOPMENT}>Try Now</Link>
     },
     {
       id: 'residential-dev',
@@ -40,21 +40,21 @@ const LandingPage: React.FC = () => {
       title: 'Construction Budget Generator',
       description: 'Automated budget creation tool with industry-standard line items and cost estimation.',
       icon: '📊',
-      link:<Link className="try-button" to={routes.CONSTRUCTION_BUDGET}>Try Now</Link>
+      link: <Link className="try-button" to={routes.CONSTRUCTION_BUDGET}>Try Now</Link>
     },
     {
       id: 'multi-family-proforma',
       title: 'Multi-family Proforma',
       description: 'Detailed financial modeling tool for multi-family properties with comprehensive cash flow analysis.',
       icon: '💰',
-      link:<Link className="try-button" to={routes.MULTIFAMILY_ANALYSIS}>Try Now</Link>
+      link: <Link className="try-button" to={routes.MULTIFAMILY_ANALYSIS}>Try Now</Link>
     },
     {
       id: 'industrial-sqft',
       title: 'Industrial Per SQFT Calculator',
       description: 'Quick and accurate calculations for industrial property metrics on a per-square-foot basis.',
       icon: '📏',
-      link:<Link className="try-button" to={routes.INDUSTRIAL_PRICE_PER_SQFT}>Try Now</Link>
+      link: <Link className="try-button" to={routes.INDUSTRIAL_PRICE_PER_SQFT}>Try Now</Link>
     },
     {
       id: 'multi-family-door',
@@ -68,14 +68,14 @@ const LandingPage: React.FC = () => {
       title: "Seller's IRR Estimator",
       description: 'Sophisticated tool for calculating and analyzing Internal Rate of Return for property sellers.',
       icon: '📈',
-      link:<Link className="try-button" to={routes.IRR_CALCULATOR}>Try Now</Link>
+      link: <Link className="try-button" to={routes.IRR_CALCULATOR}>Try Now</Link>
     },
     {
       id: 'site-plan',
       title: 'Site Plan Generator',
       description: 'Innovative tool for creating preliminary site plans and layout options for development projects.',
       icon: '🗺️',
-      link:<Link className="try-button"  to={routes.SITE_PLAN_BUILDER}>Try Now</Link>
+      link: <Link className="try-button" to={routes.SITE_PLAN_BUILDER}>Try Now</Link>
     }
   ];
 
@@ -83,6 +83,26 @@ const LandingPage: React.FC = () => {
     <div className="landing-page">
 
       <HeroSection />
+
+
+
+      <section className="calculators">
+        <div className="container">
+          <h2>Our Calculator Suite</h2>
+          <div className="calculator-grid">
+            {calculators.map(calc => (
+              <div key={calc.id} className="calculator-card">
+                <span className="calculator-icon">{calc.icon}</span>
+                <h3>{calc.title}</h3>
+                <p>{calc.description}</p>
+                {/* <button ></button> */}
+                {calc.link}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
 
       <section className="benefits">
         <div className="container">
@@ -100,23 +120,6 @@ const LandingPage: React.FC = () => {
               <h3>Accurate Results</h3>
               <p>Trusted by industry professionals for reliable analysis</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="calculators">
-        <div className="container">
-          <h2>Our Calculator Suite</h2>
-          <div className="calculator-grid">
-            {calculators.map(calc => (
-              <div key={calc.id} className="calculator-card">
-                <span className="calculator-icon">{calc.icon}</span>
-                <h3>{calc.title}</h3>
-                <p>{calc.description}</p>
-                {/* <button ></button> */}
-                {calc.link}
-              </div>
-            ))}
           </div>
         </div>
       </section>

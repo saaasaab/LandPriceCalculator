@@ -24,11 +24,6 @@ const Register: React.FC = () => {
                 { email, password }
             );
 
-            //   const { data } = await axios.post('http://localhost:8080/register', {
-            //     email,
-            //     password,
-            //   });
-
             login({ email: data.user.email, token: data.token });
 
             const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");

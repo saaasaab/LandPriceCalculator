@@ -1,7 +1,6 @@
 import { AppRouter, LandingRouter } from "../Routes";
 
-export const APPS = [
-    {
+export const APPS = [{
         subdomain: "www",
         app: LandingRouter,
         main: true,
@@ -16,17 +15,13 @@ export const APPS = [
 
 export const getApp = () => {
     const subdomain = getSubdomains(window.location.hostname);
-   
     const main = APPS.find(app=>app.main);
-
     if(!main) throw new Error("Must have main app");
     if(subdomain === "") return main.app;
     const app = APPS.find(app => subdomain ===app.subdomain);
 
     if(!app) return main?.app;
-
     return app.app;
-
 }
 
 export const getSubdomains = (location: string) =>{

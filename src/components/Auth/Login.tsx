@@ -58,7 +58,7 @@ const Login: React.FC = () => {
       </form>
 
       <div className="auth-links">
-        <Link to="/forgot-password">Forgot Password?</Link>
+        {/* <Link to="/forgot-password">Forgot Password?</Link> */}
         <Link to="/register">Create an Account</Link>
       </div>
     </div>

@@ -45,11 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (!window.location.href.includes('//app.')) {
         const user = JSON.parse(storedUser);
         // redirect user to app and log them in. 
-        // window.location
-        // var searchParams = new URLSearchParams(window.location.search);
 
-
-        console.log(`user`, user)
         const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
         const targetUrl = `${getAppDefaultUrl(isLocal)}?token=${user.token || ""}`
 

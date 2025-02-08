@@ -76,8 +76,8 @@ export  const getTargetUrl = (isLocal:boolean)=> isLocal
 : `https://app.landpricecalculator.com${location.pathname}${location.search}`; // Production
 
 export  const getAppDefaultUrl = (isLocal:boolean)=> isLocal
-? `http://app.localhost:${window.location.port}/` // Local dev
-: `https://app.landpricecalculator.com/`; // Production
+? `http://app.localhost:${window.location.port}${location.pathname}` // Local dev
+: `https://app.landpricecalculator.com${location.pathname}`; // Production
 
 
 import { useLocation } from "react-router-dom";
@@ -114,7 +114,7 @@ export function LandingRouter() {
 
 
 
-            <Route path="/" element={<LandingPage />} />
+            {/* <Route path="/" element={<LandingPage />} /> */}
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
