@@ -197,8 +197,10 @@ const SitePlanGenerator: React.FC = () => {
 
   let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null)
 
+  const [count, setCount] = useState(0);
   useEffect(() => {
     const updateVariables = () => {
+      setCount(prev=>prev+1)
       const property = propertyRef.current;
       const approach = approachRef.current;
       const parking = parkingRef.current;
@@ -680,7 +682,7 @@ const SitePlanGenerator: React.FC = () => {
             const rect = canvasRef.current.getBoundingClientRect();
 
             return (
-              <div key={index}>
+              <div key={count +"_"+index}>
                 <div className="edge-index"
                   style={{
                     position: "fixed",
@@ -1093,15 +1095,6 @@ const SitePlanGenerator: React.FC = () => {
     },
 
 
-    // {
-    //   id: 'generate',
-    //   title: '6. Generate Siteplan',
-    //   icon: <Box />,
-    //   description: 'Generate the base for your site plan',
-    //   help: 'Move the parking lot and building around, create building entrances, create sidewalks, and get ready to submit your site plan.',
-    //   onClick: () => { generateSitePlan() },
-    //   disabled: isUploadingImageRef.current
-    // },
 
   ];
   return (
@@ -1120,14 +1113,14 @@ const SitePlanGenerator: React.FC = () => {
 
                   <div className="site-plan-generator__sidebar-content">
                     {steps.map((step, index) => {
-                      if (!step) return <></>
+                      if (!step) return <div key={"empty"} style={{display: "none"}}></div>
 
                       return (
 
 
 
                         <div
-                          key={step.id}
+                          key={`${count}_${step.id}`}
                           className={`site-plan-generator__step 
                         ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
                         ${index < currentStep ? 'site-plan-generator__step--completed' : ''}

@@ -460,6 +460,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
       if (buildingsGroup) {
+
         buildingsGroup.buildings.forEach((building, buildingIndex) => {
 
           if (building === null) return;
@@ -474,8 +475,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             // STOP THE GROWING FOR NOW.
             // building.buildingGrower(property, parking);
           }
-
-
 
           isHovered.buildings[buildingIndex] = building.isMouseHovering();
           isHovered.buildingsOffset[buildingIndex] = building.isMouseHoveringOffset();
@@ -538,6 +537,11 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           }
 
 
+          console.log(`(isHove`, isHovered.buildings[buildingIndex] ,
+            isHovered.buildingsOffset[buildingIndex] ,
+            isHovered.buildingsHandle[buildingIndex] ,
+            building.isRotating)
+
           // Check if we're hovering over a building corner, edge, or center
           if ((isHovered.buildings[buildingIndex] ||
             isHovered.buildingsOffset[buildingIndex] ||
@@ -548,8 +552,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             // isNoOtherIsTrue(buildingsGroup.buildings.map(building=>building.isSelected),buildingIndex)
             // No other building is being dragged
           ) {
-
-
 
             parkingDragMode = null;
             approachDragMode = null;
