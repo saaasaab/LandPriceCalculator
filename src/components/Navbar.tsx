@@ -4,7 +4,7 @@ import './Navbar.scss';
 import { useState } from 'react';
 import Hamburger from './Hamburger';
 import { EPageTitles } from '../utils/types';
-import {useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 
 
@@ -89,18 +89,20 @@ const Navbar = () => {
             <Link onClick={handleToggleMenu} to={routes.ARTICLES}>Articles</Link>
           </div>
         </li> */}
+
+        <div className="navbar-auth">
+          {user ? (
+            <>
+              <button onClick={logout} className="logout-btn">Logout</button>
+            </>
+          ) : (
+            <Link to="/login" className="login-btn">Login</Link>
+          )}
+        </div>
       </ul>
 
 
-      <div className="navbar-auth">
-        {user ? (
-          <>
-            <button onClick={logout} className="logout-btn">Logout</button>
-          </>
-        ) : (
-          <Link to="/login" className="login-btn">Login</Link>
-        )}
-      </div>
+
 
 
     </nav>

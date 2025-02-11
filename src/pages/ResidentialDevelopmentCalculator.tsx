@@ -179,7 +179,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
             description: "Total profit made by the land developer from the entire project.",
         },
         [OutputKeys.TotalSDCCosts]: {
-            title: "Total SDC Costs",
+            title: "Total Land Entitlement Costs",
             value: costToDevelopPerLot,
             value2: (removeCommas(costToDevelopPerLot) * totalLotYield).toLocaleString(),
             description: "The total SDC costs and engineering/architectural fees.",
