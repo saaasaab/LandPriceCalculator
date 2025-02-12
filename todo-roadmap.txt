@@ -43,7 +43,6 @@
 [ ] Adjust parking height when parking goes out of bounds. 
 [ ] The confirm button has no cursor
 
-
 [ ] Different parking configurations
 [ ] Grab icon is not right. It only is grabbing when the mouse is moving
 [ ] Arrows on resize are not always pointing the right angle. 

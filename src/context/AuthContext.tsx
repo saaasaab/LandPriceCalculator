@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
-import { getAppDefaultUrl } from '../Routes';
-import { postRequest } from '../utils/api';
+// import { getAppDefaultUrl } from '../Routes';
+// import { postRequest } from '../utils/api';
 
 // Define user and context types
 interface User {
@@ -14,15 +14,26 @@ interface AuthContextType {
   logout: () => void;
 }
 
+const checkUser = () => {
+  const storedUser = localStorage.getItem('user');
+
+  if (!storedUser) {
+    return null;
+  }
+
+  const _user = JSON.parse(storedUser);
+  return _user
+  // redirect user to app and log them in. 
+}
 // Default values to prevent `undefined`
 const defaultAuthContext: AuthContextType = {
-  user: null,
+  user: checkUser(),
   login: () => { },
   logout: () => { },
 };
 
 
-const removeQueryParam = (param:string) => {
+const removeQueryParam = (param: string) => {
   const url = new URL(window.location.href);
   url.searchParams.delete(param);
   window.history.replaceState({}, document.title, url.toString());
@@ -38,56 +49,57 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-
-
-
     if (storedUser) {
-      if (!window.location.href.includes('//app.')) {
-        const user = JSON.parse(storedUser);
-        // redirect user to app and log them in. 
+      // if (!window.location.href.includes('//app.')) {
 
-        const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
-        const targetUrl = `${getAppDefaultUrl(isLocal)}?token=${user.token || ""}`
+      // // UNCOMMENT WHEN I WANT AUTO REDIRECT
 
-        window.location.href = targetUrl;
-      }
-      
+
+      //   // const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
+      //   // const targetUrl = `${getAppDefaultUrl(isLocal)}?token=${user.token || ""}`
+
+      //   // window.location.href = targetUrl;
+      // }
+
+      const _user = JSON.parse(storedUser);
+
+      // redirect user to app and log them in. 
       removeQueryParam("token");
-      setUser(JSON.parse(storedUser));
+      setUser(_user)
     }
 
 
-    else {
-      if (window.location.href.includes('//app.')) {
-        const urlParams = new URLSearchParams(location.search);
-        const token = urlParams.get("token");
+    // else {
+    //   if (window.location.href.includes('//app.')) {
+    //     const urlParams = new URLSearchParams(location.search);
+    //     const token = urlParams.get("token");
 
-        if (token) {
-          checkToken(token);
+    //     if (token) {
+    //       checkToken(token);
 
-          // Remove "token" query param
-          removeQueryParam("token");
-        } 
+    //       // Remove "token" query param
+    //       removeQueryParam("token");
+    //     }
 
-      }
-    }
+    //   }
+    // }
 
 
 
-    async function checkToken(token: string) {
-      // Store token in localStorage (or in cookies)
-      localStorage.setItem("authToken", token);
+    // async function checkToken(token: string) {
+    //   // Store token in localStorage (or in cookies)
+    //   localStorage.setItem("authToken", token);
 
-      // Call the api to get the user and log them in. 
+    //   // Call the api to get the user and log them in. 
 
-      const data = await postRequest<{ token: string; user: { email: string } }>(
-        '/auth',
-        { token }
-      );
+    //   const data = await postRequest<{ token: string; user: { email: string } }>(
+    //     '/auth',
+    //     { token }
+    //   );
 
-      login({ email: data.user.email, token: data.token }); // Save user data
+    //   login({ email: data.user.email, token: data.token }); // Save user data
 
-    }
+    // }
   }, []);
 
   const login = (userData: User) => {
@@ -97,9 +109,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
 
-    localStorage.clear()    
+    const firstVisitDate = localStorage.getItem('firstVisitDate') || "";
+
+
+    localStorage.clear();
+    localStorage.setItem('firstVisitDate', firstVisitDate);
+
+    location.reload();
   };
 
   return (

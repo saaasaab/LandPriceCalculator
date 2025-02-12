@@ -108,7 +108,8 @@ export const DEFAULT_VALUES = {
         homeBuilderProfitPercentage: "20",
         realEstateCommissionPercentage: "3",
         landDeveloperProfitPercentage: "15",
-        costToDevelopPerLot: "40,000",
+        costToDevelopPerLot: "50,000",
+        SDCFees: "35,000",
     },
     [EPageNames.MULTIFAMILY_DEVELOPMENT]: {
         ...DEFAULT_VALUES_ZEROS,

@@ -62,7 +62,7 @@ const HeroSection: React.FC = () => {
                 <h1>Transform Your Real Estate Analysis</h1>
                 <p className="tagline">A rich man's tool at a poor man's price</p>
                 {/* <p className="subtitle">Professional-grade real estate calculators at your fingertips</p> */}
-                <Link className="cta-button" to="/register">Start Free Trial</Link>
+                <Link className="cta-button" to="/register">Sign Up for Early Acces</Link>
             </div>
         </header>
     );

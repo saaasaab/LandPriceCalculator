@@ -27,6 +27,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
     const [grossAcres, setGrossAcres] = usePersistedState2(page, EAllStates.grossAcres, DEFAULT_VALUES[page].grossAcres, queryParams);
     const [costToDevelopPerLot, setCostToDevelopPerLot] = usePersistedState2(page, EAllStates.costToDevelopPerLot, DEFAULT_VALUES[page].costToDevelopPerLot, queryParams);
+    
+    const [SDCFees,setSDCFees]= usePersistedState2(page, EAllStates.SDCFees, DEFAULT_VALUES[page].SDCFees, queryParams);
     const [hardCostPerSqFt, setHardCostPerSqFt] = usePersistedState2(page, EAllStates.hardCostPerSqFt, DEFAULT_VALUES[page].hardCostPerSqFt, queryParams);
     const [homeBuilderProfitPercentage, setHomeBuilderProfitPercentage] = usePersistedState2(page, EAllStates.homeBuilderProfitPercentage, DEFAULT_VALUES[page].homeBuilderProfitPercentage, queryParams);
     const [housePricePerSqFt, setHousePricePerSqFt] = usePersistedState2(page, EAllStates.housePricePerSqFt, DEFAULT_VALUES[page].housePricePerSqFt, queryParams);
@@ -58,7 +60,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         // realEstateCommissionPercentage,
         landDeveloperProfitPercentage,
         costToDevelopPerLot,
-        ownedLandCost
+        ownedLandCost,
+        SDCFees
     };
 
     const {
@@ -79,6 +82,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         totalSoftCosts,
         totalCosts,
         totalProfits,
+        totalCostToDevelopPerLot,
+     
         // totalClosingCosts
     } = residentialDevelopmentCalculations(inputs)
 
@@ -180,9 +185,9 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         },
         [OutputKeys.TotalSDCCosts]: {
             title: "Total Land Entitlement Costs",
-            value: costToDevelopPerLot,
-            value2: (removeCommas(costToDevelopPerLot) * totalLotYield).toLocaleString(),
-            description: "The total SDC costs and engineering/architectural fees.",
+            value: totalCostToDevelopPerLot.toLocaleString(),
+            value2: (totalCostToDevelopPerLot * totalLotYield).toLocaleString(),
+            description: "The total SDC costs,  engineering/architectural fees, and infrastructure buildout costs",
         },
 
 
@@ -277,7 +282,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["Zoning - Sq Ft per Lot (SQFT)", sqFtPerLot]}
                         description="The jurisdiction gives a zoning requirement or desired lot size (e.g., R-5 = 5,000 sq ft per lot)."
                         isMobile={isMobile}
-                        // isGreyedOut={  removeCommas(unitsPerAcre) > 0}
+                    // isGreyedOut={  removeCommas(unitsPerAcre) > 0}
 
                     />
 
@@ -298,7 +303,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["House Price - per Sq Ft", housePricePerSqFt]}
                         description="The average price per square foot for houses in this area, determined by local research."
                         isMobile={isMobile}
-                        isGreyedOut={ removeCommas(residentialPricePerHome) > 0}
+                        isGreyedOut={removeCommas(residentialPricePerHome) > 0}
                     />
                     {/* House Price Per Sq Ft */}
                     <InputRow
@@ -331,7 +336,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Permits */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.permits}`); setPermits(value) }}
-                        cellValues={["Permits ($)", permits]}
+                        cellValues={["Permits ($) per Home", permits]}
                         description="The total cost of permits required for the house build."
                         isMobile={isMobile}
                     />
@@ -340,7 +345,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Misc Costs */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.miscCosts}`); setMiscCosts(value) }}
-                        cellValues={["Misc Costs ($)", miscCosts]}
+                        cellValues={["Misc Costs ($) per Home", miscCosts]}
                         description="Miscellaneous costs involved in the house build."
                         isMobile={isMobile}
                     />
@@ -380,10 +385,19 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Cost to Develop Land */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.costToDevelopPerLot}`); setCostToDevelopPerLot(value) }}
-                        cellValues={["Cost to Develop the Land ($)", costToDevelopPerLot]}
-                        description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
+                        cellValues={["Cost to Develop the Land ($) per Home", costToDevelopPerLot]}
+                        description="Costs for engineering, clearing, demolition, utilities, and infrastructure costs per home"
                         isMobile={isMobile}
                     />
+
+
+                    <InputRow
+                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.SDCFees}`); setSDCFees(value) }}
+                        cellValues={["SDC (System Development Charges) ($) per Home", SDCFees]}
+                        description="SDC (System Development Charges) are the charges a city requires to connect to their services."
+                        isMobile={isMobile}
+                    />
+
 
 
                     <InputRow

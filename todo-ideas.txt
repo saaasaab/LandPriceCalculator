@@ -19,6 +19,6 @@
     [ ] Depreciation Modeling
     [ ] Industrial Proforma
 
-[ ] mulplie Buildings
+[X] mulplie Buildings
 [X] Building Price - per Sq Ft ($) NOT CLEAR
 [X] breakout the formulas - NOI

@@ -12,6 +12,7 @@ type TResidentialDevelopmentCalculationsInputs = {
     permits: string;
     miscCosts: string;
     homeBuilderProfitPercentage: string;
+    SDCFees: string;
     // realEstateCommissionPercentage: string;
     landDeveloperProfitPercentage: string;
     costToDevelopPerLot: string;
@@ -39,6 +40,7 @@ type TResidentialDevelopmentCalculationsOutputs = {
     totalSoftCosts: number;
     totalCosts: number;
     totalProfits: number;
+    totalCostToDevelopPerLot: number;
     // totalClosingCosts: number;
 };
 
@@ -49,7 +51,7 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         sqFtPerLot,
         unitsPerAcre,
         houseSize,
-
+        SDCFees,
 
         housePricePerSqFt,
         residentialPricePerHome,
@@ -89,19 +91,17 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
 
     const landDeveloperProfitPerLot = (landDeveloperProfitPercentage / 100) * finishedLotValue;
     const landDeveloperProfit = landDeveloperProfitPerLot * totalLotYield;
+    const totalCostToDevelopPerLot =  SDCFees + costToDevelopPerLot;
     
-    
-    const perLotOfferToLandOwner = ownedLandCost ? ownedLandCost/totalLotYield : finishedLotValue - costToDevelopPerLot - landDeveloperProfitPerLot;
+    const perLotOfferToLandOwner = ownedLandCost ? ownedLandCost/totalLotYield : finishedLotValue - totalCostToDevelopPerLot - landDeveloperProfitPerLot;
     const totalOfferToLandOwner = perLotOfferToLandOwner * totalLotYield;
 
     const totalHardCosts = totalHardCostsPerUnit * totalLotYield;
-    const totalSoftCosts = costToDevelopPerLot * totalLotYield + landDeveloperProfit;
+    const totalSoftCosts = totalCostToDevelopPerLot * totalLotYield + landDeveloperProfit;
     const totalCosts = totalOfferToLandOwner + totalSoftCosts + totalHardCosts
 
     const totalProfits = houseSalePrice * totalLotYield - totalCosts;
     // const totalClosingCosts = reAgentCommission
-
-
 
     
     return {
@@ -125,6 +125,7 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         totalSoftCosts,
         totalCosts,
         totalProfits,
+        totalCostToDevelopPerLot,
         // totalClosingCosts
     };
 };
