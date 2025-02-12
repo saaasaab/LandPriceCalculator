@@ -51,7 +51,7 @@ export function AppRouter() {
     const daysSinceFirstVisit = (currentDate - firstVisit) / (1000 * 60 * 60 * 24);
 
     // ✅ Check if free access expired
-    if (daysSinceFirstVisit > 0) {
+    if (daysSinceFirstVisit > 7) {
       setFreeAccessExpired(true);
     }
 
@@ -69,6 +69,7 @@ export function AppRouter() {
 
           <Routes>
             <Route path="*" element={<Payment />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/register" element={<Register />} />
@@ -84,7 +85,8 @@ export function AppRouter() {
             {/* Route Definitions */}
             <Routes>
               {/* <Route path="/" element={ <LandCalculator isMobile={isMobile} />} /> */}
-              <Route path="/" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
+              <Route path="/" element={<LandingPage />} />
+              {/* <Route path="/" element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} /> */}
               <Route path={routes.RESIDENTIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
               <Route path={routes.INDUSTRIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
               <Route path={routes.MULTIFAMILY_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
@@ -117,13 +119,22 @@ export function AppRouter() {
 }
 
 
-export const getTargetUrl = (isLocal: boolean) => isLocal
-  ? `http://app.localhost:${window.location.port}${location.pathname}${location.search}` // Local dev
-  : `https://app.landpricecalculator.com${location.pathname}${location.search}`; // Production
+// export const getTargetUrl = (isLocal: boolean) => isLocal
+//   ? `http://app.localhost:${window.location.port}${location.pathname}${location.search}` // Local dev
+//   : `https://app.landpricecalculator.com${location.pathname}${location.search}`; // Production
+
+// export const getAppDefaultUrl = (isLocal: boolean) => isLocal
+//   ? `http://app.localhost:${window.location.port}` // Local dev
+//   : `https://app.landpricecalculator.com`; // Production
+
+
+  export const getTargetUrl = (isLocal: boolean) => isLocal
+  ? `http://localhost:${window.location.port}${location.pathname}${location.search}` // Local dev
+  : `https://www.landpricecalculator.com${location.pathname}${location.search}`; // Production
 
 export const getAppDefaultUrl = (isLocal: boolean) => isLocal
-  ? `http://app.localhost:${window.location.port}` // Local dev
-  : `https://app.landpricecalculator.com`; // Production
+  ? `http://localhost:${window.location.port}` // Local dev
+  : `https://www.landpricecalculator.com`; // Production
 
 
 import { useLocation } from "react-router-dom";

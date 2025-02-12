@@ -21,6 +21,7 @@ export const routes = {
   WATERFALL: "/waterfall-generator",
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
   SITE_PLAN_BUILDER: "/site-plan-builder",
+  HOME: "/",
 
 }
 
@@ -49,6 +50,13 @@ const Navbar = () => {
 
 
       <ul className={`navbar-links ${isMobileMenuOpen ? 'is-open' : ''}`}>
+
+        <li className="dropdown">
+          <Link className="dropdown-title" onClick={handleToggleMenu} to={routes.HOME}>{EPageTitles.HOME}</Link>
+
+        </li>
+
+
         {/* Development Dropdown */}
         <li className="dropdown">
           <span className="dropdown-title">Development Tools</span>
