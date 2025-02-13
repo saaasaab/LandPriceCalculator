@@ -67,15 +67,19 @@ export function AppRouter() {
         {freeAccessExpired && !user ? (
           // ✅ Redirect all pages to Payment if free access expired
 
-          <Routes>
-            <Route path="*" element={<Payment />} />
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/landing" element={<LandingPage />} />
+          <>
+            <Routes>
+              <Route path="*" element={<Payment />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/terms" element={<Terms />} />
+            </Routes>
+            <Footer />
+          </>
 
-          </Routes>
         ) : (
 
           <div className="land-calculator-container">
@@ -105,10 +109,12 @@ export function AppRouter() {
               <Route path="/register" element={<Register />} />
               <Route path="/landing" element={<LandingPage />} />
               <Route path="/payment" element={<Payment />} />
-
+              <Route path="/terms" element={<Terms />} />
               <Route path="*" element={<NotFound />} />
               {/* <Route path="/contact" element={<Contact />} /> */}
             </Routes>
+
+            <Footer />
           </div>
 
         )}
@@ -128,7 +134,7 @@ export function AppRouter() {
 //   : `https://app.landpricecalculator.com`; // Production
 
 
-  export const getTargetUrl = (isLocal: boolean) => isLocal
+export const getTargetUrl = (isLocal: boolean) => isLocal
   ? `http://localhost:${window.location.port}${location.pathname}${location.search}` // Local dev
   : `https://www.landpricecalculator.com${location.pathname}${location.search}`; // Production
 
@@ -139,6 +145,8 @@ export const getAppDefaultUrl = (isLocal: boolean) => isLocal
 
 import { useLocation } from "react-router-dom";
 import Payment from './pages/Payment';
+import Terms from './pages/Terms';
+import Footer from './components/Footer';
 
 export const RedirectToApp = () => {
   const location = useLocation();
