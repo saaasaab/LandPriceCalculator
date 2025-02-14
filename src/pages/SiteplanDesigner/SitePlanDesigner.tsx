@@ -197,10 +197,10 @@ const SitePlanGenerator: React.FC = () => {
 
   let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null)
 
-  const [count, setCount] = useState(0);
+  // const [count, setCount] = useState(0);
   useEffect(() => {
     const updateVariables = () => {
-      setCount(prev=>prev+1)
+      // setCount(prev=>prev+1)
       const property = propertyRef.current;
       const approach = approachRef.current;
       const parking = parkingRef.current;
@@ -248,7 +248,6 @@ const SitePlanGenerator: React.FC = () => {
 
       setMetrics(_metrics)
     };
-
 
 
     // if (visualizer.current) {
@@ -371,6 +370,7 @@ const SitePlanGenerator: React.FC = () => {
   const updateSetback = (index: number, value: string) => {
 
     const lines = linesRef.current;
+    
     const newLines = [...lines];
 
     // Handle empty string explicitly to allow deleting the value
@@ -682,7 +682,7 @@ const SitePlanGenerator: React.FC = () => {
             const rect = canvasRef.current.getBoundingClientRect();
 
             return (
-              <div key={count +"_"+index}>
+              <div key={index}>
                 <div className="edge-index"
                   style={{
                     position: "fixed",
@@ -1120,7 +1120,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
                         <div
-                          key={`${count}_${step.id}`}
+                          key={`${step.id}`}
                           className={`site-plan-generator__step 
                         ${index === currentStep ? 'site-plan-generator__step--active' : ''} 
                         ${index < currentStep ? 'site-plan-generator__step--completed' : ''}

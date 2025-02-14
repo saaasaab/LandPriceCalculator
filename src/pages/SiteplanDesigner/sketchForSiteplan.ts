@@ -536,12 +536,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             }
           }
 
-
-          console.log(`(isHove`, isHovered.buildings[buildingIndex] ,
-            isHovered.buildingsOffset[buildingIndex] ,
-            isHovered.buildingsHandle[buildingIndex] ,
-            building.isRotating)
-
           // Check if we're hovering over a building corner, edge, or center
           if ((isHovered.buildings[buildingIndex] ||
             isHovered.buildingsOffset[buildingIndex] ||
