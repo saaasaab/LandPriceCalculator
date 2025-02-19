@@ -1,6 +1,3 @@
-
-
-
 import './App.css'
 import { getApp } from './utils/subdomains';
 

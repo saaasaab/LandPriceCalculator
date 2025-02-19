@@ -61,7 +61,7 @@ const Navbar = () => {
         <li className="dropdown">
           <span className="dropdown-title">Development Tools</span>
           <div className="dropdown-content">
-            <Link onClick={handleToggleMenu} to="/">{EPageTitles.MULTIFAMILY_DEVELOPMENT}</Link>
+            <Link onClick={handleToggleMenu} to={routes.MULTIFAMILY_DEVELOPMENT}>{EPageTitles.MULTIFAMILY_DEVELOPMENT}</Link>
             <Link onClick={handleToggleMenu} to={routes.INDUSTRIAL_DEVELOPMENT}>{EPageTitles.INDUSTRIAL_DEVELOPMENT}</Link>
             <Link onClick={handleToggleMenu} to={routes.RESIDENTIAL_DEVELOPMENT}>{EPageTitles.RESIDENTIAL_DEVELOPMENT}</Link>
             <Link onClick={handleToggleMenu} to={routes.CONSTRUCTION_BUDGET}>{EPageTitles.CONSTRUCTION_BUDGET}</Link>

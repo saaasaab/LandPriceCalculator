@@ -37,20 +37,16 @@ export function AppRouter() {
   const [freeAccessExpired, setFreeAccessExpired] = useState(false);
 
   useEffect(() => {
-    // ✅ Get first visit date from localStorage or set it if not exists
     let firstVisitDate = localStorage.getItem("firstVisitDate");
 
     if (!firstVisitDate) {
       firstVisitDate = new Date().toISOString();
       localStorage.setItem("firstVisitDate", firstVisitDate);
     }
-
-    // ✅ Calculate days since first visit
     const firstVisit = new Date(firstVisitDate).getTime();
     const currentDate = new Date().getTime();
     const daysSinceFirstVisit = (currentDate - firstVisit) / (1000 * 60 * 60 * 24);
 
-    // ✅ Check if free access expired
     if (daysSinceFirstVisit > 7) {
       setFreeAccessExpired(true);
     }
