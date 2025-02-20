@@ -273,7 +273,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     <InputRow
                         cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unbuildableAcres}`); setUnbuildableAcres(value) }}
-                        description="The total area in acres that cannot be built upon due to environmental or geographical features."
+                        description="The total area in acres that cannot be built upon due to environmental, geographical features, setbacks, or easements"
                         isMobile={isMobile}
                     />
 

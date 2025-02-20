@@ -37,7 +37,7 @@ export class Property {
   public imperviousSurfaceAllowed: number;
   public landscapeRequiredPercent: number;
   public zoning: string;
-  public hasGarbageEnclosure : boolean;
+  public hasGarbageEnclosure: boolean;
 
 
 
@@ -77,7 +77,7 @@ export class Property {
     this.imperviousSurfaceAllowed = initialFormData.imperviousSurfacePercentageAllowed;
     this.landscapeRequiredPercent = initialFormData.landscapeRequiredPercent;
     this.zoning = initialFormData.zoning;
-    this.hasGarbageEnclosure  = initialFormData.hasGarbageEnclosure;
+    this.hasGarbageEnclosure = initialFormData.hasGarbageEnclosure;
 
 
 
@@ -90,11 +90,6 @@ export class Property {
     this.imperviousSurfaceArea = 0;
     this.landscapeArea = 0
     this.totalAreaDedicatedToSetbacks = 0;
-
-
-
-
-
 
   }
 
@@ -123,14 +118,19 @@ export class Property {
 
   createNewBuilding(building: Building | null) {
     if (building === null) return;
-
-
   }
   updateSetbacks(lines: Line[]) {
     lines.forEach((line, i) => {
       this.propertyEdges[i].setback = (this.isClockwise ? -1 : -1) * (line.setback / this.scale);
     })
     this.calculateCornerOffsetsFromSetbacks()
+
+    const buildableFootprint = calculateArea(this.cornerOffsetsFromSetbacks) * this.scale * this.scale;
+
+
+
+    this.totalAreaDedicatedToSetbacks = Math.round(this.areaOfProperty - buildableFootprint)
+
   }
 
   setApproachIndex(approachIndex: number) {

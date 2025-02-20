@@ -35,7 +35,8 @@ export interface SiteMetrics {
   sidewalkArea: number;
   totalParkingStalls: number;
 
-  totalAreaDedicatedToSetbacks: number
+  totalAreaDedicatedToSetbacks: number;
+  totalSetbackPercentage: number; 
 }
 
 export interface IPoint {
@@ -111,7 +112,8 @@ const initialMetrics: SiteMetrics = {
 
   approachArea: 62,
   bikeParkingArea: 0,
-  totalAreaDedicatedToSetbacks: 1000,
+  totalAreaDedicatedToSetbacks: 0,
+  totalSetbackPercentage: 0,
 
 
 
@@ -237,6 +239,8 @@ const SitePlanGenerator: React.FC = () => {
       _metrics.parkingStallsArea = parking?.parkingStallsArea || initialMetrics.parkingStallsArea;
       _metrics.propertyArea = property?.areaOfProperty || initialMetrics.propertyArea;
       _metrics.totalAreaDedicatedToSetbacks = property?.totalAreaDedicatedToSetbacks || initialMetrics.totalAreaDedicatedToSetbacks;
+      _metrics.totalSetbackPercentage = Math.round(_metrics.totalAreaDedicatedToSetbacks / (property?.areaOfProperty || 1) *100)
+      
       _metrics.totalParkingStalls = parking?.parkingStallsNumber || initialMetrics.totalParkingStalls;
       _metrics.zoning = property?.zoning || initialMetrics.zoning;
 
