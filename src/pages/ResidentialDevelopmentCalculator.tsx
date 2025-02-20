@@ -308,7 +308,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* House Price Per Sq Ft */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.residentialPricePerHome}`); setresidentialPricePerHome(value) }}
-                        cellValues={["House Price - per Home", removeCommas(residentialPricePerHome) === 0 ? '' : residentialPricePerHome]}
+                        cellValues={["House Sale Price - per Home", removeCommas(residentialPricePerHome) === 0 ? '' : residentialPricePerHome]}
                         description="The price each home will sell, determined by local research."
                         isMobile={isMobile}
                     />

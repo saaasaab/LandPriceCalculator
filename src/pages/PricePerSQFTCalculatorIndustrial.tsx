@@ -26,18 +26,24 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
     const params: {
         annualLeaseRatesPerSQFT: string;
+        leasableSQFT: string;
         downPayment: string;
         interestRate: string;
         numberOfYears: string;
         expensePercentage: string;
         cashOnCashReturn: string;
+        clostingCostsFee: string;
+        buyersAgentFee: string;
     } = {
         annualLeaseRatesPerSQFT: annualLeaseRatesPerSQFT,
+        leasableSQFT:leasableSQFT,
         downPayment: downPayment,
         interestRate: interestRate,
         numberOfYears: numberOfYears,
         expensePercentage: expensePercentage,
         cashOnCashReturn: cashOnCashReturn,
+        clostingCostsFee: clostingCostsFee,
+        buyersAgentFee: buyersAgentFee,
     };
 
 

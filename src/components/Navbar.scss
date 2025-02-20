@@ -136,6 +136,7 @@
         flex-direction: column;
         align-items: center;
         .dropdown-content {
+          min-width: unset;
           display: block;
           position: static;
           box-shadow: none;

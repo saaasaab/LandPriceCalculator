@@ -60,7 +60,8 @@ const HeroSection: React.FC = () => {
             {/* <div ref={canvasRef} className="hero-canvas" /> */}
             <div className="hero-content">
                 <h1>Transform Your Real Estate Analysis</h1>
-                <p className="tagline">A rich man's tool at a poor man's price</p>
+                <p className="tagline">Expert Real Estate Analysis Tools for Free</p>
+               
                 {/* <p className="tagline">A rich man's tool at a poor man's price</p> */}
 
                 {/* <p className="subtitle">Professional-grade real estate calculators at your fingertips</p> */}

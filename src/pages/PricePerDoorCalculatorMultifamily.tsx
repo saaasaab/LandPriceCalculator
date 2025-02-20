@@ -25,7 +25,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
     const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
 
-
     const params: {
         rents: string;
         downPayment: string;
@@ -33,6 +32,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         numberOfYears: string;
         expensePercentage: string;
         cashOnCashReturn: string;
+        clostingCostsFee: string;
+        buyersAgentFee: string;
     } = {
         rents: rents,
         downPayment: downPayment,
@@ -40,6 +41,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         numberOfYears: numberOfYears,
         expensePercentage: expensePercentage,
         cashOnCashReturn: cashOnCashReturn,
+        clostingCostsFee: clostingCostsFee,
+        buyersAgentFee: buyersAgentFee
     };
 
     const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
