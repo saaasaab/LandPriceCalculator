@@ -6,6 +6,7 @@ import ShareButton from '../components/ShareButton';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
 import './DynamicTable.scss';
+import { capitilizationRate, debtServiceCoverageRatio } from '../utils/commonMetrics';
 
 
 
@@ -15,7 +16,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const [annualLeaseRatesPerSQFT, setAnnualLeaseRatesPerSQFT] = usePersistedState2(page, EAllStates.annualLeaseRatesPerSQFT, DEFAULT_VALUES[page].annualLeaseRatesPerSQFT, queryParams);
 
     const [leasableSQFT, setLeasableSQFT] = usePersistedState2(page, EAllStates.leasableSQFT, DEFAULT_VALUES[page].leasableSQFT, queryParams);
-
     const [interestRate, setInterestRate] = usePersistedState2(page, EAllStates.interestRate, DEFAULT_VALUES[page].interestRate, queryParams);
     const [numberOfYears, setNumberOfYears] = usePersistedState2(page, EAllStates.catchAll, DEFAULT_VALUES[page].numberOfYears, queryParams);
     const [cashOnCashReturn, setCashOnCashReturn] = usePersistedState2(page, EAllStates.cashOnCashReturn, DEFAULT_VALUES[page].cashOnCashReturn, queryParams);
@@ -36,7 +36,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         buyersAgentFee: string;
     } = {
         annualLeaseRatesPerSQFT: annualLeaseRatesPerSQFT,
-        leasableSQFT:leasableSQFT,
+        leasableSQFT: leasableSQFT,
         downPayment: downPayment,
         interestRate: interestRate,
         numberOfYears: numberOfYears,
@@ -45,8 +45,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         clostingCostsFee: clostingCostsFee,
         buyersAgentFee: buyersAgentFee,
     };
-
-
 
     const monthlyLeaseRatesPerSQFT = removeCommas(annualLeaseRatesPerSQFT) / 12
     const interestRateMonthly = removeCommas(interestRate) / 100 / 12;
@@ -63,19 +61,13 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const downAsDecimal = removeCommas(downPayment) / 100;
     const pricePerSQFT = (operatingIncome) / (downAsDecimal * cashOnCashReturnMonthly + ((1 - (downAsDecimal)) * mort));
 
-
-
-
-    // OH, pricePerSQFT is just calculating the NOI per sqft
-
     const mortgagePayment = (mort * pricePerSQFT * (1 - downAsDecimal));
-
     const cashFlowPerSQFT = roundToDecimal(operatingIncome - mortgagePayment, 2);
-    const DSCR = operatingIncome / (mort * pricePerSQFT * (1 - downAsDecimal));
-    const capRate = operatingIncome * 12 / pricePerSQFT;
 
+    const DSCR = debtServiceCoverageRatio (operatingIncome, mort, pricePerSQFT, downAsDecimal);
+
+    const capRate = capitilizationRate( operatingIncome, pricePerSQFT);
     const totalPrice = removeCommas(leasableSQFT) * pricePerSQFT;
-
     const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
     const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
     const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;

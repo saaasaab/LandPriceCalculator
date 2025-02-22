@@ -342,7 +342,12 @@ const SitePlanGenerator: React.FC = () => {
 
   const formatMetricValue = (key: keyof SiteMetrics, value: number): string => {
     const formattedValue = value.toLocaleString();
-    return key.toLowerCase().includes('area') ? `${formattedValue} sq ft` : formattedValue;
+    let modified = formattedValue;
+
+    if(key.toLowerCase().includes('area'))  modified = `${formattedValue} sq ft`
+    else if(key.toLowerCase().includes('percent'))  modified = `${formattedValue}%`
+   
+    return modified;
   };
 
   const formatMetricLabel = (key: string): string => {

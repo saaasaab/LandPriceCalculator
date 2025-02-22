@@ -91,8 +91,11 @@ const residentialCashFlowCalculations = (inputs: TResidentialCashFlowCalculation
 
     const netOperatingIncome = totalMonthlyIncome - operatingExpenses
     const totalBorrowed = allInCosts * (1 - downPayment / 100);
-    const monthlyMorgagePayment = monthlyPayment(totalBorrowed, duration * 12, interestRate / 100 / 12)
+    const monthlyMorgagePayment = monthlyPayment(totalBorrowed, duration * 12, interestRate / 100 / 12);
+
+
     const totalExpenses = operatingExpenses + monthlyMorgagePayment;
+
     const DSCR = netOperatingIncome / monthlyMorgagePayment;
 
     const totalMonthlyCashflowBeforeTaxes = totalMonthlyIncome - operatingExpenses - monthlyMorgagePayment;
