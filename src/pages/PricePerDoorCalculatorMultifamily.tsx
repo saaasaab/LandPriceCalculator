@@ -7,7 +7,6 @@ import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
 
 import './DynamicTable.scss';
-import { capitilizationRate, debtServiceCoverageRatio } from '../utils/commonMetrics';
 
 
 
@@ -64,8 +63,15 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const mortgagePayment = (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
     const cashFlowPerUnit = operatingIncome - mortgagePayment;
 
-    const DSCR = debtServiceCoverageRatio (operatingIncome, mort, pricePerUnit, removeCommas(downPayment));
-    const capRate = capitilizationRate( operatingIncome,  pricePerUnit);
+
+    const DSCR = operatingIncome / (mort * pricePerUnit * (1 - removeCommas(downPayment) / 100));
+    const capRate = operatingIncome * 12 / pricePerUnit;
+
+
+    // const capRate = operatingIncome * 12 / pricePerUnit;
+    // const DSCR = debtServiceCoverageRatio (operatingIncome, mort, pricePerUnit, removeCommas(downPayment));
+   
+    // const capRate = capitilizationRate( operatingIncome,  pricePerUnit);
 
     const totalPrice = removeCommas(units) * pricePerUnit;
     const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;

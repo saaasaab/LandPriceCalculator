@@ -6,7 +6,7 @@ import ShareButton from '../components/ShareButton';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
 import './DynamicTable.scss';
-import { capitilizationRate, debtServiceCoverageRatio } from '../utils/commonMetrics';
+// import { capitilizationRate, debtServiceCoverageRatio } from '../utils/commonMetrics';
 
 
 
@@ -64,9 +64,12 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const mortgagePayment = (mort * pricePerSQFT * (1 - downAsDecimal));
     const cashFlowPerSQFT = roundToDecimal(operatingIncome - mortgagePayment, 2);
 
-    const DSCR = debtServiceCoverageRatio (operatingIncome, mort, pricePerSQFT, downAsDecimal);
+    const DSCR = operatingIncome / (mort * pricePerSQFT * (1 - downAsDecimal));
+    const capRate = operatingIncome * 12 / pricePerSQFT;
 
-    const capRate = capitilizationRate( operatingIncome, pricePerSQFT);
+    // const DSCR = debtServiceCoverageRatio (operatingIncome, mort, pricePerSQFT, downAsDecimal);
+
+    // const capRate = capitilizationRate( operatingIncome, pricePerSQFT);
     const totalPrice = removeCommas(leasableSQFT) * pricePerSQFT;
     const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
     const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
