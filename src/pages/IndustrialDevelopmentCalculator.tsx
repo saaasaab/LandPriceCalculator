@@ -298,7 +298,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.INDUSTRIAL_DEVELOPMENT}_${EAllStates.unbuildableAcres}`); setUnbuildableAcres(value) }}
                         cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
-                        description="The total area in acres that cannot be built upon due to environmental or geographical features."
+                        description="The total area in acres that cannot be built upon due to environmental, geographical features, setbacks, or easements."
                         isMobile={isMobile}
                     />
                     <InputRow

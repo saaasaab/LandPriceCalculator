@@ -295,7 +295,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     <InputRow
                         cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
                         setInput={value => setUnbuildableAcres(value)}
-                        description="The total area in acres that cannot be built upon due to environmental or geographical features."
+                        description="The total area in acres that cannot be built upon due to environmental, geographical features, setbacks, or easements"
                         isMobile={isMobile}
                     />
                     <InputRow
