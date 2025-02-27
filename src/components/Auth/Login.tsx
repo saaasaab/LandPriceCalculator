@@ -55,6 +55,7 @@ const Login: React.FC = () => {
           required
         />
         <button type="submit">Login</button>
+        
       </form>
 
       <div className="auth-links">
