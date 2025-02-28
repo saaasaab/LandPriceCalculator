@@ -144,7 +144,7 @@ const LandingPage: React.FC = () => {
         <div className="container">
           <h2>Ready to Elevate Your Analysis?</h2>
           <p>Join thousands of real estate professionals who trust our tools</p>
-          <Link className="cta-button" to="/register">Get Started Now</Link>
+          <Link className="cta-button" to={routes.SIGN_UP}>Get Started Now</Link>
         </div>
       </section>}
 

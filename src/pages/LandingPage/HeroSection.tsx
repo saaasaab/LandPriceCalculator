@@ -2,6 +2,7 @@ import React from "react";
 // import p5 from "p5";
 import './HeroSection.scss';
 import { Link } from "react-router-dom";
+import { routes } from "../../components/Navbar";
 
 export const heroCanvasHeight = 500;
 const HeroSection: React.FC = () => {
@@ -65,7 +66,7 @@ const HeroSection: React.FC = () => {
                 {/* <p className="tagline">A rich man's tool at a poor man's price</p> */}
 
                 {/* <p className="subtitle">Professional-grade real estate calculators at your fingertips</p> */}
-                <Link className="cta-button" to="/register">Sign Up for Early Acces</Link>
+                <Link className="cta-button" to={routes.SIGN_UP}>Sign Up for Early Acces</Link>
             </div>
         </header>
     );

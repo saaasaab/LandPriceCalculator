@@ -3,7 +3,7 @@ import { getApp } from './utils/subdomains';
 
 function App() {
   const AppRoute = getApp()
-
+  
   return (
     <AppRoute />
   );

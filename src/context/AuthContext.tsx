@@ -1,17 +1,24 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 // import { getAppDefaultUrl } from '../Routes';
 // import { postRequest } from '../utils/api';
 
 // Define user and context types
-interface User {
+export interface User {
   email: string;
   token: string;
+  is_paid: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
+  tempEmail: string;
+  updateTempEmail: (tempEmail: string) => void;
+  tempPassword: string;
+  updateTempPassword:  (tempPassword: string) => void;
+
 }
 
 const checkUser = () => {
@@ -30,12 +37,17 @@ const defaultAuthContext: AuthContextType = {
   user: checkUser(),
   login: () => { },
   logout: () => { },
+  tempEmail: '',
+  updateTempEmail: () => { },
+  tempPassword: '',
+  updateTempPassword: () => { },
 };
 
 
 const removeQueryParam = (param: string) => {
   const url = new URL(window.location.href);
   url.searchParams.delete(param);
+
   window.history.replaceState({}, document.title, url.toString());
 };
 
@@ -46,15 +58,19 @@ export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 // Provider Component
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [tempEmail, setTempEmail] = useState('');
+  const [tempPassword, setTempPassword] = useState('');
 
-  useEffect(() => {
+  
+
+  const navigate = useNavigate();
+
+  useEffect(() => {  
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       // if (!window.location.href.includes('//app.')) {
 
       // // UNCOMMENT WHEN I WANT AUTO REDIRECT
-
-
       //   // const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
       //   // const targetUrl = `${getAppDefaultUrl(isLocal)}?token=${user.token || ""}`
 
@@ -67,8 +83,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       removeQueryParam("token");
       setUser(_user)
     }
-
-
     // else {
     //   if (window.location.href.includes('//app.')) {
     //     const urlParams = new URLSearchParams(location.search);
@@ -101,6 +115,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // }
   }, []);
+  
 
   const login = (userData: User) => {
     setUser(userData);
@@ -111,16 +126,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
 
     const firstVisitDate = localStorage.getItem('firstVisitDate') || "";
-
-
     localStorage.clear();
     localStorage.setItem('firstVisitDate', firstVisitDate);
 
     location.reload();
+    navigate('/')
   };
 
+  const updateTempEmail = (email: string) => {
+    setTempEmail(email);
+  };
+
+  const updateTempPassword = (password: string) => {
+    setTempPassword(password);
+  };
+
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, tempEmail, updateTempEmail, tempPassword, updateTempPassword }}>
       {children}
     </AuthContext.Provider>
   );

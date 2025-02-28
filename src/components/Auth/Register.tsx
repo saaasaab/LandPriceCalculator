@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-// import axios from 'axios';
 
-import './Auth.scss';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, User } from '../../context/AuthContext';
 import { postRequest } from '../../utils/api';
 import { getAppDefaultUrl } from '../../Routes';
-
+import './Auth.scss';
+import { routes } from '../Navbar';
 
 const Register: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -19,19 +18,17 @@ const Register: React.FC = () => {
 
         try {
 
-            const data = await postRequest<{ token: string; user: { email: string } }>(
+            const data = await postRequest<{ token: string; user:User }>(
                 '/register',
                 { email, password }
             );
-
-            login({ email: data.user.email, token: data.token });
+            
+            login({ email: data.user.email, token: data.token, is_paid: data.user.is_paid });
 
             const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
 
             const targetUrl = getAppDefaultUrl(isLocal)
             
-            console.log('✅ Account created:', data);
-
             window.location.href = targetUrl;
 
         } catch (error) {
@@ -43,6 +40,7 @@ const Register: React.FC = () => {
     return (
         <div className="auth-container">
             <h2>Create an Account</h2>
+       
             <form onSubmit={handleSubmit}>
                 <input
                     type="email"
@@ -61,7 +59,7 @@ const Register: React.FC = () => {
                 <button type="submit">Sign Up</button>
             </form>
 
-            <p>Already have an account? <Link to="/login">Login</Link></p>
+            <p>Already have an account? <Link to={routes.LOGIN}>Login</Link></p>
         </div>
     );
 };

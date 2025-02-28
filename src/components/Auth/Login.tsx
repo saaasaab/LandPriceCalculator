@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { postRequest } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { getAppDefaultUrl } from '../../Routes';
+import { routes } from '../Navbar';
 
 
 const Login: React.FC = () => {
@@ -10,22 +11,17 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const { login } = useAuth(); // Use custom hook
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-
-
-      const data = await postRequest<{ token: string; user: { email: string } }>(
+      const data = await postRequest<{ token: string; user: { email: string, is_paid: boolean } }>(
         '/login',
-        { email, password }
+        { email, password  }
       );
 
+      // DATA is not all being used
+      login({ email: data.user.email, token: data.token, is_paid: data.user.is_paid}); // Save user data
 
-      login({ email: data.user.email, token: data.token }); // Save user data
-
-        
       const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
 
       const targetUrl = getAppDefaultUrl(isLocal)
@@ -55,12 +51,12 @@ const Login: React.FC = () => {
           required
         />
         <button type="submit">Login</button>
-        
+
       </form>
 
       <div className="auth-links">
-        {/* <Link to="/forgot-password">Forgot Password?</Link> */}
-        <Link to="/register">Create an Account</Link>
+        {/* <Link to={routes.FORGOT_PASSWORD}>Forgot Password?</Link> */}
+        <Link to={routes.SIGN_UP}>Create an Account</Link>
       </div>
     </div>
   );

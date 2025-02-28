@@ -23,6 +23,18 @@ export const routes = {
   SITE_PLAN_BUILDER: "/site-plan-builder",
   HOME: "/",
 
+ // Authentication & User-related Routes
+ LOGIN: "/login",
+ FORGOT_PASSWORD: "/forgot-password",
+ REGISTER: "/register",
+
+ // General Pages
+ LANDING_PAGE: "/landing",
+ END_FREE_TRIAL: "/end-free-trial",
+ PAYMENT: "/payment",
+ COMPLETION: "/completion",
+ SIGN_UP: "/sign-up",
+ TERMS: "/terms",
 }
 
 
@@ -104,7 +116,7 @@ const Navbar = () => {
               <button onClick={logout} className="logout-btn">Logout</button>
             </>
           ) : (
-            <Link to="/login" className="login-btn">Login</Link>
+            <Link to={routes.LOGIN} className="login-btn">Login</Link>
           )}
         </div>
       </ul>
