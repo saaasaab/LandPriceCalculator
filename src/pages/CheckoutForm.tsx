@@ -22,7 +22,7 @@ export default function CheckoutForm() {
     }
 
     setIsProcessing(true);
-  
+    
     const stripeReturn = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -42,8 +42,8 @@ export default function CheckoutForm() {
 
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
-      <PaymentElement id="payment-element"  />
-      <button disabled={isProcessing || !stripe || !elements} id="submit">
+      <PaymentElement id="payment-element" />
+      <button disabled={isProcessing || !stripe || !elements} id="submit" className="btn">
         {isProcessing || !stripe || !elements ? <></> :
           <span id="button-text">
             {isProcessing ? "Processing ... " : "Pay now"}

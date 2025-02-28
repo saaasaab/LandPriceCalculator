@@ -103,7 +103,7 @@ export function AppRouter() {
             <Route path={routes.REGISTER} element={<Register />} />
             <Route path={routes.LANDING_PAGE} element={<LandingPage />} />
             <Route path={routes.END_FREE_TRIAL} element={<EndFreeTrial />} />
-            <Route path={routes.PAYMENT} element={<Payment />} />
+            <Route path={routes.PAYMENT} element={<Payment  email={user?.email || ""}/>} />
             <Route path={routes.COMPLETION} element={<Completion />} />
             <Route path={routes.SIGN_UP} element={<Pricing />} />
             <Route path={routes.TERMS} element={<Terms />} />
@@ -125,7 +125,7 @@ export function AppRouter() {
             <Route path={routes.REGISTER} element={<Register />} />
             <Route path={routes.LANDING_PAGE} element={<LandingPage />} />
             <Route path={routes.TERMS} element={<Terms />} />
-            <Route path={routes.PAYMENT} element={<Payment />} />
+            <Route path={routes.PAYMENT} element={<Payment email={user?.email || ""}/>} />
             <Route path={routes.SIGN_UP} element={<Pricing />} />
 
           </Routes>

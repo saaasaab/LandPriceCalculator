@@ -10,7 +10,7 @@ import { getRequest, postRequest } from "../utils/api";
 // recreating the `Stripe` object on every render.
 // const stripePromise = loadStripe('pk_test_51QBPgCCLU8SJtxVAAKrfqmUccC92ceL5aZtYvLhD5Sbz8PzOs7DqmDZbGWix6Ny8w5h4qCU9LlSiI4lvqwrQo9G400URRM2hDA');
 
-const Payment = () => {
+const Payment = ({ email }: { email: string }) => {
   // const handlePayment = () => {
   //   // ✅ Simulate successful payment
   //   localStorage.setItem("isPaid", "true");
@@ -20,7 +20,9 @@ const Payment = () => {
   const [stripePromise, setStripePromise] = useState<Stripe | null>(null);
   const [clientSecret, setClientSecret] = useState("");
 
-  const [error, setError] = useState('')
+  const [error, setError] = useState('');
+
+
   useEffect(() => {
     const fetchStripeKey = async () => {
       try {
@@ -47,7 +49,7 @@ const Payment = () => {
     const handleCreatePaymentIntent = async () => {
       try {
         const { clientSecret } = await postRequest<{ clientSecret: string | null }>(
-          '/create-payment-intent', {}
+          '/create-payment-intent', { email: email }
         );
 
         if (clientSecret) {

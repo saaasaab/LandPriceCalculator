@@ -32,8 +32,6 @@ function Completion() {
         if(data){
           login({ email: data.user.email, token: data.token, is_paid: data.user.is_paid }); // Save user data
         }
-
-        console.log(`2`, 2)
         // Should redirect to the one they were trying to get to.
 
         navigate('/');

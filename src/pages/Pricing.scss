@@ -4,6 +4,25 @@
   max-width: 80rem;
   margin: auto;
 
+  .btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: var(--primary-color);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    transition: all .2s;
+
+    &:hover {
+      transition: all .2s;
+      filter: brightness(0.75);
+    }
+  }
+  
   form {
     display: flex;
     flex-direction: column;
@@ -103,24 +122,7 @@
         }
       }
 
-      .subscribe-button {
-        .btn {
-          display: block;
-          width: 100%;
-          text-align: center;
-          background-color: var(--primary-color);
-          padding: 0.75rem;
-          border-radius: 0.5rem;
-          font-size: 1rem;
-          font-weight: bold;
-          color: white;
-          text-decoration: none;
-
-          &:hover {
-            filter: brightness(0.75);
-          }
-        }
-      }
+      
     }
   }
 }

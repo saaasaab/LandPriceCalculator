@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './Pricing.scss';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, User } from '../context/AuthContext';
 import Payment from './Payment';
 import { postRequest } from '../utils/api';
@@ -135,12 +135,21 @@ const Pricing = () => {
                         {!showPaymentForm ?
                             <ul className="features-list">
                                 {[
-                                    'NextJS boilerplate',
-                                    'User oauth',
-                                    'Database',
-                                    'Emails',
-                                    '1 year of updates',
-                                    '24/7 support'
+                                    "Land Analysis & Zoning Insights",
+                                    "Automated Site Plan Generation",
+                                    "Financial Projections & ROI Analysis",
+                                    "Multi-Family & Commercial Development Tools",
+                                    "Investor Returns Modeling",
+                                    "Construction Budget Generator",
+                                    // "Lending & Financing Calculator – Compare financing options, loan terms, and interest impact.
+                                    // "Comparable Sales & Market Data – Pull recent sales and rental comps to validate pricing.
+                                    "Profitability & Offer Price Calculator",
+                                    // "Interactive Mapping & Parcel Data – Explore properties with GIS overlays and ownership details.
+                                    // "Risk Assessment & Sensitivity Analysis – Test different scenarios to optimize development strategy.
+                                    // "Seamless Integrations 
+
+
+                                  
                                 ].map((feature, i) => (
                                     <li key={i} className="feature-item">
                                         <svg
@@ -184,7 +193,7 @@ const Pricing = () => {
                                     </button>
                                 </div>
 
-                            </form>) : <Payment />}
+                            </form>) : <Payment email={email}/>}
                     </div>
                 </div>
             </div>
