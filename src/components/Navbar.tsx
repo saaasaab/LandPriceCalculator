@@ -90,6 +90,10 @@ const Navbar = () => {
             <Link onClick={handleToggleMenu} to={routes.INDUSTRIAL_PRICE_PER_SQFT}>{EPageTitles.INDUSTRIAL_PRICE_PER_SQFT}</Link>
             <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
             <Link onClick={handleToggleMenu} to={routes.HARD_MONEY_COST_ESTIMATOR}>{EPageTitles.HARD_MONEY_COST_ESTIMATOR}</Link>
+            <Link onClick={handleToggleMenu} to={routes.HOUSE_FLIPPING_CALCULATOR}>{EPageTitles.HOUSE_FLIPPING_CALCULATOR}</Link>
+
+            
+            
             {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
             {/* <Link onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link> */}
 

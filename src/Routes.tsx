@@ -23,7 +23,7 @@ import EndFreeTrial from './pages/EndFreeTrial';
 import Completion from './pages/Completion';
 
 import './App.css'
-import HouseFlipperCalculator from './pages/HouseFlipperCalculator';
+import HouseFlippingCalculator from './pages/HouseFlippingCalculator';
 
 export function AppRouter() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -108,8 +108,8 @@ export function AppRouter() {
             <Route path={routes.COMPLETION} element={<Completion />} />
             <Route path={routes.SIGN_UP} element={<Pricing />} />
             <Route path={routes.TERMS} element={<Terms />} />
-            <Route path={routes.HOUSE_FLIPPING_CALCULATOR} element={<HouseFlipperCalculator isMobile={isMobile} page={EPageNames.HOUSE_FLIPPING_CALCULATOR} />} />
-
+            <Route path={routes.HOUSE_FLIPPING_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HOUSE_FLIPPING_CALCULATOR} />} />
+   
             <Route path="*" element={<NotFound />} />
             {/* <Route path="/contact" element={<Contact />} /> */}
           </Routes>

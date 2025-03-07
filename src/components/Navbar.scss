@@ -135,6 +135,8 @@
       li.dropdown {
         flex-direction: column;
         align-items: center;
+        padding: 0;
+        margin: 0;
         .dropdown-content {
           min-width: unset;
           display: block;
@@ -162,7 +164,9 @@
     }
     .is-open {
       display: flex;
+      
     }
+   
   }
 }
 

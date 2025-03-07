@@ -4,9 +4,10 @@ import { usePersistedState2 } from '../hooks/usePersistedState';
 import { DEFAULT_VALUES } from '../utils/constants';
 import { EPageNames, EAllStates } from '../utils/types';
 import { roundAndLocalString, convertInputsToNumbers, roundToDecimal } from '../utils/utils';
+import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 
 
-const HardMoneyLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
+const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
 
   const queryParams = new URLSearchParams(window.location.search)
 
@@ -256,6 +257,14 @@ const HardMoneyLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           />
 
           <DynamicRow
+            setInput={value => setGapPoints(value)}
+            cellValues={["Gap Points (%)", gapPoints + "%"]}
+            isMobile={isMobile}
+            numberOfCells={2}
+            inputCellIndex={1}
+          />
+
+          <DynamicRow
             setInput={value => setGapInterestRate(value)}
             cellValues={["Gap Interest Rate (%)", gapInterestRate + "%"]}
             isMobile={isMobile}
@@ -263,13 +272,7 @@ const HardMoneyLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
             inputCellIndex={1}
           />
 
-          <DynamicRow
-            setInput={value => setGapPoints(value)}
-            cellValues={["Gap Points (%)", gapPoints + "%"]}
-            isMobile={isMobile}
-            numberOfCells={2}
-            inputCellIndex={1}
-          />
+
 
           <DynamicRow
             cellValues={["Gap Loan Amount ($)", roundAndLocalString(gapLoanAmount)]}
@@ -314,11 +317,16 @@ const HardMoneyLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
       </div>
 
 
-
+      <HardMoneyLoanCalculator
+        isMobile={isMobile}
+        page={EPageNames.HARD_MONEY_COST_ESTIMATOR}
+      />
       <ShareButton params={params} />
 
     </>
   );
 };
 
-export default HardMoneyLoanCalculator;
+export default HouseFlippingCalculator;
+
+

@@ -50,7 +50,6 @@ export enum EPageTitles {
     SITE_PLAN_BUILDER = "Site Plan Builder",
     HOUSE_FLIPPING_CALCULATOR = "House Flipping Calculator",
     HOME = "Home",
-    // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
 
 
