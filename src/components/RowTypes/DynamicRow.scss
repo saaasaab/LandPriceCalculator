@@ -3,6 +3,7 @@
   display: flex;
   border-bottom: 1px solid rgb(187, 168, 168);
   position: relative;
+  padding: 3px 0;
   .dynamic-cell {
     display: flex;
     align-items: center;
@@ -86,7 +87,7 @@
   .info-cell {
     border: none;
     text-align: left;
-    background-color: #f0f8ff;
+    // background-color: #f0f8ff;
     min-width: 10px;
     font-size: 1em;
     color: #1a1a1a;
@@ -97,16 +98,25 @@
   }
   .description-cell {
     color: #1a1a1a;
-    background-color: #f0f8ff;
+    // background-color: #f0f8ff;
     font-size: 0.8em;
     padding-top: 0;
     padding-bottom: 10px;
   }
 
   .input-cell {
+    // background-color: #cce3ed; //#ffebcd;
     padding: 0;
-    background-color: #cce3ed; //#ffebcd;
+    background-color: #ebf1f4;
     position: relative;
+    border-radius: 100px;
+    /* margin: -3px; */
+    border: 1px solid grey;
+
+    label{
+      height: 100%;
+    }
+
     // padding: 2px 10px;
     input[type="date"] {
       padding-inline-start: 10px;

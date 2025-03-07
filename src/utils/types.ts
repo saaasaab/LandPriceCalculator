@@ -27,10 +27,11 @@ export enum EPageNames {
     MULTI_FAMILY_PRICE_PER_DOOR = "MULTI_FAMILY_PRICE_PER_DOOR",
     MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
     IRR_CALCULATOR = "IRR_CALCULATOR",
-    LENDING_COST = "LENDING_COST",
+    HARD_MONEY_COST_ESTIMATOR = "HARD_MONEY_COST_ESTIMATOR",
     WATERFALL = "WATERFALL",
     CONSTRUCTION_BUDGET = "CONSTRUCTION_BUDGET",
     INDUSTRIAL_PRICE_PER_SQFT = "INDUSTRIAL_PRICE_PER_SQFT",
+    HOUSE_FLIPPING_CALCULATOR="HOUSE_FLIPPING_CALCULATOR",
     // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
 }
 
@@ -43,10 +44,11 @@ export enum EPageTitles {
 
     MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
     IRR_CALCULATOR = "Seller's IRR Estimator",
-    LENDING_COST = "Lending Cost Estimator",
+    HARD_MONEY_COST_ESTIMATOR = "Hard Money Loan Estimator",
     WATERFALL = "Waterfall Distribution Generator",
     CONSTRUCTION_BUDGET = "Construction Budget Generator",
     SITE_PLAN_BUILDER = "Site Plan Builder",
+    HOUSE_FLIPPING_CALCULATOR = "House Flipping Calculator",
     HOME = "Home",
     // HOW_TO_MULTIFAMILY="How to analyze multifamily"
 }
@@ -131,23 +133,37 @@ export enum EAllStates {
     originalPurchasePrice = "originalPurchasePrice",
 
     // FOR LOAN CALCULATION FEES
-    loanOriginationFee = "loanOriginationFee",
+    // loanOriginationFee = "loanOriginationFee",
 
-    loanTerm = "loanTerm",
-    drawFee = "drawFee",
-    underwritingFee = "underwritingFee",
-    inspectionFee = "inspectionFee",
-    appraisalFee = "appraisalFee",
-    titleInsurance = "titleInsurance",
-    recordingFee = "recordingFee",
-    legalFee = "legalFee",
-    interestReserve = "interestReserve",
-    prepaymentPenalty = "prepaymentPenalty",
-    loanExtensionFee = "loanExtensionFee",
-    discountPoints = "discountPoints",
-    propertyValue = "propertyValue",
-    loanToValue = "loanToValue",
-    constructionToLongTermLoan = "constructionToLongTermLoan",
-    isInterestOnly = "isInterestOnly",
+    // loanTerm = "loanTerm",
+    // drawFee = "drawFee",
+    // underwritingFee = "underwritingFee",
+    // inspectionFee = "inspectionFee",
+    // appraisalFee = "appraisalFee",
+    // titleInsurance = "titleInsurance",
+    // recordingFee = "recordingFee",
+    // legalFee = "legalFee",
+    // interestReserve = "interestReserve",
+    // prepaymentPenalty = "prepaymentPenalty",
+    // loanExtensionFee = "loanExtensionFee",
+    // discountPoints = "discountPoints",
+    // propertyValue = "propertyValue",
+    // loanToValue = "loanToValue",
+    // constructionToLongTermLoan = "constructionToLongTermLoan",
+    // isInterestOnly = "isInterestOnly",
+
+
+    hardMoneyLoanLtv = "hardMoneyLoanLtv",
+    hardMoneyLoanPoints = "hardMoneyLoanPoints",
+    hardMoneyLoanInterestRate = "hardMoneyLoanInterestRate",
+    gapPoints = "gapPoints",
+    gapInterestRate = "gapInterestRate",
+    arv = "arv",
+    purchaseAndRepairCosts = "purchaseAndRepairCosts",
+    projectMonths = "projectMonths",
+    hardMoneyLoanAdminFees="hardMoneyLoanAdminFees",
+    gapLoanAdminFees="gapLoanAdminFees",
+
+
 
 }

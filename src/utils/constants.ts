@@ -91,6 +91,19 @@ export const DEFAULT_VALUES_ZEROS = {
     constructionToLongTermLoan: "0",
     isInterestOnly: false,
 
+    arv: "0",
+    purchaseAndRepairCosts: "0",
+    projectMonths: "0",
+    hardMoneyLoanLtv: "0",
+    hardMoneyLoanPoints: "0",
+    hardMoneyLoanInterestRate: "0",
+    gapPoints: "0",
+    gapInterestRate: "0",
+    hardMoneyLoanAdminFees: "0",
+    gapLoanAdminFees: "0",
+
+    
+
 }
 export const DEFAULT_VALUES = {
     [EPageNames.RESIDENTIAL_DEVELOPMENT]: {
@@ -201,26 +214,37 @@ export const DEFAULT_VALUES = {
         newPurchasePrice: "600,000",
 
     },
-    [EPageNames.LENDING_COST]: {
+    [EPageNames.HARD_MONEY_COST_ESTIMATOR]: {
         ...DEFAULT_VALUES_ZEROS,
-        loanOriginationFee: "1.0",           // 1% of loan amount
-        interestRate: "5.0",                 // 5% annual interest rate
-        loanTerm: "360",                      // 12-month term for short-term loan or construction loan
-        drawFee: "0.25",                     // 0.25% per draw
-        underwritingFee: "0.5",              // 0.5% of loan amount
-        inspectionFee: "300",                // Flat fee per inspection
-        appraisalFee: "500",                 // Flat fee for appraisal
-        titleInsurance: "0.5",               // 0.5% of loan amount
-        recordingFee: "150",                 // Flat recording fee
-        legalFee: "0.75",                    // 0.75% of loan amount for legal fees
-        interestReserve: "10.0",             // 10% of loan amount reserved for interest payments
-        prepaymentPenalty: "2.0",            // 2% of outstanding loan balance if applicable
-        loanExtensionFee: "1.0",             // 1% of loan amount for extension
-        discountPoints: "1.0",               // 1 point equals 1% of loan amount
-        propertyValue: "1,000,000",                // Default property value for loan amount ($)
-        loanToValue: "80",              // Default construction loan percentage (%)
-        constructionToLongTermLoan: "75",    // Default conversion to long-term loan percentage (%)
-        isInterestOnly: false,                  // Default interest-only option (unchecked)
+        // loanOriginationFee: "1.0",           // 1% of loan amount
+        // interestRate: "5.0",                 // 5% annual interest rate
+        // loanTerm: "360",                      // 12-month term for short-term loan or construction loan
+        // drawFee: "0.25",                     // 0.25% per draw
+        // underwritingFee: "0.5",              // 0.5% of loan amount
+        // inspectionFee: "300",                // Flat fee per inspection
+        // appraisalFee: "500",                 // Flat fee for appraisal
+        // titleInsurance: "0.5",               // 0.5% of loan amount
+        // recordingFee: "150",                 // Flat recording fee
+        // legalFee: "0.75",                    // 0.75% of loan amount for legal fees
+        // interestReserve: "10.0",             // 10% of loan amount reserved for interest payments
+        // prepaymentPenalty: "2.0",            // 2% of outstanding loan balance if applicable
+        // loanExtensionFee: "1.0",             // 1% of loan amount for extension
+        // discountPoints: "1.0",               // 1 point equals 1% of loan amount
+        // propertyValue: "1,000,000",                // Default property value for loan amount ($)
+        // loanToValue: "80",              // Default construction loan percentage (%)
+        // constructionToLongTermLoan: "75",    // Default conversion to long-term loan percentage (%)
+        // isInterestOnly: false,                  // Default interest-only option (unchecked)
+
+        arv: "400,000",
+        purchaseAndRepairCosts: "306,500",
+        projectMonths: "9",
+        hardMoneyLoanLtv: "70",
+        hardMoneyLoanPoints: "1",
+        hardMoneyLoanInterestRate: "10",
+        gapPoints: "3",
+        gapInterestRate: "15",
+        hardMoneyLoanAdminFees: "1,000",
+        gapLoanAdminFees: "1,000"
     },
     [EPageNames.INDUSTRIAL_PRICE_PER_SQFT]: {
         ...DEFAULT_VALUES_ZEROS,
@@ -234,6 +258,10 @@ export const DEFAULT_VALUES = {
         units: "4",
         buyersAgentFee:"2.5",
         closingCosts:"1.5",
+    },
+    [EPageNames.HOUSE_FLIPPING_CALCULATOR]:{
+        ...DEFAULT_VALUES_ZEROS,
+       
     },
     [EPageNames.WATERFALL]: {
         ...DEFAULT_VALUES_ZEROS,

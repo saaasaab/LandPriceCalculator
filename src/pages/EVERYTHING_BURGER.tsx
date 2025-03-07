@@ -8,10 +8,11 @@ import ContactMe from '../components/ContactMe';
 import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './PricePerDoorCalculatorMultifamily';
 import IRRCalculator from './IRRCalculator';
-// import LendingCosts from './LendingCosts';
+// import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 import WaterfallGenerator from '../futureItems/WaterfallGenerator';
 import ConstructionBudget from './ConstructionBudget';
 import PricePerSQFTCalculatorIndustrial from './PricePerSQFTCalculatorIndustrial';
+import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
@@ -55,11 +56,11 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                     isMobile={isMobile}
                     page={page}
                 />
-            // case EPageNames.LENDING_COST:
-            //     return <LendingCosts
-            //         isMobile={isMobile}
-            //         page={page}
-            //     />
+            case EPageNames.HARD_MONEY_COST_ESTIMATOR:
+                return <HardMoneyLoanCalculator
+                    isMobile={isMobile}
+                    page={page}
+                />
             case EPageNames.WATERFALL:
                 return <WaterfallGenerator
                     isMobile={isMobile}

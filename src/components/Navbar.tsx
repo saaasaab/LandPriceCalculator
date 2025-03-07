@@ -17,24 +17,25 @@ export const routes = {
   MULTIFAMILY_ANALYSIS: "/multifamily-analysis",
   HOW_TO_LAND_FOR_MULTIFAMILY: "/how-to-analyzis-land-for-multifamily",
   IRR_CALCULATOR: "/irr-calculator",
-  LENDING_COST: "/lending-costs",
+  HARD_MONEY_COST_ESTIMATOR: "/hard-money-calculator",
   WATERFALL: "/waterfall-generator",
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
   SITE_PLAN_BUILDER: "/site-plan-builder",
+  HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
   HOME: "/",
 
- // Authentication & User-related Routes
- LOGIN: "/login",
- FORGOT_PASSWORD: "/forgot-password",
- REGISTER: "/register",
+  // Authentication & User-related Routes
+  LOGIN: "/login",
+  FORGOT_PASSWORD: "/forgot-password",
+  REGISTER: "/register",
 
- // General Pages
- LANDING_PAGE: "/landing",
- END_FREE_TRIAL: "/end-free-trial",
- PAYMENT: "/payment",
- COMPLETION: "/completion",
- SIGN_UP: "/sign-up",
- TERMS: "/terms",
+  // General Pages
+  LANDING_PAGE: "/landing",
+  END_FREE_TRIAL: "/end-free-trial",
+  PAYMENT: "/payment",
+  COMPLETION: "/completion",
+  SIGN_UP: "/sign-up",
+  TERMS: "/terms",
 }
 
 
@@ -88,7 +89,7 @@ const Navbar = () => {
             <Link onClick={handleToggleMenu} to={routes.MULTI_FAMILY_PRICE_PER_DOOR}>{EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR}</Link>
             <Link onClick={handleToggleMenu} to={routes.INDUSTRIAL_PRICE_PER_SQFT}>{EPageTitles.INDUSTRIAL_PRICE_PER_SQFT}</Link>
             <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
-            {/* <Link onClick={handleToggleMenu} to={routes.LENDING_COST}>{EPageTitles.LENDING_COST}</Link> */}
+            <Link onClick={handleToggleMenu} to={routes.HARD_MONEY_COST_ESTIMATOR}>{EPageTitles.HARD_MONEY_COST_ESTIMATOR}</Link>
             {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
             {/* <Link onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link> */}
 
