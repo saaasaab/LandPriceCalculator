@@ -27,10 +27,8 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                 />
             case EPageNames.INDUSTRIAL_DEVELOPMENT:
                 return <IndustrialDevelopmentCalculator
-
                     isMobile={isMobile}
                     page={page}
-
                 />
             case EPageNames.RESIDENTIAL_DEVELOPMENT:
                 return <ResidentialDevelopmentCalculator

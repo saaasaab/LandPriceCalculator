@@ -23,6 +23,9 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
 
 
+  const [hardMoneyEquitySharePercentage, setHardMoneyEquitySharePercentage] = usePersistedState2(page, EAllStates.hardMoneyEquitySharePercentage, DEFAULT_VALUES[page].hardMoneyEquitySharePercentage, queryParams);
+  const [gapEquitySharePercentage, setGapEquitySharePercentage] = usePersistedState2(page, EAllStates.gapEquitySharePercentage, DEFAULT_VALUES[page].gapEquitySharePercentage, queryParams);
+
   const [hardMoneyLoanLtv, setHardMoneyLoanLtv] = usePersistedState2(page, EAllStates.hardMoneyLoanLtv, DEFAULT_VALUES[page].hardMoneyLoanLtv, queryParams);
   const [hardMoneyLoanPoints, setHardMoneyLoanPoints] = usePersistedState2(page, EAllStates.hardMoneyLoanPoints, DEFAULT_VALUES[page].hardMoneyLoanPoints, queryParams);
   const [hardMoneyLoanInterestRate, setHardMoneyLoanInterestRate] = usePersistedState2(page, EAllStates.hardMoneyLoanInterestRate, DEFAULT_VALUES[page].hardMoneyLoanInterestRate, queryParams);
@@ -62,9 +65,6 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
   const [termites, setTermites] = usePersistedState2(page, EAllStates.termites, DEFAULT_VALUES[page].termites, queryParams);
   const [mold, setMold] = usePersistedState2(page, EAllStates.mold, DEFAULT_VALUES[page].mold, queryParams);
   const [miscellaneous, setMiscellaneous] = usePersistedState2(page, EAllStates.miscellaneous, DEFAULT_VALUES[page].miscellaneous, queryParams);
-
-
-
 
 
 
@@ -109,6 +109,8 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
     mold: string;
     miscellaneous: string;
     profitPercentage: string;
+    hardMoneyEquitySharePercentage: string;
+    gapEquitySharePercentage: string;
   } = {
     arv: arv,
     purchasePrice: purchasePrice,
@@ -150,12 +152,15 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
     mold,
     miscellaneous,
     profitPercentage,
+    hardMoneyEquitySharePercentage,
+    gapEquitySharePercentage,
   };
 
 
   const {
     arv: _arv,
-    purchasePrice: _purchaseAndRepairCosts,
+    purchasePrice: _purchasePrice,
+    closingCosts: _closingCosts,
     projectMonths: _projectMonths,
     hardMoneyLoanLtv: _hardMoneyLoanLtv,
     hardMoneyLoanPoints: _hardMoneyLoanPoints,
@@ -198,30 +203,14 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
     miscellaneous: _miscellaneous,
     profitPercentage: _profitPercentage,
 
+    gapEquitySharePercentage: _gapEquitySharePercentage,
+    hardMoneyEquitySharePercentage: _hardMoneyEquitySharePercentage,
+    realEstateCommissionPercentage: _realEstateCommissionPercentage,
+
   }
     = convertInputsToNumbers(params)
 
   // HML
-  const hardMoneyLoanAmount = (_purchaseAndRepairCosts) * _hardMoneyLoanLtv / 100;
-  const hardMoneyLoanPointsAmount = _hardMoneyLoanPoints * hardMoneyLoanAmount / 100
-  const hardMoneyLoanTotalInterest = _projectMonths / 12 * hardMoneyLoanAmount * _hardMoneyLoanInterestRate / 100;
-  const hardMoneyLoanTotalFees = hardMoneyLoanTotalInterest + _hardMoneyLoanAdminFees
-  const hardMoneyLoanROI = hardMoneyLoanTotalFees / hardMoneyLoanAmount * 100;
-
-
-  // Gap Financing
-  const downPayment = (_purchaseAndRepairCosts) * (1 - _hardMoneyLoanLtv / 100);
-  const gapLoanAmount = downPayment + hardMoneyLoanTotalFees;
-  const gapPointsAmount = gapLoanAmount * _gapPoints / 100;
-  const gapInterestAmount = _projectMonths / 12 * gapLoanAmount * _gapInterestRate / 100;
-  const gapTotalFees = gapInterestAmount + gapPointsAmount + _gapLoanAdminFees;
-  const gapLoanROI = gapTotalFees / gapLoanAmount * 100
-
-
-  const minimumProfit = _profitPercentage / 100 * _arv;
-
-
-
   const totalRepairCosts =
     _roof +
     _concrete +
@@ -252,12 +241,46 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
     _miscellaneous;
 
 
+
+  const _purchaseAndRepairCosts = _purchasePrice + totalRepairCosts;
+  const hardMoneyLoanAmount = (_purchaseAndRepairCosts) * _hardMoneyLoanLtv / 100;
+  const hardMoneyLoanPointsAmount = _hardMoneyLoanPoints * hardMoneyLoanAmount / 100
+  const hardMoneyLoanTotalInterest = _projectMonths / 12 * hardMoneyLoanAmount * _hardMoneyLoanInterestRate / 100;
+  const hardMoneyLoanTotalFees = hardMoneyLoanTotalInterest + _hardMoneyLoanAdminFees
+
+
+  // Gap Financing
+  const downPayment = (_purchaseAndRepairCosts) * (1 - _hardMoneyLoanLtv / 100);
+  const gapLoanAmount = downPayment + hardMoneyLoanTotalFees;
+  const gapPointsAmount = gapLoanAmount * _gapPoints / 100;
+  const gapInterestAmount = _projectMonths / 12 * gapLoanAmount * _gapInterestRate / 100;
+  const gapTotalFees = gapInterestAmount + gapPointsAmount + _gapLoanAdminFees;
+
+
+  const minimumProfit = _profitPercentage / 100 * _arv;
+
+
   const totalLoanCosts = gapTotalFees + hardMoneyLoanTotalFees
-  const totalProjectCosts = totalLoanCosts + _purchaseAndRepairCosts
+  const totalProjectCosts = totalLoanCosts + _purchaseAndRepairCosts + _closingCosts / 100 * _purchasePrice
 
 
-  const totalProfit = _arv - totalProjectCosts;
-  const isDeal =  totalProfit >= minimumProfit;
+  const totalProfit = _arv - totalProjectCosts - _realEstateCommissionPercentage / 100 * _arv;
+
+
+  const gapEquityShareReturn = _gapEquitySharePercentage / 100 * totalProfit;
+  const hardMoneyEquityShareReturn = _hardMoneyEquitySharePercentage / 100 * totalProfit;
+
+  const hardMoneyLoanReturn = (hardMoneyLoanTotalFees + hardMoneyEquityShareReturn);
+  const gapLoanReturn = (gapTotalFees + gapEquityShareReturn);
+
+
+  const hardMoneyLoanROI = hardMoneyLoanReturn / hardMoneyLoanAmount * 100;
+  const gapLoanROI = gapLoanReturn / gapLoanAmount * 100
+
+  const totalProfitLessEquitySplit = totalProfit - hardMoneyEquityShareReturn - gapEquityShareReturn;
+
+
+  const isDeal = totalProfitLessEquitySplit >= minimumProfit;
   return (
 
     <>
@@ -278,18 +301,25 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           numberOfCells={2}
           inputCellIndex={1}
         />
-
         <DynamicRow
-          setInput={value => setClosingCosts(value)}
-          cellValues={["Closing Costs (% of purhcase price)", closingCosts]}
+          setInput={value => setArv(value)}
+          cellValues={["After Repair Value ($)", arv]}
+          isMobile={isMobile}
+          numberOfCells={2}
+          inputCellIndex={1}
+        />
+        <DynamicRow
+          setInput={value => setProjectMonths(value)}
+          cellValues={["Project Months", projectMonths]}
           isMobile={isMobile}
           numberOfCells={2}
           inputCellIndex={1}
         />
 
+
         <DynamicRow
-          setInput={value => setRealEstateCommissionPercentage(value)}
-          cellValues={["Real Estate Commission (% of purhcase price)", realEstateCommissionPercentage]}
+          setInput={value => setClosingCosts(value)}
+          cellValues={["Closing Costs (% of purhcase price)", closingCosts]}
           isMobile={isMobile}
           numberOfCells={2}
           inputCellIndex={1}
@@ -302,13 +332,6 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           numberOfCells={2}
         />
 
-        <DynamicRow
-          setInput={value => setProjectMonths(value)}
-          cellValues={["Project Months", projectMonths]}
-          isMobile={isMobile}
-          numberOfCells={2}
-          inputCellIndex={1}
-        />
 
         <DynamicRow
           cellValues={["Total Loan Costs ($)", roundAndLocalString(totalLoanCosts)]}
@@ -316,13 +339,7 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           numberOfCells={2}
         />
 
-        <DynamicRow
-          setInput={value => setArv(value)}
-          cellValues={["After Repair Value ($)", arv]}
-          isMobile={isMobile}
-          numberOfCells={2}
-          inputCellIndex={1}
-        />
+
 
         <DynamicRow
           cellValues={["Total Project Costs to ARV (%)", roundToDecimal(totalProjectCosts / _arv * 100, 1) + "%"]}
@@ -332,25 +349,27 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
 
         <DynamicRow
+          cellValues={["Total Project Costs ($)", roundAndLocalString(totalProjectCosts)]}
+          isMobile={isMobile}
+          numberOfCells={2}
+        />
+        <DynamicRow
+          setInput={value => setRealEstateCommissionPercentage(value)}
+          cellValues={["Real Estate Commission (% of ARV)", realEstateCommissionPercentage]}
+          isMobile={isMobile}
+          numberOfCells={2}
+          inputCellIndex={1}
+        />
+
+        <DynamicRow
           setInput={value => setProfitPercentage(value)}
           cellValues={["Minimum Profit on ARV (%)", "$" + roundAndLocalString(minimumProfit), profitPercentage]}
           isMobile={isMobile}
           numberOfCells={3}
           inputCellIndex={2}
         />
-
-
-
-
         <DynamicRow
-          cellValues={["Total Project Costs ($)", roundAndLocalString(totalProjectCosts)]}
-          isMobile={isMobile}
-          numberOfCells={2}
-        />
-
-
-        <DynamicRow
-          cellValues={["Total Profit ($)",isDeal?"Deal":"No Deal",roundAndLocalString(totalProfit)]}
+          cellValues={["Total Profit ($)", isDeal ? "Yes! Deal" : "No Deal", roundAndLocalString(totalProfitLessEquitySplit)]}
           isMobile={isMobile}
           numberOfCells={3}
 
@@ -359,10 +378,6 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
 
 
-
-
-
-        Projection Less Profit Share	26,837
 
       </div>
 
@@ -441,16 +456,25 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
             isMobile={isMobile}
             numberOfCells={2}
           />
+          <DynamicRow
+            setInput={value => setHardMoneyEquitySharePercentage(value)}
+            cellValues={["HML Profit Share (%)", "$" + roundAndLocalString(Math.max(hardMoneyEquityShareReturn, 0)), hardMoneyEquitySharePercentage]}
+            isMobile={isMobile}
+            numberOfCells={3}
+            inputCellIndex={2}
+          />
+
+
 
 
 
 
 
           <DynamicRow
-            cellValues={["HML ROI Total (%)", roundToDecimal(hardMoneyLoanROI) + "%"]}
+            cellValues={["HML ROI Total (%)", "$" + roundAndLocalString(hardMoneyLoanReturn), roundToDecimal(hardMoneyLoanROI) + "%"]}
             description="Total Return for the hard money lender"
             isMobile={isMobile}
-            numberOfCells={2}
+            numberOfCells={3}
 
             output={true}
           />
@@ -518,12 +542,19 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
             numberOfCells={2}
           />
 
+          <DynamicRow
+            setInput={value => setGapEquitySharePercentage(value)}
+            cellValues={["Gap Profit Share (%)", "$" + roundAndLocalString(Math.max(gapEquityShareReturn, 0)), gapEquitySharePercentage]}
+            isMobile={isMobile}
+            numberOfCells={3}
+            inputCellIndex={2}
+          />
 
           <DynamicRow
-            cellValues={["Gap ROI Total (%)", roundToDecimal(gapLoanROI) + "%"]}
+            cellValues={["Gap ROI Total (%)", "$" + roundAndLocalString(hardMoneyLoanReturn), roundToDecimal(gapLoanROI) + "%"]}
             description="Total Return for the gap lender"
             isMobile={isMobile}
-            numberOfCells={2}
+            numberOfCells={3}
 
             output={true}
           />
@@ -672,6 +703,34 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
         />
 
         <DynamicRow
+          setInput={value => setCarpentry(value)}
+          cellValues={["Carpentry", convertToPercent(removeCommas(carpentry) / totalRepairCosts), carpentry]}
+          description="The cost of carpentry repairs"
+          isMobile={false}
+          numberOfCells={3}
+          inputCellIndex={2}
+        />
+
+        <DynamicRow
+          setInput={value => setWindows(value)}
+          cellValues={["Windows", convertToPercent(removeCommas(windows) / totalRepairCosts), windows]}
+          description="The cost of plumbing repairs"
+          isMobile={false}
+          numberOfCells={3}
+          inputCellIndex={2}
+        />
+
+
+        <DynamicRow
+          setInput={value => setDoors(value)}
+          cellValues={["Doors", convertToPercent(removeCommas(doors) / totalRepairCosts), doors]}
+          description="The cost of doors and door installation repairs"
+          isMobile={false}
+          numberOfCells={3}
+          inputCellIndex={2}
+        />
+
+        <DynamicRow
           setInput={value => setElectrical(value)}
           cellValues={["Electrical", convertToPercent(removeCommas(electrical) / totalRepairCosts), electrical]}
           description="The cost of electrical work"
@@ -684,6 +743,35 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           setInput={value => setInteriorPainting(value)}
           cellValues={["Interior Painting", convertToPercent(removeCommas(interiorPainting) / totalRepairCosts), interiorPainting]}
           description="The cost of interior painting"
+          isMobile={false}
+          numberOfCells={3}
+          inputCellIndex={2}
+        />
+
+
+        <DynamicRow
+          setInput={value => setHvac(value)}
+          cellValues={["HVAC", convertToPercent(removeCommas(hvac) / totalRepairCosts), hvac]}
+          description="The cost of HVAC"
+          isMobile={false}
+          numberOfCells={3}
+          inputCellIndex={2}
+        />
+
+        <DynamicRow
+          setInput={value => setCabinets(value)}
+          cellValues={["Cabinets", convertToPercent(removeCommas(cabinets) / totalRepairCosts), cabinets]}
+          description="The cost of cabinets"
+          isMobile={false}
+          numberOfCells={3}
+          inputCellIndex={2}
+        />
+
+
+        <DynamicRow
+          setInput={value => setFraming(value)}
+          cellValues={["Framing", convertToPercent(removeCommas(framing) / totalRepairCosts), framing]}
+          description="The cost of framing"
           isMobile={false}
           numberOfCells={3}
           inputCellIndex={2}

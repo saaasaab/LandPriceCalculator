@@ -191,7 +191,8 @@ export enum EAllStates {
     mold = "mold",
     miscellaneous = "miscellaneous",
     profitPercentage="profitPercentage",
-
+    hardMoneyEquitySharePercentage ="hardMoneyEquitySharePercentage",
+    gapEquitySharePercentage="gapEquitySharePercentage",
 
 
 
