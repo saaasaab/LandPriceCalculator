@@ -164,5 +164,35 @@ export enum EAllStates {
     gapLoanAdminFees="gapLoanAdminFees",
 
 
+    roof = "roof",
+    concrete = "concrete",
+    gutters = "gutters",
+    garage = "garage",
+    siding = "siding",
+    landscaping = "landscaping",
+    exteriorPainting = "exteriorPainting",
+    septic = "septic",
+    decksPorches = "decksPorches",
+    foundation = "foundation",
+    demo = "demo",
+    sheetrock = "sheetrock",
+    plumbing = "plumbing",
+    carpentry = "carpentry",
+    windows = "windows",
+    doors = "doors",
+    electrical = "electrical",
+    interiorPainting = "interiorPainting",
+    hvac = "hvac",
+    cabinets = "cabinets",
+    framing = "framing",
+    flooring = "flooring",
+    insulation = "insulation",
+    termites = "termites",
+    mold = "mold",
+    miscellaneous = "miscellaneous",
+    profitPercentage="profitPercentage",
+
+
+
 
 }

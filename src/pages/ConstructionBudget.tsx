@@ -189,6 +189,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
 
             {/* Designs and Engineering Costs */}
             <div className="table-container">
+                
                 <DynamicRow
                     cellValues={["Designs and Engineering"]}
                     isMobile={false}
