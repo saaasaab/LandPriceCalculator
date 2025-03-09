@@ -23,7 +23,7 @@ const HardMoneyLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
   const [gapInterestRate, setGapInterestRate] = usePersistedState2(page, EAllStates.gapInterestRate, DEFAULT_VALUES[page].gapInterestRate, queryParams);
   const [gapLoanAdminFees, setGapLoanAdminFees] = usePersistedState2(page, EAllStates.gapLoanAdminFees, DEFAULT_VALUES[page].gapLoanAdminFees, queryParams);
 
-
+  
   const params: {
     arv: string;
     purchaseAndRepairCosts: string;
@@ -70,7 +70,7 @@ const HardMoneyLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
   const hardMoneyLoanAmount = (_purchaseAndRepairCosts) * _hardMoneyLoanLtv / 100;
   const hardMoneyLoanPointsAmount = _hardMoneyLoanPoints * hardMoneyLoanAmount / 100
   const hardMoneyLoanTotalInterest = _projectMonths / 12 * hardMoneyLoanAmount * _hardMoneyLoanInterestRate / 100;
-  const hardMoneyLoanTotalFees = hardMoneyLoanTotalInterest + _hardMoneyLoanAdminFees
+  const hardMoneyLoanTotalFees = hardMoneyLoanTotalInterest + _hardMoneyLoanAdminFees + _hardMoneyLoanAdminFees
   const hardMoneyLoanROI = hardMoneyLoanTotalFees / hardMoneyLoanAmount * 100;
 
 
@@ -289,7 +289,7 @@ const HardMoneyLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
           <DynamicRow
             setInput={value => setGapLoanAdminFees(value)}
-            cellValues={["Gap Loan Admin Fees(%)", gapLoanAdminFees]}
+            cellValues={["Gap Loan Admin Fees ($)", gapLoanAdminFees]}
             isMobile={isMobile}
             numberOfCells={2}
             inputCellIndex={1}

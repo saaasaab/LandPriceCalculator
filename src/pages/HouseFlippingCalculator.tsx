@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import DynamicRow from '../components/RowTypes/DynamicRow';
 import ShareButton from '../components/ShareButton';
 import { usePersistedState2 } from '../hooks/usePersistedState';
-import { DEFAULT_VALUES } from '../utils/constants';
+import { DEFAULT_VALUES, OutputKeys } from '../utils/constants';
 import { EPageNames, EAllStates } from '../utils/types';
-import { roundAndLocalString, convertInputsToNumbers, roundToDecimal, convertToPercent, removeCommas } from '../utils/utils';
+import { roundAndLocalString, convertInputsToNumbers, roundToDecimal, convertToPercent, removeCommas, popupBoxValues } from '../utils/utils';
+import PopupBox from '../components/PopupBox';
 
 
 const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
@@ -20,9 +22,6 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
   const [realEstateCommissionPercentage, setRealEstateCommissionPercentage] = usePersistedState2(page, EAllStates.realEstateCommissionPercentage, DEFAULT_VALUES[page].realEstateCommissionPercentage, queryParams);
 
   const [profitPercentage, setProfitPercentage] = usePersistedState2(page, EAllStates.profitPercentage, DEFAULT_VALUES[page].profitPercentage, queryParams);
-
-
-
   const [hardMoneyEquitySharePercentage, setHardMoneyEquitySharePercentage] = usePersistedState2(page, EAllStates.hardMoneyEquitySharePercentage, DEFAULT_VALUES[page].hardMoneyEquitySharePercentage, queryParams);
   const [gapEquitySharePercentage, setGapEquitySharePercentage] = usePersistedState2(page, EAllStates.gapEquitySharePercentage, DEFAULT_VALUES[page].gapEquitySharePercentage, queryParams);
 
@@ -66,7 +65,7 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
   const [mold, setMold] = usePersistedState2(page, EAllStates.mold, DEFAULT_VALUES[page].mold, queryParams);
   const [miscellaneous, setMiscellaneous] = usePersistedState2(page, EAllStates.miscellaneous, DEFAULT_VALUES[page].miscellaneous, queryParams);
 
-
+  const [activeCards, setActiveCards] = useState<Set<OutputKeys>>(new Set([OutputKeys.TotalProfitLessEquitySplit]));
 
   const params: {
     arv: string;
@@ -246,13 +245,15 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
   const hardMoneyLoanAmount = (_purchaseAndRepairCosts) * _hardMoneyLoanLtv / 100;
   const hardMoneyLoanPointsAmount = _hardMoneyLoanPoints * hardMoneyLoanAmount / 100
   const hardMoneyLoanTotalInterest = _projectMonths / 12 * hardMoneyLoanAmount * _hardMoneyLoanInterestRate / 100;
-  const hardMoneyLoanTotalFees = hardMoneyLoanTotalInterest + _hardMoneyLoanAdminFees
+  const hardMoneyLoanTotalFees = hardMoneyLoanTotalInterest + _hardMoneyLoanAdminFees +  hardMoneyLoanPointsAmount;
 
 
   // Gap Financing
   const downPayment = (_purchaseAndRepairCosts) * (1 - _hardMoneyLoanLtv / 100);
   const gapLoanAmount = downPayment + hardMoneyLoanTotalFees;
   const gapPointsAmount = gapLoanAmount * _gapPoints / 100;
+  
+  
   const gapInterestAmount = _projectMonths / 12 * gapLoanAmount * _gapInterestRate / 100;
   const gapTotalFees = gapInterestAmount + gapPointsAmount + _gapLoanAdminFees;
 
@@ -261,6 +262,7 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
 
   const totalLoanCosts = gapTotalFees + hardMoneyLoanTotalFees
+
   const totalProjectCosts = totalLoanCosts + _purchaseAndRepairCosts + _closingCosts / 100 * _purchasePrice
 
 
@@ -281,6 +283,101 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
 
   const isDeal = totalProfitLessEquitySplit >= minimumProfit;
+
+  const outputData: Partial<Record<OutputKeys, { title: string; value: any; value2?: any; description: string | null }>> = {
+    [OutputKeys.TotalRepairCosts]: {
+      title: "Total Repair Costs",
+      value: roundAndLocalString(totalRepairCosts),
+      description: "Total estimated repair costs for the project.",
+    },
+    [OutputKeys.TotalLoanCosts]: {
+      title: "Total Loan Costs ($)",
+      value: roundAndLocalString(totalLoanCosts),
+      description: "Total cost of all loan-related expenses.",
+    },
+    [OutputKeys.TotalProjectCostsToARV]: {
+      title: "Total Project Costs to ARV (%)",
+      value: roundToDecimal(totalProjectCosts / _arv * 100, 1) + "%",
+      description: "Total project cost expressed as a percentage of ARV.",
+    },
+    // _purchaseAndRepairCosts
+    [OutputKeys.TotalProjectCosts]: {
+      title: "Total Project Costs ($)",
+      value: roundAndLocalString(totalProjectCosts),
+      description: "The total cost of the project, including repairs and loan costs.",
+    },
+
+    [OutputKeys.HardMoneyLoanAmount]: {
+      title: "HML Loan Amount ($)",
+      value: roundAndLocalString(hardMoneyLoanAmount),
+      description: "Total amount borrowed through the hard money loan.",
+    },
+    [OutputKeys.HardMoneyLoanPointsAmount]: {
+      title: "HML Loan Points Amount ($)",
+      value: roundAndLocalString(hardMoneyLoanPointsAmount),
+      description: "Cost of loan points for the hard money loan.",
+    },
+    [OutputKeys.HardMoneyLoanTotalInterest]: {
+      title: "HML Total Interest ($)",
+      value: roundAndLocalString(hardMoneyLoanTotalInterest),
+      description: "Total interest paid on the hard money loan.",
+    },
+    [OutputKeys.HardMoneyLoanTotalFees]: {
+      title: "HML Total Fees ($)",
+      value: roundAndLocalString(hardMoneyLoanTotalFees),
+      description: "Total fees associated with the hard money loan.",
+    },
+    [OutputKeys.HardMoneyLoanROI]: {
+      title: "HML ROI Total (%)",
+      value: roundToDecimal(hardMoneyLoanROI) + "%",
+      value2: roundToDecimal(hardMoneyLoanROI) + "%",
+
+      description: "Total return for the hard money lender.",
+    },
+    [OutputKeys.DownPayment]: {
+      title: "Down Payment ($)",
+      value: roundAndLocalString(downPayment),
+      description: "Initial cash investment required for the deal.",
+    },
+    [OutputKeys.GapLoanAmount]: {
+      title: "Gap Loan Amount ($)",
+      value: roundAndLocalString(gapLoanAmount),
+      description: "Total amount borrowed through the gap loan.",
+    },
+    [OutputKeys.GapPointsAmount]: {
+      title: "Gap Points Amount ($)",
+      value: roundAndLocalString(gapPointsAmount),
+      description: "Cost of loan points for the gap loan.",
+    },
+    [OutputKeys.GapInterestAmount]: {
+      title: "Gap Interest Amount ($)",
+      value: roundAndLocalString(gapInterestAmount),
+      description: "Total interest paid on the gap loan.",
+    },
+    [OutputKeys.GapTotalFees]: {
+      title: "Gap Total Fees ($)",
+      value: roundAndLocalString(gapTotalFees),
+      description: "Total fees associated with the gap loan.",
+    },
+    [OutputKeys.GapLoanROI]: {
+      title: "Gap ROI Total (%)",
+      value: "$" + roundAndLocalString(gapLoanReturn),
+      value2: roundToDecimal(gapLoanROI) + "%",
+      description: "Total return for the gap lender.",
+    },
+    [OutputKeys.TotalProfitLessEquitySplit]: {
+      title: "Total Profit ($)",
+      value: isDeal ? "Yes! Deal" : "No Deal",
+      value2: roundAndLocalString(totalProfitLessEquitySplit),
+
+      description: "Total profit the rehab yields."
+    },
+  };
+
+
+
+  const popupValues = popupBoxValues(activeCards, outputData)
+
   return (
 
     <>
@@ -319,40 +416,79 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
         <DynamicRow
           setInput={value => setClosingCosts(value)}
-          cellValues={["Closing Costs (% of purhcase price)", closingCosts]}
+          cellValues={["Closing Costs (% of purhcase price)", roundAndLocalString( removeCommas(closingCosts)/100 * _purchasePrice), closingCosts]}
           isMobile={isMobile}
-          numberOfCells={2}
-          inputCellIndex={1}
+          numberOfCells={3}
+          inputCellIndex={2}
         />
-
+        {/* 
         <DynamicRow
           cellValues={["Total Repair Costs", roundAndLocalString(totalRepairCosts)]}
           description="Total Repair Costs"
           isMobile={false}
           numberOfCells={2}
+          setActiveCards={setActiveCards}
+          activeCards={activeCards}
+        /> */}
+
+
+        <DynamicRow
+          id={OutputKeys.TotalRepairCosts}
+          cellValues={[
+            outputData[OutputKeys.TotalRepairCosts]?.title,
+            outputData[OutputKeys.TotalRepairCosts]?.value
+          ]}
+          description={outputData[OutputKeys.TotalRepairCosts]?.description}
+          isMobile={false}
+          numberOfCells={2}
+          setActiveCards={setActiveCards}
+          activeCards={activeCards}
+        />
+
+
+
+        <DynamicRow
+          id={OutputKeys.TotalLoanCosts}
+          cellValues={[
+            outputData[OutputKeys.TotalLoanCosts]?.title,
+            outputData[OutputKeys.TotalLoanCosts]?.value
+          ]}
+          description={outputData[OutputKeys.TotalLoanCosts]?.description}
+          isMobile={isMobile}
+          numberOfCells={2}
+          setActiveCards={setActiveCards}
+          activeCards={activeCards}
         />
 
 
         <DynamicRow
-          cellValues={["Total Loan Costs ($)", roundAndLocalString(totalLoanCosts)]}
+          id={OutputKeys.TotalProjectCostsToARV}
+          cellValues={[
+            outputData[OutputKeys.TotalProjectCostsToARV]?.title,
+            outputData[OutputKeys.TotalProjectCostsToARV]?.value
+          ]}
+          description={outputData[OutputKeys.TotalProjectCostsToARV]?.description}
           isMobile={isMobile}
           numberOfCells={2}
+          setActiveCards={setActiveCards}
+          activeCards={activeCards}
         />
 
 
 
         <DynamicRow
-          cellValues={["Total Project Costs to ARV (%)", roundToDecimal(totalProjectCosts / _arv * 100, 1) + "%"]}
+          id={OutputKeys.TotalProjectCosts}
+          cellValues={[
+            outputData[OutputKeys.TotalProjectCosts]?.title,
+            outputData[OutputKeys.TotalProjectCosts]?.value
+          ]}
+          description={outputData[OutputKeys.TotalProjectCosts]?.description}
           isMobile={isMobile}
           numberOfCells={2}
+          setActiveCards={setActiveCards}
+          activeCards={activeCards}
         />
 
-
-        <DynamicRow
-          cellValues={["Total Project Costs ($)", roundAndLocalString(totalProjectCosts)]}
-          isMobile={isMobile}
-          numberOfCells={2}
-        />
         <DynamicRow
           setInput={value => setRealEstateCommissionPercentage(value)}
           cellValues={["Real Estate Commission (% of ARV)", realEstateCommissionPercentage]}
@@ -368,13 +504,24 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           numberOfCells={3}
           inputCellIndex={2}
         />
+
+
         <DynamicRow
-          cellValues={["Total Profit ($)", isDeal ? "Yes! Deal" : "No Deal", roundAndLocalString(totalProfitLessEquitySplit)]}
+          id={OutputKeys.TotalProfitLessEquitySplit}
+          cellValues={[
+            outputData[OutputKeys.TotalProfitLessEquitySplit]?.title,
+            outputData[OutputKeys.TotalProfitLessEquitySplit]?.value,
+            outputData[OutputKeys.TotalProfitLessEquitySplit]?.value2
+
+          ]}
+          description={outputData[OutputKeys.TotalProfitLessEquitySplit]?.description}
           isMobile={isMobile}
           numberOfCells={3}
-
           output={true}
+          setActiveCards={setActiveCards}
+          activeCards={activeCards}
         />
+
 
 
 
@@ -421,25 +568,40 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
 
 
           <DynamicRow
-            cellValues={["HML Loan Amount ($)", roundAndLocalString(hardMoneyLoanAmount)]}
+            id={OutputKeys.HardMoneyLoanAmount}
+            cellValues={[
+              outputData[OutputKeys.HardMoneyLoanAmount]?.title,
+              outputData[OutputKeys.HardMoneyLoanAmount]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
 
           <DynamicRow
-            cellValues={["HML Loan Points Amount ($)", roundAndLocalString(hardMoneyLoanPointsAmount)]}
+            id={OutputKeys.HardMoneyLoanPointsAmount}
+            cellValues={[
+              outputData[OutputKeys.HardMoneyLoanPointsAmount]?.title,
+              outputData[OutputKeys.HardMoneyLoanPointsAmount]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
+
           <DynamicRow
-            cellValues={["HML Total Interest ($)", roundAndLocalString(hardMoneyLoanTotalInterest)]}
+            id={OutputKeys.HardMoneyLoanTotalInterest}
+            cellValues={[
+              outputData[OutputKeys.HardMoneyLoanTotalInterest]?.title,
+              outputData[OutputKeys.HardMoneyLoanTotalInterest]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
-
-
-
-
 
           <DynamicRow
             setInput={value => setHardMoneyLoanAdminFees(value)}
@@ -450,11 +612,16 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           />
 
 
-
           <DynamicRow
-            cellValues={["HML Total Fees ($)", roundAndLocalString(hardMoneyLoanTotalFees)]}
+            id={OutputKeys.HardMoneyLoanTotalFees}
+            cellValues={[
+              outputData[OutputKeys.HardMoneyLoanTotalFees]?.title,
+              outputData[OutputKeys.HardMoneyLoanTotalFees]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
           <DynamicRow
             setInput={value => setHardMoneyEquitySharePercentage(value)}
@@ -464,20 +631,21 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
             inputCellIndex={2}
           />
 
-
-
-
-
-
-
           <DynamicRow
-            cellValues={["HML ROI Total (%)", "$" + roundAndLocalString(hardMoneyLoanReturn), roundToDecimal(hardMoneyLoanROI) + "%"]}
-            description="Total Return for the hard money lender"
+            id={OutputKeys.HardMoneyLoanROI}
+            cellValues={[
+              outputData[OutputKeys.HardMoneyLoanROI]?.title,
+              outputData[OutputKeys.HardMoneyLoanROI]?.value,
+              outputData[OutputKeys.HardMoneyLoanROI]?.value2
+            ]}
+            description={outputData[OutputKeys.HardMoneyLoanROI]?.description}
             isMobile={isMobile}
             numberOfCells={3}
-
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
             output={true}
           />
+
         </div>
         <div className="table-container">
           <DynamicRow
@@ -487,14 +655,17 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
             inputCellIndex={-1}
             header={true}
           />
-
-
           <DynamicRow
-            cellValues={["Down Payment ($)", roundAndLocalString(downPayment)]}
+            id={OutputKeys.DownPayment}
+            cellValues={[
+              outputData[OutputKeys.DownPayment]?.title,
+              outputData[OutputKeys.DownPayment]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
-
           <DynamicRow
             setInput={value => setGapPoints(value)}
             cellValues={["Gap Points (%)", gapPoints + "%"]}
@@ -502,7 +673,6 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
             numberOfCells={2}
             inputCellIndex={1}
           />
-
           <DynamicRow
             setInput={value => setGapInterestRate(value)}
             cellValues={["Gap Interest Rate (%)", gapInterestRate + "%"]}
@@ -511,35 +681,62 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
             inputCellIndex={1}
           />
 
+          <DynamicRow
+            id={OutputKeys.GapLoanAmount}
+            cellValues={[
+              outputData[OutputKeys.GapLoanAmount]?.title,
+              outputData[OutputKeys.GapLoanAmount]?.value
+            ]}
+            isMobile={isMobile}
+            numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
+          />
 
 
           <DynamicRow
-            cellValues={["Gap Loan Amount ($)", roundAndLocalString(gapLoanAmount)]}
+            id={OutputKeys.GapPointsAmount}
+            cellValues={[
+              outputData[OutputKeys.GapPointsAmount]?.title,
+              outputData[OutputKeys.GapPointsAmount]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
+
           <DynamicRow
-            cellValues={["Gap Points Amount ($)", roundAndLocalString(gapPointsAmount)]}
+            id={OutputKeys.GapInterestAmount}
+            cellValues={[
+              outputData[OutputKeys.GapInterestAmount]?.title,
+              outputData[OutputKeys.GapInterestAmount]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
-          <DynamicRow
-            cellValues={["Gap Interest Amount ($)", roundAndLocalString(gapInterestAmount)]}
-            isMobile={isMobile}
-            numberOfCells={2}
-          />
+
+
 
           <DynamicRow
             setInput={value => setGapLoanAdminFees(value)}
-            cellValues={["Gap Loan Admin Fees(%)", gapLoanAdminFees]}
+            cellValues={["Gap Loan Admin Fees ($)", gapLoanAdminFees]}
             isMobile={isMobile}
             numberOfCells={2}
             inputCellIndex={1}
           />
           <DynamicRow
-            cellValues={["Gap Total Fees ($)", roundAndLocalString(gapTotalFees)]}
+            id={OutputKeys.GapTotalFees}
+            cellValues={[
+              outputData[OutputKeys.GapTotalFees]?.title,
+              outputData[OutputKeys.GapTotalFees]?.value
+            ]}
             isMobile={isMobile}
             numberOfCells={2}
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
           />
 
           <DynamicRow
@@ -551,13 +748,20 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           />
 
           <DynamicRow
-            cellValues={["Gap ROI Total (%)", "$" + roundAndLocalString(hardMoneyLoanReturn), roundToDecimal(gapLoanROI) + "%"]}
-            description="Total Return for the gap lender"
+            id={OutputKeys.GapLoanROI}
+            cellValues={[
+              outputData[OutputKeys.GapLoanROI]?.title,
+              outputData[OutputKeys.GapLoanROI]?.value,
+              outputData[OutputKeys.GapLoanROI]?.value2
+            ]}
+            description={outputData[OutputKeys.GapLoanROI]?.description}
             isMobile={isMobile}
             numberOfCells={3}
-
+            setActiveCards={setActiveCards}
+            activeCards={activeCards}
             output={true}
           />
+
         </div>
 
       </div>
@@ -844,22 +1048,18 @@ const HouseFlippingCalculator = ({ isMobile, page }: { isMobile: boolean; page: 
           numberOfCells={3}
           inputCellIndex={2}
         />
-
-
-
       </div>
 
 
+      <PopupBox
+        data={popupValues[1]}
+        titles={popupValues[0]}
+        dataKeys={popupValues[2]}
+        setActiveCards={setActiveCards}
+      />
 
-
-
-      {/* 
-
-      <HardMoneyLoanCalculator
-        isMobile={isMobile}
-        page={EPageNames.HARD_MONEY_COST_ESTIMATOR}
-      /> */}
       <ShareButton params={params} />
+
 
     </>
   );
