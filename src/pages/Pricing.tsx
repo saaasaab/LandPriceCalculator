@@ -30,7 +30,6 @@ const Pricing = () => {
 
     const [showPaymentForm, setShowPaymentForm] = useState(false);
 
-
     const [plan, _setPlan] = useState(plans[0]);
 
     const [email, setEmail] = useState('');
@@ -57,9 +56,6 @@ const Pricing = () => {
                     { email, password }
                 );
 
-
-
-
                 if(loginData.user.is_paid){
                     alert("You've already paid, logging you in now.")
                     setErrorMessage('');
@@ -75,7 +71,7 @@ const Pricing = () => {
                 }
 
                 else{
-                    setErrorMessage('error logging someone in')
+                    setErrorMessage('error logging you in')
                     return
                 }
 
@@ -88,6 +84,7 @@ const Pricing = () => {
                 return
             }
         } catch (error: any) {
+            setErrorMessage('Something went wrong. This email may already be in use.');
             console.error('❌ Registration error:', error);
         }
     };

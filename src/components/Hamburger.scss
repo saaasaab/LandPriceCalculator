@@ -34,6 +34,8 @@
   }
 
   &.is-open {
+    display: flex;
+    height:$width;
     .burger1 {
       transform: rotate(45deg);
     }
@@ -49,7 +51,7 @@
 
 @media (min-width: 769px) {
   .hamburger {
-    display: none;
+    display: none !important;
   }
 
 }

@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 
+
 export const routes = {
   MULTIFAMILY_DEVELOPMENT: "/residential-development",
   INDUSTRIAL_DEVELOPMENT: "/industrial-development",
@@ -38,6 +39,33 @@ export const routes = {
   TERMS: "/terms",
 }
 
+export const calcualtorIcons = {
+  [routes.MULTIFAMILY_DEVELOPMENT]: '🏢',
+  [routes.INDUSTRIAL_DEVELOPMENT]: '🏭',
+  [routes.RESIDENTIAL_DEVELOPMENT]: '🏘️',
+  [routes.CONSTRUCTION_BUDGET]: '📊',
+  [routes.MULTIFAMILY_ANALYSIS]: '💰',
+  [routes.INDUSTRIAL_PRICE_PER_SQFT]: '📏',
+  [routes.MULTI_FAMILY_PRICE_PER_DOOR]: '🚪',
+  [routes.IRR_CALCULATOR]: '📈',
+  [routes.SITE_PLAN_BUILDER]: '🗺️',
+}
+
+
+const IconLink = ({ route, text, handleToggleMenu }: { route: string, text: string, handleToggleMenu: () => void }) => {
+
+  const icon = calcualtorIcons[route];
+  const link = route;
+
+  return (
+    <Link className="icon-link" to={link} onClick={handleToggleMenu}>
+      <div className="calculator-icon">{icon}</div>
+      <div>{text}</div>
+    </Link>
+
+  );
+};
+
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -47,12 +75,9 @@ const Navbar = () => {
     setIsMobileMenuOpen((prev) => !prev);
   };
 
-
-
-
   return (
 
-    <nav className={`navbar ${isMobileMenuOpen ? 'is-open' : ''}`}>
+    <nav className={`navbar ${isMobileMenuOpen ? 'is-open-navbar' : ''}`}>
 
       <Hamburger isOpen={isMobileMenuOpen} onClick={handleToggleMenu} />
 
@@ -74,36 +99,35 @@ const Navbar = () => {
         <li className="dropdown">
           <span className="dropdown-title">Development Tools</span>
           <div className="dropdown-content">
-            <Link onClick={handleToggleMenu} to={routes.MULTIFAMILY_DEVELOPMENT}>{EPageTitles.MULTIFAMILY_DEVELOPMENT}</Link>
-            <Link onClick={handleToggleMenu} to={routes.INDUSTRIAL_DEVELOPMENT}>{EPageTitles.INDUSTRIAL_DEVELOPMENT}</Link>
-            <Link onClick={handleToggleMenu} to={routes.RESIDENTIAL_DEVELOPMENT}>{EPageTitles.RESIDENTIAL_DEVELOPMENT}</Link>
-            <Link onClick={handleToggleMenu} to={routes.CONSTRUCTION_BUDGET}>{EPageTitles.CONSTRUCTION_BUDGET}</Link>
+            <IconLink route={routes.MULTIFAMILY_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTIFAMILY_DEVELOPMENT} />
+            <IconLink route={routes.INDUSTRIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_DEVELOPMENT} />
+            <IconLink route={routes.RESIDENTIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.RESIDENTIAL_DEVELOPMENT} />
+            <IconLink route={routes.CONSTRUCTION_BUDGET} handleToggleMenu={handleToggleMenu} text={EPageTitles.CONSTRUCTION_BUDGET} />
           </div>
         </li>
 
         {/* Analysis Dropdown */}
+        {/* Analysis Dropdown */}
         <li className="dropdown">
           <span className="dropdown-title">Analysis Tools</span>
           <div className="dropdown-content">
-            <Link onClick={handleToggleMenu} to={routes.MULTIFAMILY_ANALYSIS}>{EPageTitles.MULTIFAMILY_ANALYSIS}</Link>
-            <Link onClick={handleToggleMenu} to={routes.MULTI_FAMILY_PRICE_PER_DOOR}>{EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR}</Link>
-            <Link onClick={handleToggleMenu} to={routes.INDUSTRIAL_PRICE_PER_SQFT}>{EPageTitles.INDUSTRIAL_PRICE_PER_SQFT}</Link>
-            <Link onClick={handleToggleMenu} to={routes.IRR_CALCULATOR}>{EPageTitles.IRR_CALCULATOR}</Link>
-            <Link onClick={handleToggleMenu} to={routes.HARD_MONEY_COST_ESTIMATOR}>{EPageTitles.HARD_MONEY_COST_ESTIMATOR}</Link>
-            <Link onClick={handleToggleMenu} to={routes.HOUSE_FLIPPING_CALCULATOR}>{EPageTitles.HOUSE_FLIPPING_CALCULATOR}</Link>
+            <IconLink route={routes.MULTIFAMILY_ANALYSIS} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTIFAMILY_ANALYSIS} />
+            <IconLink route={routes.MULTI_FAMILY_PRICE_PER_DOOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR} />
+            <IconLink route={routes.INDUSTRIAL_PRICE_PER_SQFT} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PRICE_PER_SQFT} />
+            <IconLink route={routes.IRR_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.IRR_CALCULATOR} />
+            <IconLink route={routes.HARD_MONEY_COST_ESTIMATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HARD_MONEY_COST_ESTIMATOR} />
+            <IconLink route={routes.HOUSE_FLIPPING_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HOUSE_FLIPPING_CALCULATOR} />
 
-            
-            
-            {/* <Link onClick={handleToggleMenu} to={routes.WATERFALL}>{EPageTitles.WATERFALL}</Link> */}
-            {/* <Link onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link> */}
-
+            {/* Uncomment these if needed */}
+            {/* <IconLink route={routes.WATERFALL} handleToggleMenu={handleToggleMenu} text={EPageTitles.WATERFALL} /> */}
+            {/* <IconLink route={routes.SITE_PLAN_BUILDER} handleToggleMenu={handleToggleMenu} text={EPageTitles.SITE_PLAN_BUILDER} /> */}
           </div>
         </li>
 
         <li className="dropdown">
-          <Link className="dropdown-title" onClick={handleToggleMenu} to={routes.SITE_PLAN_BUILDER}>{EPageTitles.SITE_PLAN_BUILDER}</Link>
-
+          <IconLink route={routes.SITE_PLAN_BUILDER} handleToggleMenu={handleToggleMenu} text={EPageTitles.SITE_PLAN_BUILDER} />
         </li>
+
 
 
         {/* Howto and Blogs */}

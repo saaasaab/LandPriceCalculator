@@ -18,6 +18,7 @@ export const postRequest = async <T>(endpoint: string, body: object): Promise<T>
 
     const data: T = await response.json();
 
+    console.log(`data`, data)
     if (!response.ok) {
       throw new Error(data as any);
     }

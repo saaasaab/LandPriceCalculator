@@ -48,6 +48,19 @@
       // transition: background-color 0.3s;
       transition: background-color 0.3s, transform 0.2s, border-radius 0.2s;
 
+      .icon-link {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-size: 1.1rem;
+        transition: color 0.3s ease;
+        text-decoration: none;
+        .calculator-icon{
+          font-size: 24px;
+        }
+      }
       &:hover {
         background: #00bcd4;
         // background: linear-gradient(
@@ -78,7 +91,7 @@
         z-index: 1;
 
         a {
-          display: block;
+          // display: block;
           padding: 10px;
           color: #fff;
           font-size: 1.1rem;
@@ -108,6 +121,8 @@
     display: block;
     flex-direction: column;
     padding: 10px;
+    top: 0;
+    overflow: scroll;
 
     .navbar-logo {
       padding: 0;
@@ -131,6 +146,10 @@
       display: none;
       flex-direction: column;
       gap: 10px;
+
+      &.is-open {
+        display: flex;
+      }
 
       li.dropdown {
         flex-direction: column;
@@ -162,11 +181,10 @@
         margin: 10px 0;
       }
     }
-    .is-open {
-      display: flex;
-      
+
+    &.is-open-navbar {
+      height: 100vh;
     }
-   
   }
 }
 
