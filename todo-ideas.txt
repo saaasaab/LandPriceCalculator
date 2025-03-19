@@ -22,3 +22,82 @@
 [X] mulplie Buildings
 [X] Building Price - per Sq Ft ($) NOT CLEAR
 [X] breakout the formulas - NOI
+
+
+
+
+[ ] Zoning documents for any city Zoning Map. AI that gets all the planning information including phone and email.
+[ ] 
+
+
+[ ] PDF form to fun fillible form
+You already have some strong real estate tools, but here are additional **quick-to-build** tools that could add value and bring in more users:  
+
+### 🔹 **Deal Analysis & Valuation Tools**
+1. **📊 ARV (After Repair Value) Calculator**  
+   - Enter purchase price, rehab costs, and comps to estimate ARV.  
+   - Show potential ROI and profit margin.  
+
+2. **💵 Rent vs. Buy Calculator**  
+   - Compares long-term costs of renting vs. buying based on user inputs.  
+
+3. **🏘️ Short-Term vs. Long-Term Rental Profitability**  
+   - Analyzes whether an Airbnb model outperforms a long-term lease.  
+
+4. **📉 Break-Even Cap Rate Calculator**  
+   - Helps investors understand the cap rate at which their investment will break even.  
+
+---
+
+### 🔹 **Financing & Cost Tools**
+5. **📅 Mortgage & Loan Calculator with Interest Rate Comparisons**  
+   - Similar to standard mortgage calculators but with investor-focused insights.  
+   - Includes different loan options like DSCR loans, hard money, etc.  
+
+6. **💸 Refinance vs. Hold Calculator**  
+   - Helps property owners decide if refinancing makes sense.  
+
+7. **🏗️ Construction Cost Estimator**  
+   - Basic tool where users enter square footage, construction type, and location for estimated costs.  
+
+8. **📑 1031 Exchange Benefit Estimator**  
+   - Shows potential tax savings when selling a property and reinvesting via 1031 exchange.  
+
+---
+
+### 🔹 **Development & Zoning Tools**
+9. **📐 Zoning & Density Calculator**  
+   - Users input lot size and zoning type to determine max units that can be built.  
+
+10. **🏗️ Build vs. Buy Decision Helper**  
+    - Estimates whether developing a new project is more profitable than buying an existing property.  
+
+11. **🌎 Opportunity Zone Tax Benefit Calculator**  
+    - Estimates tax savings when investing in Opportunity Zones.  
+
+---
+
+### 🔹 **Property Marketing & Investor Attraction**
+12. **🎨 Quick Investor Deck Generator**  
+    - Auto-generates a simple PDF pitch deck for investors with deal summary, financials, and project photos.  
+
+13. **📢 Lease vs. Sell Decision Tool**  
+    - Helps property owners determine whether they should lease or sell based on their goals.  
+
+14. **🗺️ Heatmap of Cash Flow Markets**  
+    - Uses public rental and sale data to show where cash flow deals are strongest.  
+
+---
+
+### 🔹 **Bonus Idea: Viral & Lead-Generating Tools**
+15. **📍 "What’s My Property Worth?" Instant Valuation Tool**  
+    - Simple Zestimate-style tool that asks for property details and gives an estimated value.  
+    - Great for lead generation—captures emails in exchange for the report.  
+
+16. **🔄 House Hacking Calculator**  
+    - Helps people determine if they can live for free by renting out parts of their property.  
+
+17. **🛠️ Rehab Cost vs. Resale Value Analyzer**  
+    - Users input potential rehab upgrades, and the tool estimates added value.  
+
+Would any of these be a good fit for your roadmap? 🚀
