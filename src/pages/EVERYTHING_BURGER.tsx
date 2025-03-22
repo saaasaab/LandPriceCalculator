@@ -14,6 +14,7 @@ import ConstructionBudget from './ConstructionBudget';
 import PricePerSQFTCalculatorIndustrial from './PricePerSQFTCalculatorIndustrial';
 import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 import HouseFlippingCalculator from './HouseFlippingCalculator';
+import IndustrialProformaCalculator from './IndustrialProformaCalculator';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
@@ -37,6 +38,11 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                 />
             case EPageNames.MULTIFAMILY_ANALYSIS:
                 return <ResidentialCashFlowCalculator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.INDUSTRIAL_PROFORMA:
+                return <IndustrialProformaCalculator
                     isMobile={isMobile}
                     page={page}
                 />

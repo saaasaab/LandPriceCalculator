@@ -1,0 +1,19 @@
+
+
+@media print {
+  .navbar,
+  .hover-add-icon.hover-add-icon-active,
+  footer,
+  button.copy-url-button {
+    display: none !important;
+  }
+
+
+  input{
+    box-shadow: none !important;
+  }
+  .app-header{
+    font-size: 2rem;
+
+  }
+}

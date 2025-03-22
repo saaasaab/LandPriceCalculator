@@ -1,0 +1,45 @@
+.lease-selector {
+  max-width: 600px;
+  margin: auto;
+  text-align: center;
+  font-family: Arial, sans-serif;
+
+  .lease-options {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .lease-button {
+    padding: 10px 15px;
+    border: 2px solid #007bff;
+    background: white;
+    color: #007bff;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 5px;
+    
+    &.active, &:hover {
+      background: #007bff;
+      color: white;
+    }
+  }
+
+  .lease-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    ul {
+      list-style: none;
+      padding: 0;
+
+      li {
+        margin: 8px 0;
+        text-align: left;
+      }
+    }
+  }
+}

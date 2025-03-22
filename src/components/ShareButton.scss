@@ -1,18 +1,23 @@
-.copy-url-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #487e4a;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.action-buttons {
+  display: flex;
+  gap: 20px;
 
-  &:hover {
-    background-color: #45a049;
-  }
+  .copy-url-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #487e4a;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 
-  &.copied {
-    background-color: #2196f3;
+    &:hover {
+      background-color: #45a049;
+    }
+
+    &.copied {
+      background-color: #2196f3;
+    }
   }
 }

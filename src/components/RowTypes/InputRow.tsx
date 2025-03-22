@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { formatNumberWithCommas } from '../../utils/utils';
 
 
@@ -21,6 +21,15 @@ const InputRow = ({
 
     }) => {
     const [cell, setCell] = useState((`${cellValues[1]}`) as (string | number | readonly string[] | undefined));
+
+
+
+    useEffect(() => {
+
+        setCell(`${cellValues[1]}`);
+    }, [cellValues[1]]);
+
+
     const [isClicked, setIsClicked] = useState(false);
 
     function removeNonNumeric(input: string): string {
@@ -44,19 +53,19 @@ const InputRow = ({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = removeNonNumeric(e.target.value); // Ensure only numbers
 
-        if(isPercent && Number(rawValue) > 100 ){
-           return;
-        }    
-        
+        if (isPercent && Number(rawValue) > 100) {
+            return;
+        }
+
         const formattedValue = formatNumberWithCommas(rawValue);
         setCell(`${formattedValue}`);//  ${inputUnits?inputUnits:""}
         setInput && setInput(formattedValue);
-        
+
     };
 
     // ${isMobile?"is-mobile":""}
     return (
-        <div className={`input-row ${ isGreyedOut?"is-greyed-out":""}` }>
+        <div className={`input-row ${isGreyedOut ? "is-greyed-out" : ""}`}>
             <div className="info-cell" onClick={() => setIsClicked(!isClicked)}>
                 <h4>{cellValues[0]}</h4>
                 {/* && isMobile */}

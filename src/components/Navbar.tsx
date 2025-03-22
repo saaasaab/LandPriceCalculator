@@ -16,6 +16,7 @@ export const routes = {
   MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
   INDUSTRIAL_PRICE_PER_SQFT: "industrial-price-per-sqft-calculator",
   MULTIFAMILY_ANALYSIS: "/multifamily-analysis",
+  INDUSTRIAL_PROFORMA :"/industrial-commercial-proforma",
   HOW_TO_LAND_FOR_MULTIFAMILY: "/how-to-analyzis-land-for-multifamily",
   IRR_CALCULATOR: "/irr-calculator",
   HARD_MONEY_COST_ESTIMATOR: "/hard-money-calculator",
@@ -45,6 +46,7 @@ export const calcualtorIcons = {
   [routes.RESIDENTIAL_DEVELOPMENT]: '🏘️',
   [routes.CONSTRUCTION_BUDGET]: '📊',
   [routes.MULTIFAMILY_ANALYSIS]: '💰',
+  [routes.INDUSTRIAL_PROFORMA]: '💰',
   [routes.INDUSTRIAL_PRICE_PER_SQFT]: '📏',
   [routes.MULTI_FAMILY_PRICE_PER_DOOR]: '🚪',
   [routes.IRR_CALCULATOR]: '📈',
@@ -112,6 +114,8 @@ const Navbar = () => {
           <span className="dropdown-title">Analysis Tools</span>
           <div className="dropdown-content">
             <IconLink route={routes.MULTIFAMILY_ANALYSIS} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTIFAMILY_ANALYSIS} />
+            {/* <IconLink route={routes.INDUSTRIAL_PROFORMA} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PROFORMA} /> */}
+
             <IconLink route={routes.MULTI_FAMILY_PRICE_PER_DOOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR} />
             <IconLink route={routes.INDUSTRIAL_PRICE_PER_SQFT} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PRICE_PER_SQFT} />
             <IconLink route={routes.IRR_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.IRR_CALCULATOR} />

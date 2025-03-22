@@ -9,8 +9,11 @@ import { usePersistedState2 } from '../hooks/usePersistedState';
 import PopupBox from '../components/PopupBox';
 import ShareButton from '../components/ShareButton';
 import InputRow from '../components/RowTypes/InputRow';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+function format(val: number) {
+    return val.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
 
 interface ResidentialDevelopmentCalculationProps {
     isMobile: boolean;
@@ -27,12 +30,12 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
     const [grossAcres, setGrossAcres] = usePersistedState2(page, EAllStates.grossAcres, DEFAULT_VALUES[page].grossAcres, queryParams);
     const [costToDevelopPerLot, setCostToDevelopPerLot] = usePersistedState2(page, EAllStates.costToDevelopPerLot, DEFAULT_VALUES[page].costToDevelopPerLot, queryParams);
-    
-    const [SDCFees,setSDCFees]= usePersistedState2(page, EAllStates.SDCFees, DEFAULT_VALUES[page].SDCFees, queryParams);
+
+    const [SDCFees, setSDCFees] = usePersistedState2(page, EAllStates.SDCFees, DEFAULT_VALUES[page].SDCFees, queryParams);
     const [hardCostPerSqFt, setHardCostPerSqFt] = usePersistedState2(page, EAllStates.hardCostPerSqFt, DEFAULT_VALUES[page].hardCostPerSqFt, queryParams);
     const [homeBuilderProfitPercentage, setHomeBuilderProfitPercentage] = usePersistedState2(page, EAllStates.homeBuilderProfitPercentage, DEFAULT_VALUES[page].homeBuilderProfitPercentage, queryParams);
     const [housePricePerSqFt, setHousePricePerSqFt] = usePersistedState2(page, EAllStates.housePricePerSqFt, DEFAULT_VALUES[page].housePricePerSqFt, queryParams);
-    const [residentialPricePerHome, setresidentialPricePerHome] = usePersistedState2(page, EAllStates.residentialPricePerHome, DEFAULT_VALUES[page].residentialPricePerHome, queryParams);
+    const [residentialPricePerHome, setResidentialPricePerHome] = usePersistedState2(page, EAllStates.residentialPricePerHome, DEFAULT_VALUES[page].residentialPricePerHome, queryParams);
     const [houseSize, setHouseSize] = usePersistedState2(page, EAllStates.houseSize, DEFAULT_VALUES[page].houseSize, queryParams);
     const [landDeveloperProfitPercentage, setLandDeveloperProfitPercentage] = usePersistedState2(page, EAllStates.landDeveloperProfitPercentage, DEFAULT_VALUES[page].landDeveloperProfitPercentage, queryParams);
     const [miscCosts, setMiscCosts] = usePersistedState2(page, EAllStates.miscCosts, DEFAULT_VALUES[page].miscCosts, queryParams);
@@ -42,8 +45,70 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
     const [sqFtPerLot, setSqFtPerLot] = usePersistedState2(page, EAllStates.sqFtPerLot, DEFAULT_VALUES[page].sqFtPerLot, queryParams);
     const [unbuildableAcres, setUnbuildableAcres] = usePersistedState2(page, EAllStates.unbuildableAcres, DEFAULT_VALUES[page].unbuildableAcres, queryParams);
     const [unitsPerAcre, setUnitsPerAcre] = usePersistedState2(page, EAllStates.unitsPerAcre, DEFAULT_VALUES[page].unitsPerAcre, queryParams);
-
     const [activeCards, setActiveCards] = useState<Set<OutputKeys>>(new Set([OutputKeys.OfferToLandOwner]));
+
+
+    const [lastChanged, setLastChanged] = useState<'price' | 'sqft' | 'size' | null>(null);
+
+    useEffect(() => {
+        const size = removeCommas(houseSize);
+        const price = removeCommas(housePricePerSqFt);
+        const total = removeCommas(residentialPricePerHome);
+        if (lastChanged === 'sqft') {
+            const newTotal = price * size;
+            const formatted = format(newTotal);
+
+            if (size === 0) {
+                setResidentialPricePerHome('0');
+                setHousePricePerSqFt('0');
+                return
+            }
+            if (removeCommas(residentialPricePerHome) !== newTotal) {
+                setResidentialPricePerHome(formatted);
+            }
+        }
+
+        if (lastChanged === 'price') {
+            const newSqFt = total / size;
+            const formatted = format(newSqFt);
+
+            if (size === 0) {
+                setResidentialPricePerHome('0');
+                setHousePricePerSqFt('0');
+                return
+            }
+            if (removeCommas(housePricePerSqFt) !== newSqFt) {
+
+                setHousePricePerSqFt(formatted);
+            }
+        }
+
+        if (lastChanged === 'size') {
+            const newTotal = price * size;
+            const newSqFt = total / size;
+
+            const formattedTotal = format(newTotal);
+            const formattedSqFt = format(newSqFt);
+
+
+            if (size === 0) {
+                setResidentialPricePerHome('0');
+                setHousePricePerSqFt('0');
+                return
+            }
+            if (removeCommas(residentialPricePerHome) !== newTotal) {
+                setResidentialPricePerHome(formattedTotal);
+            }
+
+            if (removeCommas(housePricePerSqFt) !== newSqFt) {
+                setHousePricePerSqFt(formattedSqFt);
+            }
+        }
+
+        // Reset lastChanged to avoid accidental repeat logic
+        setLastChanged(null);
+    }, [lastChanged]);
+
 
     const inputs = {
         grossAcres,
@@ -83,7 +148,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         totalCosts,
         totalProfits,
         totalCostToDevelopPerLot,
-     
+
         // totalClosingCosts
     } = residentialDevelopmentCalculations(inputs)
 
@@ -282,7 +347,6 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         cellValues={["Zoning - Sq Ft per Lot (SQFT)", sqFtPerLot]}
                         description="The jurisdiction gives a zoning requirement or desired lot size (e.g., R-5 = 5,000 sq ft per lot)."
                         isMobile={isMobile}
-                    // isGreyedOut={  removeCommas(unitsPerAcre) > 0}
 
                     />
 
@@ -299,15 +363,22 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                     {/* House Price Per Sq Ft */}
                     <InputRow
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.housePricePerSqFt}`); setHousePricePerSqFt(value) }}
+                        setInput={(value) => {
+                            setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.housePricePerSqFt}`);
+                            setHousePricePerSqFt(value);
+                            setLastChanged('sqft');
+                        }}
                         cellValues={["House Price - per Sq Ft", housePricePerSqFt]}
                         description="The average price per square foot for houses in this area, determined by local research."
                         isMobile={isMobile}
-                        isGreyedOut={removeCommas(residentialPricePerHome) > 0}
                     />
                     {/* House Price Per Sq Ft */}
                     <InputRow
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.residentialPricePerHome}`); setresidentialPricePerHome(value) }}
+                        setInput={(value) => {
+                            setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.residentialPricePerHome}`);
+                            setResidentialPricePerHome(value)
+                            setLastChanged('price');
+                        }}
                         cellValues={["House Sale Price - per Home", removeCommas(residentialPricePerHome) === 0 ? '' : residentialPricePerHome]}
                         description="The price each home will sell, determined by local research."
                         isMobile={isMobile}
@@ -315,7 +386,11 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                     {/* House Size */}
                     <InputRow
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.houseSize}`); setHouseSize(value) }}
+                        setInput={(value) => {
+                            setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.houseSize}`);
+                            setHouseSize(value);
+                            setLastChanged('size');
+                        }}
                         cellValues={["House Size - Sq Ft", houseSize]}
                         description="The average size of houses in this area, determined by local research."
                         isMobile={isMobile}

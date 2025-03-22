@@ -26,6 +26,7 @@ export enum EPageNames {
     RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
     MULTI_FAMILY_PRICE_PER_DOOR = "MULTI_FAMILY_PRICE_PER_DOOR",
     MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
+    INDUSTRIAL_PROFORMA ="INDUSTRIAL_PROFORMA",
     IRR_CALCULATOR = "IRR_CALCULATOR",
     HARD_MONEY_COST_ESTIMATOR = "HARD_MONEY_COST_ESTIMATOR",
     WATERFALL = "WATERFALL",
@@ -43,6 +44,8 @@ export enum EPageTitles {
     INDUSTRIAL_PRICE_PER_SQFT = "Price Per SQFT Calculator - Industrial",
 
     MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
+    INDUSTRIAL_PROFORMA = "Industrial/Commercial Proforma",
+
     IRR_CALCULATOR = "Seller's IRR Estimator",
     HARD_MONEY_COST_ESTIMATOR = "Hard Money Loan Estimator",
     WATERFALL = "Waterfall Distribution Generator",

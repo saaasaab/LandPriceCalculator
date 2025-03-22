@@ -1,4 +1,5 @@
 import './App.css'
+import './components/PrintingStyles.scss'
 import { getApp } from './utils/subdomains';
 
 function App() {
