@@ -132,6 +132,7 @@ export const DEFAULT_VALUES_ZEROS = {
     profitPercentage: "0",
     hardMoneyEquitySharePercentage:"0",
     gapEquitySharePercentage:"0",
+    infrastructurePercentage:"0",
 
 
     
@@ -142,11 +143,12 @@ export const DEFAULT_VALUES = {
         ...DEFAULT_VALUES_ZEROS,
         grossAcres: "1.65",
         unbuildableAcres: "0",
+        infrastructurePercentage:"70",
         sqFtPerLot: "1,500",
         unitsPerAcre: "0",
         houseSize: "1,500",
         housePricePerSqFt: "300",
-        residentialPricePerHome:"0",
+        residentialPricePerHome:"450,000",
         hardCostPerSqFt: "135",
         permits: "12,000",
         miscCosts: "7,500",

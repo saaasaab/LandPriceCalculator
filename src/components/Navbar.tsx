@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 
 
 export const routes = {
-  MULTIFAMILY_DEVELOPMENT: "/residential-development",
+  MULTIFAMILY_DEVELOPMENT: "/multifamily-development",
   INDUSTRIAL_DEVELOPMENT: "/industrial-development",
   RESIDENTIAL_DEVELOPMENT: "/residential-development",
   MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",

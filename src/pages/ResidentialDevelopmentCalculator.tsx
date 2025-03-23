@@ -3,7 +3,7 @@ import DynamicRow from '../components/RowTypes/DynamicRow';
 
 import './LandCalculator.scss';
 import residentialDevelopmentCalculations from '../utils/residentialDevelopmentCalculations';
-import { DEFAULT_VALUES, infrastructurePercentage, OutputKeys } from '../utils/constants';
+import { DEFAULT_VALUES, OutputKeys, SQ_FT_PER_ACRE } from '../utils/constants';
 import { EAllStates, EPageNames } from '../utils/types';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import PopupBox from '../components/PopupBox';
@@ -30,6 +30,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
     const [grossAcres, setGrossAcres] = usePersistedState2(page, EAllStates.grossAcres, DEFAULT_VALUES[page].grossAcres, queryParams);
     const [costToDevelopPerLot, setCostToDevelopPerLot] = usePersistedState2(page, EAllStates.costToDevelopPerLot, DEFAULT_VALUES[page].costToDevelopPerLot, queryParams);
+    const [infrastructurePercentage, setInfrastructurePercentage] = usePersistedState2(page, EAllStates.infrastructurePercentage, DEFAULT_VALUES[page].infrastructurePercentage, queryParams);
 
     const [SDCFees, setSDCFees] = usePersistedState2(page, EAllStates.SDCFees, DEFAULT_VALUES[page].SDCFees, queryParams);
     const [hardCostPerSqFt, setHardCostPerSqFt] = usePersistedState2(page, EAllStates.hardCostPerSqFt, DEFAULT_VALUES[page].hardCostPerSqFt, queryParams);
@@ -49,6 +50,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
 
     const [lastChanged, setLastChanged] = useState<'price' | 'sqft' | 'size' | null>(null);
+    const [densityChanged, setDensityChanged] = useState<'sqft' | 'units' | 'acres' | null>(null);
+
 
     useEffect(() => {
         const size = removeCommas(houseSize);
@@ -110,6 +113,59 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
     }, [lastChanged]);
 
 
+
+
+
+
+
+
+
+
+
+
+
+    useEffect(() => {
+        const sqFt = removeCommas(sqFtPerLot);
+        const units = removeCommas(unitsPerAcre);
+
+        if (densityChanged === 'sqft') {
+            if (sqFt === 0) {
+                setUnitsPerAcre('0');
+            }
+            else {
+                const newUnits = SQ_FT_PER_ACRE / sqFt;
+                const formatted = format(newUnits);
+                if (removeCommas(unitsPerAcre) !== newUnits) {
+                    setUnitsPerAcre(formatted);
+                }
+            }
+        }
+
+
+        if (densityChanged === 'units') {
+            if (units === 0) {
+                setSqFtPerLot('0');
+            } else {
+                const newSqFt = SQ_FT_PER_ACRE / units;
+                const formatted = format(newSqFt);
+                if (removeCommas(sqFtPerLot) !== newSqFt) {
+                    setSqFtPerLot(formatted);
+                }
+            }
+        }
+
+
+        // Reset lastChanged to avoid accidental repeat logic
+        setDensityChanged(null);
+    }, [densityChanged]);
+
+
+
+
+
+
+
+
     const inputs = {
         grossAcres,
         unbuildableAcres,
@@ -126,7 +182,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         landDeveloperProfitPercentage,
         costToDevelopPerLot,
         ownedLandCost,
-        SDCFees
+        SDCFees,
+        infrastructurePercentage
     };
 
     const {
@@ -147,7 +204,7 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
         totalSoftCosts,
         totalCosts,
         totalProfits,
-        totalCostToDevelopPerLot,
+        totalCostToDevelopPerLot
 
         // totalClosingCosts
     } = residentialDevelopmentCalculations(inputs)
@@ -331,7 +388,13 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     </div>
                     <InputRow
                         cellValues={["Gross Acres", grossAcres]}
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.grossAcres}`); setGrossAcres(value) }}
+                        setInput={(value) => {
+                            setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.grossAcres}`);
+
+                            setGrossAcres(value);
+                            setDensityChanged('acres');
+
+                        }}
                         description="The total area of the land in acres before any deductions for unbuildable areas."
                         isMobile={isMobile}
                     />
@@ -341,17 +404,35 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                         description="The total area in acres that cannot be built upon due to environmental, geographical features, setbacks, or easements"
                         isMobile={isMobile}
                     />
-
                     <InputRow
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.sqFtPerLot}`); setSqFtPerLot(value) }}
+                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.infrastructurePercentage}`); setInfrastructurePercentage(value) }}
+                        cellValues={["Adjusted for Infrastructure (%)", infrastructurePercentage]}
+                        description="Every lot requires infrastructure like streets, which reduces the buildable area."
+                        isMobile={isMobile}
+                        isPercent={true}
+                    />
+                    <InputRow
+                        setInput={(value) => {
+                            setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.sqFtPerLot}`);
+                            setSqFtPerLot(value);
+                            setDensityChanged('sqft');
+
+                        }}
                         cellValues={["Zoning - Sq Ft per Lot (SQFT)", sqFtPerLot]}
                         description="The jurisdiction gives a zoning requirement or desired lot size (e.g., R-5 = 5,000 sq ft per lot)."
                         isMobile={isMobile}
-
                     />
 
+
+
+
                     <InputRow
-                        setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unitsPerAcre}`); setUnitsPerAcre(value) }}
+                        setInput={(value) => {
+                            setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.unitsPerAcre}`);
+                            setUnitsPerAcre(value)
+                            setDensityChanged('units');
+
+                        }}
                         cellValues={["Zoning - Maximum units per acre", removeCommas(unitsPerAcre) === 0 ? "" : unitsPerAcre]}
                         description="The jurisdiction gives a zoning requirement for the maximum number of units per acre."
                         isMobile={isMobile}

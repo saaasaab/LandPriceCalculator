@@ -25,7 +25,6 @@ const InputRow = ({
 
 
     useEffect(() => {
-
         setCell(`${cellValues[1]}`);
     }, [cellValues[1]]);
 

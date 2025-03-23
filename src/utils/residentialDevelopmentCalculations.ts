@@ -1,4 +1,4 @@
-import { infrastructurePercentage, SQ_FT_PER_ACRE } from "./constants";
+import {  SQ_FT_PER_ACRE } from "./constants";
 import { convertInputsToNumbers } from "./utils";
 
 type TResidentialDevelopmentCalculationsInputs = {
@@ -17,6 +17,7 @@ type TResidentialDevelopmentCalculationsInputs = {
     landDeveloperProfitPercentage: string;
     costToDevelopPerLot: string;
     ownedLandCost?: string; // Optional
+    infrastructurePercentage:string;
 };
 
 type TResidentialDevelopmentCalculationsOutputs = {
@@ -63,6 +64,7 @@ const residentialDevelopmentCalculations = (inputs: TResidentialDevelopmentCalcu
         landDeveloperProfitPercentage,
         ownedLandCost,
         costToDevelopPerLot,
+        infrastructurePercentage,
     } = convertInputsToNumbers(inputs);
 
     // Calculate net buildable acres

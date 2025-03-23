@@ -90,7 +90,7 @@ export enum EAllStates {
     annualLeaseRatesPerSQFT = "annualLeaseRatesPerSQFT",
     percentageOfIncomeToExpenses = "percentageOfIncomeToExpenses",
     leasableSQFT = "leasableSQFT",
-
+    infrastructurePercentage= "infrastructurePercentage",
 
     // FOR THE PRICE CALCULATOR
     rents = "rents",
