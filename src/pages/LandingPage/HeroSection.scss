@@ -1,5 +1,11 @@
 .hero {
-  background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+  background: rgb(0 12 17);
+  background: linear-gradient(
+    231deg,
+    rgb(0 12 17) 0%,
+    rgba(0, 69, 226, 1) 100%
+  );
+
   color: white;
   text-align: center;
   position: relative;
@@ -44,11 +50,53 @@
       margin-bottom: 40px;
     }
   }
+
+  .email-form {
+    display: flex;
+    width: 100%;
+
+    .email-input {
+      padding: 0.75rem 1rem;
+      font-size: 1.5rem;
+      border-top-left-radius: 0.5rem;
+      border-bottom-left-radius: 0.5rem;
+      width: 100%;
+      color: black;
+      border: none;
+    }
+
+    a {
+      text-decoration: none;
+    }
+    .email-button {
+      background-color:#2f732e;// #22c55e; // Tailwind's green-500
+      color: white;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      border-top-right-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+      transition: background-color 0.3s ease;
+      border: none;
+
+      &:hover {
+        background-color: #16a34a; // Tailwind's green-600
+      }
+
+      .chevron-icon {
+        margin-left: 0.5rem;
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {
   .hero {
-    padding: 60px 0;
+    padding: 80px 0;
+    height: unset;
+
+
+    
 
     .hero-content {
       h1 {
@@ -59,6 +107,19 @@
         font-size: 1.25rem;
       }
     }
+    .email-form {
+
+      .email-input {
+        font-size: 1rem; 
+        padding: 0.25rem 1rem;
+      }
+      .email-button{
+        padding: 0.25rem 1rem;
+      }
+  
+  
+    }
+
   }
 
   .benefits,
@@ -70,4 +131,8 @@
       font-size: 2rem;
     }
   }
+
+
+
+
 }

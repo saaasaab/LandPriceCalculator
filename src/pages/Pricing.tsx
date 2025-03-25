@@ -23,7 +23,7 @@ export const plans = [
 
 const Pricing = () => {
 
-    const { login } = useAuth();
+    const { login, tempEmail } = useAuth();
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -32,7 +32,7 @@ const Pricing = () => {
 
     const [plan, _setPlan] = useState(plans[0]);
 
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(tempEmail ? tempEmail : "");
     const [password, setPassword] = useState('');
 
 
@@ -48,7 +48,7 @@ const Pricing = () => {
             );
 
             if (data.message) {
-               
+
 
                 // User may already exist, so try logging them in
                 const loginData = await postRequest<{ token: string; user: { email: string, is_paid: boolean } }>(
@@ -56,7 +56,7 @@ const Pricing = () => {
                     { email, password }
                 );
 
-                if(loginData.user.is_paid){
+                if (loginData.user.is_paid) {
                     alert("You've already paid, logging you in now.")
                     setErrorMessage('');
                     login({ email: loginData.user.email, token: loginData.token, is_paid: loginData.user.is_paid });
@@ -70,7 +70,7 @@ const Pricing = () => {
                     return
                 }
 
-                else{
+                else {
                     setErrorMessage('error logging you in')
                     return
                 }
@@ -146,7 +146,7 @@ const Pricing = () => {
                                     // "Seamless Integrations 
 
 
-                                  
+
                                 ].map((feature, i) => (
                                     <li key={i} className="feature-item">
                                         <svg
@@ -190,7 +190,7 @@ const Pricing = () => {
                                     </button>
                                 </div>
 
-                            </form>) : <Payment email={email}/>}
+                            </form>) : <Payment email={email} />}
                     </div>
                 </div>
             </div>

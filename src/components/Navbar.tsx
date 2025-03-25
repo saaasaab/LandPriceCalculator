@@ -40,7 +40,7 @@ export const routes = {
   TERMS: "/terms",
 }
 
-export const calcualtorIcons = {
+export const calculatorIcons = {
   [routes.MULTIFAMILY_DEVELOPMENT]: '🏢',
   [routes.INDUSTRIAL_DEVELOPMENT]: '🏭',
   [routes.RESIDENTIAL_DEVELOPMENT]: '🏘️',
@@ -56,7 +56,7 @@ export const calcualtorIcons = {
 
 const IconLink = ({ route, text, handleToggleMenu }: { route: string, text: string, handleToggleMenu: () => void }) => {
 
-  const icon = calcualtorIcons[route];
+  const icon = calculatorIcons[route];
   const link = route;
 
   return (

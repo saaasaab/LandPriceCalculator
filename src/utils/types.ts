@@ -19,7 +19,6 @@ export interface BuildingCalculationResult {
 }
 
 
-
 export enum EPageNames {
     MULTIFAMILY_DEVELOPMENT = "MULTIFAMILY_DEVELOPMENT",
     INDUSTRIAL_DEVELOPMENT = "INDUSTRIAL_DEVELOPMENT",

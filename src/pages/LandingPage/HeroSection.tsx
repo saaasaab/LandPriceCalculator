@@ -1,26 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 // import p5 from "p5";
 import './HeroSection.scss';
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { routes } from "../../components/Navbar";
-
+import { ChevronRight } from 'lucide-react';
+import { useAuth } from "../../context/AuthContext";
 export const heroCanvasHeight = 500;
 const HeroSection: React.FC = () => {
     // const canvasRef = useRef<HTMLDivElement>(null);
 
     // useEffect(() => {
     //     const sketch = (p: p5) => {
+
+    //         console.log(`window.innerWidth`, window.innerWidth)
     //         const hexSize = 30;
     //         const cols = Math.ceil(window.innerWidth / hexSize);
     //         const rows = Math.ceil(heroCanvasHeight / (hexSize * Math.sqrt(3)));
     //         p.setup = () => {
-    //             p.createCanvas(window.innerWidth, heroCanvasHeight).parent(canvasRef.current!);
+    //             const width = window.innerWidth;
+    //             p.pixelDensity(1);
+    //             p.createCanvas(width, heroCanvasHeight).parent(canvasRef.current!);
     //             p.frameRate(24);
     //         };
 
     //         p.draw = () => {
     //             p.background(20);
     //             drawHexGrid();
+
+    //             // console.log(`p.width`, p.width)
     //         };
 
     //         const drawHexGrid = () => {
@@ -56,17 +63,48 @@ const HeroSection: React.FC = () => {
     //     return () => p5Instance.remove();
     // }, []);
 
+    const [email, setEmail] = useState('');
+    const { updateTempEmail } = useAuth();
+    const navigate = useNavigate();
+
+
+    const handleEmailSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Add email submission logic here
+        if (email) {
+            updateTempEmail(email)
+            navigate(routes.SIGN_UP)
+        }
+    };
+
+
     return (
         <header className="hero">
             {/* <div ref={canvasRef} className="hero-canvas" /> */}
             <div className="hero-content">
                 <h1>Transform Your Real Estate Analysis</h1>
                 <p className="tagline">Expert Real Estate Analysis Tools</p>
-               
+
                 {/* <p className="tagline">A rich man's tool at a poor man's price</p> */}
 
                 {/* <p className="subtitle">Professional-grade real estate calculators at your fingertips</p> */}
-                <Link className="cta-button" to={routes.SIGN_UP}>Sign Up for Early Acces</Link>
+
+                <form onSubmit={handleEmailSubmit} className="email-form">
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="email-input"
+                        required
+                    />
+                    <button
+                        type="submit"
+                        className="email-button"
+                    >
+                        Get Early Access <ChevronRight className="chevron-icon" />
+                    </button>
+                </form>
             </div>
         </header>
     );
