@@ -1,83 +1,88 @@
 
 
-import { useState } from 'react';
 import DynamicRow from '../components/RowTypes/DynamicRow';
-import { EPageNames } from '../utils/types';
+import { EAllStates, EPageNames } from '../utils/types';
 
-import { convertToPercent, removeCommas } from '../utils/utils';
+import { roundAndLocalString, convertToPercent, removeCommas } from '../utils/utils';
 import { constructionBudgetCalculations } from '../utils/constructionBudgetCalculations';
 
 import './DynamicTable.scss';
+import { usePersistedState2 } from '../hooks/usePersistedState';
+import { DEFAULT_VALUES } from '../utils/constants';
+import ShareButton from '../components/ShareButton';
 
 
-const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
+const ConstructionBudget = ({ page }: { isMobile: boolean; page: EPageNames; }) => {
     // Land Costs
-    const [landAcquisition, setLandAcquisition] = useState<string>('62,000');
-    const [closingCosts, setClosingCosts] = useState<string>('3,000');
 
+    const queryParams = new URLSearchParams(window.location.search);
+
+    const [landAcquisition, setLandAcquisition] = usePersistedState2(page, EAllStates.landAcquisition, DEFAULT_VALUES[page].landAcquisition, queryParams);
+    const [closingCosts, setClosingCosts] = usePersistedState2(page, EAllStates.closingCosts, DEFAULT_VALUES[page].closingCosts, queryParams);
 
     // Designs and Engineering Costs
-    const [architecturalDesigns, setArchitecturalDesigns] = useState<string>('20,625');
-    const [civilEngineering, setCivilEngineering] = useState<string>('10,000');
-    const [surveying, setSurveying] = useState<string>('10,000');
-    const [landscapeDesign, setLandscapeDesign] = useState<string>('1,000');
-    const [geotechnical, setGeotechnical] = useState<string>('3,000');
-    const [mepEngineering, setMepEngineering] = useState<string>('15,000');
+    const [architecturalDesigns, setArchitecturalDesigns] = usePersistedState2(page, EAllStates.architecturalDesigns, DEFAULT_VALUES[page].architecturalDesigns, queryParams);
+    const [civilEngineering, setCivilEngineering] = usePersistedState2(page, EAllStates.civilEngineering, DEFAULT_VALUES[page].civilEngineering, queryParams);
+    const [surveying, setSurveying] = usePersistedState2(page, EAllStates.surveying, DEFAULT_VALUES[page].surveying, queryParams);
+    const [landscapeDesign, setLandscapeDesign] = usePersistedState2(page, EAllStates.landscapeDesign, DEFAULT_VALUES[page].landscapeDesign, queryParams);
+    const [geotechnical, setGeotechnical] = usePersistedState2(page, EAllStates.geotechnical, DEFAULT_VALUES[page].geotechnical, queryParams);
+    const [mepEngineering, setMepEngineering] = usePersistedState2(page, EAllStates.mepEngineering, DEFAULT_VALUES[page].mepEngineering, queryParams);
 
-    // City application, review, and permit fees
-    const [preApplication, setPreApplication] = useState<string>('1,500');
-    const [siteDesignReview, setSiteDesignReview] = useState<string>('4,467');
-    const [sitePlanReview, setSitePlanReview] = useState<string>('1,000');
-    const [buildingPermit, setBuildingPermit] = useState<string>('369');
+    // City Application, Review, and Permit Fees
+    const [preApplication, setPreApplication] = usePersistedState2(page, EAllStates.preApplication, DEFAULT_VALUES[page].preApplication, queryParams);
+    const [siteDesignReview, setSiteDesignReview] = usePersistedState2(page, EAllStates.siteDesignReview, DEFAULT_VALUES[page].siteDesignReview, queryParams);
+    const [sitePlanReview, setSitePlanReview] = usePersistedState2(page, EAllStates.sitePlanReview, DEFAULT_VALUES[page].sitePlanReview, queryParams);
+    const [buildingPermit, setBuildingPermit] = usePersistedState2(page, EAllStates.buildingPermit, DEFAULT_VALUES[page].buildingPermit, queryParams);
 
-    // System development charges
-    const [stormwater, setStormwater] = useState<string>('1,972');
-    const [transportation, setTransportation] = useState<string>('27,335');
-    const [sanitarySewer, setSanitarySewer] = useState<string>('3,411');
-    const [parks, setParks] = useState<string>('5,684');
-    const [water, setWater] = useState<string>('1,0979');
+    // System Development Charges
+    const [stormwater, setStormwater] = usePersistedState2(page, EAllStates.stormwater, DEFAULT_VALUES[page].stormwater, queryParams);
+    const [transportation, setTransportation] = usePersistedState2(page, EAllStates.transportation, DEFAULT_VALUES[page].transportation, queryParams);
+    const [sanitarySewer, setSanitarySewer] = usePersistedState2(page, EAllStates.sanitarySewer, DEFAULT_VALUES[page].sanitarySewer, queryParams);
+    const [parks, setParks] = usePersistedState2(page, EAllStates.parks, DEFAULT_VALUES[page].parks, queryParams);
+    const [water, setWater] = usePersistedState2(page, EAllStates.water, DEFAULT_VALUES[page].water, queryParams);
 
     // Land Preparation Costs
-    const [excavation, setExcavation] = useState<string>('15,000');
-    const [waterRetention, setWaterRetention] = useState<string>('10,000');
-    const [foundation, setFoundation] = useState<string>('76,000');
-    const [asphalt, setAsphalt] = useState<string>('26,000');
+    const [excavation, setExcavation] = usePersistedState2(page, EAllStates.excavation, DEFAULT_VALUES[page].excavation, queryParams);
+    const [waterRetention, setWaterRetention] = usePersistedState2(page, EAllStates.waterRetention, DEFAULT_VALUES[page].waterRetention, queryParams);
+    const [foundation, setFoundation] = usePersistedState2(page, EAllStates.foundation, DEFAULT_VALUES[page].foundation, queryParams);
+    const [asphalt, setAsphalt] = usePersistedState2(page, EAllStates.asphalt, DEFAULT_VALUES[page].asphalt, queryParams);
 
     // Rough Buildout Costs
-    const [lumber, setLumber] = useState<string>('60,000');
-    const [trusses, setTrusses] = useState<string>('17,000');
-    const [framingLabor, setFramingLabor] = useState<string>('58,000');
-    const [windows, setWindows] = useState<string>('9,000');
-    const [siding, setSiding] = useState<string>('31,000');
-    const [hvac, setHvac] = useState<string>('18,000');
-    const [plumbing, setPlumbing] = useState<string>('20,000');
-    const [electrical, setElectrical] = useState<string>('62,000');
-    const [gasPiping, setGasPiping] = useState<string>('3,000');
-    const [gutters, setGutters] = useState<string>('5,000');
-    const [roofing, setRoofing] = useState<string>('14,000');
-    const [exteriorDoors, setExteriorDoors] = useState<string>('4,000');
+    const [lumber, setLumber] = usePersistedState2(page, EAllStates.lumber, DEFAULT_VALUES[page].lumber, queryParams);
+    const [trusses, setTrusses] = usePersistedState2(page, EAllStates.trusses, DEFAULT_VALUES[page].trusses, queryParams);
+    const [framingLabor, setFramingLabor] = usePersistedState2(page, EAllStates.framingLabor, DEFAULT_VALUES[page].framingLabor, queryParams);
+    const [windows, setWindows] = usePersistedState2(page, EAllStates.windows, DEFAULT_VALUES[page].windows, queryParams);
+    const [siding, setSiding] = usePersistedState2(page, EAllStates.siding, DEFAULT_VALUES[page].siding, queryParams);
+    const [hvac, setHvac] = usePersistedState2(page, EAllStates.hvac, DEFAULT_VALUES[page].hvac, queryParams);
+    const [plumbing, setPlumbing] = usePersistedState2(page, EAllStates.plumbing, DEFAULT_VALUES[page].plumbing, queryParams);
+    const [electrical, setElectrical] = usePersistedState2(page, EAllStates.electrical, DEFAULT_VALUES[page].electrical, queryParams);
+    const [gasPiping, setGasPiping] = usePersistedState2(page, EAllStates.gasPiping, DEFAULT_VALUES[page].gasPiping, queryParams);
+    const [gutters, setGutters] = usePersistedState2(page, EAllStates.gutters, DEFAULT_VALUES[page].gutters, queryParams);
+    const [roofing, setRoofing] = usePersistedState2(page, EAllStates.roofing, DEFAULT_VALUES[page].roofing, queryParams);
+    const [exteriorDoors, setExteriorDoors] = usePersistedState2(page, EAllStates.exteriorDoors, DEFAULT_VALUES[page].exteriorDoors, queryParams);
 
     // Finishings Costs
-    const [insulation, setInsulation] = useState<string>('14,000');
-    const [drywall, setDrywall] = useState<string>('50,000');
-    const [interiorTrim, setInteriorTrim] = useState<string>('44,000');
-    const [painting, setPainting] = useState<string>('45,000');
-    const [cabinets, setCabinets] = useState<string>('4,000');
-    const [countertops, setCountertops] = useState<string>('11,000');
-    const [flooring, setFlooring] = useState<string>('11,000');
-    const [carpet, setCarpet] = useState<string>('11,000');
-    const [hardware, setHardware] = useState<string>('4,000');
-    const [appliances, setAppliances] = useState<string>('4,000');
-    const [lightFixtures, setLightFixtures] = useState<string>('5,000');
-    const [windowCovering, setWindowCovering] = useState<string>('7,000');
-    const [cleanup, setCleanup] = useState<string>('10,000');
-    const [flatwork, setFlatwork] = useState<string>('6,000');
-    const [fences, setFences] = useState<string>('1,000');
-    const [landscaping, setLandscaping] = useState<string>('13,000');
+    const [insulation, setInsulation] = usePersistedState2(page, EAllStates.insulation, DEFAULT_VALUES[page].insulation, queryParams);
+    const [drywall, setDrywall] = usePersistedState2(page, EAllStates.drywall, DEFAULT_VALUES[page].drywall, queryParams);
+    const [interiorTrim, setInteriorTrim] = usePersistedState2(page, EAllStates.interiorTrim, DEFAULT_VALUES[page].interiorTrim, queryParams);
+    const [painting, setPainting] = usePersistedState2(page, EAllStates.painting, DEFAULT_VALUES[page].painting, queryParams);
+    const [cabinets, setCabinets] = usePersistedState2(page, EAllStates.cabinets, DEFAULT_VALUES[page].cabinets, queryParams);
+    const [countertops, setCountertops] = usePersistedState2(page, EAllStates.countertops, DEFAULT_VALUES[page].countertops, queryParams);
+    const [flooring, setFlooring] = usePersistedState2(page, EAllStates.flooring, DEFAULT_VALUES[page].flooring, queryParams);
+    const [carpet, setCarpet] = usePersistedState2(page, EAllStates.carpet, DEFAULT_VALUES[page].carpet, queryParams);
+    const [hardware, setHardware] = usePersistedState2(page, EAllStates.hardware, DEFAULT_VALUES[page].hardware, queryParams);
+    const [appliances, setAppliances] = usePersistedState2(page, EAllStates.appliances, DEFAULT_VALUES[page].appliances, queryParams);
+    const [lightFixtures, setLightFixtures] = usePersistedState2(page, EAllStates.lightFixtures, DEFAULT_VALUES[page].lightFixtures, queryParams);
+    const [windowCovering, setWindowCovering] = usePersistedState2(page, EAllStates.windowCovering, DEFAULT_VALUES[page].windowCovering, queryParams);
+    const [cleanup, setCleanup] = usePersistedState2(page, EAllStates.cleanup, DEFAULT_VALUES[page].cleanup, queryParams);
+    const [flatwork, setFlatwork] = usePersistedState2(page, EAllStates.flatwork, DEFAULT_VALUES[page].flatwork, queryParams);
+    const [fences, setFences] = usePersistedState2(page, EAllStates.fences, DEFAULT_VALUES[page].fences, queryParams);
+    const [landscaping, setLandscaping] = usePersistedState2(page, EAllStates.landscaping, DEFAULT_VALUES[page].landscaping, queryParams);
 
     // Contractor Fee and Contingencies
-    const [generalConditions, setGeneralConditions] = useState<string>('10,000');
-    const [contractorFee, setContractorFee] = useState<string>('136,000');
+    const [generalConditions, setGeneralConditions] = usePersistedState2(page, EAllStates.generalConditions, DEFAULT_VALUES[page].generalConditions, queryParams);
+    const [contractorFee, setContractorFee] = usePersistedState2(page, EAllStates.contractorFee, DEFAULT_VALUES[page].contractorFee, queryParams);
+
 
     const params = {
         landAcquisition,
@@ -152,7 +157,6 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
     return (
 
         <>
-
             {/* Land Costs */}
             <div className="table-container">
                 <DynamicRow
@@ -180,7 +184,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                     inputCellIndex={2}
                 />
                 <DynamicRow
-                    cellValues={["Land Acquisition Costs", convertToPercent(totalLandCosts / totalCosts), totalLandCosts]}
+                    cellValues={["Land Acquisition Costs", convertToPercent(totalLandCosts / totalCosts), roundAndLocalString(totalLandCosts)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -189,7 +193,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
 
             {/* Designs and Engineering Costs */}
             <div className="table-container">
-                
+
                 <DynamicRow
                     cellValues={["Designs and Engineering"]}
                     isMobile={false}
@@ -251,7 +255,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                     inputCellIndex={2}
                 />
                 <DynamicRow
-                    cellValues={["Designs and Engineering", convertToPercent(totalDesignsEngineering / totalCosts), totalDesignsEngineering]}
+                    cellValues={["Designs and Engineering", convertToPercent(totalDesignsEngineering / totalCosts), roundAndLocalString(totalDesignsEngineering)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -303,7 +307,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                     inputCellIndex={2}
                 />
                 <DynamicRow
-                    cellValues={["Total Designs and Engineering Costs", convertToPercent(totalCityFees / totalCosts), totalCityFees]}
+                    cellValues={["Total Designs and Engineering Costs", convertToPercent(totalCityFees / totalCosts), roundAndLocalString(totalCityFees)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -364,7 +368,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                     inputCellIndex={2}
                 />
                 <DynamicRow
-                    cellValues={["Total System Development Charges Costs", convertToPercent(totalSystemDevelopmentCharges / totalCosts), totalSystemDevelopmentCharges]}
+                    cellValues={["Total System Development Charges Costs", convertToPercent(totalSystemDevelopmentCharges / totalCosts), roundAndLocalString(totalSystemDevelopmentCharges)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -416,7 +420,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                     inputCellIndex={2}
                 />
                 <DynamicRow
-                    cellValues={["Total Land Preparation Costs", convertToPercent(totalLandPreparation / totalCosts), totalLandPreparation]}
+                    cellValues={["Total Land Preparation Costs", convertToPercent(totalLandPreparation / totalCosts), roundAndLocalString(totalLandPreparation)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -540,7 +544,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                     inputCellIndex={2}
                 />
                 <DynamicRow
-                    cellValues={["Total Rough Buildout Costs", convertToPercent(totalRoughBuildout / totalCosts), totalRoughBuildout]}
+                    cellValues={["Total Rough Buildout Costs", convertToPercent(totalRoughBuildout / totalCosts), roundAndLocalString(totalRoughBuildout)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -701,7 +705,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                 />
 
                 <DynamicRow
-                    cellValues={["Total ontractor Fee and Contingencies Costs", convertToPercent(totalFinishings / totalCosts), totalFinishings]}
+                    cellValues={["Total ontractor Fee and Contingencies Costs", convertToPercent(totalFinishings / totalCosts), roundAndLocalString(totalFinishings)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -737,7 +741,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                 />
 
                 <DynamicRow
-                    cellValues={["Total ontractor Fee and Contingencies Costs", convertToPercent(totalContractorFee / totalCosts), totalContractorFee]}
+                    cellValues={["Total ontractor Fee and Contingencies Costs", convertToPercent(totalContractorFee / totalCosts), roundAndLocalString(totalContractorFee)]}
                     isMobile={false}
                     numberOfCells={3}
                     output={true}
@@ -769,7 +773,7 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                 />
 
                 <DynamicRow
-                    cellValues={["Total Costs", convertToPercent(totalCosts / totalCosts), totalCosts]}
+                    cellValues={["Total Costs", convertToPercent(totalCosts / totalCosts), roundAndLocalString(totalCosts)]}
                     description="Grand total costs"
                     isMobile={false}
                     numberOfCells={3}
@@ -777,9 +781,11 @@ const ConstructionBudget = ({ }: { isMobile: boolean; page: EPageNames; }) => {
                 />
             </div>
 
+            <ShareButton params={params} />
 
 
-            
+
+
             {/* <ShareButton params={params}/> */}
 
         </>

@@ -1,5 +1,3 @@
-
-
 @media print {
   .navbar,
   .hover-add-icon.hover-add-icon-active,
@@ -8,12 +6,19 @@
     display: none !important;
   }
 
-
-  input{
+  input {
     box-shadow: none !important;
   }
-  .app-header{
+  .app-header {
     font-size: 2rem;
+  }
 
+  .dynamic-cell {
+    border: none !important;
+  }
+
+  .dynamic-row.three-cell-row.output-row * {
+    color: black !important;
+    font-size: 1.25rem !important;
   }
 }

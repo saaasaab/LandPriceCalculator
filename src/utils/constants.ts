@@ -130,12 +130,69 @@ export const DEFAULT_VALUES_ZEROS = {
     mold: "0",
     miscellaneous: "0",
     profitPercentage: "0",
-    hardMoneyEquitySharePercentage:"0",
-    gapEquitySharePercentage:"0",
-    infrastructurePercentage:"0",
+    hardMoneyEquitySharePercentage: "0",
+    gapEquitySharePercentage: "0",
+    infrastructurePercentage: "0",
 
 
-    
+    // Land Costs
+    landAcquisition: "0",
+
+    // Designs and Engineering Costs
+    architecturalDesigns: "0",
+    civilEngineering: "0",
+    surveying: "0",
+    landscapeDesign: "0",
+    geotechnical: "0",
+    mepEngineering: "0",
+
+    // City Application, Review, and Permit Fees
+    preApplication: "0",
+    siteDesignReview: "0",
+    sitePlanReview: "0",
+    buildingPermit: "0",
+
+    // System Development Charges
+    stormwater: "0",
+    transportation: "0",
+    sanitarySewer: "0",
+    parks: "0",
+    water: "0",
+
+    // Land Preparation Costs
+    excavation: "0",
+    waterRetention: "0",
+    asphalt: "0",
+
+    // Rough Buildout Costs
+    lumber: "0",
+    trusses: "0",
+    framingLabor: "0",
+    gasPiping: "0",
+    roofing: "0",
+    exteriorDoors: "0",
+
+    // Finishings Costs
+    drywall: "0",
+    interiorTrim: "0",
+    painting: "0",
+    countertops: "0",
+    carpet: "0",
+    hardware: "0",
+    appliances: "0",
+    lightFixtures: "0",
+    windowCovering: "0",
+    cleanup: "0",
+    flatwork: "0",
+    fences: "0",
+
+    // Contractor Fee and Contingencies
+    generalConditions: "0",
+    contractorFee: "0",
+
+
+
+
 
 }
 export const DEFAULT_VALUES = {
@@ -143,12 +200,12 @@ export const DEFAULT_VALUES = {
         ...DEFAULT_VALUES_ZEROS,
         grossAcres: "1.65",
         unbuildableAcres: "0",
-        infrastructurePercentage:"70",
+        infrastructurePercentage: "70",
         sqFtPerLot: "1,500",
         unitsPerAcre: "0",
         houseSize: "1,500",
         housePricePerSqFt: "300",
-        residentialPricePerHome:"450,000",
+        residentialPricePerHome: "450,000",
         hardCostPerSqFt: "135",
         permits: "12,000",
         miscCosts: "7,500",
@@ -210,8 +267,8 @@ export const DEFAULT_VALUES = {
         expensePercentage: "50",
         downPayment: "30",
         units: "4",
-        buyersAgentFee:"2.5",
-        closingCosts:"1.5"
+        buyersAgentFee: "2.5",
+        closingCosts: "1.5"
     },
     [EPageNames.MULTIFAMILY_ANALYSIS]: {
         ...DEFAULT_VALUES_ZEROS,
@@ -269,7 +326,7 @@ export const DEFAULT_VALUES = {
         propertyManagement: "8",
     },
 
-    
+
     [EPageNames.IRR_CALCULATOR]: {
         ...DEFAULT_VALUES_ZEROS,
         originalPurchasePrice: "240,000",
@@ -319,11 +376,11 @@ export const DEFAULT_VALUES = {
         expensePercentage: "50",
         downPayment: "30",
         units: "4",
-        buyersAgentFee:"2.5",
-        closingCosts:"1.5",
+        buyersAgentFee: "2.5",
+        closingCosts: "1.5",
     },
-    [EPageNames.HOUSE_FLIPPING_CALCULATOR]:{
-        
+    [EPageNames.HOUSE_FLIPPING_CALCULATOR]: {
+
         ...DEFAULT_VALUES_ZEROS,
         purchasePrice: "250,000",
         arv: "400,000",
@@ -336,9 +393,9 @@ export const DEFAULT_VALUES = {
         hardMoneyLoanAdminFees: "1,000",
         gapLoanAdminFees: "1,000",
         realEstateCommissionPercentage: "5",
-        profitPercentage:"10",
-        hardMoneyEquitySharePercentage:"3",
-        gapEquitySharePercentage:"5",
+        profitPercentage: "10",
+        hardMoneyEquitySharePercentage: "3",
+        gapEquitySharePercentage: "5",
         closingCosts: "1.5",
         roof: "3000",
         concrete: "1,000",
@@ -367,13 +424,82 @@ export const DEFAULT_VALUES = {
         termites: "150",
         mold: "1,000",
         miscellaneous: "4,000",
-        
+
     },
     [EPageNames.WATERFALL]: {
         ...DEFAULT_VALUES_ZEROS,
     },
     [EPageNames.CONSTRUCTION_BUDGET]: {
         ...DEFAULT_VALUES_ZEROS,
+
+
+        // Land Costs
+        landAcquisition: "62,000",
+        closingCosts: "3,000",
+
+        // Designs and Engineering Costs
+        architecturalDesigns: "20,625",
+        civilEngineering: "10,000",
+        surveying: "10,000",
+        landscapeDesign: "1,000",
+        geotechnical: "3,000",
+        mepEngineering: "15,000",
+
+        // City Application, Review, and Permit Fees
+        preApplication: "1,500",
+        siteDesignReview: "4,467",
+        sitePlanReview: "1,000",
+        buildingPermit: "369",
+
+        // System Development Charges
+        stormwater: "1,972",
+        transportation: "27,335",
+        sanitarySewer: "3,411",
+        parks: "5,684",
+        water: "10,979",
+
+        // Land Preparation Costs
+        excavation: "15,000",
+        waterRetention: "10,000",
+        foundation: "76,000",
+        asphalt: "26,000",
+
+        // Rough Buildout Costs
+        lumber: "60,000",
+        trusses: "17,000",
+        framingLabor: "58,000",
+        windows: "9,000",
+        siding: "31,000",
+        hvac: "18,000",
+        plumbing: "20,000",
+        electrical: "62,000",
+        gasPiping: "3,000",
+        gutters: "5,000",
+        roofing: "14,000",
+        exteriorDoors: "4,000",
+
+        // Finishings Costs
+        insulation: "14,000",
+        drywall: "50,000",
+        interiorTrim: "44,000",
+        painting: "45,000",
+        cabinets: "4,000",
+        countertops: "11,000",
+        flooring: "11,000",
+        carpet: "11,000",
+        hardware: "4,000",
+        appliances: "4,000",
+        lightFixtures: "5,000",
+        windowCovering: "7,000",
+        cleanup: "10,000",
+        flatwork: "6,000",
+        fences: "1,000",
+        landscaping: "13,000",
+
+        // Contractor Fee and Contingencies
+        generalConditions: "10,000",
+        contractorFee: "136,000",
+
     },
 }
 
@@ -474,10 +600,10 @@ export enum OutputKeys {
     UnitSqFt = "unitSqFt",
     ValuePerLotToLandOwner = "valuePerLotToLandOwner",
 
-    TotalPermitCosts="permits",
-    TotalMiscCosts="miscCosts",
-    TotalSDCCosts="costToDevelopPerLot",
-    ClosingCosts="totalClosingCosts",
+    TotalPermitCosts = "permits",
+    TotalMiscCosts = "miscCosts",
+    TotalSDCCosts = "costToDevelopPerLot",
+    ClosingCosts = "totalClosingCosts",
 
 
 
@@ -489,13 +615,13 @@ export enum OutputKeys {
     Arv = "arv",
     PurchaseAndRepairCosts = "purchaseAndRepairCosts",
     ProjectMonths = "projectMonths",
-    HardMoneyLoanAdminFees="hardMoneyLoanAdminFees",
-    GapLoanAdminFees="gapLoanAdminFees",
+    HardMoneyLoanAdminFees = "hardMoneyLoanAdminFees",
+    GapLoanAdminFees = "gapLoanAdminFees",
 
-    ProfitPercentage="profitPercentage",
-    HardMoneyEquitySharePercentage ="hardMoneyEquitySharePercentage",
-    GapEquitySharePercentage="gapEquitySharePercentage",
-    TotalProfitLessEquitySplit="totalProfitLessEquitySplit",
+    ProfitPercentage = "profitPercentage",
+    HardMoneyEquitySharePercentage = "hardMoneyEquitySharePercentage",
+    GapEquitySharePercentage = "gapEquitySharePercentage",
+    TotalProfitLessEquitySplit = "totalProfitLessEquitySplit",
 
 
     TotalRepairCosts = "totalRepairCosts",

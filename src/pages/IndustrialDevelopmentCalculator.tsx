@@ -42,12 +42,8 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
     const [annualLeaseRatesPerSQFT, setAnnualLeaseRatesPerSQFT] = usePersistedState2(page, EAllStates.annualLeaseRatesPerSQFT, DEFAULT_VALUES[page].annualLeaseRatesPerSQFT, queryParams);
     const [percentageOfIncomeToExpenses, setPercentageOfIncomeToExpenses] = usePersistedState2(page, EAllStates.percentageOfIncomeToExpenses, DEFAULT_VALUES[page].percentageOfIncomeToExpenses, queryParams);
 
-
-
-
     const [activeCards, setActiveCards] = useState<Set<OutputKeys>>(new Set([OutputKeys.OfferToLandOwner]));
     // const activeCards: Set<OutputKeys> = new Set([OutputKeys.OfferToLandOwner]);
-
 
     const inputs = {
         grossAcres,

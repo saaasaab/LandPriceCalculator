@@ -197,5 +197,61 @@ export enum EAllStates {
     gapEquitySharePercentage="gapEquitySharePercentage",
 
 
+    // CONSTRUCTION BUDGET
+
+    // Land Costs
+    landAcquisition = "landAcquisition",
+
+    // Designs and Engineering Costs
+    architecturalDesigns = "architecturalDesigns",
+    civilEngineering = "civilEngineering",
+    surveying = "surveying",
+    landscapeDesign = "landscapeDesign",
+    geotechnical = "geotechnical",
+    mepEngineering = "mepEngineering",
+
+    // City Application, Review, and Permit Fees
+    preApplication = "preApplication",
+    siteDesignReview = "siteDesignReview",
+    sitePlanReview = "sitePlanReview",
+    buildingPermit = "buildingPermit",
+
+    // System Development Charges
+    stormwater = "stormwater",
+    transportation = "transportation",
+    sanitarySewer = "sanitarySewer",
+    parks = "parks",
+    water = "water",
+
+    // Land Preparation Costs
+    excavation = "excavation",
+    waterRetention = "waterRetention",
+    asphalt = "asphalt",
+
+    // Rough Buildout Costs
+    lumber = "lumber",
+    trusses = "trusses",
+    framingLabor = "framingLabor",
+    gasPiping = "gasPiping",
+    roofing = "roofing",
+    exteriorDoors = "exteriorDoors",
+
+    // Finishings Costs
+    drywall = "drywall",
+    interiorTrim = "interiorTrim",
+    painting = "painting",
+    countertops = "countertops",
+    carpet = "carpet",
+    hardware = "hardware",
+    appliances = "appliances",
+    lightFixtures = "lightFixtures",
+    windowCovering = "windowCovering",
+    cleanup = "cleanup",
+    flatwork = "flatwork",
+    fences = "fences",
+
+    // Contractor Fee and Contingencies
+    generalConditions = "generalConditions",
+    contractorFee = "contractorFee",
 
 }
