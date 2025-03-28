@@ -4,9 +4,10 @@ import p5 from "p5";
 import crosses from "robust-segment-intersect"
 import classifyPoint from "robust-point-in-polygon"
 import { TNode } from "../utils/BreadthFirstSearchBiDirectional";
-import { findShortestPathsAstar } from "../utils/AStarBiDirectional";
+
 import { TTwoPoints } from "../utils/SiteplanGeneratorUtils";
 import { simulatedAnnealing } from "../utils/SteinerTreeSearch";
+import { findShortestPathsAstar } from "../utils/AstarBiDirectional";
 
 
 interface IPoint { x: number; y: number; }

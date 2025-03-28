@@ -50,7 +50,7 @@ export const calculatorIcons = {
   [routes.INDUSTRIAL_PRICE_PER_SQFT]: '📏',
   [routes.MULTI_FAMILY_PRICE_PER_DOOR]: '🚪',
   [routes.IRR_CALCULATOR]: '📈',
-  [routes.SITE_PLAN_BUILDER]: '🗺️',
+  // [routes.SITE_PLAN_BUILDER]: '🗺️',
 }
 
 

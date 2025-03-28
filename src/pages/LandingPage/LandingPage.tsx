@@ -99,9 +99,8 @@ const LandingPage: React.FC = () => {
         <div className="container">
           
 
-          {user ? <h2>Our Calculator Suite</h2> : <h2>Try our calculator suite for free for 7 days</h2>}
-
-
+          {user ? <h2>Our Calculator Suite</h2> : <h2>
+            Try expert real estate analysis Tools for free for 7 days, no account needed</h2>}
 
           <div className="calculator-grid">
             {calculators.map(calc => (

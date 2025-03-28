@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 // import p5 from "p5";
 import './HeroSection.scss';
-import { useNavigate } from "react-router-dom";
-import { routes } from "../../components/Navbar";
-import { ChevronRight } from 'lucide-react';
-import { useAuth } from "../../context/AuthContext";
+// import { useNavigate } from "react-router-dom";
+// import { routes } from "../../components/Navbar";
+// // import { ChevronRight } from 'lucide-react';
+// import { useAuth } from "../../context/AuthContext";
 export const heroCanvasHeight = 500;
 const HeroSection: React.FC = () => {
     // const canvasRef = useRef<HTMLDivElement>(null);
@@ -63,33 +63,33 @@ const HeroSection: React.FC = () => {
     //     return () => p5Instance.remove();
     // }, []);
 
-    const [email, setEmail] = useState('');
-    const { updateTempEmail } = useAuth();
-    const navigate = useNavigate();
+    // const [email, setEmail] = useState('');
+    // const { updateTempEmail } = useAuth();
+    // const navigate = useNavigate();
 
 
-    const handleEmailSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Add email submission logic here
-        if (email) {
-            updateTempEmail(email)
-            navigate(routes.SIGN_UP)
-        }
-    };
+    // const handleEmailSubmit = (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     // Add email submission logic here
+    //     if (email) {
+    //         updateTempEmail(email)
+    //         navigate(routes.SIGN_UP)
+    //     }
+    // };
 
 
     return (
         <header className="hero">
             {/* <div ref={canvasRef} className="hero-canvas" /> */}
             <div className="hero-content">
-                <h1>Transform Your Real Estate Analysis</h1>
-                <p className="tagline">Expert Real Estate Analysis Tools</p>
+                <h1>Make Smarter Real Estate Investments</h1>
+                <p className="tagline">Instant ROI, Cost, and Revenue Projections for Any Development Project</p>
 
                 {/* <p className="tagline">A rich man's tool at a poor man's price</p> */}
 
                 {/* <p className="subtitle">Professional-grade real estate calculators at your fingertips</p> */}
 
-                <form onSubmit={handleEmailSubmit} className="email-form">
+                {/* <form onSubmit={handleEmailSubmit} className="email-form">
                     <input
                         type="email"
                         placeholder="Enter your email"
@@ -104,7 +104,7 @@ const HeroSection: React.FC = () => {
                     >
                         Get Early Access <ChevronRight className="chevron-icon" />
                     </button>
-                </form>
+                </form> */}
             </div>
         </header>
     );

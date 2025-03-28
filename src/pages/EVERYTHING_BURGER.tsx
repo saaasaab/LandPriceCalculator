@@ -1,5 +1,4 @@
 import { EPageNames, EPageTitles } from '../utils/types';
-import MultifamilyDevelopmentCalculator from './MultifamilyDevelopmentCalculator';
 import IndustrialDevelopmentCalculator from './IndustrialDevelopmentCalculator';
 import ResidentialDevelopmentCalculator from './ResidentialDevelopmentCalculator';
 
@@ -15,6 +14,7 @@ import PricePerSQFTCalculatorIndustrial from './PricePerSQFTCalculatorIndustrial
 import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 import HouseFlippingCalculator from './HouseFlippingCalculator';
 import IndustrialProformaCalculator from './IndustrialProformaCalculator';
+import MultifamilyDevelopmentCalculator from './MultiFamilyDevelopmentCalculator';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
