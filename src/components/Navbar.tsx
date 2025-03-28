@@ -12,11 +12,12 @@ import { useAuth } from '../context/AuthContext';
 export const routes = {
   MULTIFAMILY_DEVELOPMENT: "/multifamily-development",
   INDUSTRIAL_DEVELOPMENT: "/industrial-development",
+  COMMERCIAL_DEVELOPMENT: "/commercial-development",
   RESIDENTIAL_DEVELOPMENT: "/residential-development",
   MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
   INDUSTRIAL_PRICE_PER_SQFT: "industrial-price-per-sqft-calculator",
   MULTIFAMILY_ANALYSIS: "/multifamily-analysis",
-  INDUSTRIAL_PROFORMA :"/industrial-commercial-proforma",
+  INDUSTRIAL_PROFORMA: "/industrial-commercial-proforma",
   HOW_TO_LAND_FOR_MULTIFAMILY: "/how-to-analyzis-land-for-multifamily",
   IRR_CALCULATOR: "/irr-calculator",
   HARD_MONEY_COST_ESTIMATOR: "/hard-money-calculator",
@@ -43,6 +44,7 @@ export const routes = {
 export const calculatorIcons = {
   [routes.MULTIFAMILY_DEVELOPMENT]: '🏢',
   [routes.INDUSTRIAL_DEVELOPMENT]: '🏭',
+  [routes.COMMERCIAL_DEVELOPMENT]: '🏢',
   [routes.RESIDENTIAL_DEVELOPMENT]: '🏘️',
   [routes.CONSTRUCTION_BUDGET]: '📊',
   [routes.MULTIFAMILY_ANALYSIS]: '💰',
@@ -101,9 +103,10 @@ const Navbar = () => {
         <li className="dropdown">
           <span className="dropdown-title">Development Tools</span>
           <div className="dropdown-content">
+            <IconLink route={routes.RESIDENTIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.RESIDENTIAL_DEVELOPMENT} />
             <IconLink route={routes.MULTIFAMILY_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTIFAMILY_DEVELOPMENT} />
             <IconLink route={routes.INDUSTRIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_DEVELOPMENT} />
-            <IconLink route={routes.RESIDENTIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.RESIDENTIAL_DEVELOPMENT} />
+            <IconLink route={routes.COMMERCIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.COMMERCIAL_DEVELOPMENT} />
             <IconLink route={routes.CONSTRUCTION_BUDGET} handleToggleMenu={handleToggleMenu} text={EPageTitles.CONSTRUCTION_BUDGET} />
           </div>
         </li>

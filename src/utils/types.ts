@@ -22,6 +22,7 @@ export interface BuildingCalculationResult {
 export enum EPageNames {
     MULTIFAMILY_DEVELOPMENT = "MULTIFAMILY_DEVELOPMENT",
     INDUSTRIAL_DEVELOPMENT = "INDUSTRIAL_DEVELOPMENT",
+    COMMERCIAL_DEVELOPMENT = "COMMERCIAL_DEVELOPMENT",
     RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
     MULTI_FAMILY_PRICE_PER_DOOR = "MULTI_FAMILY_PRICE_PER_DOOR",
     MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
@@ -37,7 +38,9 @@ export enum EPageNames {
 
 export enum EPageTitles {
     MULTIFAMILY_DEVELOPMENT = "Multi-Family Development Calculator",
-    INDUSTRIAL_DEVELOPMENT = "Industrial / Commercial Land Development Calculator",
+    INDUSTRIAL_DEVELOPMENT = "Industrial Land Development Calculator",
+    COMMERCIAL_DEVELOPMENT = "Commercial Land Development Calculator",
+
     RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
     MULTI_FAMILY_PRICE_PER_DOOR = "Price Per Door Calculator - Multifamily",
     INDUSTRIAL_PRICE_PER_SQFT = "Price Per SQFT Calculator - Industrial",

@@ -33,6 +33,13 @@ const LandingPage: React.FC = () => {
       link: routes.INDUSTRIAL_DEVELOPMENT
     },
     {
+      id: 'commercial-dev',
+      title: 'Commercial Development Calculator',
+      description: 'Advanced calculator for commercial development projects with specialized metrics for office buildings and retail.',
+      icon: calculatorIcons[routes.COMMERCIAL_DEVELOPMENT],
+      link: routes.COMMERCIAL_DEVELOPMENT
+    },
+    {
       id: 'residential-dev',
       title: 'Residential Development Calculator',
       description: 'Essential tool for residential developers to analyze project feasibility, costs, and potential returns.',

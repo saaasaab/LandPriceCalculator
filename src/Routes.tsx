@@ -98,6 +98,7 @@ export function AppRouter() {
 
               <Route path={routes.RESIDENTIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
               <Route path={routes.INDUSTRIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
+              <Route path={routes.COMMERCIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.COMMERCIAL_DEVELOPMENT} isMobile={isMobile} />} />
               <Route path={routes.MULTIFAMILY_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.MULTIFAMILY_DEVELOPMENT} isMobile={isMobile} />} />
               <Route path={routes.MULTIFAMILY_ANALYSIS} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTIFAMILY_ANALYSIS} />} />
               <Route path={routes.INDUSTRIAL_PROFORMA} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.INDUSTRIAL_PROFORMA} />} />
