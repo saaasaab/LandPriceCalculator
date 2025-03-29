@@ -47,7 +47,9 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     };
 
     const monthlyLeaseRatesPerSQFT = removeCommas(annualLeaseRatesPerSQFT) / 12
-    const interestRateMonthly = removeCommas(interestRate) / 100 / 12;
+    let interestRateMonthly = removeCommas(interestRate) / 100 / 12;
+
+    interestRateMonthly = interestRateMonthly === 0 ? .0000000000001 : interestRateMonthly;
     const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
     const numberOfPayments = removeCommas(numberOfYears) * 12;
 

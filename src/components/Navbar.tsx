@@ -87,7 +87,7 @@ const Navbar = () => {
 
       <div className="navbar-logo">
         <img src={logo} alt="Land Price Calculator Logo" />
-        <h3>Land Price Calculators</h3>
+        <h3>Land Price Calculator</h3>
       </div>
 
 

@@ -15,6 +15,7 @@ import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 import HouseFlippingCalculator from './HouseFlippingCalculator';
 import IndustrialProformaCalculator from './IndustrialProformaCalculator';
 import MultifamilyDevelopmentCalculator from './MultiFamilyDevelopmentCalculator';
+import { HELP_PAGES } from '../utils/constants';
 
 
 const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
@@ -99,6 +100,14 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
         <div className="land-calculator">
             <header className="app-header">
                 <h1>{EPageTitles[page]}</h1>
+
+                {HELP_PAGES?.[page as keyof typeof HELP_PAGES] ? (
+                    <p>
+                        <a href={HELP_PAGES[page as keyof typeof HELP_PAGES]} target="_blank" style={{ fontSize: "14px", color: "#007bff", textDecoration: "underline" }}>
+                            📺 How to Use This Tool?
+                        </a>
+                    </p>
+                ) : null}
             </header>
             {/* <MonteCarloSimulator {...inputs} /> */}
             {PageToRender(page)}

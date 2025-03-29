@@ -190,9 +190,10 @@ export const DEFAULT_VALUES_ZEROS = {
     generalConditions: "0",
     contractorFee: "0",
 
+}
 
-
-
+export const HELP_PAGES ={
+    [EPageNames.RESIDENTIAL_DEVELOPMENT]: "https://www.youtube.com/watch?v=adJ4LWB85mc",
 
 }
 export const DEFAULT_VALUES = {
