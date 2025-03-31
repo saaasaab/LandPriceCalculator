@@ -148,7 +148,6 @@ export function calculateBuildingSqft(
     const buildingSize = buildingFootprint * floors;
     const leaseableBuildingSpace = buildingSize * (1 - commonSpacePercentage / 100);
 
-
     const parkingSpots = Math.round(leaseableBuildingSpace * parkingRatio);
     const handicappedParking = getHandicappedParkingRequirements(parkingSpots);
 
@@ -208,7 +207,8 @@ export function calculateBuildingSqftResidential(
   parkingSpots: number,
   imperviousSurfaceRatio: number,
   catchAll: number,
-  requiresHandicappedParking = false
+  requiresHandicappedParking = false,
+  // commonSpacePercentage: number
 ): BuildingCalculationResult {
   const approachW = 24;
   const parkingSpotW = 8;
@@ -231,6 +231,7 @@ export function calculateBuildingSqftResidential(
 
 
     const buildingSize = buildingFootprint * floors;
+    // const leaseableBuildingSpace = buildingSize * (1 - commonSpacePercentage / 100);
 
     // const parkingSpots = Math.round(buildingSize * parkingPerUnit);
     const handicappedParking = requiresHandicappedParking ? getHandicappedParkingRequirements(parkingSpots) : 0;

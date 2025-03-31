@@ -97,7 +97,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
         },
         [OutputKeys.NetBuildableAcres]: {
             title: "Net Buildable Acres",
-            value: netBuildableAcres,
+            value: roundAndLocalString(netBuildableAcres),
             description: "The area of land available for building after subtracting unbuildable acres from gross acres.",
         },
         [OutputKeys.LotSize]: {
@@ -314,7 +314,7 @@ const IndustrialDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculatio
 
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${page}_${EAllStates.catchAll}`); setCatchAll(value) }}
-                        cellValues={["Extra Pavement Multiple (X)", catchAll]}
+                        cellValues={["Extra Pavement Multiplier (X)", catchAll]}
                         isMobile={isMobile}
                         description="A catchall amount for extra approaches, garbage, utilities, and other miscellaneous items. This is added to the Calculated Driveway Area"
                     />

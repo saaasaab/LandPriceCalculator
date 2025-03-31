@@ -19,6 +19,7 @@ type TMultifamilyDevelopmentCalculationsInputs = {
     multifamilyPricePerSqFt: string;
     builderProfitPercentage: string;
     costToDevelopPerUnit: string;
+    // commonSpacePercentage: string;
 };
 
 interface IMultifamilyDevelopmentCalculationsOutputs {
@@ -55,6 +56,7 @@ interface IMultifamilyDevelopmentCalculationsOutputs {
 
 const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalculationsInputs, requiresHandicappedParking: boolean): IMultifamilyDevelopmentCalculationsOutputs => {
     const {
+        // commonSpacePercentage,
         grossAcres,
         unbuildableAcres,
         hardCostPerSqFt,
@@ -92,6 +94,7 @@ const multifamilyDevelopmentCalculations = (inputs: TMultifamilyDevelopmentCalcu
 
     const resultCalculateBuildingSqftResidential = calculateBuildingSqftResidential(totalBuildableSqFt, numberOfFloors, totalParkingSpots, maxImperviousSurfaceRatio / 100, catchAll,
         requiresHandicappedParking);
+    // , commonSpacePercentage);
 
     const totalBuildingSqft = resultCalculateBuildingSqftResidential.totalBuildingSqft;
     // Calculations

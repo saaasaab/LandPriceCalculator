@@ -29,7 +29,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
     const [grossAcres, setGrossAcres] = usePersistedState2(page, EAllStates.grossAcres, DEFAULT_VALUES[page].grossAcres, queryParams);
     const [builderProfitPercentage, setBuilderProfitPercentage] = usePersistedState2(page, EAllStates.builderProfitPercentage, DEFAULT_VALUES[page].builderProfitPercentage, queryParams);
     const [catchAll, setCatchAll] = usePersistedState2(page, EAllStates.catchAll, DEFAULT_VALUES[page].catchAll, queryParams);
-    const [commonSpacePercentage, setCommonSpacePercentage] = usePersistedState2(page, EAllStates.commonSpacePercentage, DEFAULT_VALUES[page].commonSpacePercentage, queryParams);
+    // const [commonSpacePercentage, setCommonSpacePercentage] = usePersistedState2(page, EAllStates.commonSpacePercentage, DEFAULT_VALUES[page].commonSpacePercentage, queryParams);
     const [costToDevelopPerUnit, setCostToDevelopPerUnit] = usePersistedState2(page, EAllStates.costToDevelopPerUnit, DEFAULT_VALUES[page].costToDevelopPerUnit, queryParams);
     const [hardCostPerSqFt, setHardCostPerSqFt] = usePersistedState2(page, EAllStates.hardCostPerSqFt, DEFAULT_VALUES[page].hardCostPerSqFt, queryParams);
     const [landDeveloperProfitPercentage, setLandDeveloperProfitPercentage] = usePersistedState2(page, EAllStates.landDeveloperProfitPercentage, DEFAULT_VALUES[page].landDeveloperProfitPercentage, queryParams);
@@ -51,6 +51,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
     const [activeCards, setActiveCards] = useState<Set<OutputKeys>>(new Set([OutputKeys.TotalOfferToLandOwner]));
 
     const inputs = {
+        // commonSpacePercentage,
         grossAcres,
         unbuildableAcres,
         hardCostPerSqFt,
@@ -306,13 +307,13 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                     />
 
 
-                    <InputRow
+                    {/* <InputRow
                         setInput={(value) => setCommonSpacePercentage(value)}
                         cellValues={["Percentage used for common space (%)", commonSpacePercentage]}
                         description="Every building requires common space that cannot be leased and should be excluded from parking calculations. This includes halls, elevators, stairs, foyers, etc."
                         isMobile={isMobile}
                         isPercent={true}
-                    />
+                    /> */}
 
                     <InputRow
                         setInput={(value) => setMaxImperviousSurfaceRatio(value)}
@@ -324,7 +325,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
 
                     <InputRow
                         setInput={(value) => setCatchAll(value)}
-                        cellValues={["Extra Pavement Multiple (X)", catchAll]}
+                        cellValues={["Extra Pavement Multiplier (X)", catchAll]}
                         isMobile={isMobile}
                         description="A catchall amount to capture all extra driveway sqft. This will include extra sqft for approaches, garbage, utilities, and other miscellaneous hardscape excluding sidewalk. This is added to the Calculated Driveway Area"
                     />
