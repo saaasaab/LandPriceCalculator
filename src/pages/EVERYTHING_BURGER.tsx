@@ -103,7 +103,7 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
 
                 {HELP_PAGES?.[page as keyof typeof HELP_PAGES] ? (
                     <p>
-                        <a href={HELP_PAGES[page as keyof typeof HELP_PAGES]} target="_blank" style={{ fontSize: "14px", color: "#007bff", textDecoration: "underline" }}>
+                        <a href={HELP_PAGES[page as keyof typeof HELP_PAGES]} target="_blank">
                             📺 How to Use This Tool?
                         </a>
                     </p>
