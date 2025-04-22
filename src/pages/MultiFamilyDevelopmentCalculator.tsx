@@ -284,168 +284,180 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
             <div className="group-section">
                 <div className="input-fields-container">
 
-                    <div className="input-grouping">
-                        Basic Land Info Inputs
-                    </div>
-                    <InputRow
-                        cellValues={["Gross Acres", grossAcres]}
-                        setInput={value => setGrossAcres(value)}
-                        description="The total area of the land in acres before any deductions for unbuildable areas."
-                        isMobile={isMobile}
-                    />
-                    <InputRow
-                        cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
-                        setInput={value => setUnbuildableAcres(value)}
-                        description="The total area in acres that cannot be built upon due to environmental, geographical features, setbacks, or easements"
-                        isMobile={isMobile}
-                    />
-                    <InputRow
-                        setInput={(value) => setNumberOfUnits(value)}
-                        cellValues={['Number of Units', numberOfUnits]}
-                        description='Number of units buildible in the multo-family building'
-                        isMobile={isMobile}
-                    />
+                    <div className="input-grouping-container">
+                        <div className="input-grouping">
+                            Basic Land Info Inputs
+                        </div>
+                        <InputRow
+                            cellValues={["Gross Acres", grossAcres]}
+                            setInput={value => setGrossAcres(value)}
+                            description="The total area of the land in acres before any deductions for unbuildable areas."
+                            isMobile={isMobile}
+                        />
+                        <InputRow
+                            cellValues={["Adjusted Unbuildable Acres", unbuildableAcres]}
+                            setInput={value => setUnbuildableAcres(value)}
+                            description="The total area in acres that cannot be built upon due to environmental, geographical features, setbacks, or easements"
+                            isMobile={isMobile}
+                        />
+                        <InputRow
+                            setInput={(value) => setNumberOfUnits(value)}
+                            cellValues={['Number of Units', numberOfUnits]}
+                            description='Number of units buildible in the multo-family building'
+                            isMobile={isMobile}
+                        />
 
 
-                    {/* <InputRow
+                        {/* <InputRow
                         setInput={(value) => setCommonSpacePercentage(value)}
                         cellValues={["Percentage used for common space (%)", commonSpacePercentage]}
                         description="Every building requires common space that cannot be leased and should be excluded from parking calculations. This includes halls, elevators, stairs, foyers, etc."
                         isMobile={isMobile}
                         isPercent={true}
-                    /> */}
+                        /> */}
 
-                    <InputRow
-                        setInput={(value) => setMaxImperviousSurfaceRatio(value)}
-                        cellValues={["Max Impervious Surface (%)", maxImperviousSurfaceRatio]}
-                        description="In certain zonings, the municipality limits the total impervious surface (Default 100%)"
-                        isMobile={isMobile}
-                        isPercent={true}
-                    />
+                        <InputRow
+                            setInput={(value) => setMaxImperviousSurfaceRatio(value)}
+                            cellValues={["Max Impervious Surface (%)", maxImperviousSurfaceRatio]}
+                            description="In certain zonings, the municipality limits the total impervious surface (Default 100%)"
+                            isMobile={isMobile}
+                            isPercent={true}
+                        />
 
-                    <InputRow
-                        setInput={(value) => setCatchAll(value)}
-                        cellValues={["Extra Pavement Multiplier (X)", catchAll]}
-                        isMobile={isMobile}
-                        description="A catchall amount to capture all extra driveway sqft. This will include extra sqft for approaches, garbage, utilities, and other miscellaneous hardscape excluding sidewalk. This is added to the Calculated Driveway Area"
-                    />
-
-
-                    <InputRow
-                        setInput={(value) => setParkingSpotsPerUnit(value)}
-                        cellValues={["Parking spots per unit", parkingSpotsPerUnit]}
-                        isMobile={isMobile}
-                        description="The parking number of parking spots required per unit"
-                    />
+                        <InputRow
+                            setInput={(value) => setCatchAll(value)}
+                            cellValues={["Extra Pavement Multiplier (X)", catchAll]}
+                            isMobile={isMobile}
+                            description="A catchall amount to capture all extra driveway sqft. This will include extra sqft for approaches, garbage, utilities, and other miscellaneous hardscape excluding sidewalk. This is added to the Calculated Driveway Area"
+                        />
 
 
-                    <div className="input-grouping">
-                        Building Assumptions
+                        <InputRow
+                            setInput={(value) => setParkingSpotsPerUnit(value)}
+                            cellValues={["Parking spots per unit", parkingSpotsPerUnit]}
+                            isMobile={isMobile}
+                            description="The parking number of parking spots required per unit"
+                        />
+
                     </div>
 
-                    <InputRow
-                        setInput={(value) => setNumberOfFloors(value)}
-                        cellValues={["Number of floors (#)", numberOfFloors]}
-                        isMobile={isMobile}
-                    />
-
-                    {/* Multifamily Sale Price */}
-                    <InputRow
-                        setInput={(value) => setMultifamilyPricePerSqFt(value)}
-                        cellValues={["Multifamily Sale Price ($/SQFT)", multifamilyPricePerSqFt]}
-                        description="The total sale price of the multifamily based on the size and price per square foot. Inputing in the average price per square foot for multifamilys in this area, determined by local research."
-                        isMobile={isMobile}
-                    />
-
-                    {/* Multifamily Sale Price */}
-                    <InputRow
-                        setInput={(value) => setMultifamilyPricePerUnit(value)}
-                        cellValues={["Multifamily Sale Price ($/Unit)", removeCommas(multifamilyPricePerUnit) === 0 ? '' : multifamilyPricePerUnit]}
-                        description="The total sale price of the multifamily based on the number of units. This can be calculated either through comparable sales in your area or by performing another type of analysis."
-                        isMobile={isMobile}
-                    />
 
 
-                    {/* Real Estate Agent Commission */}
-                    <InputRow
-                        setInput={(value) => setRealEstateCommissionPercentage(value)}
-                        cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage]}
-                        description="The real estate agent commission, calculated as a percentage of the multifamily sale price."
-                        isMobile={isMobile}
-                        isPercent={true}
-                    />
-                    <div className="input-grouping">
-                        Construction Inputs
+
+                    <div className="input-grouping-container">
+                        <div className="input-grouping">
+                            Building Assumptions
+                        </div>
+
+                        <InputRow
+                            setInput={(value) => setNumberOfFloors(value)}
+                            cellValues={["Number of floors (#)", numberOfFloors]}
+                            isMobile={isMobile}
+                        />
+
+                        {/* Multifamily Sale Price */}
+                        <InputRow
+                            setInput={(value) => setMultifamilyPricePerSqFt(value)}
+                            cellValues={["Multifamily Sale Price ($/SQFT)", multifamilyPricePerSqFt]}
+                            description="The total sale price of the multifamily based on the size and price per square foot. Inputing in the average price per square foot for multifamilys in this area, determined by local research."
+                            isMobile={isMobile}
+                        />
+
+                        {/* Multifamily Sale Price */}
+                        <InputRow
+                            setInput={(value) => setMultifamilyPricePerUnit(value)}
+                            cellValues={["Multifamily Sale Price ($/Unit)", removeCommas(multifamilyPricePerUnit) === 0 ? '' : multifamilyPricePerUnit]}
+                            description="The total sale price of the multifamily based on the number of units. This can be calculated either through comparable sales in your area or by performing another type of analysis."
+                            isMobile={isMobile}
+                        />
+
+
+                        {/* Real Estate Agent Commission */}
+                        <InputRow
+                            setInput={(value) => setRealEstateCommissionPercentage(value)}
+                            cellValues={["RE Agent Commission (%)", realEstateCommissionPercentage]}
+                            description="The real estate agent commission, calculated as a percentage of the multifamily sale price."
+                            isMobile={isMobile}
+                            isPercent={true}
+                        />
                     </div>
-                    {/* Home Builder Profit */}
-                    <InputRow
-                        setInput={(value) => setBuilderProfitPercentage(value)}
-                        cellValues={["Builder Profit (%)", builderProfitPercentage]}
-                        description="The builder's profit based on a percentage of the hard costs, permits and misc costs."
-                        isMobile={isMobile}
-                        isPercent={true}
-                    />
+                    <div className="input-grouping-container">
+                        <div className="input-grouping">
+                            Construction Inputs
+                        </div>
+                        {/* Home Builder Profit */}
+                        <InputRow
+                            setInput={(value) => setBuilderProfitPercentage(value)}
+                            cellValues={["Builder Profit (%)", builderProfitPercentage]}
+                            description="The builder's profit based on a percentage of the hard costs, permits and misc costs."
+                            isMobile={isMobile}
+                            isPercent={true}
+                        />
 
 
 
-                    {/* Hard Cost Per Sq Ft */}
-                    <InputRow
-                        setInput={(value) => setHardCostPerSqFt(value)}
-                        cellValues={["Hard Cost Multifamily Build ($/SQFT)", hardCostPerSqFt]}
-                        description="The total hard costs, including construction costs, and miscellaneous costs. Inputing the hard costs for building the multifamily per square foot."
-                        isMobile={isMobile}
-                    />
+                        {/* Hard Cost Per Sq Ft */}
+                        <InputRow
+                            setInput={(value) => setHardCostPerSqFt(value)}
+                            cellValues={["Hard Cost Multifamily Build ($/SQFT)", hardCostPerSqFt]}
+                            description="The total hard costs, including construction costs, and miscellaneous costs. Inputing the hard costs for building the multifamily per square foot."
+                            isMobile={isMobile}
+                        />
 
 
 
-                    {/* Permits */}
-                    <InputRow
-                        setInput={(value) => setPermits(value)}
-                        cellValues={["Permits per unit ($/unit)", permits]}
-                        description="The total cost of permits required for the multifamily build."
-                        isMobile={isMobile}
-                    />
+                        {/* Permits */}
+                        <InputRow
+                            setInput={(value) => setPermits(value)}
+                            cellValues={["Permits per unit ($/unit)", permits]}
+                            description="The total cost of permits required for the multifamily build."
+                            isMobile={isMobile}
+                        />
 
 
-                    {/* Misc Costs */}
-                    <InputRow
-                        setInput={(value) => setMiscCosts(value)}
-                        cellValues={["Misc Costs per unit ($/unit)", miscCosts]}
-                        description="Miscellaneous costs involved in the multifamily build."
-                        isMobile={isMobile}
+                        {/* Misc Costs */}
+                        <InputRow
+                            setInput={(value) => setMiscCosts(value)}
+                            cellValues={["Misc Costs per unit ($/unit)", miscCosts]}
+                            description="Miscellaneous costs involved in the multifamily build."
+                            isMobile={isMobile}
 
-                    />
-
-
-                    <div className="input-grouping">
-                        Land Entitlement Inputs
+                        />
                     </div>
-                    <InputRow
-                        setInput={(value) => setLandDeveloperProfitPercentage(value)}
-                        cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage]}
-                        description="Percentage profit made by the developer per lot."
-                        isMobile={isMobile}
-                        isPercent={true}
-                    />
 
-                    {/* Cost to Develop Land Per Unit */}
-                    <InputRow
-                        setInput={(value) => setCostToDevelopPerUnit(value)}
-                        cellValues={["Cost to Develop the Land Per unit ($)", costToDevelopPerUnit]}
-                        description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
-                        isMobile={isMobile}
-                    />
+                    <div className="input-grouping-container">
+                        <div className="input-grouping">
+                            Land Entitlement Inputs
+                        </div>
+                        <InputRow
+                            setInput={(value) => setLandDeveloperProfitPercentage(value)}
+                            cellValues={["Land Developer Profit (%)", landDeveloperProfitPercentage]}
+                            description="Percentage profit made by the developer per lot."
+                            isMobile={isMobile}
+                            isPercent={true}
+                        />
+
+                        {/* Cost to Develop Land Per Unit */}
+                        <InputRow
+                            setInput={(value) => setCostToDevelopPerUnit(value)}
+                            cellValues={["Cost to Develop the Land Per unit ($)", costToDevelopPerUnit]}
+                            description="Costs for engineering, clearing, demolition, utilities, and SDC (System Development Charges), etc."
+                            isMobile={isMobile}
+                        />
 
 
-                    <InputRow
-                        setInput={(value) => setOwnedLandCost(value)}
-                        description="If you own the property already, enter in the price of the property here"
-                        cellValues={["Land value if already own ($)", removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
-                        isMobile={isMobile}
-                    />
+                        <InputRow
+                            setInput={(value) => setOwnedLandCost(value)}
+                            description="If you own the property already, enter in the price of the property here"
+                            cellValues={["Land value if already own ($)", removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
+                            isMobile={isMobile}
+                        />
 
+                    </div>
                 </div>
             </div>
+
+
 
             <div className="table-container">
                 <DynamicRow

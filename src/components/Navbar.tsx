@@ -56,13 +56,13 @@ export const calculatorIcons = {
 }
 
 
-const IconLink = ({ route, text, handleToggleMenu }: { route: string, text: string, handleToggleMenu: () => void }) => {
+const IconLink = ({ route, text, handleToggleMenu,className }: { route: string, text: string, handleToggleMenu: () => void,className?: string }) => {
 
   const icon = calculatorIcons[route];
   const link = route;
 
   return (
-    <Link className="icon-link" to={link} onClick={handleToggleMenu}>
+    <Link className={`icon-link ${className!==""?className:"" }`} to={link} onClick={handleToggleMenu}>
       <div className="calculator-icon">{icon}</div>
       <div>{text}</div>
     </Link>
@@ -152,7 +152,8 @@ const Navbar = () => {
               <button onClick={logout} className="logout-btn">Logout</button>
             </>
           ) : (
-            <Link to={routes.LOGIN} className="login-btn">Login</Link>
+          <IconLink className="login-btn" route={routes.LOGIN} handleToggleMenu={handleToggleMenu} text={"Login"} />
+
           )}
         </div>
       </ul>

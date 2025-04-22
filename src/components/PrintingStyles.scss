@@ -6,8 +6,51 @@
     display: none !important;
   }
 
-  input {
-    box-shadow: none !important;
+  .group-section {
+    // width: unset !important;
+    gap: 0px 0px !important;
+    padding: 0px !important;
+    margin: 0px !important;
+
+    .input-grouping-container{
+      display: inline-block !important;
+
+    }
+    .input-fields-container {
+      column-count: 2 !important;
+      -webkit-column-count: 2 !important;
+      -moz-column-count: 2 !important;
+    }
+
+    .input-grouping{
+      // width: ;
+      padding: 0px !important;
+      padding-top: 20px !important;
+    }
+  }
+
+  .input-row {
+    min-height: 10px !important;
+    padding: 0px 20px !important;
+    // border-left: 1px solid black;
+    border-bottom: 1px solid rgb(187, 168, 168);
+
+    
+
+    * {
+      min-height: 10px !important;
+      font-size: 1rem !important;
+      padding: 0 !important;
+      border: none !important;
+    }
+
+    input {
+      box-shadow: none !important;
+      min-height: 10px !important;
+      width: 40px !important;
+    text-align: right !important;
+
+    }
   }
   .app-header {
     font-size: 2rem;
@@ -20,5 +63,10 @@
   .dynamic-row.three-cell-row.output-row * {
     color: black !important;
     font-size: 1.25rem !important;
+  }
+  .app-header {
+    p {
+      display: none;
+    }
   }
 }

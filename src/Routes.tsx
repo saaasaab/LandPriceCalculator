@@ -139,7 +139,7 @@ export function AppRouter() {
         </div>
 
       ) : (
-        <>
+        <div className="land-calculator-container">
           <Navbar />
           <Routes>
             <Route path="*" element={<EndFreeTrial />} />
@@ -155,7 +155,7 @@ export function AppRouter() {
 
           </Routes>
           <Footer />
-        </>
+        </div>
       )
     )
   }
@@ -167,9 +167,6 @@ export function AppRouter() {
       <AuthProvider>
 
         <Children />
-
-
-
 
       </AuthProvider>
       {/* </FeatureFlagsProvider> */}

@@ -5,7 +5,7 @@
   height: 100%;
   min-height: 100vh;
   background-color: #f4f4f4;
-  padding-top: 86px;
+  
 }
 
 .land-calculator {
@@ -41,6 +41,9 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .land-calculator-container {
+    padding-top: 0;
+  }
   .land-calculator {
     padding: 80px 10px 10px;
 
