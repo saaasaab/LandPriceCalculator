@@ -98,14 +98,12 @@ export enum EAllStates {
     rents = "rents",
     interestRate = "interestRate",
     numberOfPayments = "numberOfPayments",
-    cashOnCashReturn = "cashOnCashReturn",
     expensePercentage = "expensePercentage",
     downPayment = "downPayment",
     buyersAgentFee = "buyersAgentFee",
     clostingCostsFee = "clostingCostsFee",
 
-
-    //   FOR THE MULTI FAMILY ANALYSIS
+    // FOR THE MULTI FAMILY ANALYSIS
     purchasePrice = "purchasePrice",
     units = "units",
     rentPerUnit = "rentPerUnit",
@@ -129,7 +127,6 @@ export enum EAllStates {
     capEx = "capEx",
     propertyManagement = "propertyManagement",
     closingCosts = "closingCosts",
-
 
     // FOR IRR CALCULATIONS
     newPurchasePrice = "newPurchasePrice",
@@ -156,7 +153,23 @@ export enum EAllStates {
     // constructionToLongTermLoan = "constructionToLongTermLoan",
     // isInterestOnly = "isInterestOnly",
 
+    // FOR WATERFALL DISTRIBUTION
+    totalInvestment = "totalInvestment",
+    totalReturn = "totalReturn",
+    gpEquityContribution = "gpEquityContribution",
+    tier1Hurdle = "tier1Hurdle",
+    tier1Split = "tier1Split",
+    tier2Hurdle = "tier2Hurdle",
+    tier2Promote = "tier2Promote",
+    tier2Split = "tier2Split",
+    tier3Hurdle = "tier3Hurdle",
+    tier3Promote = "tier3Promote",
+    tier3Split = "tier3Split",
+    tier4Hurdle = "tier4Hurdle",
+    tier4Promote = "tier4Promote",
+    tier4Split = "tier4Split",
 
+    // FOR LOAN CALCULATION FEES
     hardMoneyLoanLtv = "hardMoneyLoanLtv",
     hardMoneyLoanPoints = "hardMoneyLoanPoints",
     hardMoneyLoanInterestRate = "hardMoneyLoanInterestRate",
@@ -167,7 +180,6 @@ export enum EAllStates {
     projectMonths = "projectMonths",
     hardMoneyLoanAdminFees="hardMoneyLoanAdminFees",
     gapLoanAdminFees="gapLoanAdminFees",
-
 
     roof = "roof",
     concrete = "concrete",
@@ -198,7 +210,6 @@ export enum EAllStates {
     profitPercentage="profitPercentage",
     hardMoneyEquitySharePercentage ="hardMoneyEquitySharePercentage",
     gapEquitySharePercentage="gapEquitySharePercentage",
-
 
     // CONSTRUCTION BUDGET
 
@@ -257,4 +268,9 @@ export enum EAllStates {
     generalConditions = "generalConditions",
     contractorFee = "contractorFee",
 
+    tier1LPSplit = "tier1LPSplit",
+    tier1Active = "tier1Active",
+    tier2Active = "tier2Active",
+    tier3Active = "tier3Active",
+    tier4Active = "tier4Active",
 }
