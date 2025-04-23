@@ -25,6 +25,7 @@ export const routes = {
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
   SITE_PLAN_BUILDER: "/site-plan-builder",
   HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
+  CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
   HOME: "/",
 
   // Authentication & User-related Routes
@@ -52,6 +53,7 @@ export const calculatorIcons = {
   [routes.INDUSTRIAL_PRICE_PER_SQFT]: '📏',
   [routes.MULTI_FAMILY_PRICE_PER_DOOR]: '🚪',
   [routes.IRR_CALCULATOR]: '📈',
+  [routes.CONSTRUCTION_LOAN_CALCULATOR]: '🏗️',
   // [routes.SITE_PLAN_BUILDER]: '🗺️',
 }
 
@@ -112,7 +114,6 @@ const Navbar = () => {
         </li>
 
         {/* Analysis Dropdown */}
-        {/* Analysis Dropdown */}
         <li className="dropdown">
           <span className="dropdown-title">Analysis Tools</span>
           <div className="dropdown-content">
@@ -124,9 +125,8 @@ const Navbar = () => {
             <IconLink route={routes.IRR_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.IRR_CALCULATOR} />
             <IconLink route={routes.HARD_MONEY_COST_ESTIMATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HARD_MONEY_COST_ESTIMATOR} />
             <IconLink route={routes.HOUSE_FLIPPING_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HOUSE_FLIPPING_CALCULATOR} />
-
-            {/* Uncomment these if needed */}
-            {/* <IconLink route={routes.WATERFALL} handleToggleMenu={handleToggleMenu} text={EPageTitles.WATERFALL} /> */}
+            <IconLink route={routes.WATERFALL} handleToggleMenu={handleToggleMenu} text={EPageTitles.WATERFALL_GENERATOR} />
+            <IconLink route={routes.CONSTRUCTION_LOAN_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.CONSTRUCTION_LOAN_CALCULATOR} />
             {/* <IconLink route={routes.SITE_PLAN_BUILDER} handleToggleMenu={handleToggleMenu} text={EPageTitles.SITE_PLAN_BUILDER} /> */}
           </div>
         </li>

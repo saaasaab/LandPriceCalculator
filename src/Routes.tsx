@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, useLocation, Routes, Route } from 'react-router-dom';
 
@@ -110,8 +109,9 @@ export function AppRouter() {
               <Route path={routes.IRR_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.IRR_CALCULATOR} />} />
               <Route path={routes.HARD_MONEY_COST_ESTIMATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HARD_MONEY_COST_ESTIMATOR} />} />
               <Route path={routes.CONSTRUCTION_BUDGET} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_BUDGET} />} />
-              <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL} />} />
+              <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL_GENERATOR} />} />
               <Route path={routes.HOUSE_FLIPPING_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HOUSE_FLIPPING_CALCULATOR} />} />
+              <Route path={routes.CONSTRUCTION_LOAN_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_LOAN_CALCULATOR} />} />
 
 
 

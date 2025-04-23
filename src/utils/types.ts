@@ -18,6 +18,47 @@ export interface BuildingCalculationResult {
     sidewalkArea: number;
 }
 
+export interface Milestone {
+    id: string;
+    name: string;
+    startDate: string;
+    endDate: string;
+    drawdownAmount: number;
+    completed: boolean;
+    dependencies?: string[]; // IDs of milestones that must be completed before this one can start
+}
+
+export interface LendingFees {
+    originationFee: number;      // Percentage of total loan
+    originationFeeFlat: number;  // Flat fee amount
+    lenderFee: number;          // Percentage of each drawdown
+    lenderFeeFlat: number;      // Flat fee per drawdown
+    interestRate: number;       // Annual interest rate
+    interestRateType: 'fixed' | 'variable';
+    adminFee: number;           // Monthly admin fee
+    inspectionFee: number;      // Fee per inspection
+    exitFee: number;            // Exit fee percentage
+    exitFeeFlat: number;        // Flat exit fee
+    extensionFeePercentage: number; // Fee for extending the loan
+    extensionFeeFlat: number;   // Flat fee for extension
+}
+
+export interface DrawdownCalculation {
+    date: string;
+    milestone: string;
+    drawdownAmount: number;
+    interestCharged: number;
+    fees: {
+        lenderFee: number;
+        adminFee: number;
+        inspectionFee: number;
+        other: number;
+    };
+    totalCost: number;
+    cumulativeInterest: number;
+    cumulativeFees: number;
+    cumulativeDrawdown: number;
+}
 
 export enum EPageNames {
     MULTIFAMILY_DEVELOPMENT = "MULTIFAMILY_DEVELOPMENT",
@@ -26,35 +67,35 @@ export enum EPageNames {
     RESIDENTIAL_DEVELOPMENT = "RESIDENTIAL_DEVELOPMENT",
     MULTI_FAMILY_PRICE_PER_DOOR = "MULTI_FAMILY_PRICE_PER_DOOR",
     MULTIFAMILY_ANALYSIS = "MULTIFAMILY_ANALYSIS",
-    INDUSTRIAL_PROFORMA ="INDUSTRIAL_PROFORMA",
+    INDUSTRIAL_PROFORMA = "INDUSTRIAL_PROFORMA",
     IRR_CALCULATOR = "IRR_CALCULATOR",
     HARD_MONEY_COST_ESTIMATOR = "HARD_MONEY_COST_ESTIMATOR",
-    WATERFALL = "WATERFALL",
+    WATERFALL_GENERATOR = "WATERFALL_GENERATOR",
     CONSTRUCTION_BUDGET = "CONSTRUCTION_BUDGET",
     INDUSTRIAL_PRICE_PER_SQFT = "INDUSTRIAL_PRICE_PER_SQFT",
-    HOUSE_FLIPPING_CALCULATOR="HOUSE_FLIPPING_CALCULATOR",
-    // HOW_TO_MULTIFAMILY="HOW_TO_MULTIFAMILY",
+    HOUSE_FLIPPING_CALCULATOR = "HOUSE_FLIPPING_CALCULATOR",
+    CONSTRUCTION_LENDING_COSTS = "CONSTRUCTION_LENDING_COSTS",
+    CONSTRUCTION_LOAN_CALCULATOR = "CONSTRUCTION_LOAN_CALCULATOR"
 }
 
 export enum EPageTitles {
     MULTIFAMILY_DEVELOPMENT = "Multi-Family Development Calculator",
     INDUSTRIAL_DEVELOPMENT = "Industrial Land Development Calculator",
     COMMERCIAL_DEVELOPMENT = "Commercial Land Development Calculator",
-
     RESIDENTIAL_DEVELOPMENT = "Residential Land Development Calculator",
     MULTI_FAMILY_PRICE_PER_DOOR = "Price Per Door Calculator - Multifamily",
     INDUSTRIAL_PRICE_PER_SQFT = "Price Per SQFT Calculator - Industrial",
-
     MULTIFAMILY_ANALYSIS = "Multi-Family Proforma",
     INDUSTRIAL_PROFORMA = "Industrial/Commercial Proforma",
-
     IRR_CALCULATOR = "Seller's IRR Estimator",
     HARD_MONEY_COST_ESTIMATOR = "Hard Money Loan Estimator",
-    WATERFALL = "Waterfall Distribution Generator",
+    WATERFALL_GENERATOR = "Waterfall Distribution Generator",
     CONSTRUCTION_BUDGET = "Construction Budget Generator",
     SITE_PLAN_BUILDER = "Site Plan Builder",
     HOUSE_FLIPPING_CALCULATOR = "House Flipping Calculator",
     HOME = "Home",
+    CONSTRUCTION_LENDING_COSTS = "Construction Lending Cost Calculator",
+    CONSTRUCTION_LOAN_CALCULATOR = "Construction Loan Calculator",
 }
 
 
@@ -133,26 +174,7 @@ export enum EAllStates {
     originalPurchaseDate = "originalPurchaseDate",
     originalPurchasePrice = "originalPurchasePrice",
 
-    // FOR LOAN CALCULATION FEES
-    // loanOriginationFee = "loanOriginationFee",
-
-    // loanTerm = "loanTerm",
-    // drawFee = "drawFee",
-    // underwritingFee = "underwritingFee",
-    // inspectionFee = "inspectionFee",
-    // appraisalFee = "appraisalFee",
-    // titleInsurance = "titleInsurance",
-    // recordingFee = "recordingFee",
-    // legalFee = "legalFee",
-    // interestReserve = "interestReserve",
-    // prepaymentPenalty = "prepaymentPenalty",
-    // loanExtensionFee = "loanExtensionFee",
     // discountPoints = "discountPoints",
-    // propertyValue = "propertyValue",
-    // loanToValue = "loanToValue",
-    // constructionToLongTermLoan = "constructionToLongTermLoan",
-    // isInterestOnly = "isInterestOnly",
-
     // FOR WATERFALL DISTRIBUTION
     totalInvestment = "totalInvestment",
     totalReturn = "totalReturn",
@@ -273,4 +295,31 @@ export enum EAllStates {
     tier2Active = "tier2Active",
     tier3Active = "tier3Active",
     tier4Active = "tier4Active",
+
+    // Construction Lending Calculator States
+    constructionLoanAmount = "constructionLoanAmount",
+    constructionLoanTerm = "constructionLoanTerm",
+    originationFee = "originationFee",
+    originationFeeFlat = "originationFeeFlat",
+    lenderFee = "lenderFee",
+    lenderFeeFlat = "lenderFeeFlat",
+    constructionInterestRate = "constructionInterestRate",
+    interestRateType = "interestRateType",
+    adminFee = "adminFee",
+    inspectionFee = "inspectionFee",
+    exitFee = "exitFee",
+    exitFeeFlat = "exitFeeFlat",
+    extensionFeePercentage = "extensionFeePercentage",
+    extensionFeeFlat = "extensionFeeFlat",
+    points = "points",
+    refinanceEnabled = "refinanceEnabled",
+    permanentRate = "permanentRate",
+    permanentTerm = "permanentTerm",
+    // monthlyPaymentAmount = "monthlyPaymentAmount",
+    // totalPermanentInterest = "totalPermanentInterest",
+    milestones = "milestones",
+    loanTranches = "loanTranches",
+    // totalInterestAccrued = "totalInterestAccrued",
+    // totalLoanAmount = "totalLoanAmount",
+    // totalLoanDuration = "totalLoanDuration",
 }

@@ -32,7 +32,7 @@ const WaterfallGenerator = ({ isMobile, page }: { isMobile: boolean; page: EPage
     const [tier4LPSplit, setTier4LPSplit] = usePersistedState2(page, EAllStates.tier4Split, "50", queryParams);
 
     // Example return amount for demonstration
-    const [totalReturn, setTotalReturn] = usePersistedState2(page, EAllStates.totalReturn, "12000000", queryParams);
+    const [totalReturn, setTotalReturn] = usePersistedState2(page, EAllStates.totalReturn, "2,000,000", queryParams);
 
     const params = {
         lpEquityContribution,
