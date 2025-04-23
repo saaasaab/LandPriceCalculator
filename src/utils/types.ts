@@ -319,6 +319,8 @@ export enum EAllStates {
     // totalPermanentInterest = "totalPermanentInterest",
     milestones = "milestones",
     loanTranches = "loanTranches",
+
+    cashOnCashReturn="cashOnCashReturn",
     // totalInterestAccrued = "totalInterestAccrued",
     // totalLoanAmount = "totalLoanAmount",
     // totalLoanDuration = "totalLoanDuration",

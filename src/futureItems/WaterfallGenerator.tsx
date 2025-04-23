@@ -1,13 +1,13 @@
-import DynamicRow from '../components/RowTypes/DynamicRow';
+// import DynamicRow from '../components/RowTypes/DynamicRow';
 import { convertToPercent, removeCommas } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import '../pages/DynamicTable.scss';
 import { EAllStates, EPageNames } from '../utils/types';
-import { DEFAULT_VALUES } from '../utils/constants';
+// import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
 import './WaterfallGenerator.scss';
 
-const WaterfallGenerator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
+const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; }) => {
     const queryParams = new URLSearchParams(window.location.search);
 
     // Transaction Structure states

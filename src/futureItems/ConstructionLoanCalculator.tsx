@@ -161,7 +161,7 @@ const defaultMilestones: Milestone[] = [
     }
 ];
 
-const ConstructionLoanCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {
+const ConstructionLoanCalculator = ({  page }: { isMobile: boolean; page: EPageNames; }) => {
     const queryParams = new URLSearchParams(window.location.search);
     
     const [loanAmount, setLoanAmount] = usePersistedState2(page, EAllStates.constructionLoanAmount, "1,000,000", queryParams);
@@ -450,7 +450,7 @@ const ConstructionLoanCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                                 <div key={milestone.id} className="task-row">
                                     <div className="task-label">{milestone.name}</div>
                                     <div className="task-timeline">
-                                        {generateWeekColumns().map((week, index) => (
+                                        {generateWeekColumns().map((_week, index) => (
                                             <div key={index} className="week-cell" />
                                         ))}
                                         <div 

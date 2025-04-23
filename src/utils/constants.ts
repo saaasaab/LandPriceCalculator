@@ -449,13 +449,11 @@ export const DEFAULT_VALUES = {
         miscellaneous: "4,000",
 
     },
-    [EPageNames.WATERFALL]: {
+    [EPageNames.WATERFALL_GENERATOR]: {
         ...DEFAULT_VALUES_ZEROS,
     },
     [EPageNames.CONSTRUCTION_BUDGET]: {
         ...DEFAULT_VALUES_ZEROS,
-
-
         // Land Costs
         landAcquisition: "62,000",
         closingCosts: "3,000",
@@ -524,6 +522,12 @@ export const DEFAULT_VALUES = {
         contractorFee: "136,000",
 
     },
+    [EPageNames.CONSTRUCTION_LENDING_COSTS]: {
+        ...DEFAULT_VALUES_ZEROS,
+    },
+    [EPageNames.CONSTRUCTION_LOAN_CALCULATOR]:{
+        ...DEFAULT_VALUES_ZEROS,
+    }
 }
 
 
