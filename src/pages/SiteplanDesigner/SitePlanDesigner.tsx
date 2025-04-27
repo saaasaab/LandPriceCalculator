@@ -80,6 +80,7 @@ import { BikeParking } from './SitePlanClasses/BikeParking';
 import { VisibilityGraph } from '../VisibilityGraph';
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { EPageNames } from '../../utils/types';
 
 const initialMetrics: SiteMetrics = {
   zoning: "C-M Commercial Manufacturing",
@@ -1108,7 +1109,7 @@ const SitePlanGenerator: React.FC = () => {
   ];
   return (
     <div className="site-plan-generator">
-      <AlphaBanner />
+      <AlphaBanner page={EPageNames.SITE_PLAN_BUILDER} />
       <div className="site-plan-generator__container">
         {/* Left Column - Controls */}
         <div className="site-plan-generator__controls">

@@ -10,7 +10,7 @@ export const plans = [
     {
         link: '********',
         priceId: '********',
-        price: 20,
+        price: 200,
         duration: '/Lifetime'
     },
     // {

@@ -6,6 +6,7 @@ import { EAllStates, EPageNames } from '../utils/types';
 // import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
 import './WaterfallGenerator.scss';
+import AlphaBanner from '../pages/SiteplanDesigner/AlphaBanner';
 
 const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; }) => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -228,6 +229,7 @@ const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; })
 
     return (
         <div className="waterfall-container">
+             <AlphaBanner page={page} />
             <div className="waterfall-section">
                 <h2>Distribution Waterfall</h2>
                 <div className="waterfall-table">

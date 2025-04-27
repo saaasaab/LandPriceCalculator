@@ -22,6 +22,7 @@ import {
     useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import AlphaBanner from '../pages/SiteplanDesigner/AlphaBanner';
 
 interface Milestone {
     id: string;
@@ -385,6 +386,7 @@ const ConstructionLoanCalculator = ({  page }: { isMobile: boolean; page: EPageN
 
     return (
         <div className="construction-loan-calculator">
+             <AlphaBanner  page={page} />
             <div className="milestones-section">
                 <h2>Construction Milestones</h2>
                 <button className="add-milestone-button" onClick={addMilestone}>

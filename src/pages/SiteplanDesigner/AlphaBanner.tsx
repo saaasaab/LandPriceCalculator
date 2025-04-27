@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { EPageNames } from "../../utils/types";
 
-const AlphaBanner: React.FC = () => {
+const AlphaBanner: React.FC<{ page: EPageNames }> = ({ page }) => {
 
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
     useEffect(() => {
         // Check local storage to see if the banner has already been dismissed
-        const dismissed = localStorage.getItem("alphaBannerDismissed");
+        const dismissed = localStorage.getItem(`alphaBannerDismissed-${page}`);
         if (dismissed === "true") {
             setIsVisible(false);
         }
@@ -17,7 +18,7 @@ const AlphaBanner: React.FC = () => {
 
     const handleClose = () => {
         setIsVisible(false);
-        localStorage.setItem("alphaBannerDismissed", "true");
+        localStorage.setItem(`alphaBannerDismissed-${page}`, "true");
     };
 
     if (!isVisible) return null;
@@ -52,6 +53,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        left: 0,
     },
     text: {
         margin: 0,
