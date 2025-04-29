@@ -197,6 +197,9 @@ export const HELP_PAGES ={
 
 }
 export const DEFAULT_VALUES = {
+    [EPageNames.SITE_PLAN_BUILDER]: {
+        ...DEFAULT_VALUES_ZEROS,
+    },
     [EPageNames.RESIDENTIAL_DEVELOPMENT]: {
         ...DEFAULT_VALUES_ZEROS,
         grossAcres: "1.65",
