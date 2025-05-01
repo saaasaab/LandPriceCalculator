@@ -7,6 +7,7 @@ import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
 import './DynamicTable.scss';
 // import { capitilizationRate, debtServiceCoverageRatio } from '../utils/commonMetrics';
+import { useState } from 'react';
 
 
 
@@ -77,7 +78,14 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
     const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
 
+    const [showTotalValues, setShowTotalValues] = useState(false);
 
+    const getDisplayValue = (perSqftValue: number) => {
+        if (showTotalValues) {
+            return "$" + roundAndLocalString(perSqftValue * removeCommas(leasableSQFT));
+        }
+        return "$" + roundToDecimal(perSqftValue);
+    };
 
     return (
 
@@ -141,39 +149,53 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 />
             </div>
 
-
             <div className="output-fields-container">
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Building value price per SQFT ", "$" + roundToDecimal(pricePerSQFT)]}
+                    cellValues={[
+                        `Building value ${showTotalValues ? 'total' : 'price per SQFT'}`,
+                        getDisplayValue(pricePerSQFT)
+                    ]}
                     description="This is the max you should pay per sqft to achive the desired returns"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vS8YsmrbZaugpEsC5jwMyYxLuCaznTDfN1IasxjJjyOKPyWKFPJONfWXBAXdkQvTn5aWKZDSk0-ehmz/pub"}
                 />
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Monthly operating income per SQFT", "$" + roundToDecimal(operatingIncome, 2)]}
-                    description="The operating income per SQFT per month"
+                    cellValues={[
+                        `Monthly operating income ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        getDisplayValue(operatingIncome)
+                    ]}
+                    description={`The operating income ${showTotalValues ? 'total' : 'per SQFT'} per month`}
                 />
 
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Mortgage Payment ", "$" + roundToDecimal(mortgagePayment)]}
-                    description="The payment for the mortgage per sqft"
+                    cellValues={[
+                        `Mortgage Payment ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        getDisplayValue(mortgagePayment)
+                    ]}
+                    description={`The payment for the mortgage ${showTotalValues ? 'total' : 'per SQFT'}`}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vSqIxRzLoXKwnS9ZqPx_i6O3RE8netRC3KeBNPfbe-KMMlfFVExpuO4WOBgKX0M2M0j96SrmSrPzwmF/pub"}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Monthly Cash flow per sqft", "$" + cashFlowPerSQFT]}
-                    description="The cash flow per sqft"
+                    cellValues={[
+                        `Monthly Cash flow ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        getDisplayValue(cashFlowPerSQFT)
+                    ]}
+                    description={`The cash flow ${showTotalValues ? 'total' : 'per SQFT'}`}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Annual Cash flow per sqft", "$" + roundToDecimal(cashFlowPerSQFT * 12, 2)]}
-                    description="The cash flow per sqft"
+                    cellValues={[
+                        `Annual Cash flow ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        getDisplayValue(cashFlowPerSQFT * 12)
+                    ]}
+                    description={`The cash flow ${showTotalValues ? 'total' : 'per SQFT'}`}
                 />
 
 
@@ -182,8 +204,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     cellValues={["Debt service coverage ratio (DSCR)", Math.round(DSCR * 100) / 100 + "X"]}
                     description="A bank normally is looking for 1.25 or greater"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNoMpWgbOK0f32XSoQ2eVfe8-JmhdiCHjTPVP1jb9TYud-plRzGgtsHoAYSQzEExSZQ-Qp0fDJyxVg/pub"}
-
-
                 />
 
                 <OutputRow
@@ -191,7 +211,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     cellValues={["Cap rate (%)", convertToPercent(capRate)]}
                     description="The cap rate of the property based off the operating income and the value of the property."
                     helpLink="https://docs.google.com/document/d/e/2PACX-1vRt_ChiF_ZoJYXXemimCn-LKxn0-F8wIG66csw4FnybeFH2xh3U1WUhDuinZ-uJlEMDE-bS_XjBvzYp/pub"
-
                 />
 
                 <OutputRow
@@ -199,18 +218,20 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     cellValues={["Total Building Value", "$" + roundAndLocalString(totalPrice)]}
                     description="This is the total value of the building based on the persqft price"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vRn3jgo32H_h1Jw4oeodBPqrvw4TQt2OnN9nUC-Knok_FieP8xqK-chi-iOORGuAY6NnpzvoFyO2Xbz/pub"}
-
                 />
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
                     description="This is the total you will offer to the seller including closing costs"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTTnUs2pOKas85TqnynslZWKFLTaPyx7jiGnKexqv87tCcJvrdYRHgN1WyeIkP-T8sooUTCT1Sc1_6V/pub"}
-
                 />
             </div>
 
-            <ShareButton params={params} />
+            <ShareButton 
+                params={params} 
+                showTotalValues={showTotalValues}
+                onToggleTotalValues={() => setShowTotalValues(!showTotalValues)}
+            />
         </div>
 
     );

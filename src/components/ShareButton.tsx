@@ -2,18 +2,29 @@ import { useState } from 'react';
 import { copyToClipboard } from '../utils/utils';
 import './ShareButton.scss';
 
-const ShareButton = ({ params }: { params: any }) => {
-  const [copied, setCopied] = useState(false);
+interface ShareButtonProps {
+  params: any;
+  showTotalValues?: boolean;
+  onToggleTotalValues?: () => void;
+}
 
+const ShareButton = ({ params, showTotalValues = false, onToggleTotalValues }: ShareButtonProps) => {
+  const [copied, setCopied] = useState(false);
 
   const initiatePrinting = () => {
     window.print();
   }
 
-
   return (
-
-    <div className={"action-buttons"}>
+    <div className="action-buttons">
+      {onToggleTotalValues && (
+        <button
+          onClick={onToggleTotalValues}
+          className="toggle-values-button"
+        >
+          Show {showTotalValues ? 'Per SQFT' : 'Total'} Values
+        </button>
+      )}
       <button
         onClick={() => copyToClipboard(params, setCopied)}
         className={`copy-url-button ${copied ? 'copied' : ''}`}
@@ -24,13 +35,11 @@ const ShareButton = ({ params }: { params: any }) => {
         onClick={() => {
           initiatePrinting()
         }}
-        className={`copy-url-button `}
+        className="copy-url-button"
       >
         Print
       </button>
-
     </div>
-
   );
 };
 
