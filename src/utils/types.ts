@@ -325,4 +325,6 @@ export enum EAllStates {
     // totalInterestAccrued = "totalInterestAccrued",
     // totalLoanAmount = "totalLoanAmount",
     // totalLoanDuration = "totalLoanDuration",
+    investmentDate = 'investmentDate',
+    returnDate = 'returnDate'
 }

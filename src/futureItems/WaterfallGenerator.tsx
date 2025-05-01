@@ -7,6 +7,7 @@ import { EAllStates, EPageNames } from '../utils/types';
 import ShareButton from '../components/ShareButton';
 import './WaterfallGenerator.scss';
 import AlphaBanner from '../pages/SiteplanDesigner/AlphaBanner';
+import { XIRR } from '../utils/xirrCalculation';
 
 const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; }) => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -34,6 +35,10 @@ const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; })
 
     // Example return amount for demonstration
     const [totalReturn, setTotalReturn] = usePersistedState2(page, EAllStates.totalReturn, "2,000,000", queryParams);
+
+    // Add state for investment date
+    const [investmentDate, setInvestmentDate] = usePersistedState2(page, EAllStates.investmentDate, new Date().toISOString(), queryParams);
+    const [returnDate, setReturnDate] = usePersistedState2(page, EAllStates.returnDate, new Date(new Date().setFullYear(new Date().getFullYear() + 5)).toISOString(), queryParams);
 
     const params = {
         lpEquityContribution,
@@ -214,14 +219,28 @@ const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; })
         lpDistribution += removeCommas(lpEquityContribution);
         gpDistribution += removeCommas(gpEquityContribution);
 
+        // Calculate IRRs using XIRR
+        const lpCashflows = [-removeCommas(lpEquityContribution), lpDistribution];
+        const gpCashflows = [-removeCommas(gpEquityContribution), gpDistribution];
+        const dates = [
+            new Date(investmentDate).toISOString().split('T')[0],
+            new Date(returnDate).toISOString().split('T')[0]
+        ];
+
+        const lpIRR = XIRR(lpCashflows, dates);
+        const gpIRR = XIRR(gpCashflows, dates);
+        const totalCashflows = [-totalEquity, lpDistribution + gpDistribution];
+        const totalIRR = XIRR(totalCashflows, dates);
+
         return {
             lpDistribution,
             gpDistribution,
             totalDistribution: lpDistribution + gpDistribution,
             lpMultiple: lpDistribution / removeCommas(lpEquityContribution),
             gpMultiple: gpDistribution / removeCommas(gpEquityContribution),
-            lpIRR: (lpDistribution / removeCommas(lpEquityContribution) - 1) * 100,
-            gpIRR: (gpDistribution / removeCommas(gpEquityContribution) - 1) * 100,
+            lpIRR,
+            gpIRR,
+            totalIRR
         };
     };
 
@@ -232,6 +251,24 @@ const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; })
              <AlphaBanner page={page} />
             <div className="waterfall-section">
                 <h2>Distribution Waterfall</h2>
+                <div className="date-inputs">
+                    <div>
+                        <label>Investment Date:</label>
+                        <input
+                            type="date"
+                            value={investmentDate.split('T')[0]}
+                            onChange={(e) => setInvestmentDate(new Date(e.target.value).toISOString())}
+                        />
+                    </div>
+                    <div>
+                        <label>Return Date:</label>
+                        <input
+                            type="date"
+                            value={returnDate.split('T')[0]}
+                            onChange={(e) => setReturnDate(new Date(e.target.value).toISOString())}
+                        />
+                    </div>
+                </div>
                 <div className="waterfall-table">
                     <table>
                         <thead>
@@ -457,19 +494,19 @@ const WaterfallGenerator = ({  page }: { isMobile: boolean; page: EPageNames; })
                                 <td>Limited Partner Returns</td>
                                 <td>${returns.lpDistribution.toLocaleString()}</td>
                                 <td>{returns.lpMultiple.toFixed(2)}x</td>
-                                <td>{returns.lpIRR.toFixed(1)}%</td>
+                                <td>{(returns.lpIRR*100).toFixed(1)}%</td>
                             </tr>
                             <tr>
                                 <td>General Partner Returns</td>
                                 <td>${returns.gpDistribution.toLocaleString()}</td>
                                 <td>{returns.gpMultiple.toFixed(2)}x</td>
-                                <td>{returns.gpIRR.toFixed(1)}%</td>
+                                <td>{(returns.gpIRR*100).toFixed(1)}%</td>
                             </tr>
                             <tr className="total-row">
                                 <td>Total Distribution</td>
                                 <td>${returns.totalDistribution.toLocaleString()}</td>
                                 <td>{(returns.totalDistribution / totalEquity).toFixed(2)}x</td>
-                                <td>{((returns.totalDistribution / totalEquity - 1) * 100).toFixed(1)}%</td>
+                                <td>{(returns.totalIRR*100).toFixed(1)}%</td>
                             </tr>
                         </tbody>
                     </table>

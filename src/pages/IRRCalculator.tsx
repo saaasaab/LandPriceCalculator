@@ -43,7 +43,6 @@ const IRRCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames
     const cashFlowAmounts = [-removeCommas(originalPurchasePrice), removeCommas(newPurchasePrice)]
     const cashFlowDates = [originalPurchaseDate, formattedDate]
 
-
     // if (includeCashflows) {
     //     const monthsArray = getMonthsBetweenDates(originalPurchaseDate, formattedDate);
     //     const filledArray = new Array(monthsArray.length).fill(removeCommas(cashflowMonthly));
