@@ -18,7 +18,6 @@ interface AuthContextType {
   updateTempEmail: (tempEmail: string) => void;
   tempPassword: string;
   updateTempPassword:  (tempPassword: string) => void;
-
 }
 
 const checkUser = () => {
@@ -60,8 +59,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [tempEmail, setTempEmail] = useState('');
   const [tempPassword, setTempPassword] = useState('');
-
-  
 
   const navigate = useNavigate();
 

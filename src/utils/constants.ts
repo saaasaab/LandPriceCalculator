@@ -2,7 +2,7 @@ import { EAllStates, EPageNames } from "./types";
 
 export const SQ_FT_PER_ACRE = 43560;
 export const infrastructurePercentage = 70;
-
+export const PROJECT_NAME = "Land Price Calculator";
 export const DEFAULT_VALUES_ZEROS = {
     grossAcres: "0",
     unbuildableAcres: "0",

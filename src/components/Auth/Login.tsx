@@ -4,19 +4,20 @@ import { postRequest } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { getAppDefaultUrl } from '../../Routes';
 import { routes } from '../Navbar';
+import { PROJECT_NAME } from '../../utils/constants';
 
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth(); // Use custom hook
-
+  const projectName = PROJECT_NAME;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const data = await postRequest<{ token: string; user: { email: string, is_paid: boolean } }>(
         '/login',
-        { email, password  }
+        { email, password,  projectName }
       );
 
       // DATA is not all being used
