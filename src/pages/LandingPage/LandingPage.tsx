@@ -106,7 +106,7 @@ const LandingPage: React.FC = () => {
         <div className="container">
           
 
-          {user ? <h2>Suite of Real Estate Calculator</h2> : <h2>
+          {user ? <h2>Suite of Real Estate Underwriting Tools</h2> : <h2>
             Try expert real estate analysis Tools for free for 7 days, no account needed</h2>}
 
           <div className="calculator-grid">
