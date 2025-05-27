@@ -1,166 +1,198 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './LandingPage.scss';
-import HeroSection from './HeroSection';
-import { Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { calculatorIcons, routes } from '../../components/Navbar';
 import { useAuth } from '../../context/AuthContext';
+import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
+import { EPageNames } from '../../utils/types';
+import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
+import HeroSection from './HeroSection';
+import {
+  Building2,
+  Factory,
+  Building,
+  Home,
+  Calculator,
+  BarChart4,
+  Ruler,
+  TowerControl,
+  TrendingUp,
+  Map
+} from 'lucide-react';
 
 interface Calculator {
   id: string;
   title: string;
   description: string;
-  icon: string;
-  link: string
+  icon: React.ReactNode;
+  link: string;
+  component: React.ComponentType<any>;
+  pageType?: EPageNames;
 }
 
-
 const LandingPage: React.FC = () => {
-  const { user } = useAuth(); // Use custom hook
-
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [hoveredCalculator, setHoveredCalculator] = useState<Calculator | null>(null);
+  const [activeCalculator, setActiveCalculator] = useState<Calculator | null>(null);
+  const transitionTimeoutRef = useRef<number>();
+  
   const calculators: Calculator[] = [
     {
       id: 'multi-family-dev',
       title: 'Multi-family Development Calculator',
-      description: 'Comprehensive analysis tool for multi-family development projects including cost estimation, revenue projections, and ROI calculations.',
-      icon: calculatorIcons[routes.MULTIFAMILY_DEVELOPMENT],
-      link: routes.MULTIFAMILY_DEVELOPMENT
+      description: 'Comprehensive analysis tool for multi-family development projects.',
+      icon: <Building2 size={24} />,
+      link: routes.MULTIFAMILY_DEVELOPMENT,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.MULTIFAMILY_DEVELOPMENT
     },
     {
       id: 'industrial-dev',
       title: 'Industrial Development Calculator',
-      description: 'Advanced calculator for industrial development projects with specialized metrics for warehouse, manufacturing, and logistics facilities.',
-      icon: calculatorIcons[routes.INDUSTRIAL_DEVELOPMENT],
-      link: routes.INDUSTRIAL_DEVELOPMENT
+      description: 'Advanced calculator for industrial development projects.',
+      icon: <Factory size={24} />,
+      link: routes.INDUSTRIAL_DEVELOPMENT,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.INDUSTRIAL_DEVELOPMENT
     },
     {
       id: 'commercial-dev',
       title: 'Commercial Development Calculator',
-      description: 'Advanced calculator for commercial development projects with specialized metrics for office buildings and retail.',
-      icon: calculatorIcons[routes.COMMERCIAL_DEVELOPMENT],
-      link: routes.COMMERCIAL_DEVELOPMENT
+      description: 'Advanced calculator for commercial development projects.',
+      icon: <Building size={24} />,
+      link: routes.COMMERCIAL_DEVELOPMENT,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.COMMERCIAL_DEVELOPMENT
     },
     {
       id: 'residential-dev',
       title: 'Residential Development Calculator',
-      description: 'Essential tool for residential developers to analyze project feasibility, costs, and potential returns.',
-      icon: calculatorIcons[routes.RESIDENTIAL_DEVELOPMENT],
-      link: routes.RESIDENTIAL_DEVELOPMENT
+      description: 'Essential tool for residential developers.',
+      icon: <Home size={24} />,
+      link: routes.RESIDENTIAL_DEVELOPMENT,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.RESIDENTIAL_DEVELOPMENT
     },
     {
       id: 'construction-budget',
       title: 'Construction Budget Generator',
-      description: 'Automated budget creation tool with industry-standard line items and cost estimation.',
-      icon: calculatorIcons[routes.CONSTRUCTION_BUDGET],
-      link: routes.CONSTRUCTION_BUDGET
+      description: 'Automated budget creation tool.',
+      icon: <Calculator size={24} />,
+      link: routes.CONSTRUCTION_BUDGET,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.CONSTRUCTION_BUDGET
     },
     {
       id: 'multi-family-proforma',
       title: 'Multi-family Proforma',
-      description: 'Detailed financial modeling tool for multi-family properties with comprehensive cash flow analysis.',
-      icon: calculatorIcons[routes.MULTIFAMILY_ANALYSIS],
-      link: routes.MULTIFAMILY_ANALYSIS
+      description: 'Detailed financial modeling tool.',
+      icon: <BarChart4 size={24} />,
+      link: routes.MULTIFAMILY_ANALYSIS,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.MULTIFAMILY_ANALYSIS
     },
     {
       id: 'industrial-sqft',
       title: 'Industrial Per SQFT Calculator',
-      description: 'Quick and accurate calculations for industrial property metrics on a per-square-foot basis.',
-      icon: calculatorIcons[routes.INDUSTRIAL_PRICE_PER_SQFT],
-      link: routes.INDUSTRIAL_PRICE_PER_SQFT
+      description: 'Quick calculations for industrial property metrics.',
+      icon: <Ruler size={24} />,
+      link: routes.INDUSTRIAL_PRICE_PER_SQFT,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.INDUSTRIAL_PRICE_PER_SQFT
     },
     {
       id: 'multi-family-door',
       title: 'Multi-family Per Door Calculator',
-      description: 'Essential metrics calculator for multi-family properties on a per-unit basis.',
-      icon: calculatorIcons[routes.MULTI_FAMILY_PRICE_PER_DOOR],
-      link: routes.MULTI_FAMILY_PRICE_PER_DOOR
+      description: 'Essential metrics calculator for multi-family properties.',
+      icon: <TowerControl size={24} />,
+      link: routes.MULTI_FAMILY_PRICE_PER_DOOR,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.MULTI_FAMILY_PRICE_PER_DOOR
     },
     {
       id: 'seller-irr',
       title: "Seller's IRR Estimator",
-      description: 'Sophisticated tool for calculating and analyzing Internal Rate of Return for property sellers.',
-      icon: calculatorIcons[routes.IRR_CALCULATOR],
-      link: routes.IRR_CALCULATOR
+      description: 'Sophisticated tool for calculating IRR.',
+      icon: <TrendingUp size={24} />,
+      link: routes.IRR_CALCULATOR,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.IRR_CALCULATOR
     },
     {
       id: 'site-plan',
       title: 'Site Plan Generator',
-      description: 'Innovative tool for creating preliminary site plans and layout options for development projects.',
-      icon: calculatorIcons[routes.SITE_PLAN_BUILDER],
-      link: routes.SITE_PLAN_BUILDER
+      description: 'Innovative tool for creating site plans.',
+      icon: <Map size={24} />,
+      link: routes.SITE_PLAN_BUILDER,
+      component: SitePlanDesigner
     }
   ];
 
+  useEffect(() => {
+    // Set initial calculator
+    if (!activeCalculator && calculators.length > 0) {
+      setActiveCalculator(calculators[0]);
+    }
+  }, []);
 
+  useEffect(() => {
+    if (hoveredCalculator) {
+      // Clear any existing timeout
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+      
+      // Set a small delay before changing the component to avoid rapid changes
+      transitionTimeoutRef.current = window.setTimeout(() => {
+        setActiveCalculator(hoveredCalculator);
+      }, 100);
+    }
 
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, [hoveredCalculator]);
+
+  const currentCalculator = activeCalculator || calculators[0];
+  const CurrentComponent = currentCalculator.component;
+
+  const handleCalculatorClick = (calculator: Calculator) => {
+    navigate(calculator.link);
+  };
 
   return (
     <div className="landing-page">
-
-      {user ? <></> : <HeroSection />}
-
-
-
-
-
-      <section className="calculators">
-        <div className="container">
-          
-
-          {user ? <h2>Suite of Real Estate Underwriting Tools</h2> : <h2>
-            Try expert real estate analysis Tools for free for 7 days, no account needed</h2>}
-
-          <div className="calculator-grid">
+      {/* {!user && } */}
+      <HeroSection />
+      <div className="app-content">
+        <div className="sidebar">
+          <div className="calculator-list">
             {calculators.map(calc => (
-              <Link key={calc.id} className="calculator-link" to={calc.link}>
-                <div className="calculator-card">
-                  <span className="calculator-icon">{calc.icon}</span>
-                  <h3>{calc.title}</h3>
-                  <p>{calc.description}</p>
-
-                  <button className="try-button">
-                    Try Now
-
-                  </button>
-                </div>
-
-              </Link>
-
+              <div
+                key={calc.id}
+                className={`calculator-item ${calc === hoveredCalculator ? 'active' : ''}`}
+                onMouseEnter={() => setHoveredCalculator(calc)}
+              >
+                <span className="calculator-icon">{calc.icon}</span>
+                <h3>{calc.title}</h3>
+              </div>
             ))}
           </div>
         </div>
-      </section>
 
-
-      <section className="benefits">
-        <div className="container">
-          <h2>Why Choose Our Tools?</h2>
-          <div className="benefits-grid">
-            <div className="benefit-item">
-              <h3>Professional Grade</h3>
-              <p>Industry-standard calculations used by top developers</p>
-            </div>
-            <div className="benefit-item">
-              <h3>Time Saving</h3>
-              <p>Complete complex calculations in minutes, not hours</p>
-            </div>
-            <div className="benefit-item">
-              <h3>Accurate Results</h3>
-              <p>Trusted by industry professionals for reliable analysis</p>
-            </div>
+        <div className="main-content">
+          <div className={`calculator-view ${currentCalculator === activeCalculator ? 'active' : ''}`}>
+            <CurrentComponent 
+              page={currentCalculator.pageType} 
+              isMobile={false}
+            />
           </div>
         </div>
-      </section>
-
-
-      {user ? <></> : <section className="cta">
-        <div className="container">
-          <h2>Ready to Elevate Your Analysis?</h2>
-          <p>Join thousands of real estate professionals who trust our tools</p>
-          <Link className="cta-button" to={routes.SIGN_UP}>Get Started Now</Link>
-        </div>
-      </section>}
-
-
+      </div>
     </div>
   );
 };

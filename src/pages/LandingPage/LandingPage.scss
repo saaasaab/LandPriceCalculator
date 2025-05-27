@@ -1,8 +1,87 @@
 .landing-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f8f8f8;
   font-family: "Inter", sans-serif;
   color: #333;
   width: 100%;
 
+  .app-content {
+    display: flex;
+    flex: 1;
+    min-height: 0; // Important for proper scrolling
+  }
+
+  .sidebar {
+    width: 400px;
+    background: #f8f8f8;
+    padding: 20px 0;
+    overflow-y: auto;
+    border-right: 1px solid #eaeaea;
+    
+    .calculator-list {
+      display: flex;
+      flex-direction: column;
+      
+      .calculator-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: #333;
+        
+        &:hover, &.active {
+          background: #fff;
+        }
+        
+        .calculator-icon {
+          font-size: 24px;
+          min-width: 32px;
+          margin-right: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #000;
+        }
+        
+        h3 {
+          font-size: 16px;
+          margin: 0;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+        
+        p {
+          display: none; // Hide description to match the image design
+        }
+      }
+    }
+  }
+  
+  .main-content {
+    flex: 1;
+    padding: 40px;
+    background: #fff;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .calculator-view{
+      width: 100%;
+    }
+  }
+}
+
+// Remove any conflicting styles from the old layout
+.calculators, .benefits, .cta {
+  display: none;
+}
+
+.landing-page {
   .benefits {
     padding: 80px 0;
     background-color: #f7fafc;
