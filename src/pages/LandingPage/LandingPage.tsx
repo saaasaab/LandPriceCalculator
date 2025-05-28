@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './LandingPage.scss';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { calculatorIcons, routes } from '../../components/Navbar';
+import { useNavigate } from 'react-router-dom';
+import { routes } from '../../components/Navbar';
 import { useAuth } from '../../context/AuthContext';
 import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
 import { EPageNames } from '../../utils/types';
@@ -17,7 +17,11 @@ import {
   Ruler,
   TowerControl,
   TrendingUp,
-  Map
+  Map,
+  Coins,
+  Home as HomeIcon,
+  GitFork,
+  Construction
 } from 'lucide-react';
 
 interface Calculator {
@@ -33,11 +37,48 @@ interface Calculator {
 const LandingPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [hoveredCalculator, setHoveredCalculator] = useState<Calculator | null>(null);
   const [activeCalculator, setActiveCalculator] = useState<Calculator | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const transitionTimeoutRef = useRef<number>();
+  const heroRef = useRef<HTMLDivElement>(null);
   
+  // Handle window resize and height calculations
+  useEffect(() => {
+    const updateLayout = () => {
+      setIsMobile(window.innerWidth <= 768);
+      
+      // Calculate available height
+      if (heroRef.current) {
+        const heroHeight = heroRef.current.offsetHeight;
+        const navHeight = document.querySelector('nav')?.offsetHeight || 0;
+        const availableHeight = window.innerHeight - (heroHeight + navHeight);
+        
+        // Set both heights as CSS variables
+        document.documentElement.style.setProperty('--hero-height', `${heroHeight}px`);
+        document.documentElement.style.setProperty('--nav-height', `${navHeight}px`);
+        document.documentElement.style.setProperty('--available-height', `${availableHeight}px`);
+      }
+    };
+
+    // Initial calculation
+    updateLayout();
+    
+    // Recalculate on resize
+    window.addEventListener('resize', updateLayout);
+    
+    // Add a small delay to ensure accurate hero height calculation
+    const timeoutId = setTimeout(updateLayout, 100);
+
+    return () => {
+      window.removeEventListener('resize', updateLayout);
+      clearTimeout(timeoutId);
+      document.documentElement.style.removeProperty('--hero-height');
+      document.documentElement.style.removeProperty('--nav-height');
+      document.documentElement.style.removeProperty('--available-height');
+    };
+  }, []);
+
   const calculators: Calculator[] = [
     {
       id: 'multi-family-dev',
@@ -120,6 +161,43 @@ const LandingPage: React.FC = () => {
       component: EVERYTHING_BURGER,
       pageType: EPageNames.IRR_CALCULATOR
     },
+   
+    {
+      id: 'hard-money-calculator',
+      title: 'Hard Money Cost Estimator',
+      description: 'Calculate costs and terms for hard money loans.',
+      icon: <Coins size={24} />,
+      link: routes.HARD_MONEY_COST_ESTIMATOR,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.HARD_MONEY_COST_ESTIMATOR
+    },
+    {
+      id: 'house-flipping',
+      title: 'House Flipping Calculator',
+      description: 'Analyze potential returns on house flipping projects.',
+      icon: <HomeIcon size={24} />,
+      link: routes.HOUSE_FLIPPING_CALCULATOR,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.HOUSE_FLIPPING_CALCULATOR
+    },
+    {
+      id: 'waterfall',
+      title: 'Waterfall Generator',
+      description: 'Generate and analyze waterfall distribution structures.',
+      icon: <GitFork size={24} />,
+      link: routes.WATERFALL,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.WATERFALL_GENERATOR
+    },
+    {
+      id: 'construction-loan',
+      title: 'Construction Loan Calculator',
+      description: 'Calculate construction loan terms and payments.',
+      icon: <Construction size={24} />,
+      link: routes.CONSTRUCTION_LOAN_CALCULATOR,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.CONSTRUCTION_LOAN_CALCULATOR
+    },
     {
       id: 'site-plan',
       title: 'Site Plan Generator',
@@ -127,71 +205,83 @@ const LandingPage: React.FC = () => {
       icon: <Map size={24} />,
       link: routes.SITE_PLAN_BUILDER,
       component: SitePlanDesigner
-    }
+    },
   ];
 
+  // Set initial active calculator
   useEffect(() => {
-    // Set initial calculator
     if (!activeCalculator && calculators.length > 0) {
       setActiveCalculator(calculators[0]);
     }
   }, []);
 
-  useEffect(() => {
-    if (hoveredCalculator) {
-      // Clear any existing timeout
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
+  // useEffect(() => {
+  //   if (hoveredCalculator && !isMobile) {
+  //     if (transitionTimeoutRef.current) {
+  //       clearTimeout(transitionTimeoutRef.current);
+  //     }
       
-      // Set a small delay before changing the component to avoid rapid changes
-      transitionTimeoutRef.current = window.setTimeout(() => {
-        setActiveCalculator(hoveredCalculator);
-      }, 100);
-    }
+  //     transitionTimeoutRef.current = window.setTimeout(() => {
+  //       setActiveCalculator(hoveredCalculator);
+  //     }, 100);
+  //   }
 
-    return () => {
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-  }, [hoveredCalculator]);
+  //   return () => {
+  //     if (transitionTimeoutRef.current) {
+  //       clearTimeout(transitionTimeoutRef.current);
+  //     }
+  //   };
+  // }, [hoveredCalculator, isMobile]);
+
+  const handleCalculatorInteraction = (calculator: Calculator) => {
+    if (isMobile) {
+      navigate(calculator.link);
+    } else {
+      setHoveredCalculator(calculator);
+      setActiveCalculator(calculator); // Immediately set active on click
+    }
+  };
 
   const currentCalculator = activeCalculator || calculators[0];
   const CurrentComponent = currentCalculator.component;
 
-  const handleCalculatorClick = (calculator: Calculator) => {
-    navigate(calculator.link);
-  };
+  // Memoize calculators to prevent unnecessary re-renders
+  const calculatorItems = React.useMemo(() => calculators.map(calc => (
+    <div
+      key={calc.id}
+      className={`calculator-item ${calc.id === activeCalculator?.id ? 'active' : ''}`}
+      onClick={() => handleCalculatorInteraction(calc)}
+      onMouseEnter={() => !isMobile && handleCalculatorInteraction(calc)}
+    >
+      <span className="calculator-icon">{calc.icon}</span>
+      <h3>{calc.title}</h3>
+    </div>
+  )), [activeCalculator?.id, isMobile]);
 
   return (
     <div className="landing-page">
-      {/* {!user && } */}
-      <HeroSection />
+      <div ref={heroRef}>
+        <HeroSection />
+      </div>
       <div className="app-content">
         <div className="sidebar">
           <div className="calculator-list">
-            {calculators.map(calc => (
-              <div
-                key={calc.id}
-                className={`calculator-item ${calc === hoveredCalculator ? 'active' : ''}`}
-                onMouseEnter={() => setHoveredCalculator(calc)}
-              >
-                <span className="calculator-icon">{calc.icon}</span>
-                <h3>{calc.title}</h3>
-              </div>
-            ))}
+            {calculatorItems}
           </div>
         </div>
 
-        <div className="main-content">
-          <div className={`calculator-view ${currentCalculator === activeCalculator ? 'active' : ''}`}>
-            <CurrentComponent 
-              page={currentCalculator.pageType} 
-              isMobile={false}
-            />
+        {!isMobile && (
+          <div className="main-content">
+            <div className="calculator-view">
+              {activeCalculator && (
+                <CurrentComponent 
+                  page={activeCalculator.pageType} 
+                  isMobile={false}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

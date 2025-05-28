@@ -10,52 +10,116 @@
   .app-content {
     display: flex;
     flex: 1;
-    min-height: 0; // Important for proper scrolling
+    position: relative;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      padding: 20px;
+      height: auto;
+    }
   }
 
   .sidebar {
     width: 400px;
+    flex-shrink: 0;
     background: #f8f8f8;
-    padding: 20px 0;
-    overflow-y: auto;
     border-right: 1px solid #eaeaea;
-    
+    position: sticky;
+    top: 0; //var(--nav-height, 0px);
+    height: calc(100vh - var(--nav-height, 0px));
+
+    @media (max-width: 768px) {
+      width: 100%;
+      position: static;
+      height: auto;
+      border-right: none;
+    }
+
     .calculator-list {
       display: flex;
       flex-direction: column;
+      padding: 20px;
+      gap: 6px;
+      height: 100%;
+      will-change: transform;
       
       .calculator-item {
         display: flex;
         align-items: center;
-        padding: 16px 24px;
+        padding: 4px 20px;
         cursor: pointer;
         transition: all 0.2s ease;
         text-decoration: none;
         color: #333;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(234, 234, 234, 0.5);
+        position: relative;
+        min-height: 56px;
+        transform: translateZ(0);
+        backface-visibility: hidden;
         
-        &:hover, &.active {
-          background: #fff;
+        &::after {
+          content: '';
+          position: absolute;
+          right: -2px;
+          top: 0;
+          height: 100%;
+          width: 4px;
+          background: #2563eb;
+          border-radius: 4px;
+          opacity: 0;
+          transition: opacity 0.2s ease;
         }
         
         .calculator-icon {
           font-size: 24px;
-          min-width: 32px;
+          min-width: 40px;
+          height: 40px;
           margin-right: 16px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #000;
+          color: #2563eb;
+          background: rgba(37, 99, 235, 0.1);
+          border-radius: 10px;
+          flex-shrink: 0;
         }
         
         h3 {
-          font-size: 16px;
+          font-size: 15px;
           margin: 0;
           font-weight: 500;
           white-space: nowrap;
+          color: #1a1a1a;
+          flex-grow: 1;
         }
-        
-        p {
-          display: none; // Hide description to match the image design
+
+        &:hover {
+          background: #fff;
+          transform: translateY(-1px) translateZ(0);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        &.active {
+          background: #fff;
+          border-color: rgba(37, 99, 235, 0.2);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+          &::after {
+            opacity: 1;
+          }
+
+          .calculator-icon {
+            color: #2563eb;
+            background: rgba(37, 99, 235, 0.15);
+          }
+
+          h3 {
+            color: #2563eb;
+            font-weight: 600;
+          }
         }
       }
     }
@@ -64,14 +128,80 @@
   .main-content {
     flex: 1;
     padding: 40px;
-    background: #fff;
-    overflow-y: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .calculator-view{
+    background: linear-gradient(to bottom right, #ffffff, #f8fafc);
+    border-radius: 24px 0 0 24px;
+    margin: 20px 0 20px 0;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.03);
+    
+    .calculator-view {
       width: 100%;
+      min-height: 100%;
+      
+      // Add some depth to the calculator forms
+      form {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        
+        input, select {
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          padding: 10px 16px;
+          transition: all 0.2s ease;
+          
+          &:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+          }
+        }
+      }
+    }
+  }
+
+  .hero-section {
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+    padding: 60px 40px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05'/%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      color: white;
+      margin: 0 0 20px 0;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      
+      @media (max-width: 768px) {
+        font-size: 2.5rem;
+      }
+    }
+
+    p {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 600px;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      
+      @media (max-width: 768px) {
+        font-size: 1rem;
+      }
     }
   }
 }

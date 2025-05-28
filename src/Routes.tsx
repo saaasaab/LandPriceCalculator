@@ -152,7 +152,6 @@ export function AppRouter() {
             <Route path={routes.TERMS} element={<Terms />} />
             <Route path={routes.PAYMENT} element={<Payment email={user?.email || ""} />} />
             <Route path={routes.SIGN_UP} element={<Pricing />} />
-
           </Routes>
           <Footer />
         </div>

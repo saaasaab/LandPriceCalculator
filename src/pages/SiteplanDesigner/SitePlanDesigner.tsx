@@ -1116,7 +1116,7 @@ const SitePlanGenerator: React.FC = () => {
           <Card>
             {/* {isGeneratingSitePlan ? */}
 
-            <div className="sidebar">
+            <div className="sidebar-main-container">
               <CollapsibleSection title="Site Plan Steps"
                 isDefaultOpen={true}>
                 <div className="site-plan-generator__sidebar">

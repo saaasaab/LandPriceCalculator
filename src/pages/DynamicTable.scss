@@ -16,6 +16,12 @@
   border-radius: 10px;
   margin-bottom: 20px;
 
+  .input-grouping-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+  }
   .input-fields-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
