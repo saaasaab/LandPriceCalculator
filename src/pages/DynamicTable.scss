@@ -50,29 +50,37 @@
       display: flex;
       gap: 15px;
       justify-content: space-between;
-      min-height: 50px;
+      min-height: 40px;
       align-items: center;
       padding: 0 10px 0 10px;
 
       &.is-greyed-out{
          background-color: #ececec;
       }
+      .info-cell{
+        h4{
+          font-size: .8rem !important;
+        }
+      }
+
       .input-cell {
+
         input {
           border: 1px solid #b1b1b1;
           height: 100%;
           background: transparent;
           border-radius: 10px;
-          font-size: 24px;
-          min-height: 50px;
-          max-width: 150px;
+          font-size: .90rem;
+          min-height: 40px;
+          max-width: 120px;
           text-align: left;
           padding-left: 15px;
-          box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, 0.2);
+          // box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, 0.2);
         }
         &.input-cell-date {
           input {
-            font-size: 16px;
+            font-size: .60rem;
+           
           }
         }
       }

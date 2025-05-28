@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState,  useEffect } from 'react';
 import './LandingPage.scss';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '../../components/Navbar';
-import { useAuth } from '../../context/AuthContext';
 import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
 import { EPageNames } from '../../utils/types';
 import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
@@ -35,13 +34,10 @@ interface Calculator {
 }
 
 const LandingPage: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [hoveredCalculator, setHoveredCalculator] = useState<Calculator | null>(null);
   const [activeCalculator, setActiveCalculator] = useState<Calculator | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const transitionTimeoutRef = useRef<number>();
-  const heroRef = useRef<HTMLDivElement>(null);
+  // const heroRef = useRef<HTMLDivElement>(null);
   
   // Handle window resize and height calculations
   useEffect(() => {
@@ -49,16 +45,17 @@ const LandingPage: React.FC = () => {
       setIsMobile(window.innerWidth <= 768);
       
       // Calculate available height
-      if (heroRef.current) {
-        const heroHeight = heroRef.current.offsetHeight;
+      // if (heroRef.current) {
+        // const heroHeight = heroRef.current.offsetHeight;
         const navHeight = document.querySelector('nav')?.offsetHeight || 0;
-        const availableHeight = window.innerHeight - (heroHeight + navHeight);
+        const availableHeight = window.innerHeight - (navHeight);
         
+
+        console.log(navHeight, availableHeight);
         // Set both heights as CSS variables
-        document.documentElement.style.setProperty('--hero-height', `${heroHeight}px`);
         document.documentElement.style.setProperty('--nav-height', `${navHeight}px`);
         document.documentElement.style.setProperty('--available-height', `${availableHeight}px`);
-      }
+      // }
     };
 
     // Initial calculation
@@ -73,7 +70,7 @@ const LandingPage: React.FC = () => {
     return () => {
       window.removeEventListener('resize', updateLayout);
       clearTimeout(timeoutId);
-      document.documentElement.style.removeProperty('--hero-height');
+      // document.documentElement.style.removeProperty('--hero-height');
       document.documentElement.style.removeProperty('--nav-height');
       document.documentElement.style.removeProperty('--available-height');
     };
@@ -215,29 +212,10 @@ const LandingPage: React.FC = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   if (hoveredCalculator && !isMobile) {
-  //     if (transitionTimeoutRef.current) {
-  //       clearTimeout(transitionTimeoutRef.current);
-  //     }
-      
-  //     transitionTimeoutRef.current = window.setTimeout(() => {
-  //       setActiveCalculator(hoveredCalculator);
-  //     }, 100);
-  //   }
-
-  //   return () => {
-  //     if (transitionTimeoutRef.current) {
-  //       clearTimeout(transitionTimeoutRef.current);
-  //     }
-  //   };
-  // }, [hoveredCalculator, isMobile]);
-
   const handleCalculatorInteraction = (calculator: Calculator) => {
     if (isMobile) {
       navigate(calculator.link);
     } else {
-      setHoveredCalculator(calculator);
       setActiveCalculator(calculator); // Immediately set active on click
     }
   };
@@ -255,14 +233,15 @@ const LandingPage: React.FC = () => {
     >
       <span className="calculator-icon">{calc.icon}</span>
       <h3>{calc.title}</h3>
+      {isMobile ? <p>{calc.description}</p>: null} 
     </div>
   )), [activeCalculator?.id, isMobile]);
 
   return (
     <div className="landing-page">
-      <div ref={heroRef}>
-        <HeroSection />
-      </div>
+      {/* <div ref={heroRef}> */}
+        {isMobile ?  <HeroSection />: null}
+      {/* </div> */}
       <div className="app-content">
         <div className="sidebar">
           <div className="calculator-list">

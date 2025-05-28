@@ -1,3 +1,7 @@
+footer{
+  display: none;
+}
+
 .landing-page {
   display: flex;
   flex-direction: column;
@@ -14,7 +18,7 @@
 
     @media (max-width: 768px) {
       flex-direction: column;
-      padding: 20px;
+      padding: 60px 20px;
       height: auto;
     }
   }
@@ -26,8 +30,11 @@
     border-right: 1px solid #eaeaea;
     position: sticky;
     top: 0; //var(--nav-height, 0px);
-    height: calc(100vh - var(--nav-height, 0px));
+    // height: calc(100vh - var(--nav-height, 0px));
+    height: calc(100vh );
 
+
+    overflow: hidden;
     @media (max-width: 768px) {
       width: 100%;
       position: static;
@@ -42,9 +49,35 @@
       gap: 6px;
       height: 100%;
       will-change: transform;
+      overflow-y: auto;
+      
+      // Custom scrollbar styling
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        
+        &:hover {
+          background: rgba(0, 0, 0, 0.2);
+        }
+      }
+      
+      // Firefox scrollbar
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
       
       .calculator-item {
-        display: flex;
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 10px;
+
         align-items: center;
         padding: 4px 20px;
         cursor: pointer;
@@ -60,6 +93,11 @@
         transform: translateZ(0);
         backface-visibility: hidden;
         
+
+        @media (max-width: 768px) {
+          grid-template-columns: 40px 1fr 1fr;
+        }
+
         &::after {
           content: '';
           position: absolute;
@@ -91,9 +129,18 @@
           font-size: 15px;
           margin: 0;
           font-weight: 500;
-          white-space: nowrap;
+          // white-space: nowrap;
           color: #1a1a1a;
           flex-grow: 1;
+          text-align: left;
+        }
+
+        p {
+          font-size: 12px;
+          margin: 0;
+          font-weight: 500;
+          color: #1a1a1a;
+          text-align: left;
         }
 
         &:hover {
