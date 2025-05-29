@@ -188,13 +188,18 @@ const ConstructionLoanCalculator = ({  page }: { isMobile: boolean; page: EPageN
     const termParam = params.get('term');
 
     useEffect(() => {
+
+        console.log(loanAmountParam, interestRateParam, pointsParam, termParam);
         if (loanAmountParam) setLoanAmount(loanAmountParam);
         if (interestRateParam) setInterestRate(interestRateParam);
         if (pointsParam) setPoints(pointsParam);
+
     }, [loanAmountParam, interestRateParam, pointsParam, termParam]);
 
     useEffect(() => {
         calculateLoanTranches();
+
+        console.log(loanTranches);
     }, [loanAmount, interestRate, points, permanentRate, permanentTerm, refinanceEnabled, milestones]);
 
     const calculatePermanentLoan = (loanAmount: number) => {
@@ -379,6 +384,7 @@ const ConstructionLoanCalculator = ({  page }: { isMobile: boolean; page: EPageN
 
     // Add useEffect to recalculate weeks when milestones change
     useEffect(() => {
+        console.log(milestones);
         if (milestones.length > 0) {
             generateWeekColumns();
         }
@@ -598,8 +604,8 @@ const ConstructionLoanCalculator = ({  page }: { isMobile: boolean; page: EPageN
                                 <td>${tranche.amount.toLocaleString()}</td>
                                 <td>{tranche.daysToProjectEnd} days</td>
                                 <td>{interestRate}%</td>
-                                <td>${tranche.interestAccrued.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
-                                <td>${(tranche.amount + tranche.interestAccrued).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                                <td>${tranche.interestAccrued?.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                                <td>${(tranche.amount + tranche.interestAccrued || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                             </tr>
                         ))}
                     </tbody>

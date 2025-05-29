@@ -138,12 +138,8 @@ const Pricing = () => {
                                     "Multi-Family & Commercial Development Tools",
                                     "Investor Returns Modeling",
                                     "Construction Budget Generator",
-                                    // "Lending & Financing Calculator – Compare financing options, loan terms, and interest impact.
-                                    // "Comparable Sales & Market Data – Pull recent sales and rental comps to validate pricing.
                                     "Profitability & Offer Price Calculator",
-                                    // "Interactive Mapping & Parcel Data – Explore properties with GIS overlays and ownership details.
-                                    // "Risk Assessment & Sensitivity Analysis – Test different scenarios to optimize development strategy.
-                                    // "Seamless Integrations 
+                                    
 
 
 

@@ -1,4 +1,4 @@
-import React, { useState,  useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './LandingPage.scss';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '../../components/Navbar';
@@ -20,7 +20,7 @@ import {
   Coins,
   Home as HomeIcon,
   GitFork,
-  Construction
+  // Construction
 } from 'lucide-react';
 
 interface Calculator {
@@ -37,7 +37,9 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeCalculator, setActiveCalculator] = useState<Calculator | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  // const heroRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
+  const calculatorViewRef = useRef<HTMLDivElement>(null);
   
   // Handle window resize and height calculations
   useEffect(() => {
@@ -50,8 +52,6 @@ const LandingPage: React.FC = () => {
         const navHeight = document.querySelector('nav')?.offsetHeight || 0;
         const availableHeight = window.innerHeight - (navHeight);
         
-
-        console.log(navHeight, availableHeight);
         // Set both heights as CSS variables
         document.documentElement.style.setProperty('--nav-height', `${navHeight}px`);
         document.documentElement.style.setProperty('--available-height', `${availableHeight}px`);
@@ -186,15 +186,15 @@ const LandingPage: React.FC = () => {
       component: EVERYTHING_BURGER,
       pageType: EPageNames.WATERFALL_GENERATOR
     },
-    {
-      id: 'construction-loan',
-      title: 'Construction Loan Calculator',
-      description: 'Calculate construction loan terms and payments.',
-      icon: <Construction size={24} />,
-      link: routes.CONSTRUCTION_LOAN_CALCULATOR,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.CONSTRUCTION_LOAN_CALCULATOR
-    },
+    // {
+    //   id: 'construction-loan',
+    //   title: 'Construction Loan Calculator',
+    //   description: 'Calculate construction loan terms and payments.',
+    //   icon: <Construction size={24} />,
+    //   link: routes.CONSTRUCTION_LOAN_CALCULATOR,
+    //   component: EVERYTHING_BURGER,
+    //   pageType: EPageNames.CONSTRUCTION_LOAN_CALCULATOR
+    // },
     {
       id: 'site-plan',
       title: 'Site Plan Generator',
@@ -212,11 +212,31 @@ const LandingPage: React.FC = () => {
     }
   }, []);
 
+  // Scroll to top when calculator changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({
+        top: 0,
+        behavior: 'instant'
+      });
+    }
+    if (calculatorViewRef.current) {
+      calculatorViewRef.current.scrollTo({
+        top: 0,
+        behavior: 'instant'
+      });
+    }
+  }, [activeCalculator]);
+
   const handleCalculatorInteraction = (calculator: Calculator) => {
     if (isMobile) {
       navigate(calculator.link);
     } else {
-      setActiveCalculator(calculator); // Immediately set active on click
+      // Force scroll reset before changing calculator
+      if (mainContentRef.current) {
+        mainContentRef.current.scrollTop = 0;
+      }
+      setActiveCalculator(calculator);
     }
   };
 
@@ -239,9 +259,9 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="landing-page">
-      {/* <div ref={heroRef}> */}
-        {isMobile ?  <HeroSection />: null}
-      {/* </div> */}
+      <div ref={heroRef}>
+        <HeroSection />
+      </div>
       <div className="app-content">
         <div className="sidebar">
           <div className="calculator-list">
@@ -250,8 +270,8 @@ const LandingPage: React.FC = () => {
         </div>
 
         {!isMobile && (
-          <div className="main-content">
-            <div className="calculator-view">
+          <div ref={mainContentRef} className="main-content">
+            <div ref={calculatorViewRef} className="calculator-view">
               {activeCalculator && (
                 <CurrentComponent 
                   page={activeCalculator.pageType} 

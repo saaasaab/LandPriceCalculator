@@ -30,6 +30,7 @@ const SitePlanDesigner = React.lazy(() => import('./pages/SiteplanDesigner/SiteP
 
 
 import './App.css'
+import { PopupProvider } from './context/PopupContext';
 
 export function AppRouter() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -162,11 +163,11 @@ export function AppRouter() {
 
   return (
     <Router>
-      {/* <FeatureFlagsProvider> */}
+       {/* <FeatureFlagsProvider> */}
       <AuthProvider>
-
-        <Children />
-
+        <PopupProvider>
+          <Children />
+        </PopupProvider>
       </AuthProvider>
       {/* </FeatureFlagsProvider> */}
     </Router>

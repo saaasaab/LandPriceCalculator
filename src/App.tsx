@@ -1,13 +1,20 @@
+import React from 'react';
 import './App.css'
 import './components/PrintingStyles.scss'
 import { getApp } from './utils/subdomains';
 
-function App() {
+const App: React.FC = () => {
   const AppRoute = getApp()
   
   return (
-    <AppRoute />
+    // <BrowserRouter>
+     
+        <div className="app">
+          <AppRoute />
+        </div>
+
+    // </BrowserRouter>
   );
-}
+};
 
 export default App
