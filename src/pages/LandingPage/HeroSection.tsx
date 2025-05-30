@@ -1,6 +1,7 @@
 import React from "react";
 // import p5 from "p5";
 import './HeroSection.scss';
+import { ChevronDown } from 'lucide-react';
 // import { useNavigate } from "react-router-dom";
 // import { routes } from "../../components/Navbar";
 // // import { ChevronRight } from 'lucide-react';
@@ -77,6 +78,12 @@ const HeroSection: React.FC = () => {
     //     }
     // };
 
+    const handleScrollDown = () => {
+        const appContent = document.querySelector('.app-content');
+        if (appContent) {
+            appContent.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     return (
         <header className="hero">
@@ -84,6 +91,10 @@ const HeroSection: React.FC = () => {
             <div className="hero-content">
                 <h1>Make Smarter Real Estate Investments</h1>
                 <p className="tagline">Instant ROI, Cost, and Revenue Projections for Any Development Project</p>
+                <div className="scroll-indicator" onClick={handleScrollDown}>
+                    <span>Explore Calculators</span>
+                    <ChevronDown size={24} />
+                </div>
 
                 {/* <p className="tagline">A rich man's tool at a poor man's price</p> */}
 
