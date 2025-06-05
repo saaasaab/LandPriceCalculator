@@ -5,7 +5,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, falseChecker, findClosestEdge, FormDataInputs, getCenterPoint, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, rotateCorners, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, falseChecker, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, rotateCorners, runVisibilityGraphSolver, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
 import { Garbage } from "./SitePlanClasses/Garbage";
@@ -13,7 +13,8 @@ import { Approach } from "./SitePlanClasses/Approach";
 import { VisibilityGraph } from "../VisibilityGraph";
 import { BikeParking } from "./SitePlanClasses/BikeParking";
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup'
-import { ConfirmDialog } from "./SitePlanClasses/ConfirmDialog";
+import { Entrance } from "./SitePlanClasses/Entrance";
+// import { ConfirmDialog } from "./SitePlanClasses/ConfirmDialog";
 // import { VisibilityGraph } from "../VisibilityGraph";
 
 
@@ -222,7 +223,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     };
 
     p.setup = () => {
-      p.frameRate(10);
+      p.frameRate(20);
       p.clear(); // Clear the canvas
       p.angleMode(p.DEGREES);
 
@@ -464,7 +465,6 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       if (buildingsGroup) {
 
         buildingsGroup.buildings.forEach((building, buildingIndex) => {
-
           if (building === null) return;
           building.drawBuilding();
           if (building.showRotationHandles &&
@@ -1196,62 +1196,63 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       // ALL THINGS BUILDING ENTRANCES
       else if (stepSelectorRefs.entrances.current) {
 
-        // if (isHovered.buildingOffset && buildingsGroupRef.current && propertyRef.current && parkingRef.current && garbageRef.current && approachRef.current) {
-        //   // HIDING ENTRANCE AND SOLVER FOR NOW
+        // isHovered.buildingOffset && 
+        if (buildingsGroupRef.current && propertyRef.current && parkingRef.current && garbageRef.current && approachRef.current) {
+          // HIDING ENTRANCE AND SOLVER FOR NOW
 
-        //   const mouse = p.createVector(mx, my)
-        //   const closestEdgeIndex = findClosestEdge(buildingsGroupRef.current.buildings[0].sitePlanElementEdges, mouse)
-        //   const closestEdge = buildingsGroupRef.current.buildings[0].sitePlanElementEdges[closestEdgeIndex];
-        //   // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
-
-
-        //   // get the point on the line where the entrance should interesect
-        //   const angle = closestEdge.calculateAngle() - 90;
-        //   const intersection = closestEdge.calculateClosestIntercept(
-        //     mx, my,
-        //     p
-        //   );
-
-        //   let minDistance = Infinity;
-        //   let minDistanceIndex = -1;
-        //   buildingsGroupRef.current.buildings[0].entrances.forEach((entrance, i) => {
-        //     const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
-        //     if (dist < minDistance) {
-        //       minDistance = dist;
-        //       minDistanceIndex = i;
-        //     }
-        //   })
+          const mouse = p.createVector(mx, my)
+          const closestEdgeIndex = findClosestEdge(buildingsGroupRef.current.buildings[0].sitePlanElementEdges, mouse)
+          const closestEdge = buildingsGroupRef.current.buildings[0].sitePlanElementEdges[closestEdgeIndex];
+          // const distance = calculatePointToEdgeDistance(closestEdge, mouse);
 
 
-        //   // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
+          // get the point on the line where the entrance should interesect
+          const angle = closestEdge.calculateAngle() - 90;
+          const intersection = closestEdge.calculateClosestIntercept(
+            mx, my,
+            p
+          );
 
-        //   if (minDistance < (5 / propertyRef.current.scale)) {
-        //     // THEN DELETE THE ENTRANCE
-
-        //     buildingsGroupRef.current.buildings[0].entrances = buildingsGroupRef.current.buildings[0].entrances.filter((_, i) => i !== minDistanceIndex)
-        //     visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], parkingRef.current, propertyRef.current, garbageRef.current, approachRef.current);
-        //   }
-
-        //   else {
-        //     // Draw the entrance
-        //     const isAddingEntrances = stepSelectorRefs.entrances.current;
-        //     if (isAddingEntrances) {
-        //       // Hold off on adding entrances for now
-        //       let lerpPos = getIntersectionPercentage(
-        //         closestEdge,
-        //         intersection
-        //       ) || 0;
-
-        //       const entrance = new Entrance(p, propertyRef.current.scale, lerpPos, intersection, angle, closestEdgeIndex, buildingsGroupRef.current.buildings[0].center);
-        //       buildingsGroupRef.current.buildings[0].entrances.push(entrance)
+          let minDistance = Infinity;
+          let minDistanceIndex = -1;
+          buildingsGroupRef.current.buildings[0].entrances.forEach((entrance, i) => {
+            const dist = p.dist(intersection.x, intersection.y, entrance.intersection.x, entrance.intersection.y);
+            if (dist < minDistance) {
+              minDistance = dist;
+              minDistanceIndex = i;
+            }
+          })
 
 
-        //       visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], parkingRef.current, propertyRef.current, garbageRef.current, approachRef.current);
+          // If it is really close to another entrance, and clickm then delete. Turn the entrance with a
 
-        //     }
+          if (minDistance < (5 / propertyRef.current.scale)) {
+            // THEN DELETE THE ENTRANCE
 
-        //   }
-        // }
+            buildingsGroupRef.current.buildings[0].entrances = buildingsGroupRef.current.buildings[0].entrances.filter((_, i) => i !== minDistanceIndex)
+            visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], parkingRef.current, propertyRef.current, garbageRef.current, approachRef.current);
+          }
+
+          else {
+            // Draw the entrance
+            const isAddingEntrances = stepSelectorRefs.entrances.current;
+            if (isAddingEntrances) {
+              // Hold off on adding entrances for now
+              let lerpPos = getIntersectionPercentage(
+                closestEdge,
+                intersection
+              ) || 0;
+
+              const entrance = new Entrance(p, propertyRef.current.scale, lerpPos, intersection, angle, closestEdgeIndex, buildingsGroupRef.current.buildings[0].center);
+              buildingsGroupRef.current.buildings[0].entrances.push(entrance)
+
+
+              visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], parkingRef.current, propertyRef.current, garbageRef.current, approachRef.current);
+
+            }
+
+          }
+        }
 
       }
 

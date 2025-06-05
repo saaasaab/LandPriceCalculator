@@ -153,9 +153,6 @@ const SitePlanGenerator: React.FC = () => {
 
 
 
-
-
-
   const isUploadingImageRef = useRef<boolean>(true);
   const isUpdatingBoundaryPointsRef = useRef<boolean>(false);
   const isSelectingApproachRef = useRef<boolean>(false);
@@ -221,8 +218,6 @@ const SitePlanGenerator: React.FC = () => {
       const _metrics: SiteMetrics = {
         ...metrics
       }
-
-
 
       // _metrics.actualBuildingArea = building?.buildingAreaActual || initialMetrics.actualBuildingArea;
       _metrics.approachArea = approach?.area || initialMetrics.approachArea;
