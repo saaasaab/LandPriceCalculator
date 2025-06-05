@@ -165,7 +165,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Mortgage Payment ", "$" + roundAndLocalString(mortgagePayment)]}
+                    cellValues={["Mortgage Payment per unit", "$" + roundAndLocalString(mortgagePayment)]}
                     description="The payment for the mortgage per unit"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vSqIxRzLoXKwnS9ZqPx_i6O3RE8netRC3KeBNPfbe-KMMlfFVExpuO4WOBgKX0M2M0j96SrmSrPzwmF/pub"}
                 />

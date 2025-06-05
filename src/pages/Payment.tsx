@@ -4,6 +4,7 @@ import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { useEffect, useState } from "react";
 import CheckoutForm from "./CheckoutForm";
 import { getRequest, postRequest } from "../utils/api";
+import { PROJECT_NAME } from "../utils/constants";
 
 
 // Make sure to call `loadStripe` outside of a component’s render to avoid
@@ -19,9 +20,9 @@ const Payment = ({ email }: { email: string }) => {
   // };
   const [stripePromise, setStripePromise] = useState<Stripe | null>(null);
   const [clientSecret, setClientSecret] = useState("");
-
   const [error, setError] = useState('');
 
+  const projectName = PROJECT_NAME;
 
   useEffect(() => {
     const fetchStripeKey = async () => {
@@ -49,7 +50,7 @@ const Payment = ({ email }: { email: string }) => {
     const handleCreatePaymentIntent = async () => {
       try {
         const { clientSecret } = await postRequest<{ clientSecret: string | null }>(
-          '/create-payment-intent', { email: email }
+          '/create-payment-intent', { email: email, projectName }
         );
 
         if (clientSecret) {

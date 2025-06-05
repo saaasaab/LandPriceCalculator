@@ -6,12 +6,13 @@ import { postRequest } from '../../utils/api';
 import { getAppDefaultUrl } from '../../Routes';
 import './Auth.scss';
 import { routes } from '../Navbar';
+import { PROJECT_NAME } from '../../utils/constants';
 
 const Register: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login } = useAuth();
-
+    const projectName = PROJECT_NAME;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,7 +21,7 @@ const Register: React.FC = () => {
 
             const data = await postRequest<{ token: string; user:User }>(
                 '/register',
-                { email, password }
+                { email, password, projectName }
             );
             
             login({ email: data.user.email, token: data.token, is_paid: data.user.is_paid });

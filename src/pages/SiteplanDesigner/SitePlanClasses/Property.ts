@@ -283,8 +283,10 @@ export class Property {
     this.cornerOffsetsFromSetbacks = cornerOffsetsFromSetbacks;
   }
 
-  drawSetbackPolygon() {
+  drawSetbackPolygon(opacity: number) {
     const p = this.p;
+
+    const op = p.map(opacity, 0, 100, 0, 255);
     p.push()
 
     p.fill(100, 200, 255, 50); // Fill color with transparency
@@ -302,7 +304,7 @@ export class Property {
     p.endShape(p.CLOSE); // Close the polygon
 
 
-    p.fill("#f9fafb"); // Fill color with transparency
+    p.fill(220, 220, 220, op); // Fill color with transparency
 
     p.beginShape(); // Close the polygon
 

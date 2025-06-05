@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, User } from "../context/AuthContext";
 import { postRequest } from "../utils/api";
+import { PROJECT_NAME } from "../utils/constants";
 
 function Completion() {
 
   const navigate = useNavigate();
   const { login, user } = useAuth();
   const [errorMessage, setErrorMessage] = useState('');
-
+  const projectName = PROJECT_NAME;
 
   const [hasRun, setHasRun] = useState(false);
 
@@ -20,13 +21,13 @@ function Completion() {
       return; // Prevent running logic until user is loaded
     }
     setHasRun(true)
-
+    
     const handleComplete = async () => {
       try {
 
         const data = await postRequest<{ token: string; user: User }>(
           '/set-payment-status-to-true',
-          { email: user.email }
+          { email: user.email, projectName }
         );
 
         if(data){

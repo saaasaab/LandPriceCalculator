@@ -5,6 +5,7 @@ import { useAuth, User } from '../context/AuthContext';
 import Payment from './Payment';
 import { postRequest } from '../utils/api';
 import { routes } from '../components/Navbar';
+import { PROJECT_NAME } from '../utils/constants';
 
 export const plans = [
     {
@@ -34,7 +35,7 @@ const Pricing = () => {
 
     const [email, setEmail] = useState(tempEmail ? tempEmail : "");
     const [password, setPassword] = useState('');
-
+    const projectName = PROJECT_NAME;
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -44,16 +45,14 @@ const Pricing = () => {
 
             const data = await postRequest<{ message: string, token: string; user: User }>(
                 '/register',
-                { email, password }
+                { email, password,  projectName }
             );
 
             if (data.message) {
-
-
                 // User may already exist, so try logging them in
                 const loginData = await postRequest<{ token: string; user: { email: string, is_paid: boolean } }>(
                     '/login',
-                    { email, password }
+                    { email, password ,  projectName }
                 );
 
                 if (loginData.user.is_paid) {

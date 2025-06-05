@@ -149,6 +149,10 @@ const SitePlanGenerator: React.FC = () => {
   const pointsRef = useRef<IPoint[]>([]);
   const linesRef = useRef<Line[]>([]);
   const imageOpacityRef = useRef<number>(50);
+  const propertyOpacityRef = useRef<number>(50);
+
+
+
 
 
 
@@ -291,6 +295,7 @@ const SitePlanGenerator: React.FC = () => {
     isCreateEverythingRef,
     formData,
 
+    propertyOpacityRef,
     imageOpacityRef,
     propertyRef,
     approachRef,
@@ -560,15 +565,27 @@ const SitePlanGenerator: React.FC = () => {
               value={imageOpacityRef.current}
               onChange={(value) => imageOpacityRef.current = value}
             />
-
           </div>
-
           : <></>}
 
 
+        
 
         {propertyRef.current ?
           <div style={{ marginTop: '10px' }}>
+
+
+          <div className="site-plan-generator__slider">
+            <Slider
+              id="propertyOpacity"
+              label="Propery Opacity"
+              min={0}
+              max={100}
+              value={propertyOpacityRef.current}
+              onChange={(value) => propertyOpacityRef.current = value}
+            />
+          </div>
+
 
             <div className="site-plan-generator__input-group">
               <label>Enable Angles</label>

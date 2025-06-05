@@ -67,6 +67,7 @@ interface SketchForSiteplanParams {
   // setOutboundMetrics: React.Dispatch<React.SetStateAction<SiteMetrics>>;
   formData: FormDataInputs;
   imageOpacityRef: React.MutableRefObject<number>;
+  propertyOpacityRef: React.MutableRefObject<number>;
   propertyRef: React.MutableRefObject<Property | null>;
   approachRef: React.MutableRefObject<Approach | null>;
   parkingRef: React.MutableRefObject<Parking | null>;
@@ -97,6 +98,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     // setOutboundMetrics,
     formData,
     imageOpacityRef,
+    propertyOpacityRef,
     propertyRef,
     approachRef,
     parkingRef,
@@ -119,7 +121,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   // if (bikeParkingRef.current) {
 
   // }
-  let dialog: ConfirmDialog;
+  // let dialog: ConfirmDialog;
 
   let buildingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
   let parkingDragMode: string | null = null; // null, 'center', 'edge', 'corner'
@@ -344,7 +346,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       if (property) {
         property.drawProperty();
-        property.drawSetbackPolygon();
+        property.drawSetbackPolygon(propertyOpacityRef.current);
         property.drawLineLengths();
 
 
@@ -818,7 +820,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       drawArea(p, isPolygonClosedRef.current, pointsRef, scaleRef.current || defaultScale);
       drawInstructionsToScreen(p, pointsRef, img, isPolygonClosed, stepSelectorRefs.approach, stepSelectorRefs.scale, stepSelectorRefs.setback);
-      dialog?.draw(p);
+      
+      // dialog?.draw(p);
 
       p.pop();
 
@@ -855,10 +858,10 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     p.mousePressed = () => {
 
 
-      if (dialog?.isVisible) {
-        dialog.mousePressed(p);
-        return; // Prevents further event propagation when dialog is open
-      }
+      // if (dialog?.isVisible) {
+      //   dialog.mousePressed(p);
+      //   return; // Prevents further event propagation when dialog is open
+      // }
 
       prevMouseX = p.mouseX
       prevMouseY = p.mouseY
@@ -1316,9 +1319,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     };
 
     p.mouseDragged = () => {
-      if (dialog?.isVisible) {
-        return; // Prevents further event propagation when dialog is open
-      }
+      // if (dialog?.isVisible) {
+      //   return; // Prevents further event propagation when dialog is open
+      // }
 
       const newX = p.mouseX
       const newY = p.mouseY

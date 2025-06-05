@@ -7,9 +7,9 @@
 
 [X] Construction Budget generator
 [ ] Models for real estate
-    [ ] Waterfall Analysis for investor distributions
+    [X] Waterfall Analysis for investor distributions
     [ ] 5 year distribution chart
-    [ ] Cash flow Analysis
+    [X] Cash flow Analysis
     [ ] Rent roll analysis and 
     [ ] Market rent determination
     [ ] Lease Expiry Schedule
