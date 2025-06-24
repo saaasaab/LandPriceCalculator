@@ -49,8 +49,6 @@ export function AppRouter() {
 
 
 
-
-
   // const [isPaid, setIsPaid] = useState(false);
   const [freeAccessExpired, setFreeAccessExpired] = useState(false);
 
@@ -103,7 +101,6 @@ export function AppRouter() {
               <Route path={routes.MULTIFAMILY_ANALYSIS} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTIFAMILY_ANALYSIS} />} />
               <Route path={routes.INDUSTRIAL_PROFORMA} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.INDUSTRIAL_PROFORMA} />} />
 
-
               <Route path={routes.MULTI_FAMILY_PRICE_PER_DOOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTI_FAMILY_PRICE_PER_DOOR} />} />
               <Route path={routes.INDUSTRIAL_PRICE_PER_SQFT} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.INDUSTRIAL_PRICE_PER_SQFT} />} />
 
@@ -113,9 +110,6 @@ export function AppRouter() {
               <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL_GENERATOR} />} />
               <Route path={routes.HOUSE_FLIPPING_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HOUSE_FLIPPING_CALCULATOR} />} />
               <Route path={routes.CONSTRUCTION_LOAN_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_LOAN_CALCULATOR} />} />
-
-
-
 
               <Route path={routes.HOW_TO_LAND_FOR_MULTIFAMILY} element={<BlogPost />} />
 
