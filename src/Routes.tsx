@@ -29,13 +29,14 @@ import React, { Suspense } from 'react';
 const SitePlanDesigner = React.lazy(() => import('./pages/SiteplanDesigner/SitePlanDesigner'));
 
 
+
 import './App.css'
 import { PopupProvider } from './context/PopupContext';
 
 export function AppRouter() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-
+ 
   const handleWindowSizeChange = () => {
     setIsMobile(window.innerWidth <= 768);
   }
