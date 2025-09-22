@@ -30,7 +30,7 @@ const EmailPopup: React.FC<EmailPopupProps> = ({ onClose }) => {
         <div className="popup-content">
           <h2>Unlock Premium Access</h2>
           <h3>14-Day Free Trial</h3>
-          <p>Then get <span className="highlight">lifetime access</span> for just <span className="price">$200</span></p>
+          <p>Then get <span className="highlight">lifetime access</span> for just <span className="price">$20</span></p>
           
           {/* <form onSubmit={handleSubmit}>
             <input
