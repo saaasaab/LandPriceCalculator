@@ -32,6 +32,12 @@ const EmailPopup: React.FC<EmailPopupProps> = ({ onClose }) => {
           <h3>14-Day Free Trial</h3>
           <p>Then get <span className="highlight">lifetime access</span> for just <span className="price">$20</span></p>
           
+          <div className="cta-section">
+            <button className="signup-button">
+              Start Free Trial
+            </button>
+          </div>
+          
           {/* <form onSubmit={handleSubmit}>
             <input
               type="email"
