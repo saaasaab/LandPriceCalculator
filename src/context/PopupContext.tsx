@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import EmailPopup from '../components/EmailPopup/EmailPopup';
+import { useAuth } from './AuthContext';
 
 interface PopupContextType {
   showPopup: boolean;
@@ -12,11 +13,20 @@ const PopupContext = createContext<PopupContextType | undefined>(undefined);
 export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [showPopup, setShowPopup] = useState(false);
   const popupTimerRef = useRef<number>();
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (user?.is_paid) {
+      if (popupTimerRef.current) {
+        clearTimeout(popupTimerRef.current);
+        popupTimerRef.current = undefined;
+      }
+      setShowPopup(false);
+      return;
+    }
+
     const hasSeenPopup = localStorage.getItem('popupShown');
-    
-    console.log(hasSeenPopup);
+
     if (!hasSeenPopup) {
       popupTimerRef.current = window.setTimeout(() => {
         setShowPopup(true);
@@ -28,7 +38,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         clearTimeout(popupTimerRef.current);
       }
     };
-  }, []);
+  }, [user?.is_paid]);
 
   const handleClosePopup = () => {
     setShowPopup(false);
