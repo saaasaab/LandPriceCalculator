@@ -269,18 +269,16 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
 
-        {!isMobile && (
-          <div ref={mainContentRef} className="main-content">
-            <div ref={calculatorViewRef} className="calculator-view">
-              {activeCalculator && (
-                <CurrentComponent 
-                  page={activeCalculator.pageType} 
-                  isMobile={false}
-                />
-              )}
-            </div>
+        <div ref={mainContentRef} className="main-content">
+          <div ref={calculatorViewRef} className="calculator-view">
+            {activeCalculator && (
+              <CurrentComponent
+                page={activeCalculator.pageType}
+                isMobile={isMobile}
+              />
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

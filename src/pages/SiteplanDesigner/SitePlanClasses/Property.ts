@@ -21,8 +21,7 @@ export class Property {
   public areaOfProperty: number;
   public zoom: number;
   public offsetX: number;
-  public offsetY: number
-  public frameCount = 0;
+  public offsetY: number;
 
   // INPUT CONTSTRAINTS
   public drivewayWidth: number;
@@ -317,17 +316,13 @@ export class Property {
 
   tempObject() {
     this.p.push();
-
     this.p.rectMode(this.p.CENTER);
-    this.p.strokeWeight(2)
-    const speed = 4
-    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);
-    this.frameCount++;
+    this.p.noFill();
+    this.p.stroke(30, 60, 200, 220);
+    this.p.strokeWeight(2);
+    const preview = 52;
+    this.p.rect(this.p.mouseX, this.p.mouseY, preview, preview, 4);
     this.p.pop();
-
-    // this.p.frameRate();
-
-    if (this.frameCount * speed > 50) this.frameCount = 0
   }
 
 

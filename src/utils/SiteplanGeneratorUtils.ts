@@ -339,6 +339,59 @@ export function polyPoint(vertices: p5.Vector[], px: number, py: number) {
   return collision;
 }
 
+export function closestPointOnSegment(
+  px: number,
+  py: number,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+): { x: number; y: number; t: number; dist: number } {
+  const abx = bx - ax;
+  const aby = by - ay;
+  const len2 = abx * abx + aby * aby;
+  let t = len2 === 0 ? 0 : ((px - ax) * abx + (py - ay) * aby) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const x = ax + t * abx;
+  const y = ay + t * aby;
+  const dist = Math.hypot(px - x, py - y);
+  return { x, y, t, dist };
+}
+
+/** Inserts a vertex on the closest edge (in world coords) if within max distance. Clears entrances. */
+export function tryInsertVertexOnBuildingEdge(
+  p: p5,
+  building: Building,
+  worldX: number,
+  worldY: number,
+  edgeHitMaxDist: number,
+  endMargin = 0.08,
+): boolean {
+  const poly = building.freeformPolygonCorners;
+  if (!poly || poly.length < 3 || !building.polygonNodeEditMode) return false;
+  let bestDist = Infinity;
+  let bestEdge = -1;
+  let insX = 0;
+  let insY = 0;
+  const n = poly.length;
+  for (let i = 0; i < n; i++) {
+    const p1 = poly[i];
+    const p2 = poly[(i + 1) % n];
+    const cp = closestPointOnSegment(worldX, worldY, p1.x, p1.y, p2.x, p2.y);
+    if (cp.dist <= bestDist && cp.t > endMargin && cp.t < 1 - endMargin) {
+      bestDist = cp.dist;
+      bestEdge = i;
+      insX = cp.x;
+      insY = cp.y;
+    }
+  }
+  if (bestEdge < 0 || bestDist > edgeHitMaxDist) return false;
+  poly.splice(bestEdge + 1, 0, p.createVector(insX, insY));
+  building.entrances = [];
+  building.update();
+  return true;
+}
+
 export function drawPerpendicularBezier(
   p: p5,
   point1: p5.Vector,
@@ -1096,23 +1149,21 @@ export function drawInstructionsToScreen(
   const points = pointsRef.current;
 
 
-  if ((points.length === 0 && !img) || !isPolygonClosed) {
-    p.push();
+  if (!isPolygonClosed && points.length === 0 && !img) {
     p.textSize(30);
-    p.fill(50); // Text color
+    p.fill(50);
     p.textAlign(p.CENTER, p.CENTER);
     p.text("Click here to start creating your siteplan", p.width / 2, p.height / 2);
-    p.pop()
-    return
+    p.pop();
+    return;
   }
-  else if (points.length === 0 && img) {
-    p.push();
+  if (!isPolygonClosed && points.length === 0 && img) {
     p.textSize(16);
-    p.fill(50); // Text color
+    p.fill(50);
     p.textAlign(p.RIGHT, p.BOTTOM);
     p.text("Click the property corners to start creating your siteplan", p.width - 10, p.height - 10);
-    p.pop()
-    return
+    p.pop();
+    return;
   }
 
   if (!isPolygonClosed && points.length === 1) {
@@ -1170,10 +1221,13 @@ export function drawInstructionsToScreen(
 
 }
 
-export function drawProtoPropertyLines(p: p5,
+export function drawProtoPropertyLines(
+  p: p5,
   pointsRef: React.MutableRefObject<IPoint[]>,
   linesRef: React.MutableRefObject<Line[]>,
-  scale: number
+  scale: number,
+  previewMouseDrawingX: number,
+  previewMouseDrawingY: number,
 ) {
   p.push();
   const points = pointsRef.current;
@@ -1218,15 +1272,16 @@ export function drawProtoPropertyLines(p: p5,
   if (points.length > 0) {
     p.stroke(0, 20, 220);
     p.strokeWeight(2);
-    p.line(lastPoint.x, lastPoint.y, p.mouseX, p.mouseY);
+    p.line(lastPoint.x, lastPoint.y, previewMouseDrawingX, previewMouseDrawingY);
 
 
     p.noStroke();
 
     p.fill(20, 30, 220);
-    const midX = (lastPoint.x + p.mouseX) / 2;
-    const midY = (lastPoint.y + p.mouseY) / 2;
-    const length = Math.hypot(lastPoint.x - p.mouseX, lastPoint.y - p.mouseY) * (scale);
+    const midX = (lastPoint.x + previewMouseDrawingX) / 2;
+    const midY = (lastPoint.y + previewMouseDrawingY) / 2;
+    const length =
+      Math.hypot(lastPoint.x - previewMouseDrawingX, lastPoint.y - previewMouseDrawingY) * scale;
 
     // if is finished, make the text larger.
     p.textSize(14);
@@ -1240,7 +1295,7 @@ export function drawProtoPropertyLines(p: p5,
     p.ellipse(point.x, point.y, 10, 10);
 
   }
-  p.ellipse(p.mouseX, p.mouseY, 10, 10);
+  p.ellipse(previewMouseDrawingX, previewMouseDrawingY, 10, 10);
 
   p.pop();
 
@@ -1281,7 +1336,7 @@ export function drawProtoPropertyLines(p: p5,
 
     const p1 = p.createVector(secondLastPoint.x, secondLastPoint.y);
     const p2 = p.createVector(lastPoint.x, lastPoint.y);
-    const p3 = p.createVector(p.mouseX, p.mouseY);
+    const p3 = p.createVector(previewMouseDrawingX, previewMouseDrawingY);
 
     const _angle1 = calculateAngle(p2, p1);
     const _angle2 = calculateAngle(p2, p3);
@@ -1325,6 +1380,39 @@ export function calculateLineIndexOfClosestLine(
   return lineIndex;
 }
 
+/** Nearest parcel edge by perpendicular distance; returns `line.index` if within `maxDistPx`, else -1. */
+export function closestBoundaryLineIndexWithinDistance(
+  points: IPoint[],
+  lines: Line[],
+  mx: number,
+  my: number,
+  maxDistPx: number,
+): number {
+  let bestLineIdx = -1;
+  let bestDistance = Infinity;
+
+  for (const line of lines) {
+    const a = points[line.start];
+    const b = points[line.end];
+    if (!a || !b) continue;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq < 1e-12) continue;
+    let t = ((mx - a.x) * dx + (my - a.y) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const cx = a.x + t * dx;
+    const cy = a.y + t * dy;
+    const d = Math.hypot(mx - cx, my - cy);
+    if (d < bestDistance) {
+      bestDistance = d;
+      bestLineIdx = line.index;
+    }
+  }
+
+  return bestDistance <= maxDistPx ? bestLineIdx : -1;
+}
+
 export const handleBuildingDrag = (
   p: p5,
   property: Property, approach: Approach | null, parking: Parking | null, building: Building | null, garbage: Garbage | null,
@@ -1332,7 +1420,9 @@ export const handleBuildingDrag = (
   resizeCorner: number | null,
   resizeEdge: number | null,
   resizingbuildingsRef: React.MutableRefObject<boolean>,
-  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
+  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>,
+  /** Footprint-space coordinates matching the sketch pan/zoom transform (same as polygon vertices). */
+  worldMouse: { x: number; y: number },
 ) => {
   if (!property || !approach || !parking || !building || !garbage) return;
   // let visibilityGraphSolver: VisibilityGraph;
@@ -1342,8 +1432,8 @@ export const handleBuildingDrag = (
 
   const minBuildingWidth = 5 / property.scale;
 
-  const newX = p.mouseX;
-  const newY = p.mouseY;
+  const newX = worldMouse.x;
+  const newY = worldMouse.y;
   const _center = p.createVector(building.center.x, building.center.y);
   const _height = building.height;
   const _width = building.width;
@@ -1367,16 +1457,42 @@ export const handleBuildingDrag = (
   // };
 
 
+  if (buildingDragMode === "polygonVertex" && resizeCorner !== null && building.freeformPolygonCorners !== null) {
+    p.cursor('crosshair');
+    resizingbuildingsRef.current = true;
+    const poly = building.freeformPolygonCorners;
+    if (resizeCorner >= 0 && resizeCorner < poly.length) {
+      const snapshot = poly.map((v) => ({ x: v.x, y: v.y }));
+      poly[resizeCorner].x = newX;
+      poly[resizeCorner].y = newY;
+      building.update();
+      building.updateBuildingActualArea();
+      visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
+      const pointsInBoundary = building.pointIsInPolygon(property.cornerOffsetsFromSetbacks);
+      if (!pointsInBoundary) {
+        snapshot.forEach((s, idx) => {
+          poly[idx].x = s.x;
+          poly[idx].y = s.y;
+        });
+        building.update();
+        building.updateBuildingActualArea();
+        visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
+      } else {
+        building.updateEntrances();
+      }
+    }
+    return;
+  }
 
-  if (buildingDragMode === "corner" && resizeCorner !== null) {
+  if (buildingDragMode === "corner" && resizeCorner !== null && !building.freeformPolygonCorners) {
     p.cursor('nesw-resize');
 
     resizingbuildingsRef.current = true
     // Grab the corner being dragged
 
     // Calculate the opposite corner index
-    const oppositeIndex = (resizeCorner + 2) % 4; // Opposite corner in a rectangle
+    const oppositeIndex = (resizeCorner + 2) % building.sitePlanElementCorners.length;
     const oppositeCorner = building.sitePlanElementCorners[oppositeIndex];
 
     // Translate corners to the building's local coordinate system
@@ -1421,7 +1537,7 @@ export const handleBuildingDrag = (
 
   }
 
-  else if (buildingDragMode === "edge" && resizeEdge !== null) {
+  else if (buildingDragMode === "edge" && resizeEdge !== null && !building.freeformPolygonCorners) {
     p.cursor('ew-resize'); // Adjust cursor based on edge direction (horizontal/vertical)
 
     resizingbuildingsRef.current = true;
@@ -1490,7 +1606,7 @@ export const handleBuildingDrag = (
       const a = p.atan2(mouse.y - building.center.y, mouse.x - building.center.x) -
         p.atan2(handle.y - building.center.y, handle.x - building.center.x);
 
-      building.updateAngle(building.angle + a);
+      building.updateAngle(normalizeAngle(building.angle + a));
       building.updateBuildingActualArea();
       visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
 
@@ -1789,7 +1905,10 @@ export const handleParkingDrag = (
 
 
     // parking.parkingOutline.slice(3, -3)
-    const allPointsInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, parking.sitePlanElementCorners);
+    const allPointsInBoundary = allPointsInPolygon(
+      property.propertyCorners,
+      parking.sitePlanElementCorners,
+    );
     // const garbageInBoundary = allPointsInPolygon(property.cornerOffsetsFromSetbacks, garbage.sitePlanElementCorners);
     // if (building) {
     //   visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, building, parking, property, garbage, approach);
@@ -2024,29 +2143,48 @@ export function drawNeonShape(
 
 
 
-export function getStallLengths(parkingStalls: {
-  left: ParkingStall[];
-  right: ParkingStall[];
-}){
+export type StallRowLengthOptions = {
+  /** Same as "Stalls per group" / code landscape island: N stalls then a planter gap. */
+  stallsPerGroup?: number;
+  /** Planter strip width in feet between groups (default 5). */
+  planterGapFeet?: number;
+};
+
+export function getStallLengths(
+  parkingStalls: {
+    left: ParkingStall[];
+    right: ParkingStall[];
+  },
+  options?: StallRowLengthOptions,
+): number {
   let largestSide = 0;
 
   for (const [_key, value] of Object.entries(parkingStalls)) {
-   const length = sumWidthBetweenClosedStalls(value);
+    const length = sumWidthBetweenClosedStalls(value, options);
     if (length > largestSide) largestSide = length;
   }
   return largestSide;
 }
 
+export function sumWidthBetweenClosedStalls(
+  stalls: ParkingStall[],
+  options?: StallRowLengthOptions,
+): number {
+  const revIdx = [...stalls].reverse().findIndex((stall) => !stall.isEmptySlot);
+  if (revIdx === -1) return 0;
 
+  const lastClosedIndex = stalls.length - 1 - revIdx;
 
-export function sumWidthBetweenClosedStalls(stalls: ParkingStall[]): number {
-  // Find indices of first and last closed stalls
-  const lastClosedIndex = stalls.length - 1 - [...stalls].reverse().findIndex(stall => !stall.isEmptySlot);
+  let sumFeet = stalls
+    .slice(0, lastClosedIndex + 1)
+    .reduce((sum, stall) => sum + getStallHeight(stall.parkingStallType), 0);
 
-  // If no closed stalls found, return 0
-  if (lastClosedIndex === -1) return 0;
+  const group = options?.stallsPerGroup ?? 0;
+  if (group > 0 && Number.isFinite(group)) {
+    const gapFeet = options?.planterGapFeet ?? 5;
+    sumFeet += Math.floor(lastClosedIndex / group) * gapFeet;
+  }
 
-  // Sum the width of stalls between and including first and last closed stalls
-  return stalls.slice(0, lastClosedIndex + 1).reduce((sum, stall) => sum + getStallHeight(stall.parkingStallType), 0);
+  return sumFeet;
 }
 

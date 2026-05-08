@@ -6,7 +6,6 @@ export class BuildingsGroup {
   public isInitialized = false;
   public buildings: Building[];
   public p: p5;
-  public frameCount = 0;
   constructor(
     p: p5,
   ) {
@@ -44,15 +43,17 @@ export class BuildingsGroup {
     this.p.push();
     this.p.rectMode(this.p.CENTER);
     this.p.stroke(0);
-    this.p.strokeWeight(2)
-    const speed = 4
-    this.p.rect(this.p.mouseX, this.p.mouseY, this.frameCount * speed, this.frameCount * speed, 4);
-    this.frameCount++;
+    this.p.strokeWeight(2);
+    /** One full breathe (small → large → small) every ~3s — avoids frame-based strobing at 60fps. */
+    const periodMs = 3000;
+    const minPx = 10;
+    const maxPx = 52;
+    const t = (this.p.millis() % periodMs) / periodMs;
+    const wave = (Math.sin(t * Math.PI * 2) + 1) / 2;
+    const side = minPx + wave * (maxPx - minPx);
+    this.p.rect(this.p.mouseX, this.p.mouseY, side, side, 4);
 
     this.p.pop();
-    // this.p.frameRate();
-
-    if (this.frameCount * speed > 50) this.frameCount = 0
   }
 
 }

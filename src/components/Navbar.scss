@@ -36,6 +36,14 @@
     }
   }
 
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    min-width: 0;
+  }
+
   .navbar-links {
     list-style: none;
     display: flex;
@@ -59,7 +67,17 @@
         transition: color 0.3s ease;
         text-decoration: none;
         .calculator-icon {
-          font-size: 24px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          color: currentColor;
+
+          svg {
+            display: block;
+            width: 1.375rem;
+            height: 1.375rem;
+          }
         }
       }
       &:hover {
@@ -114,6 +132,73 @@
       }
     }
   }
+
+  .navbar-auth {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.22);
+
+    .navbar-auth__link.icon-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      line-height: 1;
+      text-decoration: none;
+      color: #fff;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.55);
+        color: #e0f7fa;
+      }
+
+      .calculator-icon svg {
+        width: 1.125rem;
+        height: 1.125rem;
+      }
+    }
+
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 113, 113, 0.65);
+      background: rgba(220, 53, 69, 0.25);
+      color: #fff;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+
+      svg {
+        display: block;
+        flex-shrink: 0;
+      }
+
+      &:hover {
+        background: rgba(220, 53, 69, 0.45);
+        border-color: rgba(252, 165, 165, 0.85);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -143,14 +228,33 @@
       font-size: 1.5rem;
     }
 
-    .navbar-links {
+    .navbar-menu {
       display: none;
       flex-direction: column;
-      gap: 30px;
+      align-items: stretch;
+      width: 100%;
+      flex: none;
 
       &.is-open {
         display: flex;
       }
+
+      .navbar-auth {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        justify-content: center;
+      }
+    }
+
+    .navbar-links {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      width: 100%;
 
       li.dropdown {
         width: 100%;
@@ -194,43 +298,5 @@
     &.is-open-navbar {
       height: 100vh;
     }
-  }
-}
-
-.navbar-auth {
-  a.login-btn {
-    cursor: pointer;
-    color: white;
-    text-decoration: none;
-
-    &:visited,
-    &:hover,
-    &:active,
-    &:focus {
-      text-decoration: none;
-      color: white;
-    }
-  }
-}
-
-.logout-btn {
-  background-color: #dc3545; // Red color for logout
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-
-  &:hover {
-    background-color: #c82333; // Darker red on hover
-    transform: scale(1.05);
-  }
-
-  &:active {
-    background-color: #a71d2a; // Even darker on click
-    transform: scale(0.95);
   }
 }

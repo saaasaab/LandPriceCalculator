@@ -196,7 +196,10 @@
     }
 
     @media (max-width: 768px) {
-      display: none;
+      height: auto;
+      min-height: 50vh;
+      border-radius: 0;
+      box-shadow: none;
     }
   }
 

@@ -11,7 +11,8 @@ import { normalStallHeight, Point, SitePlanObjects } from "../sketchForSiteplan"
 import { Edge } from "./Edge";
 import { Building } from "./Building";
 
-
+/** Building code: minimum landscape / planter gap (feet) between contiguous stall runs. */
+const PLANTER_SEPARATION_FT = 5;
 
 export class Parking extends SitePlanElement {
 
@@ -42,6 +43,8 @@ export class Parking extends SitePlanElement {
   public parkingSide: 'left' | 'right';
   public showDrivewayControlPoints: boolean;
 
+  /** Last "stalls per group" value used when laying out stall rows (rebuild when `landscapeIsland` changes). */
+  private _layoutStallsPerGroupApplied = Number.NaN;
 
   // Constants for stall types
   public STALL_TYPES = {
@@ -89,7 +92,58 @@ export class Parking extends SitePlanElement {
     this.showDrivewayControlPoints = initialFormData.showDrivewayControlPoints;
     this.offStreetParkingRequired = initialFormData.offStreetParkingRequired;
 
+    this._layoutStallsPerGroupApplied = Number(this.landscapeIsland) || 0;
+  }
 
+  /** True before placing stall index `rowIndex` (0-based along the row) when a planter gap is required. */
+  private planterGapBeforeStallIndex(rowIndex: number): boolean {
+    const group = Number(this.landscapeIsland);
+    if (!Number.isFinite(group) || group <= 0 || rowIndex <= 0) return false;
+    return rowIndex % group === 0;
+  }
+
+  /**
+   * Corner 0 of the next stall: previous stall corner 3 when adjacent, plus 5′ along-row when a planter
+   * gap is needed. Advance direction is corner3 progression along the aisle (never stall width corner0→corner1).
+   */
+  private nextStallPoint0AlongRow(side: 'left' | 'right', nextStallRowIndex: number): p5.Vector {
+    const stalls = this.parkingStalls[side];
+    const prev = stalls[nextStallRowIndex - 1];
+    const c3 = prev.stallCorners[3];
+    if (!this.planterGapBeforeStallIndex(nextStallRowIndex)) {
+      return this.p.createVector(c3.x, c3.y);
+    }
+    let ux: number;
+    let uy: number;
+    if (nextStallRowIndex >= 2) {
+      const prevPrev = stalls[nextStallRowIndex - 2];
+      const vx = c3.x - prevPrev.stallCorners[3].x;
+      const vy = c3.y - prevPrev.stallCorners[3].y;
+      const len = Math.hypot(vx, vy);
+      if (len > 1e-8) {
+        ux = vx / len;
+        uy = vy / len;
+      } else {
+        ux = uy = 0;
+      }
+    } else {
+      ux = uy = 0;
+    }
+    if (ux === 0 && uy === 0 && this.entranceEdge) {
+      const ee = this.entranceEdge;
+      const ex = ee.point2.x - ee.point1.x;
+      const ey = ee.point2.y - ee.point1.y;
+      const el = Math.hypot(ex, ey);
+      if (el > 1e-8) {
+        ux = ex / el;
+        uy = ey / el;
+      }
+    }
+    if (ux === 0 && uy === 0) {
+      return this.p.createVector(c3.x, c3.y);
+    }
+    const gap = PLANTER_SEPARATION_FT / this.scale;
+    return this.p.createVector(c3.x + ux * gap, c3.y + uy * gap);
   }
 
   initializeParking(property: Property, garbage: Garbage | null, approach: Approach) {
@@ -120,8 +174,10 @@ export class Parking extends SitePlanElement {
     const stallHeight = getStallHeight(type)
 
 
-    if (this.parkingStallsNumber === 0) return
-
+    if (this.parkingStallsNumber === 0) {
+      this._layoutStallsPerGroupApplied = Number(this.landscapeIsland) || 0;
+      return;
+    }
 
     // NEED TO MANUALLY CREATE THE FIRST ONE
     // Calculate the first row's parking spots;
@@ -156,7 +212,7 @@ export class Parking extends SitePlanElement {
     for (let i = 1; i < this.parkingStallsNumber; i++) {
 
       // LeftSide
-      const point0 = this.parkingStalls.left[i - 1].stallCorners[3];
+      const point0 = this.nextStallPoint0AlongRow('left', i);
 
       const point3 = this.entranceEdge.createPerpendicularPointAtDistance(this.p, point0, -stallHeight / this.scale)
       const edge3To0 = new Edge(this.p, point3, point0, false, 0, 0)
@@ -172,7 +228,7 @@ export class Parking extends SitePlanElement {
 
 
       // RightSide
-      const pointRight0 = this.parkingStalls.right[i - 1].stallCorners[3];
+      const pointRight0 = this.nextStallPoint0AlongRow('right', i);
       const pointRight3 = this.entranceEdge.createPerpendicularPointAtDistance(this.p, pointRight0, -stallHeight / this.scale)
       const edge3To0Right = new Edge(this.p, pointRight3, pointRight0, false, 0, 0);
       const pointRight1 = edge3To0Right.createPerpendicularPointAtDistance(this.p, pointRight0, 17 / this.scale)
@@ -186,10 +242,29 @@ export class Parking extends SitePlanElement {
       this.parkingStalls.right.push(newParkingStallRight);
     }
 
+    const extraPlanterPx =
+      PLANTER_SEPARATION_FT / this.scale *
+      Math.max(0, this.countPlanterSeparatorsAcrossRow());
+
     const maxParkingStalls = Math.max(this.parkingStalls.left.length, this.parkingStalls.right.length);
 
     const garbageHeight = 8 / this.scale / 2;
-    this.updateheight(maxParkingStalls * normalStallHeight / this.scale + garbageHeight);
+    this.updateheight(
+      maxParkingStalls * normalStallHeight / this.scale + garbageHeight + extraPlanterPx,
+    );
+
+    const g = Number(this.landscapeIsland) || 0;
+    if (Number.isFinite(g)) {
+      this._layoutStallsPerGroupApplied = g;
+    }
+  }
+
+  /** How many planter gaps appear along each side row (given current stall count and group size). */
+  private countPlanterSeparatorsAcrossRow(): number {
+    const group = Number(this.landscapeIsland);
+    const n = this.parkingStallsNumber;
+    if (!Number.isFinite(group) || group <= 0 || n <= group) return 0;
+    return Math.floor((n - 1) / group);
   }
 
 
@@ -207,7 +282,10 @@ export class Parking extends SitePlanElement {
       const height = getStallHeight(type)
 
       // Side
-      const point0 = i === 0 ? this.parkingStalls[side][i].stallCorners[0] : this.parkingStalls[side][i - 1].stallCorners[3];
+      const point0 =
+        i === 0
+          ? this.parkingStalls[side][i].stallCorners[0]
+          : this.nextStallPoint0AlongRow(side, i);
       const point3 = this.entranceEdge.createPerpendicularPointAtDistance(this.p, point0, -height / this.scale)
       const edge3To0 = new Edge(this.p, point3, point0, false, 0, 0)
       const point1 = edge3To0.createPerpendicularPointAtDistance(this.p, point0, 17 * sign / this.scale)
@@ -241,7 +319,7 @@ export class Parking extends SitePlanElement {
   }
 
   statusAssignmentHelper(stall: ParkingStall, property: Property, buildings: Building[] | null | undefined) {
-    const allInProperty = this.allPointsInPolygon(property.cornerOffsetsFromSetbacks, stall.stallCorners);
+    const allInProperty = this.allPointsInPolygon(property.propertyCorners, stall.stallCorners);
 
     const allOutOfBuildings1 = buildings?.map(building => {
       const allOutOfBuilding = allPointsOutOfPolygon(building.sitePlanElementCorners, stall.stallCorners);
@@ -347,6 +425,8 @@ export class Parking extends SitePlanElement {
       this.assignStallTypes(i, 'right');
     }
 
+    this.updateParkingHeight();
+
     garbage?.updateCenterGarbage(this)
 
 
@@ -370,8 +450,46 @@ export class Parking extends SitePlanElement {
 
 
 
+  private drawPlanterSeparators() {
+    const g = Number(this.landscapeIsland);
+    if (!Number.isFinite(g) || g <= 0) return;
+
+    for (let i = 1; i < this.parkingStallsNumber; i++) {
+      if (!this.planterGapBeforeStallIndex(i)) continue;
+
+      const leftPrev = this.parkingStalls.left[i - 1];
+      const leftCurr = this.parkingStalls.left[i];
+      const rightPrev = this.parkingStalls.right[i - 1];
+      const rightCurr = this.parkingStalls.right[i];
+
+      /** Parallelogram between bays: alley-side corners 3–0 along row, opposite edge 2–1 (not 3–3, which folds to a triangle). */
+      const drawStrip = (prev: ParkingStall, curr: ParkingStall) => {
+        this.p.push();
+        this.p.fill(34, 139, 34, 72);
+        this.p.stroke(22, 100, 22, 180);
+        this.p.strokeWeight(1);
+        this.p.beginShape();
+        this.p.vertex(prev.stallCorners[3].x, prev.stallCorners[3].y);
+        this.p.vertex(curr.stallCorners[0].x, curr.stallCorners[0].y);
+        this.p.vertex(curr.stallCorners[1].x, curr.stallCorners[1].y);
+        this.p.vertex(prev.stallCorners[2].x, prev.stallCorners[2].y);
+        this.p.endShape(this.p.CLOSE);
+        this.p.pop();
+      };
+
+      // Match stall visibility: out-of-lot slots stay in the array for layout but are empty — do not draw planters in the phantom tail.
+      if (!leftPrev.isEmptySlot && !leftCurr.isEmptySlot) {
+        drawStrip(leftPrev, leftCurr);
+      }
+      if (!rightPrev.isEmptySlot && !rightCurr.isEmptySlot) {
+        drawStrip(rightPrev, rightCurr);
+      }
+    }
+  }
+
   drawParkingStalls() {
     this.p.push();
+    this.drawPlanterSeparators();
     this.parkingStalls.right.forEach((stall) => {
       if (!stall.isEmptySlot) {
         // this.p.text(i, stall.center.x, stall.center.y)
@@ -392,23 +510,40 @@ export class Parking extends SitePlanElement {
 
 
   updateParkingHeight() {
-    // Take a snapshot to revert
-    const maxStallheight = getStallLengths(this.parkingStalls) / this.scale;
+    const maxStallheight =
+      getStallLengths(this.parkingStalls, {
+        stallsPerGroup: Number(this.landscapeIsland) || 0,
+        planterGapFeet: PLANTER_SEPARATION_FT,
+      }) / this.scale;
     const garbageHeight = 5 / this.scale / 4;
     this.updateheight(maxStallheight + garbageHeight);
-
   }
 
-  updateParkingGlobals(property: Property, parkingNum: number, garbage: Garbage, buildings: Building[] | null | undefined, approach: Approach) {
-    //  USED WHEN UPDATING GLOBAL VARIABLES
-    if (this.parkingStallsNumber !== parkingNum) {
+  updateParkingGlobals(
+    property: Property,
+    parkingNum: number,
+    handicapTarget: number,
+    compactTarget: number,
+    garbage: Garbage,
+    buildings: Building[] | null | undefined,
+    approach: Approach,
+  ) {
+    const g = Math.max(0, Number(this.landscapeIsland) || 0);
+    const rebuild =
+      this.parkingStallsNumber !== parkingNum ||
+      this._layoutStallsPerGroupApplied !== g ||
+      Number(this.handicappedParkingNumTarget) !== Number(handicapTarget) ||
+      Number(this.compactParkingCountTarget) !== Number(compactTarget);
 
-      this.parkingStallsNumber = parkingNum
+    this.handicappedParkingNumTarget = handicapTarget;
+    this.compactParkingCountTarget = compactTarget;
 
-      this.updateParkingLot(property, buildings, garbage, approach);
-      garbage.updateCenterGarbage(this);
+    if (!rebuild) return;
 
-    }
+    this._layoutStallsPerGroupApplied = g;
+    this.parkingStallsNumber = parkingNum;
+    this.updateParkingLot(property, buildings, garbage, approach);
+    garbage.updateCenterGarbage(this);
   }
 
 

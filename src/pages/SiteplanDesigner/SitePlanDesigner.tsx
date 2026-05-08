@@ -57,7 +57,7 @@ export interface Line {
 }
 
 import p5 from 'p5';
-import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, ChangeEvent } from 'react';
 
 import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Footprints, BuildingIcon, DoorOpen } from 'lucide-react'; //Box, Bike
 
@@ -81,6 +81,7 @@ import { VisibilityGraph } from '../VisibilityGraph';
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { EPageNames } from '../../utils/types';
+import { SITE_PLAN_CANVAS_HINTS, type SitePlanInteractionMode } from './sitePlanCanvasHints';
 
 const initialMetrics: SiteMetrics = {
   zoning: "C-M Commercial Manufacturing",
@@ -124,11 +125,13 @@ const initialMetrics: SiteMetrics = {
 
 const SitePlanGenerator: React.FC = () => {
   const [formData, setFormData] = useState<FormDataInputs>(initialFormData);
+  const formDataRef = useRef<FormDataInputs>(initialFormData);
+  formDataRef.current = formData;
   const [metrics, setMetrics] = useState<SiteMetrics>(initialMetrics);
   const [imageURL, setImageURL] = useState<string | null>(null);
-  const [mode, setMode] = useState<'adjust' | 'approach' | 'setback' | 'scale' | 'generate' | 'upload' | 'parking' | 'building' | 'bike' | 'entrances' | 'moving'>('upload'); // Interaction mode
+  const [mode, setMode] = useState<SitePlanInteractionMode>('upload');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [_isPolygonClosedState, setIsPolygonClosedState] = useState(false)
+  const [isParcelBoundaryClosed, setIsParcelBoundaryClosed] = useState(false);
 
   const [_offsetPoints, setOffsetPoints] = useState<p5.Vector[]>([])
   const [_inputValueForScale, setInputValueForScale] = useState<number | "">("");
@@ -151,7 +154,16 @@ const SitePlanGenerator: React.FC = () => {
   const imageOpacityRef = useRef<number>(50);
   const propertyOpacityRef = useRef<number>(50);
 
+  const [imageOverlayOpacity, setImageOverlayOpacity] = useState(50);
+  const [propertyOverlayOpacity, setPropertyOverlayOpacity] = useState(50);
 
+  useEffect(() => {
+    imageOpacityRef.current = imageOverlayOpacity;
+  }, [imageOverlayOpacity]);
+
+  useEffect(() => {
+    propertyOpacityRef.current = propertyOverlayOpacity;
+  }, [propertyOverlayOpacity]);
 
   const isUploadingImageRef = useRef<boolean>(true);
   const isUpdatingBoundaryPointsRef = useRef<boolean>(false);
@@ -164,9 +176,7 @@ const SitePlanGenerator: React.FC = () => {
   const isPlacingBuildingEntrancesRef = useRef<boolean>(false);
   const isGeneratingSidewalksRef = useRef<boolean>(false);
   const isMovingElementsRef = useRef<boolean>(false);
-
   const isCreateEverythingRef = useRef<boolean>(false);
-
 
   const stepSelectorRefs = {
     upload: isUploadingImageRef,
@@ -188,7 +198,34 @@ const SitePlanGenerator: React.FC = () => {
   const scaleRef = useRef<number | null>(null);
   const draggingPointIndexRef = useRef<number | null>(null);
   const selectedLineIndexRef = useRef<number | null>(null);
+  const reportSetbackHoverLineIndexRef = useRef<(lineIndex: number | null) => void>(() => {});
+  const [hoveredSetbackSnapLineIndex, setHoveredSetbackSnapLineIndex] = useState<number | null>(
+    null,
+  );
 
+  reportSetbackHoverLineIndexRef.current = (lineIndex: number | null) => {
+    setHoveredSetbackSnapLineIndex((prev) => (prev === lineIndex ? prev : lineIndex));
+  };
+
+  const [canvasFocusedScaleLineIndex, setCanvasFocusedScaleLineIndex] = useState<number | null>(
+    null,
+  );
+  const [canvasFocusedSetbackLineIndex, setCanvasFocusedSetbackLineIndex] = useState<number | null>(
+    null,
+  );
+
+  const reportCanvasScaleBoundaryRef = useRef<(lineIndex: number | null) => void>(() => {});
+  reportCanvasScaleBoundaryRef.current = (lineIndex: number | null) => {
+    setCanvasFocusedScaleLineIndex((prev) => (prev === lineIndex ? prev : lineIndex));
+  };
+
+  const reportCanvasSetbackActivatedLineRef = useRef<(lineIndex: number | null) => void>(() => {});
+  reportCanvasSetbackActivatedLineRef.current = (lineIndex: number | null) => {
+    setCanvasFocusedSetbackLineIndex((prev) => (prev === lineIndex ? prev : lineIndex));
+  };
+
+  const scaleLengthFloatingInputRef = useRef<HTMLInputElement>(null);
+  const setbackLengthFloatingInputRef = useRef<HTMLInputElement>(null);
 
   const propertyRef = useRef<Property | null>(null);
   const approachRef = useRef<Approach | null>(null);
@@ -212,45 +249,41 @@ const SitePlanGenerator: React.FC = () => {
       const garbage = garbageRef.current;
       const bikeParking = bikeParkingRef.current;
 
-      console.log("There be danger here")
-
-
-      const _metrics: SiteMetrics = {
-        ...metrics
-      }
-
-      // _metrics.actualBuildingArea = building?.buildingAreaActual || initialMetrics.actualBuildingArea;
-      _metrics.approachArea = approach?.area || initialMetrics.approachArea;
-      _metrics.bikeParkingArea = bikeParking?.area || initialMetrics.bikeParkingArea;
-      _metrics.buildingCoveragePercentage = property?.buildingCoveragePercentage || initialMetrics.buildingCoveragePercentage
-      _metrics.buildingCoveragePercentageAllowed = property?.buildingCoveragePercentageAllowed || initialMetrics.buildingCoveragePercentageAllowed
-      _metrics.drivewayArea = property?.drivewayArea || initialMetrics.drivewayArea;
-      _metrics.garbageArea = garbage?.area || initialMetrics.garbageArea;
-      _metrics.handicappedStallsCount = parking?.handicappedParkingNumTarget || initialMetrics.handicappedStallsCount;
-      _metrics.imperviousSurfaceAllowed = property?.imperviousSurfaceAllowed || initialMetrics.imperviousSurfaceAllowed;
-      _metrics.imperviousSurfaceArea = property?.imperviousSurfaceArea || initialMetrics.imperviousSurfaceArea;
-      _metrics.landscape = property?.landscapeArea || initialMetrics.landscape;
-      _metrics.landscapeRequiredPercent = property?.landscapeRequiredPercent || initialMetrics.landscapeRequiredPercent;
-      // _metrics.maximumHeight = building?.maximumHeight || initialMetrics.maximumHeight;
-      _metrics.offStreetParkingRequired = parking?.offStreetParkingRequired || initialMetrics.offStreetParkingRequired;
-      _metrics.parkingArea = parking?.parkingArea || initialMetrics.parkingArea;
-      _metrics.parkingPer1000Max = parking?.parkingPer1000Max || initialMetrics.parkingPer1000Max;
-      _metrics.parkingPer1000Min = parking?.parkingPer1000Min || initialMetrics.parkingPer1000Min;
-      _metrics.parkingStallsArea = parking?.parkingStallsArea || initialMetrics.parkingStallsArea;
-      _metrics.propertyArea = property?.areaOfProperty || initialMetrics.propertyArea;
-      _metrics.totalAreaDedicatedToSetbacks = property?.totalAreaDedicatedToSetbacks || initialMetrics.totalAreaDedicatedToSetbacks;
-      _metrics.totalSetbackPercentage = Math.round(_metrics.totalAreaDedicatedToSetbacks / (property?.areaOfProperty || 1) *100)
-      
-      _metrics.totalParkingStalls = parking?.parkingStallsNumber || initialMetrics.totalParkingStalls;
-      _metrics.zoning = property?.zoning || initialMetrics.zoning;
-
-
-
-      // _metrics.setbacks =  || initialMetrics.;
-      // _metrics.sidewalkArea =  || initialMetrics.;
-
-
-      setMetrics(_metrics)
+      setMetrics((prev) => {
+        const next: SiteMetrics = { ...prev };
+        next.approachArea = approach?.area ?? prev.approachArea;
+        next.bikeParkingArea = bikeParking?.area ?? prev.bikeParkingArea;
+        next.buildingCoveragePercentage =
+          property?.buildingCoveragePercentage ?? prev.buildingCoveragePercentage;
+        next.buildingCoveragePercentageAllowed =
+          property?.buildingCoveragePercentageAllowed ??
+          prev.buildingCoveragePercentageAllowed;
+        next.drivewayArea = property?.drivewayArea ?? prev.drivewayArea;
+        next.garbageArea = garbage?.area ?? prev.garbageArea;
+        next.handicappedStallsCount =
+          parking?.handicappedParkingNumTarget ?? prev.handicappedStallsCount;
+        next.imperviousSurfaceAllowed =
+          property?.imperviousSurfaceAllowed ?? prev.imperviousSurfaceAllowed;
+        next.imperviousSurfaceArea = property?.imperviousSurfaceArea ?? prev.imperviousSurfaceArea;
+        next.landscape = property?.landscapeArea ?? prev.landscape;
+        next.landscapeRequiredPercent =
+          property?.landscapeRequiredPercent ?? prev.landscapeRequiredPercent;
+        next.offStreetParkingRequired =
+          parking?.offStreetParkingRequired ?? prev.offStreetParkingRequired;
+        next.parkingArea = parking?.parkingArea ?? prev.parkingArea;
+        next.parkingPer1000Max = parking?.parkingPer1000Max ?? prev.parkingPer1000Max;
+        next.parkingPer1000Min = parking?.parkingPer1000Min ?? prev.parkingPer1000Min;
+        next.parkingStallsArea = parking?.parkingStallsArea ?? prev.parkingStallsArea;
+        next.propertyArea = property?.areaOfProperty ?? prev.propertyArea;
+        next.totalAreaDedicatedToSetbacks =
+          property?.totalAreaDedicatedToSetbacks ?? prev.totalAreaDedicatedToSetbacks;
+        next.totalSetbackPercentage = Math.round(
+          (next.totalAreaDedicatedToSetbacks / (property?.areaOfProperty || 1)) * 100
+        );
+        next.totalParkingStalls = parking?.parkingStallsNumber ?? prev.totalParkingStalls;
+        next.zoning = property?.zoning ?? prev.zoning;
+        return next;
+      });
     };
 
 
@@ -271,6 +304,39 @@ const SitePlanGenerator: React.FC = () => {
     }
   }, [imageURL])
 
+  useEffect(() => {
+    if (mode !== 'scale') setCanvasFocusedScaleLineIndex(null);
+    if (mode !== 'setback') setCanvasFocusedSetbackLineIndex(null);
+  }, [mode]);
+
+  useLayoutEffect(() => {
+    if (mode !== "scale" || canvasFocusedScaleLineIndex === null) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scaleLengthFloatingInputRef.current?.focus({ preventScroll: true });
+      });
+    });
+  }, [mode, canvasFocusedScaleLineIndex]);
+
+  useLayoutEffect(() => {
+    if (mode !== "setback" || canvasFocusedSetbackLineIndex === null) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setbackLengthFloatingInputRef.current?.focus({ preventScroll: true });
+      });
+    });
+  }, [mode, canvasFocusedSetbackLineIndex]);
+
+  const edgeMidDrawingCoords = (edgeLineIndex: number): { x: number; y: number } | null => {
+    const linesArr = linesRef.current;
+    const pts = pointsRef.current;
+    const line = linesArr[edgeLineIndex];
+    if (!line) return null;
+    const s = pts[line.start];
+    const e = pts[line.end];
+    if (!s || !e) return null;
+    return { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 };
+  };
 
   const params = {
     canvasContainerRef,
@@ -284,11 +350,10 @@ const SitePlanGenerator: React.FC = () => {
     scaleRef,
     selectedLineIndexRef,
     setbacksRef,
-    setIsPolygonClosedState,
+    setIsPolygonClosedState: setIsParcelBoundaryClosed,
     stepSelectorRefs,
     clearEverythingRef,
-    isCreateEverythingRef,
-    formData,
+    formDataRef,
 
     propertyOpacityRef,
     imageOpacityRef,
@@ -299,7 +364,11 @@ const SitePlanGenerator: React.FC = () => {
     garbageRef,
     bikeParkingRef,
 
-    visibilityGraphSolverRef
+    visibilityGraphSolverRef,
+
+    reportSetbackHoverLineIndexRef,
+    reportCanvasScaleBoundaryRef,
+    reportCanvasSetbackActivatedLineRef,
   };
 
 
@@ -425,12 +494,12 @@ const SitePlanGenerator: React.FC = () => {
   }
 
   const startUploadingImage = () => {
-    setMode('upload')
+    setMode('upload');
     setImageURL(null);
-    falsifyRefs()
+    setIsParcelBoundaryClosed(false);
+    falsifyRefs();
     isUploadingImageRef.current = true;
-
-  }
+  };
   const createPoints = () => {
     falsifyRefs()
     isUpdatingBoundaryPointsRef.current = true;
@@ -442,14 +511,16 @@ const SitePlanGenerator: React.FC = () => {
     falsifyRefs();
     isCreateEverythingRef.current = true;
     isPolygonClosedRef.current = true;
+    setIsParcelBoundaryClosed(true);
     setMode('parking');
-  }
-
+  };
 
   const defineScale = () => {
     falsifyRefs()
     isDefiningScaleRef.current = true;
-    setMode('scale')
+    setMode('scale');
+    const scaleLine = linesRef.current.find((l) => l.isScale);
+    setCanvasFocusedScaleLineIndex(scaleLine ? scaleLine.index : null);
   }
 
   const selectApproach = () => {
@@ -461,6 +532,7 @@ const SitePlanGenerator: React.FC = () => {
   const createSetbacks = () => {
     falsifyRefs();
     isSelectingSetbackRef.current = true;
+    setCanvasFocusedSetbackLineIndex(null);
     setMode('setback');
   }
 
@@ -497,8 +569,9 @@ const SitePlanGenerator: React.FC = () => {
   const generateSideWalks = () => {
     falsifyRefs();
     isGeneratingSidewalksRef.current = true;
-    setMode('entrances');
-  }
+    isPlacingBuildingEntrancesRef.current = true;
+    setMode('sidewalks');
+  };
 
   const clearCanvas = () => {
 
@@ -508,7 +581,7 @@ const SitePlanGenerator: React.FC = () => {
     clearEverythingRef.current = true;
     pointsRef.current = [];
     linesRef.current = [];
-    setIsPolygonClosedState(false);
+    setIsParcelBoundaryClosed(false);
 
     // The steps on the sidebar
     falsifyRefs();
@@ -516,8 +589,13 @@ const SitePlanGenerator: React.FC = () => {
     isPolygonClosedRef.current = false;
     draggingPointIndexRef.current = null;
     selectedLineIndexRef.current = null;
+    setHoveredSetbackSnapLineIndex(null);
+    setCanvasFocusedScaleLineIndex(null);
+    setCanvasFocusedSetbackLineIndex(null);
     inputScaleRef.current = null;
     setMode('upload');
+    setImageOverlayOpacity(50);
+    setPropertyOverlayOpacity(50);
   };
 
   const steps = [
@@ -557,8 +635,8 @@ const SitePlanGenerator: React.FC = () => {
               label="Image Opacity"
               min={0}
               max={100}
-              value={imageOpacityRef.current}
-              onChange={(value) => imageOpacityRef.current = value}
+              value={imageOverlayOpacity}
+              onChange={(value) => setImageOverlayOpacity(value)}
             />
           </div>
           : <></>}
@@ -566,18 +644,18 @@ const SitePlanGenerator: React.FC = () => {
 
         
 
-        {propertyRef.current ?
+        {isParcelBoundaryClosed ?
           <div style={{ marginTop: '10px' }}>
 
 
           <div className="site-plan-generator__slider">
             <Slider
               id="propertyOpacity"
-              label="Propery Opacity"
+              label="Property overlay opacity"
               min={0}
               max={100}
-              value={propertyOpacityRef.current}
-              onChange={(value) => propertyOpacityRef.current = value}
+              value={propertyOverlayOpacity}
+              onChange={(value) => setPropertyOverlayOpacity(value)}
             />
           </div>
 
@@ -644,16 +722,24 @@ const SitePlanGenerator: React.FC = () => {
       onClick: () => { createPoints() },
     },
 
-    window.location.hostname === "localhost" ?
-      {
-        id: 'imLucky',
-        title: `2.5 I'm feeling lucky`,
-        icon: <Map />,
-        description: "Click to just create all the components so I don't have to keep clicking through all the steps to test something",
-        help: 'Click',
+    ...(import.meta.env.DEV
+      ? [
+          {
+            id: 'imLucky' as const,
+            /** Dev shortcut: listed in sidebar only; canvas prev/next skips this step. */
+            skipCanvasNav: true as const,
+            title: `2.5 I'm feeling lucky`,
+            icon: <Map />,
+            description:
+              "Create all components at once for faster testing (dev only).",
+            help: "Click, then click the canvas once to populate the site plan.",
+            onClick: () => {
+              createEverything();
+            },
+          },
+        ]
+      : []),
 
-        onClick: () => { createEverything() },
-      } : undefined,
     {
       id: 'scale',
       title: '3. Set Property Scale',
@@ -661,28 +747,22 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Define the scale by measuring a known distance',
       help: 'Draw a line along a known distance (like property edge) and enter its real-world length to set the scale.',
       onClick: () => { defineScale() },
-      children: <div style={{ marginTop: '10px' }}>
-        <label>Edge Length (ft): </label>
-
-        <Input
-          type="number"
-          min={0}
-          value={inputScaleRef.current ?? ""}
-
-          onChange={(e) => {
-            const newValue = e.target.value === "" ? "" : Number(e.target.value);
-            setInputValueForScale(newValue); // Update state for immediate UI response
-            inputScaleRef.current = newValue === "" ? null : newValue; // Keep ref updated
-          }}
-
-          // onChange={(e) => {
-          //   const newValue = e.target.value === "" ? null : Number(e.target.value);
-          //   inputScaleRef.current = newValue;
-          // }}
-          autoFocus
-        />
-      </div>,
-      disabled: !isPolygonClosedRef.current
+      children: (
+        <div className="site-plan-generator__scale-step-hint">
+          {canvasFocusedScaleLineIndex === null ? (
+            <p>
+              Move near a boundary until it highlights, then click to pick the reference edge. A
+              length field appears on the map at that edge.
+            </p>
+          ) : (
+            <p>
+              Edge #{canvasFocusedScaleLineIndex + 1} is the scale line. Enter its real-world
+              length (ft) in the field on the canvas.
+            </p>
+          )}
+        </div>
+      ),
+      disabled: !isParcelBoundaryClosed
     },
     {
       id: 'setbacks',
@@ -702,9 +782,20 @@ const SitePlanGenerator: React.FC = () => {
             const midX = (start.x + end.x) / 2;
             const midY = (start.y + end.y) / 2;
             const rect = canvasRef.current.getBoundingClientRect();
+            const setbackRowHovered = hoveredSetbackSnapLineIndex === index;
+            const setbackRowCanvasFocus = canvasFocusedSetbackLineIndex === index;
 
             return (
-              <div key={index}>
+              <div
+                key={index}
+                className={[
+                  'site-plan-generator__setback-edge-row',
+                  setbackRowHovered ? 'site-plan-generator__setback-edge-row--snap-hover' : '',
+                  setbackRowCanvasFocus ? 'site-plan-generator__setback-edge-row--canvas-focus' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
                 <div className="edge-index"
                   style={{
                     position: "fixed",
@@ -734,7 +825,7 @@ const SitePlanGenerator: React.FC = () => {
           })}
         </div>
       </>,
-      disabled: !isPolygonClosedRef.current
+      disabled: !isParcelBoundaryClosed
     },
 
     {
@@ -799,14 +890,14 @@ const SitePlanGenerator: React.FC = () => {
           } */}
         </>,
 
-      disabled: !isPolygonClosedRef.current
+      disabled: !isParcelBoundaryClosed
     },
     {
       id: 'parking',
       title: '6. Place Parking lot',
       icon: <Car />,
       description: 'Places the parking lot',
-      help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
+      help: 'Click inside the parcel where you want the parking lot centered, then drag or adjust settings as needed.',
       onClick: () => { createParking() },
       children:
         <div style={{ marginTop: '10px' }}>
@@ -938,7 +1029,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
           <div className="site-plan-generator__input-group">
-            <label htmlFor="landscapeIsland">Stalls per group</label>
+            <label htmlFor="landscapeIsland">Stalls per group (5 ft planter gap)</label>
             <Input
               id="landscapeIsland"
               type="number"
@@ -984,7 +1075,7 @@ const SitePlanGenerator: React.FC = () => {
           </div>
 
         </div>,
-      disabled: !isPolygonClosedRef.current// !approachRef.current?.isInitialized
+      disabled: !isParcelBoundaryClosed// !approachRef.current?.isInitialized
     },
 
     {
@@ -1051,7 +1142,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
       </div>,
-      disabled: !isPolygonClosedRef.current//!parkingRef.current
+      disabled: !isParcelBoundaryClosed//!parkingRef.current
     },
     // {
     //   id: 'bike',
@@ -1084,7 +1175,7 @@ const SitePlanGenerator: React.FC = () => {
 
 
     //   </div>,
-    //   disabled: !isPolygonClosedRef.current//!parkingRef.current
+    //   disabled: !isParcelBoundaryClosed//!parkingRef.current
     // },
     {
       id: 'moveComponents',
@@ -1093,7 +1184,7 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Click and move all the parts of the site plan',
       help: 'Click and drag any of your placed elements',
       onClick: () => { moveElements() },
-      disabled: !isPolygonClosedRef.current// !buildingsGroupRef.current
+      disabled: !isParcelBoundaryClosed// !buildingsGroupRef.current
     },
 
     {
@@ -1103,7 +1194,7 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Places the building entrances',
       help: 'Click and drag the parking lot to where you want it or to dynamically add or remove parking spots.',
       onClick: () => { createBuildingEntrances() },
-      disabled: !isPolygonClosedRef.current// !buildingsGroupRef.current
+      disabled: !isParcelBoundaryClosed// !buildingsGroupRef.current
     },
 
     {
@@ -1113,12 +1204,40 @@ const SitePlanGenerator: React.FC = () => {
       description: 'Automatically generates the sidewalks for the site plan',
       help: 'Automatically generates the sidewalks based on the building entrances, parking, and approach.',
       onClick: () => { generateSideWalks() },
-      disabled: !isPolygonClosedRef.current// !buildingsGroupRef.current
+      disabled: !isParcelBoundaryClosed// !buildingsGroupRef.current
     },
 
 
 
   ];
+
+  let stepNavPrevIndex: number | null = null;
+  for (let i = currentStep - 1; i >= 0; i--) {
+    const s = steps[i];
+    if (s && !s.disabled && !("skipCanvasNav" in s && s.skipCanvasNav)) {
+      stepNavPrevIndex = i;
+      break;
+    }
+  }
+  let stepNavNextIndex: number | null = null;
+  for (let i = currentStep + 1; i < steps.length; i++) {
+    const s = steps[i];
+    if (s && !s.disabled && !("skipCanvasNav" in s && s.skipCanvasNav)) {
+      stepNavNextIndex = i;
+      break;
+    }
+  }
+
+  const goToWorkflowStep = (index: number) => {
+    const s = steps[index];
+    if (!s || s.disabled) return;
+    setCurrentStep(index);
+    s.onClick();
+  };
+
+  const prevNavStep = stepNavPrevIndex !== null ? steps[stepNavPrevIndex] : undefined;
+  const nextNavStep = stepNavNextIndex !== null ? steps[stepNavNextIndex] : undefined;
+
   return (
     <div className="site-plan-generator">
       <AlphaBanner page={EPageNames.SITE_PLAN_BUILDER} />
@@ -1180,7 +1299,7 @@ const SitePlanGenerator: React.FC = () => {
                     >
                       <div className="site-plan-generator__step-content">
                         <div className={`site-plan-generator__step-icon`}>
-                          <Delete />,
+                          <Delete />
                         </div>
                         <div className="site-plan-generator__step-info">
 
@@ -1220,13 +1339,116 @@ const SitePlanGenerator: React.FC = () => {
           <Card>
 
             <CardContent>
-              <div className="site-plan-generator__visualization-container" ref={canvasContainerRef}>
-                {mode === "upload" && !imageURL ?
-                  <ImageUploader onFileUpload={setImageURL} /> : <></>}
+              <div className="site-plan-generator__visualization-container">
+                <div className="site-plan-generator__canvas-hint" role="status">
+                  {SITE_PLAN_CANVAS_HINTS[mode]}
+                </div>
 
-
-                <div ref={canvasRef} style={{ display: mode === "upload" ? "none" : "block" }} />
-
+                <div
+                  ref={canvasContainerRef}
+                  className={
+                    mode === "upload" && !imageURL
+                      ? "site-plan-generator__canvas-area site-plan-generator__canvas-area--fill-uploader"
+                      : "site-plan-generator__canvas-area"
+                  }
+                >
+                  {mode === "upload" && !imageURL ?
+                    <ImageUploader onFileUpload={setImageURL} /> : <></>}
+                  <div className="site-plan-generator__canvas-host">
+                    <div
+                      ref={canvasRef}
+                      style={{ display: mode === "upload" ? "none" : "block" }}
+                    />
+                    {mode === "scale" && canvasFocusedScaleLineIndex !== null
+                      ? (() => {
+                          const mid = edgeMidDrawingCoords(canvasFocusedScaleLineIndex);
+                          if (!mid) return null;
+                          return (
+                            <div
+                              className="site-plan-generator__canvas-floating-input site-plan-generator__canvas-floating-input--scale"
+                              style={{ left: mid.x, top: mid.y }}
+                            >
+                              <label htmlFor="siteplan-scale-length-floating">
+                                Edge #{canvasFocusedScaleLineIndex + 1} — length (ft)
+                              </label>
+                              <Input
+                                ref={scaleLengthFloatingInputRef}
+                                id="siteplan-scale-length-floating"
+                                type="number"
+                                min={0}
+                                value={_inputValueForScale === "" ? "" : _inputValueForScale}
+                                onChange={(e) => {
+                                  const raw = e.target.value;
+                                  const newValue = raw === "" ? "" : Number(raw);
+                                  setInputValueForScale(newValue);
+                                  inputScaleRef.current =
+                                    newValue === "" || Number.isNaN(newValue as number)
+                                      ? null
+                                      : (newValue as number);
+                                }}
+                              />
+                            </div>
+                          );
+                        })()
+                      : null}
+                    {mode === "setback" && canvasFocusedSetbackLineIndex !== null
+                      ? (() => {
+                          const mid = edgeMidDrawingCoords(canvasFocusedSetbackLineIndex);
+                          const li = canvasFocusedSetbackLineIndex;
+                          const line = linesRef.current[li];
+                          if (!mid || !line) return null;
+                          return (
+                            <div
+                              className="site-plan-generator__canvas-floating-input site-plan-generator__canvas-floating-input--setback"
+                              style={{ left: mid.x, top: mid.y }}
+                            >
+                              <label htmlFor="siteplan-setback-length-floating">
+                                Edge #{li + 1} — setback (ft)
+                              </label>
+                              <Input
+                                ref={setbackLengthFloatingInputRef}
+                                id="siteplan-setback-length-floating"
+                                type="number"
+                                min={0}
+                                value={line.setback === 0 ? "" : line.setback}
+                                onChange={(e) => updateSetback(li, e.target.value)}
+                              />
+                            </div>
+                          );
+                        })()
+                      : null}
+                  </div>
+                  {stepNavPrevIndex !== null && prevNavStep ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="site-plan-generator__canvas-step-nav-btn site-plan-generator__canvas-step-nav-btn--prev"
+                      aria-label={`Previous step: ${prevNavStep.title}`}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToWorkflowStep(stepNavPrevIndex);
+                      }}
+                    >
+                      {`← ${canvasStepNavButtonLabel(prevNavStep)}`}
+                    </Button>
+                  ) : null}
+                  {stepNavNextIndex !== null && nextNavStep ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="site-plan-generator__canvas-step-nav-btn site-plan-generator__canvas-step-nav-btn--next"
+                      aria-label={`Next step: ${nextNavStep.title}`}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        goToWorkflowStep(stepNavNextIndex);
+                      }}
+                    >
+                      {`${canvasStepNavButtonLabel(nextNavStep)} →`}
+                    </Button>
+                  ) : null}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1247,6 +1469,32 @@ const SitePlanGenerator: React.FC = () => {
 
 export default SitePlanGenerator;
 
+const CANVAS_STEP_NAV_LABELS: Record<string, string> = {
+  upload: "Upload",
+  boundary: "Boundary",
+  scale: "Scale",
+  setbacks: "Setbacks",
+  approach: "Entrance",
+  parking: "Parking",
+  building: "Building",
+  moveComponents: "Move",
+  buildingEntrance: "Entrances",
+  sidewalks: "Sidewalks",
+};
+
+/** Short label for fixed-size canvas prev/next buttons (sidebar keeps full `title`). */
+function canvasStepNavButtonLabel(step: { id: string; title: string }): string {
+  const mapped = CANVAS_STEP_NAV_LABELS[step.id];
+  if (mapped) return mapped;
+  return shortStepButtonLabel(step.title, 20);
+}
+
+/** Strip leading "1. " numbering and trim (fallback when a step id has no nav map entry). */
+function shortStepButtonLabel(title: string, maxLen: number): string {
+  const t = title.replace(/^\d+\.\s*/, "").trim();
+  if (t.length <= maxLen) return t;
+  return `${t.slice(0, maxLen - 1)}…`;
+}
 
 function calculatecornerOffsetsFromSetbacks(lines: Line[], points: IPoint[]) {
   const cornerOffsetsFromSetbacks: p5.Vector[] = [];

@@ -1,7 +1,7 @@
 import p5 from "p5";
 import { Entrance } from "./Entrance";
 import { SitePlanElement } from "./SitePlanElement";
-import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, drawNeonShape, expandPolygon, getCenterPoint, initialFormData, moveVector, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
+import { arrayOfRandomNudges, calculateAngle, calculateArea, calculateCentroid, createSitePlanElementCorners, drawNeonShape, expandPolygon, getCenterPoint, initialFormData, moveVector, normalizeAngle, polyPoint, pointsAreInBoundary, truthChecker, twoObjectsAreNotColliding } from "../../../utils/SiteplanGeneratorUtils";
 import { Parking } from "./Parking";
 import { Property } from "./Property";
 import { Garbage } from "./Garbage";
@@ -14,6 +14,11 @@ export class Building extends SitePlanElement {
   public hasStopped: boolean;
   public isMoving: boolean;
   public areaExceeded: boolean;
+
+  /** Vertex editing overlay: Shift+edge adds nodes; Esc exits node mode. */
+  public polygonNodeEditMode = false;
+  /** When non-null, footprint uses these vertices (drawing/world coords) instead of width/height/angle. */
+  public freeformPolygonCorners: p5.Vector[] | null = null;
 
 
   // Input Constraints
@@ -51,6 +56,123 @@ export class Building extends SitePlanElement {
     this.maximumHeight = initialFormData.maximumHeight;
 
     this.initializeBuilding(this.center.x, this.center.y)
+  }
+
+  /** True when the pointer (world coords) lies inside the building footprint polygon. */
+  isPointInFootprint(worldX: number, worldY: number): boolean {
+    return polyPoint(this.sitePlanElementCorners, worldX, worldY);
+  }
+
+  enterPolygonNodeEditMode() {
+    if (!this.freeformPolygonCorners || this.freeformPolygonCorners.length < 3) {
+      this.freeformPolygonCorners = this.sitePlanElementCorners.map((c) =>
+        this.p.createVector(c.x, c.y)
+      );
+    }
+    this.polygonNodeEditMode = true;
+    this.update();
+  }
+
+  exitPolygonNodeEditMode() {
+    this.polygonNodeEditMode = false;
+  }
+
+  update() {
+    if (this.freeformPolygonCorners !== null && this.freeformPolygonCorners.length >= 3) {
+      this.sitePlanElementCorners = this.freeformPolygonCorners.map((v) =>
+        this.p.createVector(v.x, v.y)
+      );
+      const c = calculateCentroid(this.sitePlanElementCorners);
+      if (Number.isFinite(c.x) && Number.isFinite(c.y)) {
+        this.center.x = c.x;
+        this.center.y = c.y;
+      } else {
+        let sx = 0;
+        let sy = 0;
+        for (const v of this.sitePlanElementCorners) {
+          sx += v.x;
+          sy += v.y;
+        }
+        const n = this.sitePlanElementCorners.length;
+        this.center.x = sx / n;
+        this.center.y = sy / n;
+      }
+      this.setSitePlanElementEdges();
+      this.createOffsetPolygon(this.offsetSize);
+      this.calculateArea();
+      if (this.isInitialized) {
+        this.createRotationHandles();
+      }
+    } else {
+      super.update();
+    }
+  }
+
+  updateCenter(newX: number, newY: number) {
+    if (this.freeformPolygonCorners !== null && this.freeformPolygonCorners.length >= 3) {
+      if (this.center.x === newX && this.center.y === newY) return;
+      const dx = newX - this.center.x;
+      const dy = newY - this.center.y;
+      this.freeformPolygonCorners.forEach((v) => {
+        v.x += dx;
+        v.y += dy;
+      });
+      this.previousCenter = this.p.createVector(this.center.x, this.center.y);
+      this.center.x = newX;
+      this.center.y = newY;
+      this.sitePlanElementCorners = this.freeformPolygonCorners.map((v) =>
+        this.p.createVector(v.x, v.y)
+      );
+      this.setSitePlanElementEdges();
+      this.createOffsetPolygon(this.offsetSize);
+      this.calculateArea();
+      if (this.isInitialized) {
+        this.createRotationHandles();
+      }
+      return;
+    }
+    super.updateCenter(newX, newY);
+  }
+
+  updateAngle(angle: number) {
+    if (this.freeformPolygonCorners !== null && this.freeformPolygonCorners.length >= 3) {
+      const next = normalizeAngle(angle);
+      const deltaDeg = next - this.angle;
+      const rad = this.p.radians(deltaDeg);
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      const cx = this.center.x;
+      const cy = this.center.y;
+      this.freeformPolygonCorners.forEach((v) => {
+        const rx = v.x - cx;
+        const ry = v.y - cy;
+        v.x = cx + rx * cos - ry * sin;
+        v.y = cy + rx * sin + ry * cos;
+      });
+      this.angle = next;
+      this.previousAngle = next;
+      this.sitePlanElementCorners = this.freeformPolygonCorners.map((v) =>
+        this.p.createVector(v.x, v.y)
+      );
+      this.setSitePlanElementEdges();
+      this.createOffsetPolygon(this.offsetSize);
+      this.calculateArea();
+      if (this.isInitialized) {
+        this.createRotationHandles();
+      }
+      return;
+    }
+    super.updateAngle(angle);
+  }
+
+  updateWidth(width: number) {
+    if (this.freeformPolygonCorners !== null) return;
+    super.updateWidth(width);
+  }
+
+  updateheight(height: number) {
+    if (this.freeformPolygonCorners !== null) return;
+    super.updateheight(height);
   }
 
   initializeBuilding(x: number, y: number,) {
@@ -96,25 +218,29 @@ export class Building extends SitePlanElement {
     const building = this
     const offset = expandPolygon(this.p, building.offsetSitePlanElementCorners, -this.offsetSize / 2);
 
-    // Lines for all the edges
-    p.push()
+    p.push();
     p.noFill();
     p.stroke(building.lineColor);
     p.beginShape();
-
     offset.forEach((corner) => {
       p.vertex(corner.x, corner.y);
-      p.ellipse(corner.x, corner.y, 10, 10);
-    })
-
-    p.noFill();
+    });
     p.endShape(p.CLOSE);
+
+    const nodeR = building.polygonNodeEditMode ? 12 : 10;
+    offset.forEach((corner) => {
+      const fillHue = building.polygonNodeEditMode ? [250, 220, 80] : [230, 230, 240];
+      p.fill(fillHue[0], fillHue[1], fillHue[2]);
+      p.stroke(20);
+      p.ellipse(corner.x, corner.y, nodeR, nodeR);
+    });
     p.pop();
 
 
     // Draw the pill shape
+    const nEdge = offset.length;
     offset.forEach((corner, i) => {
-      const corner2 = offset[(i + 1) % 4];
+      const corner2 = offset[(i + 1) % nEdge];
 
       p.push()
       const mid = getCenterPoint(p, corner, corner2);
@@ -169,44 +295,54 @@ export class Building extends SitePlanElement {
 
 
 
+      let minEdgePx = Infinity;
+      for (const edge of this.sitePlanElementEdges) {
+        minEdgePx = Math.min(minEdgePx, edge.getLineLength());
+      }
+
       if (this.enableBuildingDimensions) {
         this.p.push();
         this.p.textAlign(this.p.CENTER, this.p.BOTTOM);
+
+        const dimTextSize = Number.isFinite(minEdgePx) && minEdgePx < Infinity
+          ? this.p.constrain(minEdgePx * 0.22, 8, 14)
+          : 14;
+        const perpPx = Number.isFinite(minEdgePx) && minEdgePx < Infinity
+          ? this.p.constrain(minEdgePx * 0.2, 12, 32)
+          : 15;
+        const outward = this.buildingDimensionsDisplayedOnTheInside ? 1 : -1;
 
         this.sitePlanElementEdges.forEach((edge) => {
           this.p.push();
           const mid = edge.getMidpoint();
           const length = edge.getLineLength() * this.scale;
 
-          this.p.noStroke()
-          this.p.fill('black')
+          this.p.noStroke();
+          this.p.fill('black');
           this.p.translate(mid.x, mid.y);
-          this.p.rotate(edge.calculateAngle())
-          this.p.textSize(14);
+          this.p.rotate(edge.calculateAngle());
+          this.p.textSize(dimTextSize);
 
-          const direction = this.buildingDimensionsDisplayedOnTheInside ? 15 : -15
-          this.p.text(`${length.toFixed(1)} ft`, 0, direction);
+          this.p.text(`${length.toFixed(1)} ft`, 0, outward * perpPx);
           this.p.pop();
-        })
-
+        });
 
         this.p.pop();
+      }
 
+      this.entrances.forEach((entrance) => {
+        entrance.drawEnterance();
+      });
 
-
-        this.entrances.forEach(entrance => {
-          entrance.drawEnterance();
-        })
-
-
-        if (this.showbuildingArea) {
-
-          this.p.textSize(16)
-          this.p.noStroke();
-          this.p.textAlign(this.p.CENTER, this.p.CENTER);
-
-          this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y - this.height / 4)
-        }
+      if (this.showbuildingArea) {
+        const areaPx = Number.isFinite(minEdgePx) && minEdgePx < Infinity
+          ? this.p.constrain(minEdgePx * 0.2, 9, 16)
+          : 16;
+        this.p.textSize(areaPx);
+        this.p.noStroke();
+        this.p.fill('black');
+        this.p.textAlign(this.p.CENTER, this.p.CENTER);
+        this.p.text(`${this.buildingAreaActual} SQFT`, this.center.x, this.center.y);
       }
     }
   }

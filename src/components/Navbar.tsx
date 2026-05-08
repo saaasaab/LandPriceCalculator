@@ -1,10 +1,32 @@
-import { Link } from 'react-router-dom';
-import logo from '../assets/LandCalculatorLogo.svg'
-import './Navbar.scss';
-import { useState } from 'react';
-import Hamburger from './Hamburger';
-import { EPageTitles } from '../utils/types';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import {
+  BarChart3,
+  Building2,
+  CircleDollarSign,
+  DoorOpen,
+  Factory,
+  GitFork,
+  HardHat,
+  Home,
+  Landmark,
+  LineChart,
+  LogIn,
+  LogOut,
+  Map,
+  PaintRoller,
+  PiggyBank,
+  Ruler,
+  TrendingUp,
+} from "lucide-react";
+import logo from "../assets/LandCalculatorLogo.svg";
+import "./Navbar.scss";
+import Hamburger from "./Hamburger";
+import { EPageTitles } from "../utils/types";
+import { useAuth } from "../context/AuthContext";
+
+const navIconProps = { size: 22, strokeWidth: 2, "aria-hidden": true as const };
+const authLinkIconProps = { size: 18, strokeWidth: 2, "aria-hidden": true as const };
 
 
 
@@ -42,33 +64,47 @@ export const routes = {
   TERMS: "/terms",
 }
 
-export const calculatorIcons = {
-  [routes.MULTIFAMILY_DEVELOPMENT]: '🏢',
-  [routes.INDUSTRIAL_DEVELOPMENT]: '🏭',
-  [routes.COMMERCIAL_DEVELOPMENT]: '🏢',
-  [routes.RESIDENTIAL_DEVELOPMENT]: '🏘️',
-  [routes.CONSTRUCTION_BUDGET]: '📊',
-  [routes.MULTIFAMILY_ANALYSIS]: '💰',
-  [routes.INDUSTRIAL_PROFORMA]: '💰',
-  [routes.INDUSTRIAL_PRICE_PER_SQFT]: '📏',
-  [routes.MULTI_FAMILY_PRICE_PER_DOOR]: '🚪',
-  [routes.IRR_CALCULATOR]: '📈',
-  [routes.CONSTRUCTION_LOAN_CALCULATOR]: '🏗️',
-  // [routes.SITE_PLAN_BUILDER]: '🗺️',
-}
+export const calculatorIcons: Record<string, React.ReactNode> = {
+  [routes.RESIDENTIAL_DEVELOPMENT]: <Home {...navIconProps} />,
+  [routes.MULTIFAMILY_DEVELOPMENT]: <Building2 {...navIconProps} />,
+  [routes.INDUSTRIAL_DEVELOPMENT]: <Factory {...navIconProps} />,
+  [routes.COMMERCIAL_DEVELOPMENT]: <Landmark {...navIconProps} />,
+  [routes.CONSTRUCTION_BUDGET]: <BarChart3 {...navIconProps} />,
+  [routes.MULTIFAMILY_ANALYSIS]: <CircleDollarSign {...navIconProps} />,
+  [routes.INDUSTRIAL_PROFORMA]: <LineChart {...navIconProps} />,
+  [routes.INDUSTRIAL_PRICE_PER_SQFT]: <Ruler {...navIconProps} />,
+  [routes.MULTI_FAMILY_PRICE_PER_DOOR]: <DoorOpen {...navIconProps} />,
+  [routes.IRR_CALCULATOR]: <TrendingUp {...navIconProps} />,
+  [routes.HARD_MONEY_COST_ESTIMATOR]: <PiggyBank {...navIconProps} />,
+  [routes.HOUSE_FLIPPING_CALCULATOR]: <PaintRoller {...navIconProps} />,
+  [routes.WATERFALL]: <GitFork {...navIconProps} />,
+  [routes.CONSTRUCTION_LOAN_CALCULATOR]: <HardHat {...navIconProps} />,
+  [routes.SITE_PLAN_BUILDER]: <Map {...navIconProps} />,
+  [routes.LOGIN]: <LogIn {...authLinkIconProps} />,
+};
 
-
-const IconLink = ({ route, text, handleToggleMenu,className }: { route: string, text: string, handleToggleMenu: () => void,className?: string }) => {
-
+const IconLink = ({
+  route,
+  text,
+  handleToggleMenu,
+  className,
+}: {
+  route: string;
+  text: string;
+  handleToggleMenu: () => void;
+  className?: string;
+}) => {
   const icon = calculatorIcons[route];
-  const link = route;
 
   return (
-    <Link className={`icon-link ${className!==""?className:"" }`} to={link} onClick={handleToggleMenu}>
-      <div className="calculator-icon">{icon}</div>
-      <div>{text}</div>
+    <Link
+      className={`icon-link ${className ?? ""}`}
+      to={route}
+      onClick={handleToggleMenu}
+    >
+      {icon ? <span className="calculator-icon">{icon}</span> : null}
+      <span className="icon-link__text">{text}</span>
     </Link>
-
   );
 };
 
@@ -93,7 +129,8 @@ const Navbar = () => {
       </div>
 
 
-      <ul className={`navbar-links ${isMobileMenuOpen ? 'is-open' : ''}`}>
+      <div className={`navbar-menu ${isMobileMenuOpen ? "is-open" : ""}`}>
+      <ul className="navbar-links">
 
         <li className="dropdown">
           <Link className="dropdown-title" onClick={handleToggleMenu} to={routes.HOME}>{EPageTitles.HOME}</Link>
@@ -135,8 +172,6 @@ const Navbar = () => {
           <IconLink route={routes.SITE_PLAN_BUILDER} handleToggleMenu={handleToggleMenu} text={EPageTitles.SITE_PLAN_BUILDER} />
         </li>
 
-
-
         {/* Howto and Blogs */}
         {/* <li className="dropdown">
           <span className="dropdown-title">Education Center</span>
@@ -145,18 +180,24 @@ const Navbar = () => {
             <Link onClick={handleToggleMenu} to={routes.ARTICLES}>Articles</Link>
           </div>
         </li> */}
+      </ul>
 
         <div className="navbar-auth">
           {user ? (
-            <>
-              <button onClick={logout} className="logout-btn">Logout</button>
-            </>
+            <button type="button" onClick={logout} className="logout-btn">
+              <LogOut size={18} strokeWidth={2} aria-hidden />
+              <span>Logout</span>
+            </button>
           ) : (
-          <IconLink className="login-btn" route={routes.LOGIN} handleToggleMenu={handleToggleMenu} text={"Login"} />
-
+            <IconLink
+              className="navbar-auth__link"
+              route={routes.LOGIN}
+              handleToggleMenu={handleToggleMenu}
+              text="Login"
+            />
           )}
         </div>
-      </ul>
+      </div>
 
 
 
