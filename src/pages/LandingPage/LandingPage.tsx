@@ -3,8 +3,9 @@ import './LandingPage.scss';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '../../components/Navbar';
 import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
-import { EPageNames } from '../../utils/types';
+import { EPageNames, EPageTitles } from '../../utils/types';
 import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
+import FloorPlanDesigner from '../FloorPlanDesigner/FloorPlanDesigner';
 import HeroSection from './HeroSection';
 import {
   Building2,
@@ -17,6 +18,7 @@ import {
   TowerControl,
   TrendingUp,
   Map,
+  LayoutGrid,
   Coins,
   Home as HomeIcon,
   GitFork,
@@ -77,6 +79,15 @@ const LandingPage: React.FC = () => {
   }, []);
 
   const calculators: Calculator[] = [
+    {
+      id: 'multi-family-door',
+      title: 'Multi-family Per Door Calculator',
+      description: 'Essential metrics calculator for multi-family properties.',
+      icon: <TowerControl size={24} />,
+      link: routes.MULTI_FAMILY_PRICE_PER_DOOR,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.MULTI_FAMILY_PRICE_PER_DOOR
+    },
     {
       id: 'multi-family-dev',
       title: 'Multi-family Development Calculator',
@@ -141,15 +152,6 @@ const LandingPage: React.FC = () => {
       pageType: EPageNames.INDUSTRIAL_PRICE_PER_SQFT
     },
     {
-      id: 'multi-family-door',
-      title: 'Multi-family Per Door Calculator',
-      description: 'Essential metrics calculator for multi-family properties.',
-      icon: <TowerControl size={24} />,
-      link: routes.MULTI_FAMILY_PRICE_PER_DOOR,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.MULTI_FAMILY_PRICE_PER_DOOR
-    },
-    {
       id: 'seller-irr',
       title: "Seller's IRR Estimator",
       description: 'Sophisticated tool for calculating IRR.',
@@ -202,6 +204,16 @@ const LandingPage: React.FC = () => {
       icon: <Map size={24} />,
       link: routes.SITE_PLAN_BUILDER,
       component: SitePlanDesigner
+    },
+    {
+      id: 'floor-plan',
+      title: EPageTitles.FLOOR_PLAN_GENERATOR,
+      description:
+        'Draw the unit outline, dimension edges, and place draggable rooms clipped to that boundary.',
+      icon: <LayoutGrid size={24} />,
+      link: routes.FLOOR_PLAN_GENERATOR,
+      component: FloorPlanDesigner,
+      pageType: EPageNames.FLOOR_PLAN_GENERATOR,
     },
   ];
 
