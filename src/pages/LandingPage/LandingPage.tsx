@@ -3,9 +3,9 @@ import './LandingPage.scss';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '../../components/Navbar';
 import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
-import { EPageNames, EPageTitles } from '../../utils/types';
+import { EPageNames, } from '../../utils/types';
 import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
-import FloorPlanDesigner from '../FloorPlanDesigner/FloorPlanDesigner';
+// import FloorPlanDesigner from '../FloorPlanDesigner/FloorPlanDesigner';
 import HeroSection from './HeroSection';
 import {
   Building2,
@@ -18,7 +18,7 @@ import {
   TowerControl,
   TrendingUp,
   Map,
-  LayoutGrid,
+  // LayoutGrid,
   Coins,
   Home as HomeIcon,
   GitFork,
@@ -205,16 +205,16 @@ const LandingPage: React.FC = () => {
       link: routes.SITE_PLAN_BUILDER,
       component: SitePlanDesigner
     },
-    {
-      id: 'floor-plan',
-      title: EPageTitles.FLOOR_PLAN_GENERATOR,
-      description:
-        'Draw the unit outline, dimension edges, and place draggable rooms clipped to that boundary.',
-      icon: <LayoutGrid size={24} />,
-      link: routes.FLOOR_PLAN_GENERATOR,
-      component: FloorPlanDesigner,
-      pageType: EPageNames.FLOOR_PLAN_GENERATOR,
-    },
+    // {
+    //   id: 'floor-plan',
+    //   title: EPageTitles.FLOOR_PLAN_GENERATOR,
+    //   description:
+    //     'Draw the unit outline, dimension edges, and place draggable rooms clipped to that boundary.',
+    //   icon: <LayoutGrid size={24} />,
+    //   link: routes.FLOOR_PLAN_GENERATOR,
+    //   component: FloorPlanDesigner,
+    //   pageType: EPageNames.FLOOR_PLAN_GENERATOR,
+    // },
   ];
 
   // Set initial active calculator

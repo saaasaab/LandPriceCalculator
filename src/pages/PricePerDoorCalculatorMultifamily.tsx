@@ -91,6 +91,12 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     cellValues={["Rental Income one unit ", rents]}
                     description="The current rental income from one unit"
                 />
+                 <InputRow
+                    isMobile={isMobile}
+                    setInput={value => setUnits(value)}
+                    cellValues={["Number of units (#)", units]}
+                    description="How many units are in the building"
+                />
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setInterestRate(value)}
@@ -125,12 +131,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     description="Set your investors' required cash-on-cash return for this to be a good investment. This will change based on the asset type and market."
                     isPercent={true}
                 />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setUnits(value)}
-                    cellValues={["Number of units (#)", units]}
-                    description="How many units are in the building"
-                />
+               
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setBuyersAgentFee(value)}
