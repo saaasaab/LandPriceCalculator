@@ -19,6 +19,20 @@
     [ ] Depreciation Modeling
     [ ] Industrial Proforma
 
+[ ] Realtor Tools
+    [ ] Seller Net Sheet — estimated proceeds after mortgage payoff, commissions, closing costs, and prorations
+    [ ] Buyer Closing Cost Estimator — down payment, lender fees, title, escrow, prepaid taxes/insurance
+    [ ] Commission Calculator — split between listing/buyer agent, brokerage fees, and team splits
+    [ ] Offer Comparison Tool — side-by-side buyer offers (price, contingencies, closing date, net to seller)
+    [ ] CMA Summary Builder — enter comps to generate a printable pricing recommendation for listings
+    [ ] Days on Market / Price Reduction Planner — model how price drops affect showings and time to close
+    [ ] Rent vs. Sell Analysis — help landlord clients decide whether to list or lease (ties into existing calcs)
+    [ ] Cap Rate / GRM Quick Calc — for agents pitching investment listings to investor buyers
+    [ ] Mortgage Payment Estimator for Clients — simple PITI shareable link to send buyers (extends home mortgage calc)
+    [ ] Property Tax Proration Calculator — closing date prorations for buyer/seller net sheets
+    [ ] Open House ROI Tracker — cost of staging/marketing vs. leads and conversions generated
+    [ ] Listing One-Pager Generator — auto PDF with photos, key stats, price, and neighborhood highlights for showings
+
 [X] mulplie Buildings
 [X] Building Price - per Sq Ft ($) NOT CLEAR
 [X] breakout the formulas - NOI
