@@ -23,9 +23,9 @@ export const SITE_PLAN_CANVAS_HINTS: Record<SitePlanInteractionMode, string> = {
   setback:
     'Move near a boundary: the cursor snaps to the nearest edge, which highlights on the map and in the Edge # list. Click to toggle setback on that edge, then enter distances below.',
   approach:
-    'Place the driveway approach from the access street — adjust width using the sidebar controls.',
+    'Click property edges to add entrances (multiple per edge allowed). Drag an entrance to reposition it. Shift+click an entrance to remove it. With "Connect Entrances" on: Shift+click the driveway to add nodes, drag nodes to adjust the path.',
   parking:
-    'Pick the parking lot footprint and stall counts; drag to orient within the parcel.',
+    'Click inside the parcel to add parking lots. Click an existing lot to remove it. Drag to orient and adjust stall counts in the sidebar.',
   building:
     'Place the footprint inside the parcel: drag corners, edges, and center like a rectangle. Double-click to edit nodes (Shift+click an edge adds a vertex, Esc exits).',
   bike:

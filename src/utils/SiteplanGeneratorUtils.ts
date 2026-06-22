@@ -52,6 +52,7 @@ export interface FormDataInputs {
   parkingLotShape: 'the-rocket' | 't-bar',
   buildingDimensionsDisplayedOnTheInside: boolean,
   hasGarbageEnclosure: boolean,
+  connectEntrances: boolean,
 }
 
 export const initialFormData: FormDataInputs = {
@@ -90,6 +91,7 @@ export const initialFormData: FormDataInputs = {
   zoning: "r-1",
   parkingLotShape: "the-rocket",
   hasGarbageEnclosure: true,
+  connectEntrances: false,
 
 };
 
@@ -392,6 +394,72 @@ export function tryInsertVertexOnBuildingEdge(
   return true;
 }
 
+export function resolveBezierGoingUpAtDeparture(
+  p: p5,
+  point1: p5.Vector,
+  point2: p5.Vector,
+  edge1: Edge,
+): boolean {
+  const travel = p5.Vector.sub(point2, point1);
+  if (travel.magSq() < 0.001) return true;
+  travel.normalize();
+
+  const score = (goingUp: boolean) => {
+    const sign = goingUp ? -1 : 1;
+    const angle = edge1.calculateAngle() - 90 * sign;
+    const dir = p.createVector(p.cos(angle), p.sin(angle));
+    return p5.Vector.dot(dir, travel);
+  };
+
+  return score(true) >= score(false);
+}
+
+export function resolveBezierGoingUpAtArrival(
+  p: p5,
+  point1: p5.Vector,
+  point2: p5.Vector,
+  edge2: Edge,
+): boolean {
+  const travelInto = p5.Vector.sub(point2, point1);
+  if (travelInto.magSq() < 0.001) return true;
+  travelInto.normalize();
+
+  const score = (goingUp: boolean) => {
+    const sign = goingUp ? -1 : 1;
+    const angle = edge2.calculateAngle() + 90 * sign;
+    const cp2Dir = p.createVector(p.cos(angle), p.sin(angle));
+    const reverseTravel = p.createVector(-travelInto.x, -travelInto.y);
+    return p5.Vector.dot(cp2Dir, reverseTravel);
+  };
+
+  return score(true) >= score(false);
+}
+
+/** @deprecated Prefer resolveBezierGoingUpAtDeparture / AtArrival for independent endpoint control */
+export function resolveBezierGoingUp(
+  p: p5,
+  point1: p5.Vector,
+  point2: p5.Vector,
+  edge1: Edge,
+  edge2: Edge,
+): boolean {
+  const travel = p5.Vector.sub(point2, point1);
+  if (travel.magSq() < 0.001) return true;
+  travel.normalize();
+
+  const score = (goingUp: boolean) => {
+    const sign = goingUp ? -1 : 1;
+    const angle1 = edge1.calculateAngle() - 90 * sign;
+    const angle2 = edge2.calculateAngle() + 90 * sign;
+    const cp1Dir = p.createVector(p.cos(angle1), p.sin(angle1));
+    const cp2Dir = p.createVector(p.cos(angle2), p.sin(angle2));
+    const reverseTravel = p.createVector(-travel.x, -travel.y);
+    return p5.Vector.dot(cp1Dir, travel) + p5.Vector.dot(cp2Dir, reverseTravel);
+  };
+
+  return score(true) >= score(false);
+}
+
 export function drawPerpendicularBezier(
   p: p5,
   point1: p5.Vector,
@@ -400,15 +468,16 @@ export function drawPerpendicularBezier(
   edge2: Edge,
   goingUp: boolean,
   showDrivewayControlPoints = false,
-  // controlDistance: number
+  goingUpAtPoint2?: boolean,
 ): void {
-  // Define the two control points
-
+  const goingUpAtPoint1 = goingUp;
+  const goingUp2 = goingUpAtPoint2 ?? goingUp;
   const controlDistance = p.dist(point1.x, point1.y, point2.x, point2.y) / 3;
 
-  const goingUpSign = goingUp ? -1 : 1;
-  const angle1 = edge1.calculateAngle() - 90 * goingUpSign;
-  const angle2 = edge2.calculateAngle() + 90 * goingUpSign;
+  const sign1 = goingUpAtPoint1 ? -1 : 1;
+  const sign2 = goingUp2 ? -1 : 1;
+  const angle1 = edge1.calculateAngle() - 90 * sign1;
+  const angle2 = edge2.calculateAngle() + 90 * sign2;
   const controlPoint1 = p.createVector(
     point1.x + p.cos(angle1) * controlDistance,
     point1.y + p.sin(angle1) * controlDistance
@@ -1193,7 +1262,7 @@ export function drawInstructionsToScreen(
     p.textSize(16);
     p.fill(50); // Text color
     p.textAlign(p.RIGHT, p.BOTTOM);
-    p.text("Click the property edge that will be the entrance to the propery", p.width - 10, p.height - 10);
+    p.text("Click property edges to add entrances. Click an entrance to remove it. Shift+click connected driveway to add nodes.", p.width - 10, p.height - 10);
     p.pop()
   }
 
@@ -1668,15 +1737,16 @@ export const handleApproachDrag = (
   property: Property, approach: Approach, parking: Parking | null, garbage: Garbage | null, buildings: Building[],
   isRotationFrozenRef: React.MutableRefObject<boolean>,
   approachDragMode: string | null,
-  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
+  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>,
+  isPrimaryApproach: boolean = true,
 
 ) => {
 
   if (!property || !approach || !approachDragMode) return;
-  // || !building  || !parking || !garbage
 
+  const approachEdge = property.propertyEdges[approach.propertyEdgeIndex];
   const _center = p.createVector(approach.center.x, approach.center.y);
-  const approachEdgeAngle = property.approachEdge?.calculateAngle();
+  const approachEdgeAngle = approachEdge?.calculateAngle();
 
 
   let newX = p.mouseX;
@@ -1699,7 +1769,7 @@ export const handleApproachDrag = (
 
     approach.updateCenter(newX, newY);
 
-    if (parking && garbage) {
+    if (isPrimaryApproach && parking && garbage) {
       const angle = isRotationFrozenRef.current ? parking.angle : calculateAngle(parking.center, approach.center) - 90
 
       parking.updateAngle(angle); // +90 to get the perpendicular angle
@@ -1736,7 +1806,7 @@ export const handleApproachDrag = (
     }
   } else {
 
-    const edgeMidpoint = property.approachEdge?.getMidpoint();
+    const edgeMidpoint = approachEdge?.getMidpoint();
     if (!edgeMidpoint) return;
 
 
@@ -1772,7 +1842,8 @@ export const handleParkingDrag = (
   property: Property, approach: Approach, parking: Parking, garbage: Garbage, buildings: Building[] | null,
   parkingDragMode: string | null,
   isRotationFrozenRef: React.MutableRefObject<boolean>,
-  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>
+  visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>,
+  isPrimaryParkingLot: boolean = true,
 ) => {
 
   if (!property || !approach || !parking || !garbage) return;
@@ -1875,9 +1946,11 @@ export const handleParkingDrag = (
     parking.updateCenter(newX, newY);
   
     garbage.updateCenterGarbage(parking);
-    let angle = isRotationFrozenRef.current ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
-    parking.updateAngle(normalizeAngle(angle));
-    garbage.updateAngle(normalizeAngle(angle));
+    if (isPrimaryParkingLot) {
+      let angle = isRotationFrozenRef.current ? parking.angle : calculateAngle(parking.center, approach.center) - 90;
+      parking.updateAngle(normalizeAngle(angle));
+      garbage.updateAngle(normalizeAngle(angle));
+    }
 
     if (buildings) {
 

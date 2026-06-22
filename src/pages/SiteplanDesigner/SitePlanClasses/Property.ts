@@ -11,6 +11,7 @@ export class Property {
   public propertyCorners: p5.Vector[];
   public approachEdge: Edge | null = null;
   public approachEdgeIndex: number | null;
+  public approachEdgeIndices: number[] = [];
   public approachAngle: number = 15;
   // public propertyQuadrants: p5.Vector[][] = [];
   public maxAreaIndex: number = 0;
@@ -102,7 +103,7 @@ export class Property {
     for (let i = 0; i < propertyCorners.length; i++) {
       const corner1 = propertyCorners[i];
       let corner2 = i === propertyCorners.length - 1 ? propertyCorners[0] : propertyCorners[i + 1];
-      const isApproach = i === this.approachEdgeIndex;
+      const isApproach = this.approachEdgeIndices.includes(i);
       const newEdge = new Edge(p, corner1, corner2, isApproach, this.setbacks[i], i);
       propertyEdges.push(newEdge);
     }
@@ -133,10 +134,75 @@ export class Property {
   }
 
   setApproachIndex(approachIndex: number) {
-    this.approachEdgeIndex = approachIndex;
-    this.approachEdge = this.propertyEdges[this.approachEdgeIndex];
-    const initialApproachAngle = this.approachEdge?.calculateAngle();
-    this.approachAngle = initialApproachAngle;
+    this.approachEdgeIndices = [approachIndex];
+    this.syncPrimaryApproachEdge();
+    this.refreshEdgeApproachFlags();
+  }
+
+  addApproachIndex(approachIndex: number) {
+    this.approachEdgeIndices.push(approachIndex);
+    this.syncPrimaryApproachEdgeFromList(this.approachEdgeIndices);
+    this.refreshEdgeApproachFlags();
+  }
+
+  removeApproachEdgeIfUnused(approachIndex: number, remainingApproaches: { propertyEdgeIndex: number }[]) {
+    const stillUsed = remainingApproaches.some(
+      (approach) => approach.propertyEdgeIndex === approachIndex,
+    );
+    if (!stillUsed) {
+      this.approachEdgeIndices = this.approachEdgeIndices.filter((index) => index !== approachIndex);
+    }
+    this.refreshEdgeApproachFlags();
+  }
+
+  syncPrimaryApproachEdgeFromApproaches(
+    approaches: { propertyEdgeIndex: number; id: string }[],
+    parkingApproachId?: string | null,
+  ) {
+    const primary =
+      (parkingApproachId && approaches.find((approach) => approach.id === parkingApproachId)) ||
+      approaches[0];
+    if (primary) {
+      this.approachEdgeIndex = primary.propertyEdgeIndex;
+      this.approachEdge = this.propertyEdges[this.approachEdgeIndex];
+      this.approachAngle = this.approachEdge?.calculateAngle() ?? this.approachAngle;
+      return;
+    }
+
+    this.approachEdgeIndex = null;
+    this.approachEdge = null;
+  }
+
+  private syncPrimaryApproachEdgeFromList(_indices: number[]) {
+    // Primary edge is resolved from the approaches list in sketch code.
+    if (this.approachEdgeIndices.length > 0) {
+      this.approachEdgeIndex = this.approachEdgeIndices[0];
+      this.approachEdge = this.propertyEdges[this.approachEdgeIndex];
+    }
+  }
+
+  clearApproaches() {
+    this.approachEdgeIndices = [];
+    this.syncPrimaryApproachEdge();
+    this.refreshEdgeApproachFlags();
+  }
+
+  syncPrimaryApproachEdge() {
+    if (this.approachEdgeIndices.length > 0) {
+      this.approachEdgeIndex = this.approachEdgeIndices[0];
+      this.approachEdge = this.propertyEdges[this.approachEdgeIndex];
+      this.approachAngle = this.approachEdge?.calculateAngle() ?? this.approachAngle;
+      return;
+    }
+
+    this.approachEdgeIndex = null;
+    this.approachEdge = null;
+  }
+
+  refreshEdgeApproachFlags() {
+    this.propertyEdges.forEach((edge, index) => {
+      edge.isApproach = this.approachEdgeIndices.includes(index);
+    });
   }
 
   updateCornersAndEdgesPositions(points: IPoint[]) {

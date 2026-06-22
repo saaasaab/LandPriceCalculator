@@ -5,7 +5,7 @@ import { IPoint, Line } from "./SitePlanDesigner";
 import RotateArrow from "../../assets/rotateArrow.png"
 
 
-import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, closestBoundaryLineIndexWithinDistance, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, falseChecker, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, rotateCorners, runVisibilityGraphSolver, tryInsertVertexOnBuildingEdge, truthChecker } from "../../utils/SiteplanGeneratorUtils";
+import { allPointsInPolygon, calculateApproachArea, calculateCentroid, calculateLineIndexOfClosestLine, calculatePointToEdgeDistance, calculateScale, closestBoundaryLineIndexWithinDistance, displayImage, drawArea, drawInstructionsToScreen, drawNeonEllipse, drawProtoPropertyLines, falseChecker, findClosestEdge, FormDataInputs, getCenterPoint, getIntersectionPercentage, getIsClockwise, getParkingStallArea, handleApproachDrag, handleBuildingDrag, handleParkingDrag, polyPoint, rotateCorners, runVisibilityGraphSolver, tryInsertVertexOnBuildingEdge, truthChecker } from "../../utils/SiteplanGeneratorUtils";
 import { Edge } from "./SitePlanClasses/Edge";
 import { Property } from "./SitePlanClasses/Property";
 import { Parking } from "./SitePlanClasses/Parking";
@@ -14,6 +14,8 @@ import { Approach } from "./SitePlanClasses/Approach";
 import { VisibilityGraph } from "../VisibilityGraph";
 import { BikeParking } from "./SitePlanClasses/BikeParking";
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup'
+import { EntranceDrivewayNetwork } from "./SitePlanClasses/EntranceDrivewayNetwork";
+import { Building } from './SitePlanClasses/Building';
 import { Entrance } from "./SitePlanClasses/Entrance";
 // import { ConfirmDialog } from "./SitePlanClasses/ConfirmDialog";
 // import { VisibilityGraph } from "../VisibilityGraph";
@@ -31,6 +33,144 @@ export enum ESitePlanObjects {
   Garbage = "Garbage",
   Building = "Building"
 }
+
+function getParkingApproach(
+  approaches: Approach[],
+  parkingApproachIdRef: React.MutableRefObject<string | null>,
+): Approach | null {
+  if (approaches.length === 0) {
+    parkingApproachIdRef.current = null;
+    return null;
+  }
+
+  const selected = approaches.find((approach) => approach.id === parkingApproachIdRef.current);
+  if (selected) return selected;
+
+  parkingApproachIdRef.current = approaches[0].id;
+  return approaches[0];
+}
+
+function ensureParkingApproachId(
+  approaches: Approach[],
+  parkingApproachIdRef: React.MutableRefObject<string | null>,
+) {
+  if (approaches.length === 0) {
+    parkingApproachIdRef.current = null;
+    return;
+  }
+
+  if (!approaches.some((approach) => approach.id === parkingApproachIdRef.current)) {
+    parkingApproachIdRef.current = approaches[0].id;
+  }
+}
+
+function clearAllApproaches(
+  approachesRef: React.MutableRefObject<Approach[]>,
+  propertyRef: React.MutableRefObject<Property | null>,
+  linesRef: React.MutableRefObject<Line[]>,
+) {
+  approachesRef.current = [];
+  linesRef.current.forEach((line) => {
+    line.isApproach = false;
+  });
+  propertyRef.current?.clearApproaches();
+}
+
+function findApproachNearPoint(
+  p: p5,
+  approaches: Approach[],
+  x: number,
+  y: number,
+  threshold: number,
+): Approach | undefined {
+  let best: Approach | undefined;
+  let bestDistance = threshold;
+
+  approaches.forEach((approach) => {
+    const distance = p.dist(x, y, approach.center.x, approach.center.y);
+    if (distance <= bestDistance) {
+      bestDistance = distance;
+      best = approach;
+    }
+  });
+
+  return best;
+}
+
+export type ParkingLotEntry = {
+  parking: Parking;
+  garbage: Garbage;
+};
+
+function getPrimaryParkingLot(lots: ParkingLotEntry[]): ParkingLotEntry | null {
+  return lots[0] ?? null;
+}
+
+function getPrimaryParking(lots: ParkingLotEntry[]): Parking | null {
+  return lots[0]?.parking ?? null;
+}
+
+function getPrimaryGarbage(lots: ParkingLotEntry[]): Garbage | null {
+  return lots[0]?.garbage ?? null;
+}
+
+function clearAllParkingLots(
+  parkingLotsRef: React.MutableRefObject<ParkingLotEntry[]>,
+) {
+  parkingLotsRef.current = [];
+}
+
+function findParkingLotAtPoint(lots: ParkingLotEntry[], x: number, y: number): number {
+  for (let i = lots.length - 1; i >= 0; i--) {
+    const { parking } = lots[i];
+    if (!parking.isInitialized) continue;
+    if (polyPoint(parking.sitePlanElementCorners, x, y)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function createParkingLotAt(
+  p: p5,
+  center: p5.Vector,
+  property: Property,
+  primaryApproach: Approach,
+  buildings: Building[] | null | undefined,
+  defaultVector: p5.Vector,
+): ParkingLotEntry {
+  const parkingWidth = 24 / property.scale;
+  const parking = new Parking(
+    p,
+    center,
+    parkingWidth,
+    10,
+    primaryApproach.angle,
+    ESitePlanObjects.ParkingWay,
+    property.scale,
+  );
+  parking.initializeParking(property, null, primaryApproach);
+
+  const garbage = new Garbage(
+    p,
+    getCenterPoint(
+      p,
+      parking.sitePlanElementEdges[0].point1,
+      parking.sitePlanElementEdges[0].point2 || defaultVector,
+    ),
+    12 / property.scale,
+    5 / property.scale,
+    parking.angle,
+    ESitePlanObjects.Garbage,
+    property.scale,
+  );
+  garbage.initialize();
+  garbage.updateCenterGarbage(parking);
+  parking.updateParkingLot(property, buildings ?? null, garbage, primaryApproach);
+
+  return { parking, garbage };
+}
+
 export const stallWidth = 17;
 export const normalStallHeight = 8.5;
 export const handicappedStallHeight = 17;
@@ -118,10 +258,14 @@ interface SketchForSiteplanParams {
   imageOpacityRef: React.MutableRefObject<number>;
   propertyOpacityRef: React.MutableRefObject<number>;
   propertyRef: React.MutableRefObject<Property | null>;
-  approachRef: React.MutableRefObject<Approach | null>;
-  parkingRef: React.MutableRefObject<Parking | null>;
+  approachesRef: React.MutableRefObject<Approach[]>;
+  clearApproachesRef: React.MutableRefObject<boolean>;
+  parkingLotsRef: React.MutableRefObject<ParkingLotEntry[]>;
+  clearParkingLotsRef: React.MutableRefObject<boolean>;
+  entranceDrivewayNetworkRef: React.MutableRefObject<EntranceDrivewayNetwork>;
+  parkingApproachIdRef: React.MutableRefObject<string | null>;
+  reparkParkingLotsRef: React.MutableRefObject<boolean>;
   buildingsGroupRef: React.MutableRefObject<(BuildingsGroup | null)>
-  garbageRef: React.MutableRefObject<Garbage | null>;
   bikeParkingRef: React.MutableRefObject<BikeParking | null>;
   visibilityGraphSolverRef: React.MutableRefObject<VisibilityGraph | null>;
   /** Setbacks step only: notifies which boundary line index is under the cursor snap band (or null). */
@@ -154,10 +298,14 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     imageOpacityRef,
     propertyOpacityRef,
     propertyRef,
-    approachRef,
-    parkingRef,
+    approachesRef,
+    clearApproachesRef,
+    parkingLotsRef,
+    clearParkingLotsRef,
+    entranceDrivewayNetworkRef,
+    parkingApproachIdRef,
+    reparkParkingLotsRef,
     buildingsGroupRef,
-    garbageRef,
     bikeParkingRef,
 
     visibilityGraphSolverRef,
@@ -192,6 +340,13 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
   let approachTempX = 0;
   let approachTempY = 0;
   let approachTempAngle = 0;
+  let hoveredApproachIndex = -1;
+  let hoveredParkingLotIndex = -1;
+  let activeParkingLotIndex = -1;
+  let hoveredDrivewayNodeIndex = -1;
+  let draggingDrivewayNodeIndex = -1;
+  let lastApproachPathSignature = "";
+  let lastAppliedParkingApproachId: string | null = null;
 
 
   let isDragging = {
@@ -230,6 +385,21 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
 
 
+  if (clearApproachesRef.current === true) {
+    clearApproachesRef.current = false;
+    clearAllApproaches(approachesRef, propertyRef, linesRef);
+    entranceDrivewayNetworkRef.current.path = [];
+    lastApproachPathSignature = "";
+    parkingApproachIdRef.current = null;
+    lastAppliedParkingApproachId = null;
+  }
+
+  if (clearParkingLotsRef.current === true) {
+    clearParkingLotsRef.current = false;
+    clearAllParkingLots(parkingLotsRef);
+  }
+
+
   // When an input changes in the component above, set he sketch variable here.
   if (propertyRef.current) {
     propertyRef.current.updateSetbacks(linesRef.current);
@@ -241,8 +411,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
     clearEverythingRef.current = false;
 
     propertyRef.current = null
-    approachRef.current = null
-    parkingRef.current = null
+    approachesRef.current = []
+    parkingLotsRef.current = []
+    entranceDrivewayNetworkRef.current.path = []
+    lastApproachPathSignature = ""
+    parkingApproachIdRef.current = null
+    lastAppliedParkingApproachId = null
     buildingsGroupRef.current = null;
     bikeParkingRef.current = null
 
@@ -436,20 +610,49 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         : pointerDrawing;
 
       const property = propertyRef.current;
-      const approach = approachRef.current;
-      const parking = parkingRef.current;
+      const approaches = approachesRef.current;
+      const approach = getParkingApproach(approaches, parkingApproachIdRef);
+      const parkingLots = parkingLotsRef.current;
+      const parking = getPrimaryParking(parkingLots);
+      const garbage = getPrimaryGarbage(parkingLots);
       const buildingsGroup = buildingsGroupRef.current;
-      const garbage = garbageRef.current;
 
       updateGlobalVariables(
         property,
-        approach,
-        parking,
+        parkingLots,
         buildingsGroup,
-        garbage,
         bikeParkingRef.current,
         formDataRef.current,
+        approaches,
+        parkingApproachIdRef,
       );
+
+      ensureParkingApproachId(approaches, parkingApproachIdRef);
+      const parkingApproach = getParkingApproach(approaches, parkingApproachIdRef);
+      if (
+        property &&
+        parkingApproach &&
+        (
+          reparkParkingLotsRef.current ||
+          lastAppliedParkingApproachId !== parkingApproachIdRef.current
+        )
+      ) {
+        reparkParkingLotsRef.current = false;
+        lastAppliedParkingApproachId = parkingApproachIdRef.current;
+        property.syncPrimaryApproachEdgeFromApproaches(
+          approaches,
+          parkingApproachIdRef.current,
+        );
+        parkingLots.forEach((lot) => {
+          lot.parking.updateParkingLot(
+            property,
+            buildingsGroup?.buildings,
+            lot.garbage,
+            parkingApproach,
+          );
+          lot.parking.calculateParkingOutline(property, lot.garbage, parkingApproach);
+        });
+      }
 
       const isUploadingImage = stepSelectorRefs.upload.current;
       const isPolygonClosed = isPolygonClosedRef.current;
@@ -530,82 +733,82 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         );
       }
 
-      if (approach) {
-        isHovered.approach = approach.isMouseHovering();
-        isHovered.approachOffset = approach.isMouseHoveringOffset();
-      }
-      if (parking) {
-        isHovered.parking = parking.isMouseHovering();
-        isHovered.parkingOffset = parking.isMouseHoveringOffset();
-        isHovered.parkingHandle = parking.isMouseHoveringRotateHandle();
+      isHovered.approach = false;
+      isHovered.approachOffset = false;
+      hoveredApproachIndex = -1;
+      approaches.forEach((entry, index) => {
+        if (entry.isMouseHovering() || entry.isMouseHoveringOffset()) {
+          isHovered.approach = true;
+          isHovered.approachOffset = entry.isMouseHoveringOffset();
+          hoveredApproachIndex = index;
+        }
+      });
+      isHovered.parking = false;
+      isHovered.parkingOffset = false;
+      isHovered.parkingHandle = false;
+      isHovered.garbage = false;
+      hoveredParkingLotIndex = -1;
+      parkingDragMode = null;
 
-        if ((
-          isHovered.parkingOffset ||
-          isHovered.parking ||
-          isHovered.parkingHandle) ||
-          parking?.isRotating) {
+      parkingLots.forEach((lot) => {
+        lot.parking.showRotationHandles = false;
+      });
+
+      parkingLots.forEach((lot, lotIndex) => {
+        const lotParking = lot.parking;
+        if (!lotParking.isInitialized) return;
+
+        const lotHovering = lotParking.isMouseHovering();
+        const lotHoveringOffset = lotParking.isMouseHoveringOffset();
+        const lotHoveringHandle = lotParking.isMouseHoveringRotateHandle();
+
+        if (
+          lotHovering ||
+          lotHoveringOffset ||
+          lotHoveringHandle ||
+          lotParking.isRotating
+        ) {
+          isHovered.parking = true;
+          isHovered.parkingOffset = lotHoveringOffset;
+          isHovered.parkingHandle = lotHoveringHandle;
+          isHovered.garbage = lot.garbage.isMouseHovering();
+          hoveredParkingLotIndex = lotIndex;
 
           if (buildingsGroupRef.current?.buildings.length) {
-            buildingsGroupRef.current.buildings.forEach(building => {
-              if (building !== null) building.showRotationHandles = false
-            })
+            buildingsGroupRef.current.buildings.forEach((building) => {
+              if (building !== null) building.showRotationHandles = false;
+            });
           }
-          // parkingDragMode = null;
           approachDragMode = null;
+          lotParking.showRotationHandles = true;
 
-          parking.showRotationHandles = true;
-
-
-
-          if (isHovered.parkingHandle) {
-            parking.showRotationAnimationCount = 0;
-
-            const index = parking.getMouseHoveringRotateHandleIndex();
-            const handle = parking.rotationHandles[index];
-            if (p.dist(newX, newY, handle.x, handle.y) < 30) {
+          if (lotHoveringHandle) {
+            lotParking.showRotationAnimationCount = 0;
+            const handleIndex = lotParking.getMouseHoveringRotateHandleIndex();
+            const handle = lotParking.rotationHandles[handleIndex];
+            if (handle && p.dist(newX, newY, handle.x, handle.y) < 30) {
               parkingDragMode = 'rotate';
-              // resizeEdges = null;
               resizeCorner = null;
               resizeEdge = null;
-              // hasSetRotating = true;
-
             }
           }
 
-
-          if (isHovered.parking && !parking.isRotating) {
-            // !hasSetRotating&&
-            if (p.dist(newX, newY, parking.center.x, parking.center.y) < 20) {
+          if (lotHovering && !lotParking.isRotating) {
+            if (p.dist(newX, newY, lotParking.center.x, lotParking.center.y) < 20) {
               parkingDragMode = 'center';
-              // // resizeEdges = null;c
               resizeCorner = null;
               resizeEdge = null;
             }
           }
 
-
-          if (parkingDragMode !== null ||  isHovered.parking) {
+          if (parkingDragMode !== null || lotHovering) {
             p.push();
             p.noFill();
             p.stroke(30, 60, 200);
-            p.strokeWeight(3)
-
-            // // Circles around the the building corners
-            // building.sitePlanElementCorners.forEach(corner=>{
-            //   p.ellipse(corner.x, corner.y, 15, 15)
-            // })
-
-            // // Lines for all the edges
-            // building.sitePlanElementEdges.forEach(edge=>{
-            //   p.line(edge.point1.x, edge.point1.y, edge.point2.x,edge.point2.y)
-            // });
-
-            // center circle
-            p.ellipse(parking.center.x, parking.center.y, 20, 20)
+            p.strokeWeight(3);
+            p.ellipse(lotParking.center.x, lotParking.center.y, 20, 20);
             p.pop();
           }
-
-
 
           if (parkingDragMode === "corner") p.cursor('nesw-resize');
           else if (parkingDragMode === "edge") p.cursor('ew-resize');
@@ -613,22 +816,62 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           else if (parkingDragMode === "rotate") p.cursor(RotateArrow);
           else p.cursor('default');
         }
+      });
 
 
 
+
+      approaches.forEach((entry) => {
+        entry.drawApproach(entry.id === parkingApproachIdRef.current);
+      });
+
+      const connectEntrances = formDataRef.current.connectEntrances;
+      if (connectEntrances && approaches.length >= 2 && property) {
+        const pathSignature = `${approaches.map((entry) => entry.id).join("|")}:${parking?.isInitialized ? "p" : ""}`;
+        if (pathSignature !== lastApproachPathSignature) {
+          entranceDrivewayNetworkRef.current.syncFromApproaches(approaches, parking, property);
+          lastApproachPathSignature = pathSignature;
+        }
+
+        entranceDrivewayNetworkRef.current.draw(
+          p,
+          property,
+          approaches,
+          parking,
+          formDataRef.current.drivewayWidth,
+          property.scale,
+          stepSelectorRefs.approach.current || stepSelectorRefs.moving.current,
+        );
+
+        if (stepSelectorRefs.approach.current || stepSelectorRefs.moving.current) {
+          const nodeHitThreshold = Math.max(10 / property.scale, 12 / zoom);
+          hoveredDrivewayNodeIndex = entranceDrivewayNetworkRef.current.findNodeAt(
+            p,
+            newX,
+            newY,
+            nodeHitThreshold,
+          );
+          if (hoveredDrivewayNodeIndex >= 0) {
+            p.push();
+            p.noFill();
+            p.stroke(255, 180, 0);
+            p.strokeWeight(2);
+            const node = entranceDrivewayNetworkRef.current.path[hoveredDrivewayNodeIndex];
+            if (node.kind === "node") {
+              p.ellipse(node.x, node.y, 16, 16);
+            }
+            p.pop();
+          }
+        }
+      } else {
+        hoveredDrivewayNodeIndex = -1;
       }
-
-
-
 
       if (approach) {
-        approach.drawApproach();
-      }
-
-      if (parking && garbage && approach) {
-        // parkingRef.current
-        parking.drawParkingStalls();
-        parking.drawParkingOutline(p, approach);
+        parkingLots.forEach((lot) => {
+          lot.parking.drawParkingStalls();
+          lot.parking.drawParkingOutline(p, approach);
+        });
       }
 
       if (buildingsGroup) {
@@ -884,15 +1127,11 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       ) {
 
-        const parking = parkingRef.current;
-        const buildings = buildingsGroupRef.current;
-        // const garbage = garbageRef.current;
-
-
-        if (parking) {
-          parking.showRotationHandles = false;
-        }
-        if (buildings?.buildings?.length) {
+      parkingLotsRef.current.forEach((lot) => {
+        lot.parking.showRotationHandles = false;
+      });
+      const buildings = buildingsGroupRef.current;
+      if (buildings?.buildings?.length) {
           buildings.buildings.forEach(building => {
             if (building !== null) building.showRotationHandles = false;
           })
@@ -945,7 +1184,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         stepSelectorRefs.parking.current &&
         !buildingDragMode &&
         !parkingDragMode &&
-        !parking?.isInitialized) {
+        hoveredParkingLotIndex === -1
+      ) {
         property?.tempObject();
       }
 
@@ -954,9 +1194,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         stepSelectorRefs.approach.current &&
         !approachDragMode &&
         !buildingDragMode &&
-        !parkingDragMode &&
-        !approach?.isInitialized) {
-
+        !parkingDragMode
+      ) {
         if (
           property &&
           prevMouseX !== p.mouseX &&
@@ -967,18 +1206,31 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
           const mouse = p.createVector(newX, newY);
           const closestEdgeIndex = findClosestEdge(property.propertyEdges, mouse);
-          const closestEdge = property.propertyEdges[closestEdgeIndex];
-
-          const angle = closestEdge.calculateAngle();
-          const intersection = closestEdge.calculateClosestIntercept(
+          const removeThreshold = Math.max(12 / property.scale, 14 / zoom);
+          const nearExisting = findApproachNearPoint(
+            p,
+            approaches,
             newX,
             newY,
-            p
+            removeThreshold,
           );
+          if (nearExisting) {
+            approachTempX = 0;
+            approachTempY = 0;
+          } else {
+            const closestEdge = property.propertyEdges[closestEdgeIndex];
 
-          approachTempX = intersection.x;
-          approachTempY = intersection.y;
-          approachTempAngle = angle;
+            const angle = closestEdge.calculateAngle();
+            const intersection = closestEdge.calculateClosestIntercept(
+              newX,
+              newY,
+              p
+            );
+
+            approachTempX = intersection.x;
+            approachTempY = intersection.y;
+            approachTempAngle = angle;
+          }
         }
 
 
@@ -1074,10 +1326,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
           : calculateLineIndexOfClosestLine(points, lines, dmx, dmy);
 
       const property = propertyRef.current;
-      const approach = approachRef.current;
-      const parking = parkingRef.current;
+      const approaches = approachesRef.current;
+      const approach = getParkingApproach(approaches, parkingApproachIdRef);
+      const parkingLots = parkingLotsRef.current;
+      const parking = getPrimaryParking(parkingLots);
       const buildings = buildingsGroupRef.current;
-      const garbage = garbageRef.current;
+      const garbage = getPrimaryGarbage(parkingLots);
       // const bikeParking = bikeParkingRef.current;
 
       if (
@@ -1174,39 +1428,27 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         const approachWidth = property.approachWidth / property.scale;
         const approachAngle = approachEdge.calculateAngle();
         const centerOfProperty = calculateCentroid(propertyRef.current.propertyCorners)
-        const parkingWidth = 24 / propertyRef.current.scale;
         const buildingDefault = 30 / propertyRef.current.scale;
         const bikeParkingDefault = 10 / propertyRef.current.scale;
 
-        property.approachEdge = approachEdge
-        property.approachEdgeIndex = approachIndex
+        property.addApproachIndex(approachIndex);
 
-        // buildingsGroupRef.current = new BuildingsGroup(p);
+        const demoApproach = new Approach(p, midpoint, approachWidth, 20, approachAngle + 180, ESitePlanObjects.Approach, property.scale);
+        demoApproach.propertyEdgeIndex = approachIndex;
+        demoApproach.initialize();
+        approachesRef.current = [demoApproach];
 
-
-        approachRef.current = new Approach(p, midpoint, approachWidth, 20, approachAngle + 180, ESitePlanObjects.Approach, property.scale);
-        approachRef.current.initialize();
-
-        parkingRef.current = new Parking(p, p.createVector(centerOfProperty.x, centerOfProperty.y), parkingWidth, 100, approachAngle + 180, ESitePlanObjects.ParkingWay, propertyRef.current.scale);
-        parkingRef.current.initializeParking(propertyRef.current, null, approachRef.current)
-
-
-        // // *** TO UNDO
-        parkingRef.current.updateParkingLot(property, buildings?.buildings, garbageRef.current, approach)
-        // parkingRef.current.updateStallCorners();
-        // parkingRef.current.updateParkingHeight(propertyRef.current.cornerOffsetsFromSetbacks);
-
-
-
-        garbageRef.current = new Garbage(p, getCenterPoint(p,
-          parkingRef.current.sitePlanElementEdges[0].point1,
-          parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector),
-          12 / propertyRef.current.scale,
-          7 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
-        garbageRef.current.initialize();
-        garbageRef.current.updateCenterGarbage(parkingRef.current);
-
-
+        parkingLotsRef.current = [
+          createParkingLotAt(
+            p,
+            p.createVector(centerOfProperty.x, centerOfProperty.y),
+            property,
+            demoApproach,
+            buildings?.buildings,
+            defaultVector,
+          ),
+        ];
+        const demoParkingLot = parkingLotsRef.current[0];
 
 
 
@@ -1221,9 +1463,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         stepSelectorRefs.moving.current = true;
 
 
-        parkingRef.current.updateParkingLot(property, buildings?.buildings, garbageRef.current, approachRef.current)
+        demoParkingLot.parking.updateParkingLot(property, buildings?.buildings, demoParkingLot.garbage, demoApproach)
         
-        parkingRef.current.calculateParkingOutline(property, garbageRef.current, approachRef.current);
+        demoParkingLot.parking.calculateParkingOutline(property, demoParkingLot.garbage, demoApproach);
 
 
       }
@@ -1348,63 +1590,235 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       }
 
       // ALL THINGS APPROACH
-      if (stepSelectorRefs.approach.current && !isDragging.approach) {
+      if (stepSelectorRefs.approach.current && !isDragging.approach && draggingDrivewayNodeIndex === -1) {
         if (!propertyRef.current) return;
-        if (isPolygonClosed && lineIndex !== -1 && !approachRef.current) {
-          const property = propertyRef.current;
+        const property = propertyRef.current;
+        const removeThreshold = Math.max(12 / property.scale, 14 / zoom);
+        const nearApproach = findApproachNearPoint(
+          p,
+          approachesRef.current,
+          dmx,
+          dmy,
+          removeThreshold,
+        );
+        const network = entranceDrivewayNetworkRef.current;
+        const connectEntrances = formDataRef.current.connectEntrances;
+        const nodeHitThreshold = Math.max(10 / property.scale, 14 / zoom);
+        const segmentHitThreshold = Math.max(12 / property.scale, 16 / zoom);
+        const primaryParking = getPrimaryParking(parkingLotsRef.current);
+
+        if (nearApproach && !p.keyIsDown(p.SHIFT)) {
+          hoveredApproachIndex = approachesRef.current.findIndex(
+            (entry) => entry.id === nearApproach.id,
+          );
+          isDragging.approach = true;
+          approachDragMode = "center";
+          return;
+        }
+
+        if (connectEntrances && approachesRef.current.length >= 2 && !nearApproach) {
+          const nodeIndex = network.findNodeAt(p, dmx, dmy, nodeHitThreshold);
+          if (nodeIndex >= 0 && p.keyIsDown(p.SHIFT)) {
+            network.removeNode(nodeIndex);
+            return;
+          }
+          if (nodeIndex >= 0) {
+            draggingDrivewayNodeIndex = nodeIndex;
+            return;
+          }
+          if (
+            p.keyIsDown(p.SHIFT) &&
+            network.findSegmentNear(
+              p,
+              dmx,
+              dmy,
+              approachesRef.current,
+              primaryParking,
+              segmentHitThreshold,
+            )
+          ) {
+            network.insertNodeNear(
+              p,
+              dmx,
+              dmy,
+              approachesRef.current,
+              primaryParking,
+              segmentHitThreshold,
+            );
+            return;
+          }
+        }
+
+        if (nearApproach && p.keyIsDown(p.SHIFT)) {
+          const wasParkingApproach = nearApproach.id === parkingApproachIdRef.current;
+          const removedEdgeIndex = nearApproach.propertyEdgeIndex;
+          approachesRef.current = approachesRef.current.filter(
+            (entry) => entry.id !== nearApproach.id,
+          );
+          property.removeApproachEdgeIfUnused(removedEdgeIndex, approachesRef.current);
+          if (!approachesRef.current.some((entry) => entry.propertyEdgeIndex === removedEdgeIndex)) {
+            lines[removedEdgeIndex].isApproach = false;
+          }
+          ensureParkingApproachId(approachesRef.current, parkingApproachIdRef);
+          property.syncPrimaryApproachEdgeFromApproaches(
+            approachesRef.current,
+            parkingApproachIdRef.current,
+          );
+          lastApproachPathSignature = "";
+          reparkParkingLotsRef.current = true;
+
+          if (connectEntrances && approachesRef.current.length >= 2) {
+            network.syncFromApproaches(approachesRef.current, primaryParking, property);
+          } else {
+            network.path = [];
+          }
+
+          if (
+            wasParkingApproach &&
+            getParkingApproach(approachesRef.current, parkingApproachIdRef) &&
+            getPrimaryParkingLot(parkingLotsRef.current) &&
+            getPrimaryGarbage(parkingLotsRef.current)
+          ) {
+            const primaryLot = getPrimaryParkingLot(parkingLotsRef.current)!;
+            const nextParkingApproach = getParkingApproach(approachesRef.current, parkingApproachIdRef)!;
+            primaryLot.parking.updateParkingLot(
+              property,
+              buildingsGroupRef.current?.buildings,
+              primaryLot.garbage,
+              nextParkingApproach,
+            );
+          }
+          return;
+        }
+
+        if (isPolygonClosed && lineIndex !== -1) {
           selectedLineIndexRef.current = lineIndex;
-          lines[lineIndex].isApproach = !lines[lineIndex].isApproach;
-          let approachIndex = lineIndex;
-
-          // Get point closest to the edgepoint
-          const approachEdge = propertyRef.current.propertyEdges[approachIndex]
-          // const midpoint = approachEdge.getMidpoint();
-          property.approachEdge = approachEdge
-          property.approachEdgeIndex = approachIndex
-
+          lines[lineIndex].isApproach = true;
+          const approachEdge = property.propertyEdges[lineIndex];
           const approachWidth = property.approachWidth / property.scale;
-          // const approachAngle = approachEdge.calculateAngle();
+          const clickPosition = approachEdge.calculateClosestIntercept(dmx, dmy, p);
+          const newApproach = new Approach(
+            p,
+            clickPosition,
+            approachWidth,
+            20,
+            approachTempAngle || approachEdge.calculateAngle(),
+            ESitePlanObjects.Approach,
+            property.scale,
+          );
+          newApproach.propertyEdgeIndex = lineIndex;
+          newApproach.initialize();
+          property.addApproachIndex(lineIndex);
+          property.syncPrimaryApproachEdgeFromApproaches(
+            [...approachesRef.current, newApproach],
+            parkingApproachIdRef.current,
+          );
+          approachesRef.current = [...approachesRef.current, newApproach];
+          if (approachesRef.current.length === 1) {
+            parkingApproachIdRef.current = newApproach.id;
+          }
+          lastApproachPathSignature = "";
 
-          approachRef.current = new Approach(p, p.createVector(approachTempX, approachTempY), approachWidth, 20, approachTempAngle, ESitePlanObjects.Approach, property.scale);
-          approachRef.current.initialize();
+          if (connectEntrances && approachesRef.current.length >= 2) {
+            network.syncFromApproaches(approachesRef.current, primaryParking, property);
+          }
+        }
+      }
 
+      // Driveway connection nodes (moving step)
+      if (
+        stepSelectorRefs.moving.current &&
+        !stepSelectorRefs.approach.current &&
+        !isDragging.approach &&
+        draggingDrivewayNodeIndex === -1 &&
+        propertyRef.current &&
+        formDataRef.current.connectEntrances &&
+        approachesRef.current.length >= 2
+      ) {
+        const property = propertyRef.current;
+        const network = entranceDrivewayNetworkRef.current;
+        const nodeHitThreshold = Math.max(10 / property.scale, 14 / zoom);
+        const segmentHitThreshold = Math.max(12 / property.scale, 16 / zoom);
+        const primaryParking = getPrimaryParking(parkingLotsRef.current);
+        const nodeIndex = network.findNodeAt(p, dmx, dmy, nodeHitThreshold);
+
+        if (nodeIndex >= 0 && p.keyIsDown(p.SHIFT)) {
+          network.removeNode(nodeIndex);
+          return;
+        }
+        if (nodeIndex >= 0) {
+          draggingDrivewayNodeIndex = nodeIndex;
+          return;
+        }
+        if (
+          p.keyIsDown(p.SHIFT) &&
+          network.findSegmentNear(
+            p,
+            dmx,
+            dmy,
+            approachesRef.current,
+            primaryParking,
+            segmentHitThreshold,
+          )
+        ) {
+          network.insertNodeNear(
+            p,
+            dmx,
+            dmy,
+            approachesRef.current,
+            primaryParking,
+            segmentHitThreshold,
+          );
         }
       }
 
       // ALL THINGS PARKING
       else if (stepSelectorRefs.parking.current && !parkingDragMode && !approachDragMode) {
 
-        if (!propertyRef.current || !approachRef.current || parkingRef.current?.isInitialized) return;
+        const primaryApproach = getParkingApproach(approachesRef.current, parkingApproachIdRef);
+        if (!propertyRef.current || !primaryApproach) return;
+
+        const attachThreshold = Math.max(12 / propertyRef.current.scale, 14 / zoom);
+        const clickedApproach = findApproachNearPoint(
+          p,
+          approachesRef.current,
+          dmx,
+          dmy,
+          attachThreshold,
+        );
+        if (clickedApproach && approachesRef.current.length > 1) {
+          parkingApproachIdRef.current = clickedApproach.id;
+          reparkParkingLotsRef.current = true;
+          return;
+        }
+
+        const clickedLotIndex = findParkingLotAtPoint(parkingLotsRef.current, dmx, dmy);
+        if (clickedLotIndex >= 0) {
+          parkingLotsRef.current = parkingLotsRef.current.filter((_, index) => index !== clickedLotIndex);
+          return;
+        }
 
         const clickInLot = allPointsInPolygon(propertyRef.current.propertyCorners, [
           p.createVector(dmx, dmy),
         ]);
         if (!truthChecker(clickInLot)) return;
 
-        const parkingWidth = 24 / propertyRef.current.scale;
-        const approachAngle = approachRef.current?.angle;
-        parkingRef.current = new Parking(p, p.createVector(dmx, dmy), parkingWidth, 10, approachAngle, ESitePlanObjects.ParkingWay, propertyRef.current.scale);
-        parkingRef.current.initializeParking(propertyRef.current, null, approachRef.current)
-
-
-        // // *** TO UNDO
-        parkingRef.current.updateParkingLot(propertyRef.current, buildingsGroupRef.current?.buildings, garbage, approach)
-        // parkingRef.current.updateStallCorners();
-        // parkingRef.current.updateParkingHeight(propertyRef.current.cornerOffsetsFromSetbacks);
-
-        garbageRef.current = new Garbage(p, getCenterPoint(p, parkingRef.current.sitePlanElementEdges[0].point1, parkingRef.current.sitePlanElementEdges[0].point2 || defaultVector), 12 / propertyRef.current.scale, 5 / propertyRef.current.scale, parkingRef.current.angle, ESitePlanObjects.Garbage, propertyRef.current.scale);
-        garbageRef.current.initialize();
-        garbageRef.current.updateCenterGarbage(parkingRef.current);
-
-        parkingRef.current.updateParkingLot(propertyRef.current, buildingsGroupRef.current?.buildings, garbage, approach)
-
+        const newLot = createParkingLotAt(
+          p,
+          p.createVector(dmx, dmy),
+          propertyRef.current,
+          primaryApproach,
+          buildingsGroupRef.current?.buildings,
+          defaultVector,
+        );
+        parkingLotsRef.current = [...parkingLotsRef.current, newLot];
       }
 
       // ALL THINGS BUILDING
       else if (stepSelectorRefs.building.current && !buildingDragMode) {
 
 
-        if (!propertyRef.current || !approachRef.current) return;
+        if (!propertyRef.current || !getParkingApproach(approachesRef.current, parkingApproachIdRef)) return;
 
         const clickIsInProperty = allPointsInPolygon(
           propertyRef.current.propertyCorners,
@@ -1441,7 +1855,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       else if (stepSelectorRefs.entrances.current) {
 
         // isHovered.buildingOffset && 
-        if (buildingsGroupRef.current && propertyRef.current && parkingRef.current && garbageRef.current && approachRef.current) {
+        const primaryApproach = getParkingApproach(approachesRef.current, parkingApproachIdRef);
+        const primaryLot = getPrimaryParkingLot(parkingLotsRef.current);
+        if (buildingsGroupRef.current && propertyRef.current && primaryLot && primaryApproach) {
           // HIDING ENTRANCE AND SOLVER FOR NOW
 
           const mouse = p.createVector(dmx, dmy);
@@ -1471,7 +1887,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
             // THEN DELETE THE ENTRANCE
 
             buildingsGroupRef.current.buildings[0].entrances = buildingsGroupRef.current.buildings[0].entrances.filter((_, i) => i !== minDistanceIndex)
-            visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], parkingRef.current, propertyRef.current, garbageRef.current, approachRef.current);
+            visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], primaryLot.parking, propertyRef.current, primaryLot.garbage, primaryApproach);
           }
 
           else {
@@ -1488,7 +1904,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
               buildingsGroupRef.current.buildings[0].entrances.push(entrance)
 
 
-              visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], parkingRef.current, propertyRef.current, garbageRef.current, approachRef.current);
+              visibilityGraphSolverRef.current = runVisibilityGraphSolver(visibilityGraphSolverRef.current, buildingsGroupRef.current.buildings[0], primaryLot.parking, propertyRef.current, primaryLot.garbage, primaryApproach);
 
             }
 
@@ -1576,9 +1992,12 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       const d = screenToDrawingCoords(mx, my, zoom, offsetX, offsetY, p.width, p.height);
       const grp = buildingsGroupRef.current;
       const property = propertyRef.current;
-      const approach = approachRef.current;
-      const parking = parkingRef.current;
-      const garbage = garbageRef.current;
+      const approaches = approachesRef.current;
+      const approach = getParkingApproach(approaches, parkingApproachIdRef);
+      const parkingLots = parkingLotsRef.current;
+      const primaryLot = getPrimaryParkingLot(parkingLots);
+      const parking = primaryLot?.parking ?? null;
+      const garbage = primaryLot?.garbage ?? null;
       if (!grp?.buildings?.length || !property || !approach || !parking || !garbage) return;
       const canEdit =
         stepSelectorRefs.building.current ||
@@ -1692,10 +2111,10 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       // }
 
       const property = propertyRef.current;
-      const approach = approachRef.current;
-      const parking = parkingRef.current;
+      const approaches = approachesRef.current;
+      const approach = getParkingApproach(approaches, parkingApproachIdRef);
+      const parkingLots = parkingLotsRef.current;
       const buildings = buildingsGroupRef.current;
-      const garbage = garbageRef.current;
 
 
       if (!property) return;
@@ -1703,13 +2122,54 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       const worldPointer = screenToDrawingCoords(newX, newY, zoom, offsetX, offsetY, p.width, p.height);
 
-      if (approach) isHovered.approach = approach.isMouseHovering();
-
-      if (parking) {
-        isHovered.parking = parking.isMouseHovering();
-        isHovered.parkingOffset = parking.isMouseHoveringOffset();
-        isHovered.parkingHandle = parking.isMouseHoveringRotateHandle();
+      if (
+        draggingDrivewayNodeIndex >= 0 &&
+        (stepSelectorRefs.approach.current || stepSelectorRefs.moving.current) &&
+        formDataRef.current.connectEntrances
+      ) {
+        entranceDrivewayNetworkRef.current.moveNode(
+          draggingDrivewayNodeIndex,
+          worldPointer.x,
+          worldPointer.y,
+        );
+        return;
       }
+
+      isHovered.approach = false;
+      isHovered.approachOffset = false;
+      hoveredApproachIndex = -1;
+      approaches.forEach((entry, index) => {
+        if (entry.isMouseHovering() || entry.isMouseHoveringOffset()) {
+          isHovered.approach = true;
+          isHovered.approachOffset = entry.isMouseHoveringOffset();
+          hoveredApproachIndex = index;
+        }
+      });
+
+      isHovered.parking = false;
+      isHovered.parkingOffset = false;
+      isHovered.parkingHandle = false;
+      hoveredParkingLotIndex = -1;
+      parkingLots.forEach((lot, lotIndex) => {
+        const lotParking = lot.parking;
+        if (lotParking.isMouseHovering()) isHovered.parking = true;
+        if (lotParking.isMouseHoveringOffset()) isHovered.parkingOffset = true;
+        if (lotParking.isMouseHoveringRotateHandle()) isHovered.parkingHandle = true;
+        if (
+          lotParking.isMouseHovering() ||
+          lotParking.isMouseHoveringOffset() ||
+          lotParking.isMouseHoveringRotateHandle()
+        ) {
+          hoveredParkingLotIndex = lotIndex;
+        }
+      });
+
+      const draggedLotIndex =
+        activeParkingLotIndex >= 0 ? activeParkingLotIndex : hoveredParkingLotIndex;
+      const draggedLot =
+        draggedLotIndex >= 0 ? parkingLots[draggedLotIndex] : null;
+      const parking = draggedLot?.parking ?? getPrimaryParking(parkingLots);
+      const garbage = draggedLot?.garbage ?? getPrimaryGarbage(parkingLots);
 
       if (buildings?.buildings?.length) {
         buildings.buildings.forEach((building, buildingIndex) => {
@@ -1766,7 +2226,9 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       // Dragging the parking lot
       if (
-        parking !== null && parkingDragMode !== null && (
+        draggedLot &&
+        parking !== null &&
+        parkingDragMode !== null && (
           isHovered.parking ||
           isDragging.parking ||
           isHovered.parkingHandle ||
@@ -1776,12 +2238,14 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
         if (approach && parking && garbage && buildings?.buildings) {
           isDragging.parking = true;
+          activeParkingLotIndex = draggedLotIndex;
           handleParkingDrag(
             p,
             property, approach, parking, garbage, buildings.buildings,
             parkingDragMode,
             isRotationFrozenRef,
             visibilityGraphSolverRef,
+            draggedLotIndex === 0,
           )
 
         }
@@ -1789,27 +2253,37 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       // Move the approach
       else if (isHovered.approach || isDragging.approach) {
-        if (approach && buildings?.buildings) {
+        const draggedApproach =
+          hoveredApproachIndex >= 0
+            ? approaches[hoveredApproachIndex]
+            : getParkingApproach(approaches, parkingApproachIdRef);
+
+        if (draggedApproach && buildings?.buildings) {
 
           isDragging.approach = true;
           handleApproachDrag(
             p,
-            property, approach, parking, garbage, buildings.buildings,
+            property, draggedApproach, parking, garbage, buildings.buildings,
             isRotationFrozenRef,
             approachDragMode,
             visibilityGraphSolverRef,
-
+            draggedApproach.id === parkingApproachIdRef.current,
           )
         }
       }
 
 
       // Update driveway area on every drag
-      if (approach !== null && parking !== null) {
-        // drivewayArea = calculateDrivewayArea(approach.p, approach, parking)
-        parking.parkingArea = Math.round(parking.width * parking.height * property.scale * property.scale);
-        approach.approachArea = calculateApproachArea(approach)
-        parking.parkingStallsArea = getParkingStallArea(parking)
+      if (property) {
+        parkingLots.forEach((lot) => {
+          lot.parking.parkingArea = Math.round(
+            lot.parking.width * lot.parking.height * property.scale * property.scale,
+          );
+          lot.parking.parkingStallsArea = getParkingStallArea(lot.parking);
+        });
+        approaches.forEach((entry) => {
+          entry.approachArea = calculateApproachArea(entry);
+        });
       }
     };
 
@@ -1818,9 +2292,7 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 
       // const property = propertyRef.current;
       // const approach = approachRef.current;
-      const parking = parkingRef.current;
       const buildings = buildingsGroupRef.current;
-      // const garbage = garbageRef.current;
 
 
       draggingPointIndexRef.current = null;
@@ -1830,6 +2302,8 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
       isDragging.approach = false;
       isDragging.parkingOffset = false;
       isDragging.buildings = isDragging.buildings.map(_ => false);
+      activeParkingLotIndex = -1;
+      draggingDrivewayNodeIndex = -1;
 
       buildingDragMode = null;
       parkingDragMode = null;
@@ -1849,10 +2323,10 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
         })
 
       }
-      if (parking) {
-        parking.isRotating = false;
-        parking.isSelected = false
-      }
+      parkingLotsRef.current.forEach((lot) => {
+        lot.parking.isRotating = false;
+        lot.parking.isSelected = false;
+      });
 
 
     };
@@ -1871,9 +2345,17 @@ export default function sketchForSiteplan(params: SketchForSiteplanParams) {
 }
 
 function updateGlobalVariables(
-  property: Property | null, approach: Approach | null, parking: Parking | null, buildingsGroup: (BuildingsGroup | null) | null, garbage: Garbage | null, bikeParking: BikeParking | null,
-  formData: FormDataInputs
+  property: Property | null,
+  parkingLots: ParkingLotEntry[],
+  buildingsGroup: (BuildingsGroup | null) | null,
+  bikeParking: BikeParking | null,
+  formData: FormDataInputs,
+  approaches: Approach[],
+  parkingApproachIdRef: React.MutableRefObject<string | null>,
 ) {
+  const approach = getParkingApproach(approaches, parkingApproachIdRef);
+  const primaryLot = getPrimaryParkingLot(parkingLots);
+
   if (property) {
     property.imperviousSurfacePercentageAllowed = formData.imperviousSurfacePercentageAllowed
     property.buildingCoveragePercentage = formData.buildingCoveragePercentage;
@@ -1883,27 +2365,24 @@ function updateGlobalVariables(
   }
 
 
-  // Pull in the data from above.
-  if (approach) {
-    approach.propertyEntranceCount = formData.propertyEntranceCount;
-    approach.enableApproachDimensions = formData.enableApproachDimensions;
+  approaches.forEach((entry) => {
+    entry.propertyEntranceCount = approaches.length;
+    entry.enableApproachDimensions = formData.enableApproachDimensions;
 
     if (property) {
-      property.approachWidth = formData.approachWidth
-      approach.updateWidth(Number(formData.approachWidth) / property.scale)
+      entry.updateWidth(Number(formData.approachWidth) / property.scale)
     }
+  });
 
-  }
-
-  if (parking) {
-    parking.parkingPer1000Max = formData.parkingPer1000Max;
-    parking.parkingPer1000Min = formData.parkingPer1000Min;
-    parking.parkingPer1000Min = formData.parkingPerUnit;
-    parking.landscapeIsland = formData.landscapeIsland;
-    parking.halfStreetDriveway = formData.halfStreetDriveway;
-    parking.showDrivewayControlPoints = formData.showDrivewayControlPoints;
-    parking.parkingSide = formData.parkingSide;
-  }
+  parkingLots.forEach((lot) => {
+    lot.parking.parkingPer1000Max = formData.parkingPer1000Max;
+    lot.parking.parkingPer1000Min = formData.parkingPer1000Min;
+    lot.parking.parkingPer1000Min = formData.parkingPerUnit;
+    lot.parking.landscapeIsland = formData.landscapeIsland;
+    lot.parking.halfStreetDriveway = formData.halfStreetDriveway;
+    lot.parking.showDrivewayControlPoints = formData.showDrivewayControlPoints;
+    lot.parking.parkingSide = formData.parkingSide;
+  });
 
 
   if (buildingsGroup) {
@@ -1920,29 +2399,27 @@ function updateGlobalVariables(
   }
 
 
-  if (garbage) { }
   if (bikeParking) { }
 
-  if (approach && parking && property && garbage) {
+  if (approach && primaryLot && property) {
     property.drivewayWidth = formData.drivewayWidth;
     property.taperedDriveway = formData.taperedDriveway;
 
     property.hasGarbageEnclosure = formData.hasGarbageEnclosure;
 
-    parking.updateParkingGlobals(
-      property,
-      Number(formData.parkingStalls) || 0,
-      Number(formData.handicappedParkingStalls) || 0,
-      Number(formData.compactParkingStalls) || 0,
-      garbage,
-      buildingsGroup?.buildings,
-      approach,
-    );
-    parking.updateWidth(Number(formData.drivewayWidth) / property.scale);
-
-    parking.calculateParkingOutline(property, garbage, approach)
-
-
+    parkingLots.forEach((lot) => {
+      lot.parking.updateParkingGlobals(
+        property,
+        Number(formData.parkingStalls) || 0,
+        Number(formData.handicappedParkingStalls) || 0,
+        Number(formData.compactParkingStalls) || 0,
+        lot.garbage,
+        buildingsGroup?.buildings,
+        approach,
+      );
+      lot.parking.updateWidth(Number(formData.drivewayWidth) / property.scale);
+      lot.parking.calculateParkingOutline(property, lot.garbage, approach);
+    });
   }
 }
 

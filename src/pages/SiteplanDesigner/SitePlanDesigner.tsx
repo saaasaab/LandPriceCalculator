@@ -63,7 +63,7 @@ import { Map, ArrowRight, Ruler, FileImage, Delete, Car, Footprints, BuildingIco
 
 import { Button, Card, CardContent, Checkbox, Input } from '../../components/ui';
 
-import sketchForSiteplan from './sketchForSiteplan';
+import sketchForSiteplan, { type ParkingLotEntry } from './sketchForSiteplan';
 import ImageUploader from './ImageUploader';
 
 import './SitePlanDesigner.scss';
@@ -71,12 +71,11 @@ import CollapsibleSection from './CollapsibleSection';
 import AlphaBanner from './AlphaBanner';
 import { FormDataInputs, initialFormData } from '../../utils/SiteplanGeneratorUtils';
 import { Property } from './SitePlanClasses/Property';
+import { EntranceDrivewayNetwork } from './SitePlanClasses/EntranceDrivewayNetwork';
 import { Approach } from './SitePlanClasses/Approach';
-import { Garbage } from './SitePlanClasses/Garbage';
 // import { Building } from './SitePlanClasses/Building';
-import { Parking } from './SitePlanClasses/Parking';
-import Slider from '../../components/Slider';
 import { BikeParking } from './SitePlanClasses/BikeParking';
+import Slider from '../../components/Slider';
 import { VisibilityGraph } from '../VisibilityGraph';
 import { BuildingsGroup } from './SitePlanClasses/BuildingsGroup';
 import ConfirmationModal from '../../components/ConfirmationModal';
@@ -228,12 +227,20 @@ const SitePlanGenerator: React.FC = () => {
   const setbackLengthFloatingInputRef = useRef<HTMLInputElement>(null);
 
   const propertyRef = useRef<Property | null>(null);
-  const approachRef = useRef<Approach | null>(null);
-  const parkingRef = useRef<Parking | null>(null);
+  const approachesRef = useRef<Approach[]>([]);
+  const clearApproachesRef = useRef<boolean>(false);
+  const parkingLotsRef = useRef<ParkingLotEntry[]>([]);
+  const clearParkingLotsRef = useRef<boolean>(false);
+  const entranceDrivewayNetworkRef = useRef<EntranceDrivewayNetwork>(new EntranceDrivewayNetwork());
+  const parkingApproachIdRef = useRef<string | null>(null);
+  const reparkParkingLotsRef = useRef<boolean>(false);
+  const [parkingApproachOptions, setParkingApproachOptions] = useState<
+    { id: string; label: string }[]
+  >([]);
+  const [selectedParkingApproachId, setSelectedParkingApproachId] = useState<string>('');
   // const buildingsGroupRef = useRef<Building | null>(null);
   const buildingsGroupRef = useRef<(BuildingsGroup | null)>(null);
 
-  const garbageRef = useRef<Garbage | null>(null);
   const bikeParkingRef = useRef<BikeParking | null>(null);
 
   let visibilityGraphSolverRef = useRef<VisibilityGraph | null>(null)
@@ -243,15 +250,45 @@ const SitePlanGenerator: React.FC = () => {
     const updateVariables = () => {
       // setCount(prev=>prev+1)
       const property = propertyRef.current;
-      const approach = approachRef.current;
-      const parking = parkingRef.current;
-      // const buildingsGroup = buildingsGroupRef.current;
-      const garbage = garbageRef.current;
+      const approaches = approachesRef.current;
+      const parkingLots = parkingLotsRef.current;
       const bikeParking = bikeParkingRef.current;
+
+      const approachOptions = approaches.map((approach, index) => {
+        const sameEdgeCount = approaches.filter(
+          (entry) => entry.propertyEdgeIndex === approach.propertyEdgeIndex,
+        ).length;
+        const edgeLabel =
+          sameEdgeCount > 1
+            ? ` (Edge ${approach.propertyEdgeIndex + 1})`
+            : '';
+        return {
+          id: approach.id,
+          label: `Entrance ${index + 1}${edgeLabel}`,
+        };
+      });
+      setParkingApproachOptions(approachOptions);
+
+      if (approaches.length === 0) {
+        parkingApproachIdRef.current = null;
+        setSelectedParkingApproachId('');
+      } else if (!approaches.some((approach) => approach.id === parkingApproachIdRef.current)) {
+        parkingApproachIdRef.current = approaches[0].id;
+        setSelectedParkingApproachId(approaches[0].id);
+      } else {
+        setSelectedParkingApproachId((prev) =>
+          prev === parkingApproachIdRef.current
+            ? prev
+            : (parkingApproachIdRef.current ?? approaches[0].id),
+        );
+      }
 
       setMetrics((prev) => {
         const next: SiteMetrics = { ...prev };
-        next.approachArea = approach?.area ?? prev.approachArea;
+        next.approachArea = approaches.reduce(
+          (total, entry) => total + (entry.area ?? 0),
+          0,
+        ) || prev.approachArea;
         next.bikeParkingArea = bikeParking?.area ?? prev.bikeParkingArea;
         next.buildingCoveragePercentage =
           property?.buildingCoveragePercentage ?? prev.buildingCoveragePercentage;
@@ -259,28 +296,42 @@ const SitePlanGenerator: React.FC = () => {
           property?.buildingCoveragePercentageAllowed ??
           prev.buildingCoveragePercentageAllowed;
         next.drivewayArea = property?.drivewayArea ?? prev.drivewayArea;
-        next.garbageArea = garbage?.area ?? prev.garbageArea;
-        next.handicappedStallsCount =
-          parking?.handicappedParkingNumTarget ?? prev.handicappedStallsCount;
+        next.garbageArea = parkingLots.reduce(
+          (total, lot) => total + (lot.garbage.area ?? 0),
+          0,
+        ) || prev.garbageArea;
+        next.handicappedStallsCount = parkingLots.reduce(
+          (total, lot) => total + (lot.parking.handicappedParkingNumTarget ?? 0),
+          0,
+        ) || prev.handicappedStallsCount;
         next.imperviousSurfaceAllowed =
           property?.imperviousSurfaceAllowed ?? prev.imperviousSurfaceAllowed;
         next.imperviousSurfaceArea = property?.imperviousSurfaceArea ?? prev.imperviousSurfaceArea;
         next.landscape = property?.landscapeArea ?? prev.landscape;
         next.landscapeRequiredPercent =
           property?.landscapeRequiredPercent ?? prev.landscapeRequiredPercent;
-        next.offStreetParkingRequired =
-          parking?.offStreetParkingRequired ?? prev.offStreetParkingRequired;
-        next.parkingArea = parking?.parkingArea ?? prev.parkingArea;
-        next.parkingPer1000Max = parking?.parkingPer1000Max ?? prev.parkingPer1000Max;
-        next.parkingPer1000Min = parking?.parkingPer1000Min ?? prev.parkingPer1000Min;
-        next.parkingStallsArea = parking?.parkingStallsArea ?? prev.parkingStallsArea;
+        next.offStreetParkingRequired = parkingLots[0]?.parking.offStreetParkingRequired
+          ?? prev.offStreetParkingRequired;
+        next.parkingArea = parkingLots.reduce(
+          (total, lot) => total + (lot.parking.parkingArea ?? 0),
+          0,
+        ) || prev.parkingArea;
+        next.parkingPer1000Max = parkingLots[0]?.parking.parkingPer1000Max ?? prev.parkingPer1000Max;
+        next.parkingPer1000Min = parkingLots[0]?.parking.parkingPer1000Min ?? prev.parkingPer1000Min;
+        next.parkingStallsArea = parkingLots.reduce(
+          (total, lot) => total + (lot.parking.parkingStallsArea ?? 0),
+          0,
+        ) || prev.parkingStallsArea;
         next.propertyArea = property?.areaOfProperty ?? prev.propertyArea;
         next.totalAreaDedicatedToSetbacks =
           property?.totalAreaDedicatedToSetbacks ?? prev.totalAreaDedicatedToSetbacks;
         next.totalSetbackPercentage = Math.round(
           (next.totalAreaDedicatedToSetbacks / (property?.areaOfProperty || 1)) * 100
         );
-        next.totalParkingStalls = parking?.parkingStallsNumber ?? prev.totalParkingStalls;
+        next.totalParkingStalls = parkingLots.reduce(
+          (total, lot) => total + (lot.parking.parkingStallsNumber ?? 0),
+          0,
+        ) || prev.totalParkingStalls;
         next.zoning = property?.zoning ?? prev.zoning;
         return next;
       });
@@ -338,6 +389,30 @@ const SitePlanGenerator: React.FC = () => {
     return { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 };
   };
 
+  const handleParkingApproachChange = (approachId: string) => {
+    parkingApproachIdRef.current = approachId;
+    setSelectedParkingApproachId(approachId);
+    reparkParkingLotsRef.current = true;
+  };
+
+  const parkingApproachPicker =
+    parkingApproachOptions.length > 1 ? (
+      <div className="site-plan-generator__input-group">
+        <label htmlFor="parkingApproach">Attach Parking To</label>
+        <select
+          id="parkingApproach"
+          value={selectedParkingApproachId}
+          onChange={(e) => handleParkingApproachChange(e.target.value)}
+        >
+          {parkingApproachOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    ) : null;
+
   const params = {
     canvasContainerRef,
     canvasRef,
@@ -358,10 +433,14 @@ const SitePlanGenerator: React.FC = () => {
     propertyOpacityRef,
     imageOpacityRef,
     propertyRef,
-    approachRef,
-    parkingRef,
+    approachesRef,
+    clearApproachesRef,
+    parkingLotsRef,
+    clearParkingLotsRef,
+    entranceDrivewayNetworkRef,
+    parkingApproachIdRef,
+    reparkParkingLotsRef,
     buildingsGroupRef,
-    garbageRef,
     bikeParkingRef,
 
     visibilityGraphSolverRef,
@@ -830,10 +909,10 @@ const SitePlanGenerator: React.FC = () => {
 
     {
       id: 'approach',
-      title: '5. Mark Property Entrance',
+      title: '5. Mark Property Entrances',
       icon: <ArrowRight />,
-      description: 'Click to indicate where the property is accessed from',
-      help: 'Mark where vehicles enter the property, typically from the street or main access road.',
+      description: 'Click property edges to add entrances; Shift+click an entrance to remove it',
+      help: 'Click any property edge to place an entrance — multiple entrances can share the same edge. Drag an entrance marker to slide it along the edge. Shift+click an entrance to remove it. Choose which entrance parking connects to when you have multiple. Enable "Connect Entrances" to link them with an editable driveway (Shift+click a segment to add a node, drag nodes to reshape).',
       onClick: () => { selectApproach() },
       children:
         <>
@@ -870,15 +949,22 @@ const SitePlanGenerator: React.FC = () => {
               />
             </div>
 
-
+            <div className="site-plan-generator__checkbox">
+              <label htmlFor="connectEntrances">Connect Entrances</label>
+              <Checkbox
+                id="connectEntrances"
+                checked={formData.connectEntrances}
+                onChange={(e) => handleBooleanInput(e, 'connectEntrances')}
+              />
+            </div>
 
             <div className="site-plan-generator__button">
-              <label htmlFor="deleteDriveway">Delete Driveway</label>
+              <label htmlFor="deleteDriveway">Clear All Entrances</label>
 
               <Button
                 id="deleteDriveway"
 
-                onClick={() => { approachRef.current = null; }}
+                onClick={() => { clearApproachesRef.current = true; }}
               />
             </div>
 
@@ -894,13 +980,15 @@ const SitePlanGenerator: React.FC = () => {
     },
     {
       id: 'parking',
-      title: '6. Place Parking lot',
+      title: '6. Place Parking Lots',
       icon: <Car />,
-      description: 'Places the parking lot',
-      help: 'Click inside the parcel where you want the parking lot centered, then drag or adjust settings as needed.',
+      description: 'Click inside the parcel to add parking lots',
+      help: 'Click inside the parcel to place a parking lot. Click an existing lot to remove it. Choose which entrance the lot connects to when you have multiple.',
       onClick: () => { createParking() },
       children:
         <div style={{ marginTop: '10px' }}>
+
+          {parkingApproachPicker}
 
           <div className="site-plan-generator__input-group">
             <label htmlFor="parkingStalls">Parking Stalls (#)</label>
@@ -1071,6 +1159,14 @@ const SitePlanGenerator: React.FC = () => {
               min={0}
               value={formData.parkingPerUnit || ""}
               onChange={(e) => handleNumberInput(e, 'parkingPerUnit')}
+            />
+          </div>
+
+          <div className="site-plan-generator__button">
+            <label htmlFor="clearParkingLots">Clear All Parking Lots</label>
+            <Button
+              id="clearParkingLots"
+              onClick={() => { clearParkingLotsRef.current = true; }}
             />
           </div>
 
@@ -1474,7 +1570,7 @@ const CANVAS_STEP_NAV_LABELS: Record<string, string> = {
   boundary: "Boundary",
   scale: "Scale",
   setbacks: "Setbacks",
-  approach: "Entrance",
+  approach: "Entrances",
   parking: "Parking",
   building: "Building",
   moveComponents: "Move",
