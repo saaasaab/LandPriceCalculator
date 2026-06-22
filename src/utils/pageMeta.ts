@@ -241,6 +241,24 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
       },
     ],
   ),
+  [routes.LEASE_EXPIRY_SCHEDULE]: calculator(
+    routes.LEASE_EXPIRY_SCHEDULE,
+    "When Do My Tenant Leases Expire?",
+    "Track tenant lease expirations, rent rollover risk, and weighted average lease term. Free printable lease expiry schedule for property managers.",
+    "A lease expiry schedule lists each tenant's rent and end date so you can see rollover concentration by year. Enter leases to get WALT, weighted average expiry, and a printable timeline.",
+    [
+      {
+        question: "What is weighted average lease term (WALT)?",
+        answer:
+          "WALT is the rent-weighted average of remaining lease term across all tenants. Higher-rent tenants with longer terms increase WALT more than small short-term leases.",
+      },
+      {
+        question: "How do you calculate lease rollover risk?",
+        answer:
+          "Sum monthly rent for leases expiring within 12, 24, or 36 months and divide by total rent. This shows what percentage of income is at risk of vacancy or re-leasing.",
+      },
+    ],
+  ),
   [routes.INDUSTRIAL_PRICE_PER_SQFT]: calculator(
     routes.INDUSTRIAL_PRICE_PER_SQFT,
     "What Should I Pay Per SF for Industrial Property?",
@@ -427,6 +445,7 @@ const PAGE_META_BY_E_PAGE_NAME: Partial<Record<EPageNames, PageMetaConfig>> = {
   [EPageNames.INDUSTRIAL_PROFORMA]: PAGE_META[routes.INDUSTRIAL_PROFORMA],
   [EPageNames.MULTI_FAMILY_PRICE_PER_DOOR]: PAGE_META[routes.MULTI_FAMILY_PRICE_PER_DOOR],
   [EPageNames.HOME_MORTGAGE_CALCULATOR]: PAGE_META[routes.HOME_MORTGAGE_CALCULATOR],
+  [EPageNames.LEASE_EXPIRY_SCHEDULE]: PAGE_META[routes.LEASE_EXPIRY_SCHEDULE],
   [EPageNames.INDUSTRIAL_PRICE_PER_SQFT]: PAGE_META[routes.INDUSTRIAL_PRICE_PER_SQFT],
   [EPageNames.IRR_CALCULATOR]: PAGE_META[routes.IRR_CALCULATOR],
   [EPageNames.HARD_MONEY_COST_ESTIMATOR]: PAGE_META[routes.HARD_MONEY_COST_ESTIMATOR],

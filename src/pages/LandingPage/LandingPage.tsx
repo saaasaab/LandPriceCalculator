@@ -22,6 +22,7 @@ import {
   Coins,
   Home as HomeIcon,
   GitFork,
+  CalendarClock,
   // Construction
 } from 'lucide-react';
 
@@ -150,6 +151,15 @@ const LandingPage: React.FC = () => {
       link: routes.MULTIFAMILY_ANALYSIS,
       component: EVERYTHING_BURGER,
       pageType: EPageNames.MULTIFAMILY_ANALYSIS
+    },
+    {
+      id: 'lease-expiry-schedule',
+      title: 'Lease Expiry Schedule',
+      description: 'Track tenant expirations, WALT, and rent rollover risk with a printable report.',
+      icon: <CalendarClock size={24} />,
+      link: routes.LEASE_EXPIRY_SCHEDULE,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.LEASE_EXPIRY_SCHEDULE
     },
     {
       id: 'industrial-sqft',

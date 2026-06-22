@@ -2,8 +2,18 @@
   .navbar,
   .hover-add-icon.hover-add-icon-active,
   footer,
-  button.copy-url-button {
+  button.copy-url-button,
+  .action-buttons {
     display: none !important;
+  }
+
+  .land-calculator-container > .navbar {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
   }
 
   .group-section {

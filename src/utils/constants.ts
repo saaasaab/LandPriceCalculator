@@ -553,6 +553,48 @@ export const DEFAULT_VALUES = {
         balloonMonth: "60",
         mortgageCalculatorLevel: "beginner",
     },
+    [EPageNames.LEASE_EXPIRY_SCHEDULE]: {
+        ...DEFAULT_VALUES_ZEROS,
+        propertyName: "",
+        leases: [
+            {
+                id: "sample-1",
+                tenantName: "Acme Logistics",
+                unit: "101",
+                monthlyRent: 5200,
+                startDate: "2023-01-01",
+                endDate: "2026-12-31",
+                sqft: 2400,
+            },
+            {
+                id: "sample-2",
+                tenantName: "Bright Dental",
+                unit: "205",
+                monthlyRent: 3800,
+                startDate: "2022-06-01",
+                endDate: "2027-05-31",
+                sqft: 1800,
+            },
+            {
+                id: "sample-3",
+                tenantName: "Northline Fitness",
+                unit: "310",
+                monthlyRent: 6100,
+                startDate: "2021-03-01",
+                endDate: "2028-02-29",
+                sqft: 3200,
+            },
+            {
+                id: "sample-4",
+                tenantName: "Summit Law Group",
+                unit: "402",
+                monthlyRent: 4500,
+                startDate: "2024-01-01",
+                endDate: "2026-09-30",
+                sqft: 2100,
+            },
+        ],
+    },
 }
 
 

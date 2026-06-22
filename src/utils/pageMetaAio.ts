@@ -187,6 +187,23 @@ export const AIO_EXTRAS: Record<string, AioExtras> = {
       { path: routes.HOUSE_FLIPPING_CALCULATOR, label: "House flipping ROI calculator" },
     ],
   },
+  [routes.LEASE_EXPIRY_SCHEDULE]: {
+    keyTakeaways: [
+      "WALT measures rent-weighted remaining lease term across your tenant roster.",
+      "Track rent expiring in 12, 24, and 36 months to quantify rollover risk.",
+      "A printable schedule helps property managers plan renewals and re-leasing.",
+    ],
+    howToSteps: [
+      { name: "Enter tenant lease details", text: "Add each tenant's name, unit, monthly rent, start date, and lease end date." },
+      { name: "Review portfolio metrics", text: "Check total rent, WALT, weighted average expiry, and rollover percentages." },
+      { name: "Print or share the schedule", text: "Use the print button to generate a report for owners or asset management meetings." },
+    ],
+    relatedLinks: [
+      { path: routes.MULTIFAMILY_ANALYSIS, label: "Multifamily cash flow proforma" },
+      { path: routes.INDUSTRIAL_PROFORMA, label: "Commercial property proforma calculator" },
+      { path: routes.MULTI_FAMILY_PRICE_PER_DOOR, label: "Multifamily price per door calculator" },
+    ],
+  },
   [routes.INDUSTRIAL_PRICE_PER_SQFT]: {
     keyTakeaways: [
       "Value per SF equals stabilized NOI divided by cap rate, then divided by leasable area.",

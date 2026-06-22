@@ -10,10 +10,10 @@
     [X] Waterfall Analysis for investor distributions
     [ ] 5 year distribution chart
     [X] Cash flow Analysis
-    [ ] Rent roll analysis and 
+    [ ] Rent roll analysis 
     [ ] Market rent determination
-    [ ] Lease Expiry Schedule
-    [ ] Loan Amortization Schedule
+    [X] Lease Expiry Schedule
+    [ ] Loan Amortization Schedules
     [ ] Acquisition Cost Model
     [ ] Tax Impact analysis
     [ ] Depreciation Modeling
@@ -31,7 +31,6 @@
 
 
 [ ] PDF form to fun fillible form
-You already have some strong real estate tools, but here are additional **quick-to-build** tools that could add value and bring in more users:  
 
 ### 🔹 **Deal Analysis & Valuation Tools**
 1. **📊 ARV (After Repair Value) Calculator**  
@@ -99,5 +98,3 @@ You already have some strong real estate tools, but here are additional **quick-
 
 17. **🛠️ Rehab Cost vs. Resale Value Analyzer**  
     - Users input potential rehab upgrades, and the tool estimates added value.  
-
-Would any of these be a good fit for your roadmap? 🚀

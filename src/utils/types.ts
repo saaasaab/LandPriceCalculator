@@ -78,6 +78,7 @@ export enum EPageNames {
     CONSTRUCTION_LOAN_CALCULATOR = "CONSTRUCTION_LOAN_CALCULATOR",
     SITE_PLAN_BUILDER = "SITE_PLAN_BUILDER",
     HOME_MORTGAGE_CALCULATOR = "HOME_MORTGAGE_CALCULATOR",
+    LEASE_EXPIRY_SCHEDULE = "LEASE_EXPIRY_SCHEDULE",
 }
 
 export enum EPageTitles {
@@ -99,6 +100,7 @@ export enum EPageTitles {
     CONSTRUCTION_LENDING_COSTS = "Construction Lending Cost Calculator",
     CONSTRUCTION_LOAN_CALCULATOR = "Construction Loan Calculator",
     HOME_MORTGAGE_CALCULATOR = "Home Mortgage Calculator",
+    LEASE_EXPIRY_SCHEDULE = "Lease Expiry Schedule",
 }
 
 
@@ -330,6 +332,8 @@ export enum EAllStates {
     // totalPermanentInterest = "totalPermanentInterest",
     milestones = "milestones",
     loanTranches = "loanTranches",
+    propertyName = "propertyName",
+    leases = "leases",
 
     cashOnCashReturn="cashOnCashReturn",
     // totalInterestAccrued = "totalInterestAccrued",

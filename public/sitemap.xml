@@ -71,6 +71,12 @@
     <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
 
+  <!-- Lease Expiry Schedule: track tenant lease expirations, WALT, and rent rollover risk. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/lease-expiry-schedule</loc>
+    <lastmod>2026-06-21T00:00:00+00:00</lastmod>
+  </url>
+
   <!-- Price Per SQFT Calculator - Industrial: industrial property valuation metrics based on lease rates and expenses. -->
   <url>
     <loc>https://www.landpricecalculator.com/industrial-price-per-sqft-calculator</loc>

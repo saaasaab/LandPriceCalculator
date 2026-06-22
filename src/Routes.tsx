@@ -113,6 +113,7 @@ export function AppRouter() {
               <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL_GENERATOR} />} />
               <Route path={routes.HOUSE_FLIPPING_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HOUSE_FLIPPING_CALCULATOR} />} />
               <Route path={routes.CONSTRUCTION_LOAN_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_LOAN_CALCULATOR} />} />
+              <Route path={routes.LEASE_EXPIRY_SCHEDULE} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.LEASE_EXPIRY_SCHEDULE} />} />
 
               <Route path={routes.HOW_TO_LAND_FOR_MULTIFAMILY} element={<BlogPost />} />
 

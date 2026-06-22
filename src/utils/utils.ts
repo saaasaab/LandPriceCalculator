@@ -48,6 +48,30 @@ export const getQueryParamNumber = (queryParam: string, queryParams: URLSearchPa
   return param ?? undefined
 };
 
+export const jsonStateKeys = ["leases", "milestones", "loanTranches"];
+
+export function serializeQueryParamValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+export function parseQueryParamValue<T>(key: string, raw: string, fallback: T): T {
+  if (key === "requiresHandicappedParking" || key === "enableBalloonPayment") {
+    return (raw === "true" || raw === "1") as T;
+  }
+
+  if (jsonStateKeys.includes(key) || raw.startsWith("[") || raw.startsWith("{")) {
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return fallback;
+    }
+  }
+
+  return raw as T;
+}
+
 
 export const getQueryParamBoolean = (queryParam: string, queryParams: URLSearchParams): boolean | undefined => {
   const param = queryParams.get(queryParam)
@@ -294,11 +318,11 @@ export const copyToClipboard = (
   const queryString =
     "?" +
     (Object.keys(params) as Array<keyof typeof params>)
-      .map((key) =>
-        params[key]
-          ? `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-          : undefined
-      )
+      .map((key) => {
+        const value = params[key];
+        if (value === null || value === undefined || value === "") return undefined;
+        return `${encodeURIComponent(String(key))}=${encodeURIComponent(serializeQueryParamValue(value))}`;
+      })
       .filter((qs) => qs)
       .join("&");
 

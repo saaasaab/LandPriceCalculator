@@ -17,6 +17,7 @@ import IndustrialProformaCalculator from './IndustrialProformaCalculator';
 import MultifamilyDevelopmentCalculator from './MultiFamilyDevelopmentCalculator';
 import HomeMortgageCalculator from './HomeMortgageCalculator';
 import ConstructionLoanCalculator from '../futureItems/ConstructionLoanCalculator';
+import LeaseExpiryScheduleCalculator from './LeaseExpiryScheduleCalculator';
 import { HELP_PAGES } from '../utils/constants';
 
 
@@ -97,6 +98,11 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                 />
             case EPageNames.HOME_MORTGAGE_CALCULATOR:
                 return <HomeMortgageCalculator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.LEASE_EXPIRY_SCHEDULE:
+                return <LeaseExpiryScheduleCalculator
                     isMobile={isMobile}
                     page={page}
                 />

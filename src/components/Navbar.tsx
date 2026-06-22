@@ -19,6 +19,7 @@ import {
   PiggyBank,
   Ruler,
   TrendingUp,
+  CalendarClock,
 } from "lucide-react";
 import logo from "../assets/LandCalculatorLogo.svg";
 import "./Navbar.scss";
@@ -50,6 +51,7 @@ export const routes = {
   HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
   CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
   HOME_MORTGAGE_CALCULATOR: "/home-mortgage-calculator",
+  LEASE_EXPIRY_SCHEDULE: "/lease-expiry-schedule",
   HOME: "/",
 
   // Authentication & User-related Routes
@@ -81,6 +83,7 @@ export const calculatorIcons: Record<string, React.ReactNode> = {
   [routes.HOUSE_FLIPPING_CALCULATOR]: <PaintRoller {...navIconProps} />,
   [routes.WATERFALL]: <GitFork {...navIconProps} />,
   [routes.HOME_MORTGAGE_CALCULATOR]: <Banknote {...navIconProps} />,
+  [routes.LEASE_EXPIRY_SCHEDULE]: <CalendarClock {...navIconProps} />,
   [routes.CONSTRUCTION_LOAN_CALCULATOR]: <HardHat {...navIconProps} />,
   [routes.SITE_PLAN_BUILDER]: <Map {...navIconProps} />,
   [routes.LOGIN]: <LogIn {...authLinkIconProps} />,
@@ -158,6 +161,7 @@ const Navbar = () => {
           <span className="dropdown-title">Analysis Tools</span>
           <div className="dropdown-content">
             <IconLink route={routes.MULTIFAMILY_ANALYSIS} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTIFAMILY_ANALYSIS} />
+            <IconLink route={routes.LEASE_EXPIRY_SCHEDULE} handleToggleMenu={handleToggleMenu} text={EPageTitles.LEASE_EXPIRY_SCHEDULE} />
             {/* <IconLink route={routes.INDUSTRIAL_PROFORMA} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PROFORMA} /> */}
 
             <IconLink route={routes.MULTI_FAMILY_PRICE_PER_DOOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR} />

@@ -1,0 +1,449 @@
+.lease-expiry-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .screen-only {
+    display: block;
+  }
+
+  .print-only {
+    display: none;
+  }
+
+  .property-name-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    input {
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+  }
+
+  .lease-input-section,
+  .lease-metrics-section,
+  .lease-timeline-section,
+  .lease-schedule-section,
+  .lease-input-print {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    h3 {
+      font-size: 1rem;
+      color: #0f172a;
+    }
+  }
+
+  .add-lease-button {
+    background: #1d4ed8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &:hover {
+      background: #1e40af;
+    }
+  }
+
+  .lease-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+
+    th,
+    td {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 8px;
+      text-align: left;
+    }
+
+    th {
+      color: #475569;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      min-width: 0;
+    }
+
+    .rent-input {
+      max-width: 110px;
+    }
+
+    .rent-type-select {
+      width: 100%;
+      min-width: 110px;
+      padding: 6px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: white;
+    }
+
+    .rent-input-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      &__hint {
+        font-size: 0.75rem;
+        color: #64748b;
+      }
+    }
+
+    .sqft-input {
+      max-width: 90px;
+    }
+
+    .remove-button {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+
+      &:hover {
+        color: #dc2626;
+      }
+    }
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .metric-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+
+    .metric-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+    }
+
+    .metric-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  }
+
+  .timeline-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px;
+    gap: 12px;
+    align-items: center;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 60px 1fr 90px;
+      gap: 8px;
+    }
+  }
+
+  .timeline-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  .timeline-bar-track {
+    background: #e2e8f0;
+    border-radius: 999px;
+    height: 22px;
+    overflow: hidden;
+  }
+
+  .timeline-bar-fill {
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    height: 100%;
+    border-radius: 999px;
+    min-width: 4px;
+  }
+
+  .timeline-meta {
+    font-size: 0.8rem;
+    color: #475569;
+    text-align: right;
+  }
+
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+
+    th,
+    td {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 8px;
+      text-align: left;
+    }
+
+    th {
+      color: #475569;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+
+    .expiring-soon {
+      color: #b45309;
+      font-weight: 600;
+    }
+
+    .expired {
+      color: #dc2626;
+      font-weight: 600;
+    }
+  }
+}
+
+@media print {
+  @page {
+    margin: 0.15in 0.4in 0.35in;
+  }
+
+  html,
+  body,
+  #root,
+  .app {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    min-height: unset !important;
+  }
+
+  .land-calculator-container {
+    min-height: unset !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .land-calculator:has(.lease-expiry-schedule) {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+
+    .app-header {
+      display: none !important;
+    }
+
+    .footer {
+      display: none !important;
+    }
+  }
+
+  .lease-expiry-schedule {
+    gap: 8px;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    .screen-only,
+    .no-print {
+      display: none !important;
+    }
+
+    .print-only {
+      display: block !important;
+    }
+
+    .print-report-header {
+      display: flex !important;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 0 4px;
+      margin: 0;
+      border-bottom: 1px solid #cbd5e1;
+
+      &__titles {
+        text-align: left;
+      }
+
+      h1 {
+        font-size: 11pt;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      &__property {
+        font-size: 8.5pt;
+        color: #475569;
+        margin: 2px 0 0;
+        line-height: 1.2;
+      }
+
+      span {
+        font-size: 8pt;
+        color: #64748b;
+        white-space: nowrap;
+        line-height: 1.2;
+      }
+    }
+
+    .lease-input-print,
+    .lease-metrics-section,
+    .lease-timeline-section,
+    .lease-schedule-section {
+      padding: 0;
+      margin: 0;
+      border-radius: 0;
+      background: transparent;
+      page-break-inside: avoid;
+    }
+
+    .lease-input-print {
+      padding-top: 4px;
+    }
+
+    .lease-input-print h3,
+    .section-header h3 {
+      font-size: 9pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 2px;
+    }
+
+    .section-header {
+      margin-bottom: 2px;
+    }
+
+    .metrics-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+
+    .metric-card {
+      padding: 4px 6px;
+      border-radius: 3px;
+      background: #f8fafc;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+
+      .metric-label {
+        font-size: 6.5pt;
+        line-height: 1.2;
+        letter-spacing: 0.02em;
+      }
+
+      .metric-value {
+        font-size: 9pt;
+        line-height: 1.2;
+        font-weight: 700;
+      }
+
+      .metric-sub {
+        font-size: 6.5pt;
+        line-height: 1.2;
+      }
+    }
+
+    .timeline-bars {
+      gap: 4px;
+    }
+
+    .timeline-row {
+      grid-template-columns: 36px 1fr 100px;
+      gap: 6px;
+    }
+
+    .timeline-label {
+      font-size: 8pt;
+    }
+
+    .timeline-bar-track {
+      height: 10px;
+    }
+
+    .timeline-meta {
+      font-size: 7pt;
+    }
+
+    .timeline-bar-fill {
+      background: #2563eb !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .schedule-table {
+      font-size: 8pt;
+
+      th,
+      td {
+        padding: 3px 6px;
+        border-bottom: 1px solid #cbd5e1;
+      }
+
+      th {
+        font-size: 7pt;
+      }
+
+      .expiring-soon,
+      .expired {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    .lease-schedule-section {
+      page-break-before: auto;
+    }
+  }
+}
