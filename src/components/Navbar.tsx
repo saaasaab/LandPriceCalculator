@@ -38,7 +38,7 @@ export const routes = {
   COMMERCIAL_DEVELOPMENT: "/commercial-development",
   RESIDENTIAL_DEVELOPMENT: "/residential-development",
   MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
-  INDUSTRIAL_PRICE_PER_SQFT: "industrial-price-per-sqft-calculator",
+  INDUSTRIAL_PRICE_PER_SQFT: "/industrial-price-per-sqft-calculator",
   MULTIFAMILY_ANALYSIS: "/multifamily-analysis",
   INDUSTRIAL_PROFORMA: "/industrial-commercial-proforma",
   HOW_TO_LAND_FOR_MULTIFAMILY: "/how-to-analyzis-land-for-multifamily",

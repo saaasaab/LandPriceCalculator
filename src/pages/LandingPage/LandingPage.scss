@@ -28,6 +28,19 @@
     }
   }
 
+  &__faq,
+  &__related {
+    max-width: 900px;
+    width: 100%;
+    align-self: center;
+    padding: 0 20px 48px;
+  }
+
+  &__related {
+    padding-top: 0;
+    padding-bottom: 48px;
+  }
+
   .sidebar {
     width: 100%;
     min-width: 0;

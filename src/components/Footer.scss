@@ -1,0 +1,14 @@
+.site-footer {
+  text-align: center;
+  padding: 20px;
+  border-top: 1px solid #ddd;
+
+  a {
+    color: #1d4ed8;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

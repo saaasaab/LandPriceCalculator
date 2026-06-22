@@ -1,0 +1,29 @@
+.page-related {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+
+  h2 {
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  a {
+    color: #1d4ed8;
+    font-size: 0.95rem;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

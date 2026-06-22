@@ -5,104 +5,165 @@
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
+  <!-- Home page with access to all real estate development and investment calculators. -->
   <url>
     <loc>https://www.landpricecalculator.com/</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/multifamily-development</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/industrial-development</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/commercial-development</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/residential-development</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/multifamily-price-calculator</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/industrial-price-per-sqft-calculator</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/multifamily-analysis</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/industrial-commercial-proforma</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/how-to-analyzis-land-for-multifamily</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/irr-calculator</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/hard-money-calculator</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/waterfall-generator</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/construction-budget-generator</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/site-plan-builder</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/house-flipping-calculator</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/login</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/forgot-password</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
-  <url>
-    <loc>https://www.landpricecalculator.com/register</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
-  </url>
+
+  <!-- Landing page showcasing Land Price Calculator tools, calculators, and site plan builder. -->
   <url>
     <loc>https://www.landpricecalculator.com/landing</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
+
+  <!-- Multi-Family Development Calculator: comprehensive analysis for apartment and multifamily land development projects. -->
   <url>
-    <loc>https://www.landpricecalculator.com/end-free-trial</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
+    <loc>https://www.landpricecalculator.com/multifamily-development</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
+
+  <!-- Industrial Land Development Calculator: feasibility and cost analysis for industrial development sites. -->
   <url>
-    <loc>https://www.landpricecalculator.com/payment</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
+    <loc>https://www.landpricecalculator.com/industrial-development</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
+
+  <!-- Commercial Land Development Calculator: feasibility and cost analysis for commercial development projects. -->
   <url>
-    <loc>https://www.landpricecalculator.com/completion</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
+    <loc>https://www.landpricecalculator.com/commercial-development</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
+
+  <!-- Residential Land Development Calculator: lot yield, costs, and returns for residential subdivision projects. -->
   <url>
-    <loc>https://www.landpricecalculator.com/sign-up</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
+    <loc>https://www.landpricecalculator.com/residential-development</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
+
+  <!-- Construction Budget Generator: automated line-item construction budget creation for development projects. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/construction-budget-generator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Multi-Family Proforma: detailed income, expense, and cash flow modeling for multifamily investments. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/multifamily-analysis</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Industrial/Commercial Proforma: financial modeling for industrial and commercial property investments. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/industrial-commercial-proforma</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Price Per Door Calculator - Multifamily: max price per unit based on rent, expenses, and return targets. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/multifamily-price-calculator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Home Mortgage Calculator: monthly PITI payments, balloon options, and amortization over the loan term. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/home-mortgage-calculator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Price Per SQFT Calculator - Industrial: industrial property valuation metrics based on lease rates and expenses. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/industrial-price-per-sqft-calculator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Seller's IRR Estimator: calculate internal rate of return for seller financing and carryback scenarios. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/irr-calculator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Hard Money Loan Estimator: estimate points, interest, and total cost for hard money construction loans. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/hard-money-calculator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- House Flipping Calculator: analyze purchase, rehab, holding costs, and projected flip returns. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/house-flipping-calculator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Waterfall Distribution Generator: model preferred returns and profit splits between investment partners. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/waterfall-generator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Construction Loan Calculator: draw schedules, interest reserves, and lending costs for construction financing. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/construction-loan-calculator</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Site Plan Builder: interactive tool to draw property boundaries, parking, entrances, and site layouts. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/site-plan-builder</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- How to analyze land for multifamily: educational guide on evaluating land for apartment development. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/how-to-analyzis-land-for-multifamily</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Terms of service and usage policies for Land Price Calculator. -->
   <url>
     <loc>https://www.landpricecalculator.com/terms</loc>
-    <lastmod>2025-03-28T00:00:00+00:00</lastmod>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Pricing and subscription signup for Land Price Calculator premium access. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/sign-up</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- User login page for returning Land Price Calculator subscribers. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/login</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- New user registration page for Land Price Calculator accounts. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/register</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Password reset page for users who forgot their login credentials. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/forgot-password</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Subscription payment checkout page for Land Price Calculator plans. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/payment</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Payment success confirmation page after completing a subscription purchase. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/completion</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Free trial expiration notice and upgrade prompt for Land Price Calculator. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/end-free-trial</loc>
+    <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
 </urlset>

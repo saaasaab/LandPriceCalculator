@@ -20,11 +20,23 @@
     margin-bottom: 10px;
     border-bottom: 2px solid #ccc;
     border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
 
     h1 {
       margin: 0;
       font-size: 2rem;
       color: #333;
+    }
+
+    .app-header__geo-answer {
+      color: #334155;
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 720px;
+      font-weight: 500;
     }
     a{
       text-decoration: none;

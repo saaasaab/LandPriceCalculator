@@ -5,7 +5,6 @@ import { routes } from '../../components/Navbar';
 import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
 import { EPageNames, } from '../../utils/types';
 import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
-// import FloorPlanDesigner from '../FloorPlanDesigner/FloorPlanDesigner';
 import HeroSection from './HeroSection';
 import {
   Banknote,

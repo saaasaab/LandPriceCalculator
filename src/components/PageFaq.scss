@@ -1,0 +1,32 @@
+.page-faq {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+
+  h2 {
+    font-size: 1.1rem;
+    color: #1e293b;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__item {
+    dt {
+      h3 {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 0.95rem;
+      }
+    }
+
+    dd {
+      color: #475569;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+  }
+}

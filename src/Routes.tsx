@@ -32,6 +32,7 @@ const SitePlanDesigner = React.lazy(() => import('./pages/SiteplanDesigner/SiteP
 
 import './App.css'
 import { PopupProvider } from './context/PopupContext';
+import PageMeta from './components/PageMeta';
 
 export function AppRouter() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -162,6 +163,7 @@ export function AppRouter() {
        {/* <FeatureFlagsProvider> */}
       <AuthProvider>
         <PopupProvider>
+          <PageMeta />
           <Children />
         </PopupProvider>
       </AuthProvider>
@@ -214,6 +216,7 @@ export function LandingRouter() {
   return (
     <AuthProvider>
       <Router>
+        <PageMeta />
         <div className="land-calculator-container">
           <Routes>
             {/* <Route path="/*" element={<RedirectToApp />} /> */}

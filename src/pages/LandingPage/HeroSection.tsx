@@ -1,5 +1,4 @@
 import React from "react";
-// import p5 from "p5";
 import './HeroSection.scss';
 import { ChevronDown } from 'lucide-react';
 // import { useNavigate } from "react-router-dom";

@@ -1,3 +1,14 @@
 User-agent: *
 Allow: /
+
+# OpenAI / ChatGPT search and browsing crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
 Sitemap: https://www.landpricecalculator.com/sitemap.xml
