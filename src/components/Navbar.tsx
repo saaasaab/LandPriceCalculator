@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  Banknote,
   BarChart3,
   Building2,
   CircleDollarSign,
@@ -48,6 +49,7 @@ export const routes = {
   SITE_PLAN_BUILDER: "/site-plan-builder",
   HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
   CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
+  HOME_MORTGAGE_CALCULATOR: "/home-mortgage-calculator",
   HOME: "/",
 
   // Authentication & User-related Routes
@@ -78,6 +80,7 @@ export const calculatorIcons: Record<string, React.ReactNode> = {
   [routes.HARD_MONEY_COST_ESTIMATOR]: <PiggyBank {...navIconProps} />,
   [routes.HOUSE_FLIPPING_CALCULATOR]: <PaintRoller {...navIconProps} />,
   [routes.WATERFALL]: <GitFork {...navIconProps} />,
+  [routes.HOME_MORTGAGE_CALCULATOR]: <Banknote {...navIconProps} />,
   [routes.CONSTRUCTION_LOAN_CALCULATOR]: <HardHat {...navIconProps} />,
   [routes.SITE_PLAN_BUILDER]: <Map {...navIconProps} />,
   [routes.LOGIN]: <LogIn {...authLinkIconProps} />,
@@ -158,6 +161,7 @@ const Navbar = () => {
             {/* <IconLink route={routes.INDUSTRIAL_PROFORMA} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PROFORMA} /> */}
 
             <IconLink route={routes.MULTI_FAMILY_PRICE_PER_DOOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR} />
+            <IconLink route={routes.HOME_MORTGAGE_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HOME_MORTGAGE_CALCULATOR} />
             <IconLink route={routes.INDUSTRIAL_PRICE_PER_SQFT} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PRICE_PER_SQFT} />
             <IconLink route={routes.IRR_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.IRR_CALCULATOR} />
             <IconLink route={routes.HARD_MONEY_COST_ESTIMATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HARD_MONEY_COST_ESTIMATOR} />

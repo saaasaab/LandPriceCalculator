@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getQueryParamNumber } from '../utils/utils';
 
 
-const booleanStates = ["requiresHandicappedParking"]
+const booleanStates = ["requiresHandicappedParking", "enableBalloonPayment"]
 const dateStates = ["originalPurchaseDate"]
 
 export function usePersistedState2<T>(

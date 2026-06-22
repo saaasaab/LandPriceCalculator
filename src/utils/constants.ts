@@ -102,6 +102,12 @@ export const DEFAULT_VALUES_ZEROS = {
     hardMoneyLoanAdminFees: "0",
     gapLoanAdminFees: "0",
     closingCosts: "0",
+    pmiRate: "0",
+    hoaMonthly: "0",
+    extraMonthlyPayment: "0",
+    enableBalloonPayment: false,
+    balloonMonth: "0",
+    mortgageCalculatorLevel: "beginner",
 
     roof: "0",
     concrete: "0",
@@ -530,7 +536,23 @@ export const DEFAULT_VALUES = {
     },
     [EPageNames.CONSTRUCTION_LOAN_CALCULATOR]:{
         ...DEFAULT_VALUES_ZEROS,
-    }
+    },
+    [EPageNames.HOME_MORTGAGE_CALCULATOR]: {
+        ...DEFAULT_VALUES_ZEROS,
+        purchasePrice: "450,000",
+        downPayment: "20",
+        interestRate: "6.75",
+        duration: "30",
+        propertyTax: "1.1",
+        insurance: "0.35",
+        pmiRate: "0.5",
+        hoaMonthly: "0",
+        extraMonthlyPayment: "0",
+        closingCosts: "2.5",
+        enableBalloonPayment: false,
+        balloonMonth: "60",
+        mortgageCalculatorLevel: "beginner",
+    },
 }
 
 

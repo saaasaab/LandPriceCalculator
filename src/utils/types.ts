@@ -77,6 +77,7 @@ export enum EPageNames {
     CONSTRUCTION_LENDING_COSTS = "CONSTRUCTION_LENDING_COSTS",
     CONSTRUCTION_LOAN_CALCULATOR = "CONSTRUCTION_LOAN_CALCULATOR",
     SITE_PLAN_BUILDER = "SITE_PLAN_BUILDER",
+    HOME_MORTGAGE_CALCULATOR = "HOME_MORTGAGE_CALCULATOR",
 }
 
 export enum EPageTitles {
@@ -97,6 +98,7 @@ export enum EPageTitles {
     HOME = "Home",
     CONSTRUCTION_LENDING_COSTS = "Construction Lending Cost Calculator",
     CONSTRUCTION_LOAN_CALCULATOR = "Construction Loan Calculator",
+    HOME_MORTGAGE_CALCULATOR = "Home Mortgage Calculator",
 }
 
 
@@ -169,6 +171,14 @@ export enum EAllStates {
     capEx = "capEx",
     propertyManagement = "propertyManagement",
     closingCosts = "closingCosts",
+
+    // FOR HOME MORTGAGE CALCULATOR
+    pmiRate = "pmiRate",
+    hoaMonthly = "hoaMonthly",
+    extraMonthlyPayment = "extraMonthlyPayment",
+    enableBalloonPayment = "enableBalloonPayment",
+    balloonMonth = "balloonMonth",
+    mortgageCalculatorLevel = "mortgageCalculatorLevel",
 
     // FOR IRR CALCULATIONS
     newPurchasePrice = "newPurchasePrice",

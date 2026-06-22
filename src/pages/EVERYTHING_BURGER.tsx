@@ -15,6 +15,7 @@ import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 import HouseFlippingCalculator from './HouseFlippingCalculator';
 import IndustrialProformaCalculator from './IndustrialProformaCalculator';
 import MultifamilyDevelopmentCalculator from './MultiFamilyDevelopmentCalculator';
+import HomeMortgageCalculator from './HomeMortgageCalculator';
 import ConstructionLoanCalculator from '../futureItems/ConstructionLoanCalculator';
 import { HELP_PAGES } from '../utils/constants';
 
@@ -91,6 +92,11 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
                 />
             case EPageNames.CONSTRUCTION_LOAN_CALCULATOR:
                 return <ConstructionLoanCalculator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.HOME_MORTGAGE_CALCULATOR:
+                return <HomeMortgageCalculator
                     isMobile={isMobile}
                     page={page}
                 />

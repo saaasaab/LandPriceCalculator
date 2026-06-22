@@ -116,9 +116,6 @@ const initialMetrics: SiteMetrics = {
   totalAreaDedicatedToSetbacks: 0,
   totalSetbackPercentage: 0,
 
-
-
-
 };
 
 

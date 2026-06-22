@@ -8,6 +8,7 @@ import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
 // import FloorPlanDesigner from '../FloorPlanDesigner/FloorPlanDesigner';
 import HeroSection from './HeroSection';
 import {
+  Banknote,
   Building2,
   Factory,
   Building,
@@ -87,6 +88,15 @@ const LandingPage: React.FC = () => {
       link: routes.MULTI_FAMILY_PRICE_PER_DOOR,
       component: EVERYTHING_BURGER,
       pageType: EPageNames.MULTI_FAMILY_PRICE_PER_DOOR
+    },
+    {
+      id: 'home-mortgage',
+      title: 'Home Mortgage Calculator',
+      description: 'Monthly payments, PITI, balloon options, and amortization over time.',
+      icon: <Banknote size={24} />,
+      link: routes.HOME_MORTGAGE_CALCULATOR,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.HOME_MORTGAGE_CALCULATOR
     },
     {
       id: 'multi-family-dev',
