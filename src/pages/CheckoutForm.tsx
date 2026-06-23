@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import type { StripePaymentElementOptions } from "@stripe/stripe-js";
 
 import './CheckoutForm.scss'
 
@@ -42,7 +43,7 @@ export default function CheckoutForm() {
         options={{
           wallets: {
             link: 'never',
-          },
+          } as StripePaymentElementOptions['wallets'],
         }}
       />
       <button disabled={isProcessing || !stripe || !elements} id="submit" className="btn">

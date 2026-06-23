@@ -59,6 +59,7 @@ export const routes = {
   // Authentication & User-related Routes
   LOGIN: "/login",
   FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
   REGISTER: "/register",
 
   // General Pages

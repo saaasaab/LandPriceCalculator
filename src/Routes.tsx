@@ -9,6 +9,7 @@ import { EPageNames } from './utils/types';
 import BlogPost from './futureItems/BlogPost';
 import Login from './components/Auth/Login';
 import ForgotPassword from './components/Auth/ForgotPassword';
+import ResetPassword from './components/Auth/ResetPassword';
 import Register from './components/Auth/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LandingPage from './pages/LandingPage/LandingPage';
@@ -129,6 +130,7 @@ export function AppRouter() {
 
               <Route path={routes.LOGIN} element={<Login />} />
               <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
+              <Route path={`${routes.RESET_PASSWORD}/:token`} element={<ResetPassword />} />
               <Route path={routes.REGISTER} element={<Register />} />
               <Route path={routes.LANDING_PAGE} element={<LandingPage />} />
               <Route path={routes.END_FREE_TRIAL} element={expiredTrialPage} />
@@ -154,6 +156,7 @@ export function AppRouter() {
             <Route path={routes.HOME} element={<LandingPage />} />
             <Route path={routes.LOGIN} element={<Login />} />
             <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
+            <Route path={`${routes.RESET_PASSWORD}/:token`} element={<ResetPassword />} />
             <Route path={routes.REGISTER} element={<Register />} />
             <Route path={routes.LANDING_PAGE} element={<LandingPage />} />
             <Route path={routes.TERMS} element={<Terms />} />
@@ -235,6 +238,7 @@ export function LandingRouter() {
             <Route path={routes.LANDING_PAGE} element={<LandingPage />} />
             <Route path={routes.LOGIN} element={<Login />} />
             <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
+            <Route path={`${routes.RESET_PASSWORD}/:token`} element={<ResetPassword />} />
             <Route path={routes.REGISTER} element={<Pricing />} />
 
             <Route path="*" element={<NotFound />} />

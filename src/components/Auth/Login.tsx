@@ -95,6 +95,7 @@ const Login: React.FC = () => {
       </form>
 
       <div className="auth-links">
+        <Link to={routes.FORGOT_PASSWORD}>Forgot password?</Link>
         <Link to={routes.SIGN_UP}>Create an Account</Link>
       </div>
     </div>
