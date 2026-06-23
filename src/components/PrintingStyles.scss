@@ -3,8 +3,13 @@
   .hover-add-icon.hover-add-icon-active,
   footer,
   button.copy-url-button,
-  .action-buttons {
+  .action-buttons,
+  .saved-projects-panel {
     display: none !important;
+  }
+
+  .land-calculator-layout {
+    grid-template-columns: 1fr !important;
   }
 
   .land-calculator-container > .navbar {

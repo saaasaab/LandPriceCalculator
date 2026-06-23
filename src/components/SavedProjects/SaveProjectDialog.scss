@@ -1,0 +1,100 @@
+.save-project-dialog {
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 20px;
+  }
+
+  .dialog {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-radius: 12px;
+    width: min(100%, 420px);
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+
+    h3 {
+      font-size: 1.25rem;
+      color: #1e293b;
+    }
+
+    p {
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      color: #0f172a;
+
+      &:focus {
+        outline: 2px solid #00bcd4;
+        border-color: #00bcd4;
+      }
+    }
+
+    .error {
+      color: #dc2626;
+      font-size: 0.875rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 8px;
+    }
+
+    .cancel,
+    .save-as-new,
+    .submit {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.9375rem;
+      cursor: pointer;
+    }
+
+    .cancel {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .save-as-new {
+      background: #fff;
+      color: #006978;
+      border: 1px solid #00bcd4;
+      font-weight: 600;
+    }
+
+    .submit {
+      background: #00bcd4;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .cancel:disabled,
+    .save-as-new:disabled,
+    .submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}

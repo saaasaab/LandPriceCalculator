@@ -44,14 +44,14 @@ const Pricing = () => {
         try {
 
             const data = await postRequest<{ message: string, token: string; user: User }>(
-                '/register',
+                '/land-price-calculator/register',
                 { email, password,  projectName }
             );
 
             if (data.message) {
                 // User may already exist, so try logging them in
                 const loginData = await postRequest<{ token: string; user: { email: string, is_paid: boolean } }>(
-                    '/login',
+                    '/land-price-calculator/login',
                     { email, password ,  projectName }
                 );
 

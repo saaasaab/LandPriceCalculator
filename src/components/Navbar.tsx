@@ -114,6 +114,61 @@ const IconLink = ({
   );
 };
 
+type NavMenuItem = {
+  route: string;
+  title: string;
+};
+
+type NavMenu = {
+  label: string;
+  items: NavMenuItem[];
+};
+
+const NAV_MENUS: NavMenu[] = [
+  {
+    label: "Developer",
+    items: [
+      { route: routes.RESIDENTIAL_DEVELOPMENT, title: EPageTitles.RESIDENTIAL_DEVELOPMENT },
+      { route: routes.MULTIFAMILY_DEVELOPMENT, title: EPageTitles.MULTIFAMILY_DEVELOPMENT },
+      { route: routes.INDUSTRIAL_DEVELOPMENT, title: EPageTitles.INDUSTRIAL_DEVELOPMENT },
+      { route: routes.COMMERCIAL_DEVELOPMENT, title: EPageTitles.COMMERCIAL_DEVELOPMENT },
+      { route: routes.CONSTRUCTION_BUDGET, title: EPageTitles.CONSTRUCTION_BUDGET },
+      { route: routes.SITE_PLAN_BUILDER, title: EPageTitles.SITE_PLAN_BUILDER },
+      { route: routes.CONSTRUCTION_LOAN_CALCULATOR, title: EPageTitles.CONSTRUCTION_LOAN_CALCULATOR },
+    ],
+  },
+  {
+    label: "Investor",
+    items: [
+      { route: routes.MULTI_FAMILY_PRICE_PER_DOOR, title: EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR },
+      { route: routes.INDUSTRIAL_PRICE_PER_SQFT, title: EPageTitles.INDUSTRIAL_PRICE_PER_SQFT },
+      { route: routes.WATERFALL, title: EPageTitles.WATERFALL_GENERATOR },
+      { route: routes.MULTIFAMILY_ANALYSIS, title: EPageTitles.MULTIFAMILY_ANALYSIS },
+      { route: routes.LEASE_EXPIRY_SCHEDULE, title: EPageTitles.LEASE_EXPIRY_SCHEDULE },
+    ],
+  },
+  {
+    label: "Property Manager",
+    items: [
+      { route: routes.MULTIFAMILY_ANALYSIS, title: EPageTitles.MULTIFAMILY_ANALYSIS },
+      { route: routes.LEASE_EXPIRY_SCHEDULE, title: EPageTitles.LEASE_EXPIRY_SCHEDULE },
+    ],
+  },
+  {
+    label: "Realtor",
+    items: [
+      { route: routes.HOME_MORTGAGE_CALCULATOR, title: EPageTitles.HOME_MORTGAGE_CALCULATOR },
+      { route: routes.IRR_CALCULATOR, title: EPageTitles.IRR_CALCULATOR },
+    ],
+  },
+  {
+    label: "Flipper",
+    items: [
+      { route: routes.HOUSE_FLIPPING_CALCULATOR, title: EPageTitles.HOUSE_FLIPPING_CALCULATOR },
+      { route: routes.HARD_MONEY_COST_ESTIMATOR, title: EPageTitles.HARD_MONEY_COST_ESTIMATOR },
+    ],
+  },
+];
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -144,41 +199,21 @@ const Navbar = () => {
         </li>
 
 
-        {/* Development Dropdown */}
-        <li className="dropdown">
-          <span className="dropdown-title">Development Tools</span>
-          <div className="dropdown-content">
-            <IconLink route={routes.RESIDENTIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.RESIDENTIAL_DEVELOPMENT} />
-            <IconLink route={routes.MULTIFAMILY_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTIFAMILY_DEVELOPMENT} />
-            <IconLink route={routes.INDUSTRIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_DEVELOPMENT} />
-            <IconLink route={routes.COMMERCIAL_DEVELOPMENT} handleToggleMenu={handleToggleMenu} text={EPageTitles.COMMERCIAL_DEVELOPMENT} />
-            <IconLink route={routes.CONSTRUCTION_BUDGET} handleToggleMenu={handleToggleMenu} text={EPageTitles.CONSTRUCTION_BUDGET} />
-          </div>
-        </li>
-
-        {/* Analysis Dropdown */}
-        <li className="dropdown">
-          <span className="dropdown-title">Analysis Tools</span>
-          <div className="dropdown-content">
-            <IconLink route={routes.MULTIFAMILY_ANALYSIS} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTIFAMILY_ANALYSIS} />
-            <IconLink route={routes.LEASE_EXPIRY_SCHEDULE} handleToggleMenu={handleToggleMenu} text={EPageTitles.LEASE_EXPIRY_SCHEDULE} />
-            {/* <IconLink route={routes.INDUSTRIAL_PROFORMA} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PROFORMA} /> */}
-
-            <IconLink route={routes.MULTI_FAMILY_PRICE_PER_DOOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR} />
-            <IconLink route={routes.HOME_MORTGAGE_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HOME_MORTGAGE_CALCULATOR} />
-            <IconLink route={routes.INDUSTRIAL_PRICE_PER_SQFT} handleToggleMenu={handleToggleMenu} text={EPageTitles.INDUSTRIAL_PRICE_PER_SQFT} />
-            <IconLink route={routes.IRR_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.IRR_CALCULATOR} />
-            <IconLink route={routes.HARD_MONEY_COST_ESTIMATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HARD_MONEY_COST_ESTIMATOR} />
-            <IconLink route={routes.HOUSE_FLIPPING_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.HOUSE_FLIPPING_CALCULATOR} />
-            <IconLink route={routes.WATERFALL} handleToggleMenu={handleToggleMenu} text={EPageTitles.WATERFALL_GENERATOR} />
-            <IconLink route={routes.CONSTRUCTION_LOAN_CALCULATOR} handleToggleMenu={handleToggleMenu} text={EPageTitles.CONSTRUCTION_LOAN_CALCULATOR} />
-            {/* <IconLink route={routes.SITE_PLAN_BUILDER} handleToggleMenu={handleToggleMenu} text={EPageTitles.SITE_PLAN_BUILDER} /> */}
-          </div>
-        </li>
-
-        <li className="dropdown">
-          <IconLink route={routes.SITE_PLAN_BUILDER} handleToggleMenu={handleToggleMenu} text={EPageTitles.SITE_PLAN_BUILDER} />
-        </li>
+        {NAV_MENUS.map((menu) => (
+          <li key={menu.label} className="dropdown">
+            <span className="dropdown-title">{menu.label}</span>
+            <div className="dropdown-content">
+              {menu.items.map((item) => (
+                <IconLink
+                  key={item.route}
+                  route={item.route}
+                  handleToggleMenu={handleToggleMenu}
+                  text={item.title}
+                />
+              ))}
+            </div>
+          </li>
+        ))}
 
         {/* Howto and Blogs */}
         {/* <li className="dropdown">

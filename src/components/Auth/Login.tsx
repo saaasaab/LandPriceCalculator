@@ -16,7 +16,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       const data = await postRequest<{ token: string; user: { email: string, is_paid: boolean } }>(
-        '/login',
+        '/land-price-calculator/login',
         { email, password,  projectName }
       );
 

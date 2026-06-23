@@ -10,8 +10,23 @@
 
 .land-calculator {
   padding: 20px;
-  max-width: 1000px;
+  max-width: 1400px;
   width: 100%;
+
+  .land-calculator-layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+
+    &.no-sidebar {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .land-calculator-main {
+    min-width: 0;
+  }
 
   .app-header {
     text-align: center;
@@ -50,6 +65,12 @@
   }
 }
 
+
+@media (max-width: 1024px) {
+  .land-calculator-layout {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

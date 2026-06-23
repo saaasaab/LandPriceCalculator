@@ -26,7 +26,7 @@ function Completion() {
       try {
 
         const data = await postRequest<{ token: string; user: User }>(
-          '/set-payment-status-to-true',
+          '/land-price-calculator/set-payment-status-to-true',
           { email: user.email, projectName }
         );
 

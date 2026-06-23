@@ -20,7 +20,7 @@ const Register: React.FC = () => {
         try {
 
             const data = await postRequest<{ token: string; user:User }>(
-                '/register',
+                '/land-price-calculator/register',
                 { email, password, projectName }
             );
             

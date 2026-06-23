@@ -48,11 +48,11 @@
     list-style: none;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
 
     li.dropdown {
       position: relative;
-      padding: 20px 15px;
+      padding: 20px 10px;
       background-color: #333;
       // transition: background-color 0.3s;
       transition: background-color 0.3s, transform 0.2s, border-radius 0.2s;
@@ -97,6 +97,8 @@
         color: #fff;
         text-decoration: none;
         text-align: left;
+        font-size: 0.95rem;
+        white-space: nowrap;
       }
 
       .dropdown-content {

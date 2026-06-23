@@ -28,7 +28,7 @@ const Payment = ({ email }: { email: string }) => {
     const fetchStripeKey = async () => {
       try {
         const { publishableKey } = await getRequest<{ publishableKey: string | null }>(
-          '/config'
+          '/land-price-calculator/config'
         );
 
         if (publishableKey) {
@@ -50,7 +50,7 @@ const Payment = ({ email }: { email: string }) => {
     const handleCreatePaymentIntent = async () => {
       try {
         const { clientSecret } = await postRequest<{ clientSecret: string | null }>(
-          '/create-payment-intent', { email: email, projectName }
+          '/land-price-calculator/create-payment-intent', { email: email, projectName }
         );
 
         if (clientSecret) {

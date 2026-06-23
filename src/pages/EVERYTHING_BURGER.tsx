@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { EPageNames, EPageTitles } from '../utils/types';
 import IndustrialDevelopmentCalculator from './IndustrialDevelopmentCalculator';
 import ResidentialDevelopmentCalculator from './ResidentialDevelopmentCalculator';
@@ -19,10 +20,23 @@ import HomeMortgageCalculator from './HomeMortgageCalculator';
 import ConstructionLoanCalculator from '../futureItems/ConstructionLoanCalculator';
 import LeaseExpiryScheduleCalculator from './LeaseExpiryScheduleCalculator';
 import { HELP_PAGES } from '../utils/constants';
+import SavedProjectsPanel from '../components/SavedProjects/SavedProjectsPanel';
 
 
-const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageNames }) => {
+const EVERYTHING_BURGER = ({
+    isMobile,
+    page,
+    showSavedProjects = true,
+}: {
+    isMobile: boolean;
+    page: EPageNames;
+    showSavedProjects?: boolean;
+}) => {
+    const [calculatorKey, setCalculatorKey] = useState(0);
 
+    const handleProjectLoad = () => {
+        setCalculatorKey((current) => current + 1);
+    };
     const PageToRender = (page: EPageNames) => {
         switch (page) {
             case EPageNames.MULTIFAMILY_DEVELOPMENT:
@@ -116,22 +130,31 @@ const EVERYTHING_BURGER = ({ isMobile, page }: { isMobile: boolean, page: EPageN
 
     return (
         <div className="land-calculator">
-            <header className="app-header">
-                <h1>{EPageTitles[page]}</h1>
-
-                {HELP_PAGES?.[page as keyof typeof HELP_PAGES] ? (
-                    <p>
-                        <a href={HELP_PAGES[page as keyof typeof HELP_PAGES]} target="_blank">
-                            📺 How to Use This Tool?
-                        </a>
-                    </p>
+            <div className={`land-calculator-layout ${showSavedProjects ? '' : 'no-sidebar'}`}>
+                {showSavedProjects ? (
+                    <SavedProjectsPanel page={page} onProjectLoad={handleProjectLoad} />
                 ) : null}
-            </header>
-            {/* <MonteCarloSimulator {...inputs} /> */}
-            {PageToRender(page)}
 
-            <ContactMe />
+                <div className="land-calculator-main">
+                    <header className="app-header">
+                        <h1>{EPageTitles[page]}</h1>
 
+                        {HELP_PAGES?.[page as keyof typeof HELP_PAGES] ? (
+                            <p>
+                                <a href={HELP_PAGES[page as keyof typeof HELP_PAGES]} target="_blank">
+                                    📺 How to Use This Tool?
+                                </a>
+                            </p>
+                        ) : null}
+                    </header>
+
+                    <div key={calculatorKey}>
+                        {PageToRender(page)}
+                    </div>
+
+                    <ContactMe />
+                </div>
+            </div>
         </div >
     );
 };

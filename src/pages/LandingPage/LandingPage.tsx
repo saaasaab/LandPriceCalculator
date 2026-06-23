@@ -306,6 +306,7 @@ const LandingPage: React.FC = () => {
               <CurrentComponent
                 page={activeCalculator.pageType}
                 isMobile={isMobile}
+                showSavedProjects={false}
               />
             )}
           </div>
