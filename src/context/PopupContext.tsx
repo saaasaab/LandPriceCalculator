@@ -16,7 +16,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user?.is_paid) {
+    if (user) {
       if (popupTimerRef.current) {
         clearTimeout(popupTimerRef.current);
         popupTimerRef.current = undefined;
@@ -38,7 +38,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         clearTimeout(popupTimerRef.current);
       }
     };
-  }, [user?.is_paid]);
+  }, [user]);
 
   const handleClosePopup = () => {
     setShowPopup(false);

@@ -1,23 +1,25 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { getAppDefaultUrl } from '../Routes';
-// import { postRequest } from '../utils/api';
+import { getRequest } from '../utils/api';
 
-// Define user and context types
 export interface User {
   email: string;
   token: string;
   is_paid: boolean;
+  days_since_first_login?: number;
+  free_access_expired?: boolean;
+  first_logged_in?: string | null;
 }
 
 interface AuthContextType {
   user: User | null;
+  authLoading: boolean;
   login: (userData: User) => void;
   logout: () => void;
   tempEmail: string;
   updateTempEmail: (tempEmail: string) => void;
   tempPassword: string;
-  updateTempPassword:  (tempPassword: string) => void;
+  updateTempPassword: (tempPassword: string) => void;
 }
 
 const checkUser = () => {
@@ -34,6 +36,7 @@ const checkUser = () => {
 // Default values to prevent `undefined`
 const defaultAuthContext: AuthContextType = {
   user: checkUser(),
+  authLoading: true,
   login: () => { },
   logout: () => { },
   tempEmail: '',
@@ -57,60 +60,46 @@ export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 // Provider Component
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [tempEmail, setTempEmail] = useState('');
   const [tempPassword, setTempPassword] = useState('');
 
   const navigate = useNavigate();
 
-  useEffect(() => {  
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      // if (!window.location.href.includes('//app.')) {
+  useEffect(() => {
+    const loadUser = async () => {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        setAuthLoading(false);
+        return;
+      }
 
-      // // UNCOMMENT WHEN I WANT AUTO REDIRECT
-      //   // const isLocal = window.location.hostname === "localhost" || window.location.hostname.endsWith(".localhost");
-      //   // const targetUrl = `${getAppDefaultUrl(isLocal)}?token=${user.token || ""}`
+      const parsedUser = JSON.parse(storedUser) as User;
+      setUser(parsedUser);
+      removeQueryParam('token');
 
-      //   // window.location.href = targetUrl;
-      // }
+      if (!parsedUser.token) {
+        setAuthLoading(false);
+        return;
+      }
 
-      const _user = JSON.parse(storedUser);
+      try {
+        const response = await getRequest<{
+          success: boolean;
+          data: Omit<User, 'token'>;
+        }>('/land-price-calculator/me');
 
-      // redirect user to app and log them in. 
-      removeQueryParam("token");
-      setUser(_user)
-    }
-    // else {
-    //   if (window.location.href.includes('//app.')) {
-    //     const urlParams = new URLSearchParams(location.search);
-    //     const token = urlParams.get("token");
+        const updatedUser = { ...parsedUser, ...response.data };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch {
+        // Keep stored user if refresh fails.
+      } finally {
+        setAuthLoading(false);
+      }
+    };
 
-    //     if (token) {
-    //       checkToken(token);
-
-    //       // Remove "token" query param
-    //       removeQueryParam("token");
-    //     }
-
-    //   }
-    // }
-
-
-
-    // async function checkToken(token: string) {
-    //   // Store token in localStorage (or in cookies)
-    //   localStorage.setItem("authToken", token);
-
-    //   // Call the api to get the user and log them in. 
-
-    //   const data = await postRequest<{ token: string; user: { email: string } }>(
-    //     '/auth',
-    //     { token }
-    //   );
-
-    //   login({ email: data.user.email, token: data.token }); // Save user data
-
-    // }
+    loadUser();
   }, []);
   
 
@@ -140,7 +129,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, tempEmail, updateTempEmail, tempPassword, updateTempPassword }}>
+    <AuthContext.Provider value={{ user, authLoading, login, logout, tempEmail, updateTempEmail, tempPassword, updateTempPassword }}>
       {children}
     </AuthContext.Provider>
   );

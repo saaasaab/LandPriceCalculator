@@ -3,6 +3,27 @@ import { EAllStates, EPageNames } from "./types";
 export const SQ_FT_PER_ACRE = 43560;
 export const infrastructurePercentage = 70;
 export const PROJECT_NAME = "Land Price Calculator";
+export const TRIAL_DAYS = 14;
+
+const PURCHASE_ROUTES = {
+  SIGN_UP: '/sign-up',
+  END_FREE_TRIAL: '/end-free-trial',
+  PAYMENT: '/payment',
+} as const;
+
+type PurchaseRouteUser = {
+  is_paid: boolean;
+  free_access_expired?: boolean;
+} | null;
+
+export const getPurchaseRoute = (user: PurchaseRouteUser): string => {
+  if (!user || user.is_paid) {
+    return PURCHASE_ROUTES.SIGN_UP;
+  }
+  return user.free_access_expired
+    ? PURCHASE_ROUTES.END_FREE_TRIAL
+    : PURCHASE_ROUTES.PAYMENT;
+};
 export const DEFAULT_VALUES_ZEROS = {
     grossAcres: "0",
     unbuildableAcres: "0",

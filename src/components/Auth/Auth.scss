@@ -27,6 +27,26 @@
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 5px;
+
+      &.has-error {
+        border-color: #dc2626;
+      }
+    }
+
+    .auth-error {
+      color: #dc2626;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      text-align: left;
+
+      a {
+        color: #007bff;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
 
     button {

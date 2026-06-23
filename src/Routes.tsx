@@ -19,6 +19,7 @@ import Terms from './pages/Terms';
 import Footer from './components/Footer';
 import Pricing from './pages/Pricing';
 import EndFreeTrial from './pages/EndFreeTrial';
+import UpgradeAfterTrial from './pages/UpgradeAfterTrial';
 import Completion from './pages/Completion';
 
 
@@ -33,6 +34,7 @@ const SitePlanDesigner = React.lazy(() => import('./pages/SiteplanDesigner/SiteP
 import './App.css'
 import { PopupProvider } from './context/PopupContext';
 import PageMeta from './components/PageMeta';
+import { TRIAL_DAYS } from './utils/constants';
 
 export function AppRouter() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -65,7 +67,7 @@ export function AppRouter() {
     const currentDate = new Date().getTime();
     const daysSinceFirstVisit = (currentDate - firstVisit) / (1000 * 60 * 60 * 24);
 
-    if (daysSinceFirstVisit > 7) {
+    if (daysSinceFirstVisit > TRIAL_DAYS) {
       setFreeAccessExpired(true);
     }
 
@@ -77,15 +79,21 @@ export function AppRouter() {
 
 
   function Children() {
+    const { user, authLoading } = useAuth();
 
-    // user needs to be here otherwise the user doesn't update on change.
-    const { user } = useAuth(); // Use custom hook
+    const hasFullAccess = user?.is_paid
+      || (user ? user.free_access_expired !== true : !freeAccessExpired);
 
+    const expiredTrialPage = user && !user.is_paid
+      ? <UpgradeAfterTrial />
+      : <EndFreeTrial />;
+
+    if (authLoading) {
+      return null;
+    }
 
     return (
-      // {/* if is logged in and user is paid   OR   the user hasn't exceeded their free trial*/}
-      (user && user.is_paid) || (!freeAccessExpired) ? (
-        // ✅ Redirect all pages to Payment if free access expired
+      hasFullAccess ? (
         <div className="land-calculator-container">
           {/* Navigation Links */}
           <Navbar />
@@ -123,8 +131,8 @@ export function AppRouter() {
               <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
               <Route path={routes.REGISTER} element={<Register />} />
               <Route path={routes.LANDING_PAGE} element={<LandingPage />} />
-              <Route path={routes.END_FREE_TRIAL} element={<EndFreeTrial />} />
-              <Route path={routes.PAYMENT} element={<Payment email={user?.email || ""} />} />
+              <Route path={routes.END_FREE_TRIAL} element={expiredTrialPage} />
+              <Route path={routes.PAYMENT} element={<Payment email={user?.email || ""} showPageLayout />} />
               <Route path={routes.COMPLETION} element={<Completion />} />
               <Route path={routes.SIGN_UP} element={<Pricing />} />
               <Route path={routes.TERMS} element={<Terms />} />
@@ -141,7 +149,7 @@ export function AppRouter() {
         <div className="land-calculator-container">
           <Navbar />
           <Routes>
-            <Route path="*" element={<EndFreeTrial />} />
+            <Route path="*" element={expiredTrialPage} />
             <Route path={routes.COMPLETION} element={<Completion />} />
             <Route path={routes.HOME} element={<LandingPage />} />
             <Route path={routes.LOGIN} element={<Login />} />
@@ -149,8 +157,9 @@ export function AppRouter() {
             <Route path={routes.REGISTER} element={<Register />} />
             <Route path={routes.LANDING_PAGE} element={<LandingPage />} />
             <Route path={routes.TERMS} element={<Terms />} />
-            <Route path={routes.PAYMENT} element={<Payment email={user?.email || ""} />} />
+            <Route path={routes.PAYMENT} element={<Payment email={user?.email || ""} showPageLayout />} />
             <Route path={routes.SIGN_UP} element={<Pricing />} />
+            <Route path={routes.END_FREE_TRIAL} element={expiredTrialPage} />
           </Routes>
           <Footer />
         </div>

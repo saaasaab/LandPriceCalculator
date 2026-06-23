@@ -1,13 +1,20 @@
-import Pricing from "./Pricing";
+import Pricing from './Pricing';
+import { TRIAL_DAYS } from '../utils/constants';
 
 const EndFreeTrial = () => {
-    return (
-      <div className="land-calculator">
-        <h2>Login or Signup for Continued Access</h2>
-        <p>Your 7-day trial has ended. Please login or create an account to continue</p>
-        <Pricing/>
+  return (
+    <section className="pricing-section">
+      <div className="container">
+        <div className="header">
+          <h2 className="title">Your free trial has ended</h2>
+          <div className="subtitle">
+            Create an account to start a {TRIAL_DAYS}-day trial, then upgrade for lifetime access.
+          </div>
+        </div>
       </div>
-    );
-  };
-  
-  export default EndFreeTrial;
+      <Pricing />
+    </section>
+  );
+};
+
+export default EndFreeTrial;

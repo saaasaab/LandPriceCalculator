@@ -18,6 +18,7 @@ import {
   PaintRoller,
   PiggyBank,
   Ruler,
+  Sparkles,
   TrendingUp,
   CalendarClock,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import "./Navbar.scss";
 import Hamburger from "./Hamburger";
 import { EPageTitles } from "../utils/types";
 import { useAuth } from "../context/AuthContext";
+import { getPurchaseRoute } from "../utils/constants";
 
 const navIconProps = { size: 22, strokeWidth: 2, "aria-hidden": true as const };
 const authLinkIconProps = { size: 18, strokeWidth: 2, "aria-hidden": true as const };
@@ -227,10 +229,22 @@ const Navbar = () => {
 
         <div className="navbar-auth">
           {user ? (
-            <button type="button" onClick={logout} className="logout-btn">
-              <LogOut size={18} strokeWidth={2} aria-hidden />
-              <span>Logout</span>
-            </button>
+            <>
+              {!user.is_paid ? (
+                <Link
+                  to={getPurchaseRoute(user)}
+                  className="upgrade-btn"
+                  onClick={handleToggleMenu}
+                >
+                  <Sparkles size={18} strokeWidth={2} aria-hidden />
+                  <span>Upgrade</span>
+                </Link>
+              ) : null}
+              <button type="button" onClick={logout} className="logout-btn">
+                <LogOut size={18} strokeWidth={2} aria-hidden />
+                <span>Logout</span>
+              </button>
+            </>
           ) : (
             <IconLink
               className="navbar-auth__link"

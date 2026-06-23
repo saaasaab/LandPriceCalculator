@@ -1,23 +1,19 @@
-import { PaymentElement } from "@stripe/react-stripe-js";
-import { useState } from "react";
-import { useStripe, useElements } from "@stripe/react-stripe-js";
+import React, { useState } from "react";
+import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 import './CheckoutForm.scss'
 
 export default function CheckoutForm() {
   const stripe = useStripe();
-
   const elements = useElements();
 
   const [message, setMessage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements) {
-      // Stripe.js has not yet loaded.
-      // Make sure to disable form submission until Stripe.js has loaded.
       return;
     }
 
@@ -26,14 +22,13 @@ export default function CheckoutForm() {
     const stripeReturn = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // Make sure to change this to your payment completion page
         return_url: `${window.location.origin}/completion`,
       },
     });
 
-    if (stripeReturn.error.type === "card_error" || stripeReturn.error.type === "validation_error") {
+    if (stripeReturn.error?.type === "card_error" || stripeReturn.error?.type === "validation_error") {
       setMessage(stripeReturn.error?.message || "");
-    } else {
+    } else if (stripeReturn.error) {
       setMessage("An unexpected error occured.");
     }
 
@@ -42,16 +37,19 @@ export default function CheckoutForm() {
 
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
-      <PaymentElement id="payment-element" />
+      <PaymentElement
+        id="payment-element"
+        options={{
+          wallets: {
+            link: 'never',
+          },
+        }}
+      />
       <button disabled={isProcessing || !stripe || !elements} id="submit" className="btn">
-        {isProcessing || !stripe || !elements ? <></> :
-          <span id="button-text">
-            {isProcessing ? "Processing ... " : "Pay now"}
-          </span>
-        }
-
+        <span id="button-text">
+          {isProcessing ? "Processing..." : "Pay now"}
+        </span>
       </button>
-      {/* Show any error or success messages */}
       {message && <div id="payment-message">{message}</div>}
     </form>
   );

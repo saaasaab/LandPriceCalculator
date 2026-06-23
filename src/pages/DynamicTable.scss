@@ -64,6 +64,7 @@
       }
 
       .input-cell {
+        flex-shrink: 0;
 
         input {
           border: 1px solid #b1b1b1;
@@ -73,14 +74,27 @@
           font-size: .90rem;
           min-height: 40px;
           max-width: 120px;
+          width: 120px;
           text-align: left;
           padding-left: 15px;
+          box-sizing: border-box;
           // box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, 0.2);
         }
+
         &.input-cell-date {
+          label {
+            display: block;
+            width: 120px;
+          }
+
           input {
-            font-size: .60rem;
-           
+            font-size: .90rem;
+            padding-right: 8px;
+            font-family: inherit;
+
+            &::-webkit-calendar-picker-indicator {
+              cursor: pointer;
+            }
           }
         }
       }
@@ -142,10 +156,12 @@ $breakpoint-tablet: 768px;
             font-size: 16px;
             min-height: 40px;
             max-width: 120px;
+            width: 120px;
           }
+
           &.input-cell-date {
             input {
-              font-size: 12px;
+              font-size: 16px;
             }
           }
         }

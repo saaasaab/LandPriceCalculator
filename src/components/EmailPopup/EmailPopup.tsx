@@ -1,12 +1,22 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './EmailPopup.scss';
 import { X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { TRIAL_DAYS, getPurchaseRoute } from '../../utils/constants';
 
 interface EmailPopupProps {
   onClose: () => void;
 }
 
 const EmailPopup: React.FC<EmailPopupProps> = ({ onClose }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleStartTrial = () => {
+    onClose();
+    navigate(getPurchaseRoute(user));
+  };
 //   const [email, setEmail] = useState('');
 //   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,11 +39,11 @@ const EmailPopup: React.FC<EmailPopupProps> = ({ onClose }) => {
         
         <div className="popup-content">
           <h2>Unlock Premium Access</h2>
-          <h3>14-Day Free Trial</h3>
+          <h3>{TRIAL_DAYS}-Day Free Trial</h3>
           <p>Then get <span className="highlight">lifetime access</span> for just <span className="price">$20</span></p>
           
           <div className="cta-section">
-            <button className="signup-button">
+            <button type="button" className="signup-button" onClick={handleStartTrial}>
               Start Free Trial
             </button>
           </div>

@@ -1,11 +1,45 @@
 form#payment-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 1.5rem;
   width: 100%;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-sizing: border-box;
+
   #payment-element {
     width: 100%;
-    max-width: 35rem;
+  }
+
+  #submit {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #121212;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.75);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  #payment-message {
+    color: #dc2626;
+    text-align: center;
+    font-size: 0.9375rem;
+    line-height: 1.5;
   }
 }

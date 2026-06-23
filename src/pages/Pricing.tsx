@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Pricing.scss';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, User } from '../context/AuthContext';
@@ -24,7 +24,7 @@ export const plans = [
 
 const Pricing = () => {
 
-    const { login, tempEmail } = useAuth();
+    const { login, tempEmail, user, authLoading } = useAuth();
     const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -36,6 +36,20 @@ const Pricing = () => {
     const [email, setEmail] = useState(tempEmail ? tempEmail : "");
     const [password, setPassword] = useState('');
     const projectName = PROJECT_NAME;
+
+    useEffect(() => {
+        if (authLoading || !user || user.is_paid) {
+            return;
+        }
+
+        if (user.free_access_expired) {
+            navigate(routes.END_FREE_TRIAL);
+            return;
+        }
+
+        setEmail(user.email);
+        setShowPaymentForm(true);
+    }, [authLoading, navigate, user]);
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +64,16 @@ const Pricing = () => {
 
             if (data.message) {
                 // User may already exist, so try logging them in
-                const loginData = await postRequest<{ token: string; user: { email: string, is_paid: boolean } }>(
+                const loginData = await postRequest<{
+                    token: string;
+                    user: {
+                        email: string;
+                        is_paid: boolean;
+                        days_since_first_login?: number;
+                        free_access_expired?: boolean;
+                        first_logged_in?: string | null;
+                    };
+                }>(
                     '/land-price-calculator/login',
                     { email, password ,  projectName }
                 );
@@ -58,13 +81,33 @@ const Pricing = () => {
                 if (loginData.user.is_paid) {
                     alert("You've already paid, logging you in now.")
                     setErrorMessage('');
-                    login({ email: loginData.user.email, token: loginData.token, is_paid: loginData.user.is_paid });
+                    login({
+                        email: loginData.user.email,
+                        token: loginData.token,
+                        is_paid: loginData.user.is_paid,
+                        days_since_first_login: loginData.user.days_since_first_login,
+                        free_access_expired: loginData.user.free_access_expired,
+                        first_logged_in: loginData.user.first_logged_in,
+                    });
                     navigate('/')
                     return
                 }
                 else if (loginData.user.email && loginData.token && loginData.user.is_paid === false) {
-                    login({ email: loginData.user.email, token: loginData.token, is_paid: loginData.user.is_paid });
+                    login({
+                        email: loginData.user.email,
+                        token: loginData.token,
+                        is_paid: loginData.user.is_paid,
+                        days_since_first_login: loginData.user.days_since_first_login,
+                        free_access_expired: loginData.user.free_access_expired,
+                        first_logged_in: loginData.user.first_logged_in,
+                    });
                     setErrorMessage('');
+
+                    if (loginData.user.free_access_expired) {
+                        navigate(routes.END_FREE_TRIAL);
+                        return;
+                    }
+
                     setShowPaymentForm(true);
                     return
                 }
@@ -77,7 +120,13 @@ const Pricing = () => {
             }
 
             if (data.user?.email && data?.token) {
-                login({ email: data.user.email, token: data.token, is_paid: data.user.is_paid });
+                login({
+                    email: data.user.email,
+                    token: data.token,
+                    is_paid: data.user.is_paid,
+                    days_since_first_login: 0,
+                    free_access_expired: false,
+                });
                 setErrorMessage('');
                 setShowPaymentForm(true);
                 return
@@ -96,8 +145,14 @@ const Pricing = () => {
         <section id="pricing" className="pricing-section">
             <div className="container">
                 <div className="header">
-                    <h2 className="title">Lifetime access</h2>
-                    <div className="subtitle">to advanced real estate tools</div>
+                    <div className="header-copy">
+                        <h2 className="title">Lifetime access</h2>
+                        <p className="subtitle">to advanced real estate tools</p>
+                    </div>
+                    <div className="price-display">
+                        <span className="price">${plan.price}</span>
+                        <span className="duration">{plan.duration}</span>
+                    </div>
                 </div>
 
                 <div className="pricing-content">
@@ -122,11 +177,6 @@ const Pricing = () => {
                                 <span>Pay yearly (60% OFF 💰)</span>
                             </div>
                         </div> */}
-
-                        <div className="price-display">
-                            <p className="price">${plan.price}</p>
-                            <div className="duration">{plan.duration}</div>
-                        </div>
 
                         {!showPaymentForm ?
                             <ul className="features-list">
@@ -190,7 +240,7 @@ const Pricing = () => {
                 </div>
             </div>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-            <p>Already have an account? <Link to={routes.LOGIN}>Login</Link></p>
+            {!user ? <p>Already have an account? <Link to={routes.LOGIN}>Login</Link></p> : null}
         </section>
     );
 };

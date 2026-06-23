@@ -1,0 +1,131 @@
+.upgrade-after-trial {
+  max-width: 1100px;
+  width: 100%;
+  padding: 24px 20px 40px;
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+    .sidebar {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    h2 {
+      font-size: 1.25rem;
+      color: #0f172a;
+    }
+
+    .account-email {
+      color: #334155;
+      font-size: 0.9375rem;
+      word-break: break-word;
+    }
+
+    .trial-summary {
+      color: #475569;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .trial-ended {
+      color: #0f172a;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+    }
+
+    .continue-note {
+      color: #64748b;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  }
+
+    .payment-panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .header {
+      text-align: left;
+
+      h1 {
+        font-size: 1.75rem;
+        color: #0f172a;
+      }
+
+      p {
+        color: #64748b;
+        line-height: 1.5;
+      }
+    }
+
+    .price-display {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+
+      .price {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .duration {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: #64748b;
+      }
+    }
+
+    .features-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #334155;
+        font-size: 0.9375rem;
+      }
+
+      .icon {
+        width: 1rem;
+        height: 1rem;
+        color: #059669;
+        flex-shrink: 0;
+      }
+    }
+
+    .payment-form {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 20px;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .upgrade-after-trial {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+}

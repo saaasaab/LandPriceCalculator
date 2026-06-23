@@ -6,6 +6,7 @@ import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
 import { EPageNames, } from '../../utils/types';
 import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
 import HeroSection from './HeroSection';
+import SummerSpecialBanner from '../../components/SummerSpecialBanner/SummerSpecialBanner';
 import {
   Banknote,
   Building2,
@@ -290,6 +291,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="landing-page">
+      <SummerSpecialBanner />
       <div ref={heroRef}>
         <HeroSection />
       </div>
