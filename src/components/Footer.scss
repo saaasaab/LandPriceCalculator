@@ -1,7 +1,40 @@
 .site-footer {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
   padding: 20px;
   border-top: 1px solid #ddd;
+
+  .footer-main {
+    text-align: left;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .footer-contact-note {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #333;
+    max-width: 360px;
+    flex-shrink: 0;
+
+    p {
+      margin: 0;
+      font-weight: bold;
+    }
+
+    a {
+      color: #45a049;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
 
   a {
     color: #1d4ed8;
@@ -9,6 +42,20 @@
 
     &:hover {
       text-decoration: underline;
+    }
+  }
+}
+
+$breakpoint-tablet: 768px;
+@media (max-width: $breakpoint-tablet) {
+  .site-footer {
+    flex-direction: column;
+    align-items: center;
+
+    .footer-main,
+    .footer-contact-note {
+      text-align: center;
+      max-width: none;
     }
   }
 }

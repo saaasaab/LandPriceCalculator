@@ -1,6 +1,5 @@
 
 import '../pages/LandCalculator.scss';
-import ContactMe from '../components/ContactMe';
 
 
 const BlogPost = () => {
@@ -16,7 +15,6 @@ const BlogPost = () => {
 
             
             {/* <ShareButton params={params}/> */}
-            <ContactMe />
 
         </div >
     );

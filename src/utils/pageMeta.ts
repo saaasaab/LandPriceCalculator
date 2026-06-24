@@ -350,6 +350,19 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
       },
     ],
   ),
+  [routes.CUT_FILL_CALCULATOR]: calculator(
+    routes.CUT_FILL_CALCULATOR,
+    "How Do You Estimate Cut and Fill for a Site?",
+    "Model existing and finished grades on a grid and estimate cut and fill earthwork volumes with a 3D site map.",
+    "Cut and fill estimates compare existing ground elevation to proposed finished grade across a site. This calculator uses a grid of spot elevations to estimate earthwork in cubic yards and visualize cut versus fill areas in 3D.",
+    [
+      {
+        question: "How is cut and fill volume calculated?",
+        answer:
+          "Each grid cell inside the property boundary compares average existing elevation to average finished elevation. Cut is material removed; fill is material added. Volumes convert from cubic feet to cubic yards.",
+      },
+    ],
+  ),
   [routes.HOW_TO_LAND_FOR_MULTIFAMILY]: {
     path: routes.HOW_TO_LAND_FOR_MULTIFAMILY,
     title: `How Do You Analyze Land for Multifamily? | ${SITE_NAME}`,
@@ -453,6 +466,7 @@ const PAGE_META_BY_E_PAGE_NAME: Partial<Record<EPageNames, PageMetaConfig>> = {
   [EPageNames.WATERFALL_GENERATOR]: PAGE_META[routes.WATERFALL],
   [EPageNames.CONSTRUCTION_LOAN_CALCULATOR]: PAGE_META[routes.CONSTRUCTION_LOAN_CALCULATOR],
   [EPageNames.SITE_PLAN_BUILDER]: PAGE_META[routes.SITE_PLAN_BUILDER],
+  [EPageNames.CUT_FILL_CALCULATOR]: PAGE_META[routes.CUT_FILL_CALCULATOR],
 };
 
 export function normalizePath(pathname: string): string {

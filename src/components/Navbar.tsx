@@ -15,6 +15,7 @@ import {
   LogIn,
   LogOut,
   Map,
+  Mountain,
   PaintRoller,
   PiggyBank,
   Ruler,
@@ -50,6 +51,7 @@ export const routes = {
   WATERFALL: "/waterfall-generator",
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
   SITE_PLAN_BUILDER: "/site-plan-builder",
+  CUT_FILL_CALCULATOR: "/cut-fill-calculator",
   HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
   CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
   HOME_MORTGAGE_CALCULATOR: "/home-mortgage-calculator",
@@ -89,6 +91,7 @@ export const calculatorIcons: Record<string, React.ReactNode> = {
   [routes.LEASE_EXPIRY_SCHEDULE]: <CalendarClock {...navIconProps} />,
   [routes.CONSTRUCTION_LOAN_CALCULATOR]: <HardHat {...navIconProps} />,
   [routes.SITE_PLAN_BUILDER]: <Map {...navIconProps} />,
+  [routes.CUT_FILL_CALCULATOR]: <Mountain {...navIconProps} />,
   [routes.LOGIN]: <LogIn {...authLinkIconProps} />,
 };
 
@@ -137,6 +140,7 @@ const NAV_MENUS: NavMenu[] = [
       { route: routes.COMMERCIAL_DEVELOPMENT, title: EPageTitles.COMMERCIAL_DEVELOPMENT },
       { route: routes.CONSTRUCTION_BUDGET, title: EPageTitles.CONSTRUCTION_BUDGET },
       { route: routes.SITE_PLAN_BUILDER, title: EPageTitles.SITE_PLAN_BUILDER },
+      { route: routes.CUT_FILL_CALCULATOR, title: EPageTitles.CUT_FILL_CALCULATOR },
       { route: routes.CONSTRUCTION_LOAN_CALCULATOR, title: EPageTitles.CONSTRUCTION_LOAN_CALCULATOR },
     ],
   },

@@ -5,10 +5,17 @@ import "./Footer.scss";
 const Footer = () => {
   return (
     <footer className="site-footer">
-      <p>© {new Date().getFullYear()} LandPriceCalculator. All rights reserved.</p>
-      <p>
-        <Link to={routes.TERMS}>Terms & Conditions</Link>
-      </p>
+      <div className="footer-main">
+        <p>© {new Date().getFullYear()} LandPriceCalculator. All rights reserved.</p>
+        <p>
+          <Link to={routes.TERMS}>Terms & Conditions</Link>
+        </p>
+      </div>
+
+      <div className="footer-contact-note">
+        <p>Let's talk. If you have any questions, suggestions, or if you're working on anything interesting, email me:</p>
+        <a href="mailto:ExpanseInvestments@gmail.com">ExpanseInvestments@gmail.com</a>
+      </div>
     </footer>
   );
 };

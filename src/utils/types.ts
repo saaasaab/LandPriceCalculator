@@ -77,6 +77,7 @@ export enum EPageNames {
     CONSTRUCTION_LENDING_COSTS = "CONSTRUCTION_LENDING_COSTS",
     CONSTRUCTION_LOAN_CALCULATOR = "CONSTRUCTION_LOAN_CALCULATOR",
     SITE_PLAN_BUILDER = "SITE_PLAN_BUILDER",
+    CUT_FILL_CALCULATOR = "CUT_FILL_CALCULATOR",
     HOME_MORTGAGE_CALCULATOR = "HOME_MORTGAGE_CALCULATOR",
     LEASE_EXPIRY_SCHEDULE = "LEASE_EXPIRY_SCHEDULE",
 }
@@ -95,6 +96,7 @@ export enum EPageTitles {
     WATERFALL_GENERATOR = "Waterfall Distribution Generator",
     CONSTRUCTION_BUDGET = "Construction Budget Generator",
     SITE_PLAN_BUILDER = "Site Plan Builder",
+    CUT_FILL_CALCULATOR = "Cut & Fill Calculator",
     HOUSE_FLIPPING_CALCULATOR = "House Flipping Calculator",
     HOME = "Home",
     CONSTRUCTION_LENDING_COSTS = "Construction Lending Cost Calculator",

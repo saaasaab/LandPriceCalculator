@@ -17,18 +17,6 @@ const EmailPopup: React.FC<EmailPopupProps> = ({ onClose }) => {
     onClose();
     navigate(getPurchaseRoute(user));
   };
-//   const [email, setEmail] = useState('');
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setIsSubmitting(true);
-    
-//     // TODO: Add your email submission logic here
-    
-//     localStorage.setItem('popupShown', 'true');
-//     onClose();
-//   };
 
   return (
     <div className="email-popup-overlay">
@@ -47,19 +35,6 @@ const EmailPopup: React.FC<EmailPopupProps> = ({ onClose }) => {
               Start Free Trial
             </button>
           </div>
-          
-          {/* <form onSubmit={handleSubmit}>
-            <input
-              type="email"
-              placeholder="Enter your email to start your free trial"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Processing...' : 'Start Free Trial'}
-            </button>
-          </form> */}
           
           <div className="features">
             <p>✓ Land Analysis & Zoning Insights</p>

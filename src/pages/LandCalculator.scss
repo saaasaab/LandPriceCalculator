@@ -35,15 +35,36 @@
     margin-bottom: 10px;
     border-bottom: 2px solid #ccc;
     border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
+
+    &__title-row {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     h1 {
       margin: 0;
       font-size: 2rem;
       color: #333;
+    }
+
+    &__help-link {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #007bff;
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover {
+        color: #0056b3;
+      }
     }
 
     .app-header__geo-answer {
@@ -52,11 +73,6 @@
       line-height: 1.6;
       max-width: 720px;
       font-weight: 500;
-    }
-    a{
-      text-decoration: none;
-      color: rgb(51 51 51);
-      font-size: "14px";
     }
   }
 

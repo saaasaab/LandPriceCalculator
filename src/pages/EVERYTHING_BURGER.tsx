@@ -4,7 +4,6 @@ import IndustrialDevelopmentCalculator from './IndustrialDevelopmentCalculator';
 import ResidentialDevelopmentCalculator from './ResidentialDevelopmentCalculator';
 
 import './LandCalculator.scss';
-import ContactMe from '../components/ContactMe';
 import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './PricePerDoorCalculatorMultifamily';
 import IRRCalculator from './IRRCalculator';
@@ -19,6 +18,7 @@ import MultifamilyDevelopmentCalculator from './MultiFamilyDevelopmentCalculator
 import HomeMortgageCalculator from './HomeMortgageCalculator';
 import ConstructionLoanCalculator from '../futureItems/ConstructionLoanCalculator';
 import LeaseExpiryScheduleCalculator from './LeaseExpiryScheduleCalculator';
+import { Info } from 'lucide-react';
 import { HELP_PAGES } from '../utils/constants';
 import SavedProjectsPanel from '../components/SavedProjects/SavedProjectsPanel';
 
@@ -137,22 +137,26 @@ const EVERYTHING_BURGER = ({
 
                 <div className="land-calculator-main">
                     <header className="app-header">
-                        <h1>{EPageTitles[page]}</h1>
-
-                        {HELP_PAGES?.[page as keyof typeof HELP_PAGES] ? (
-                            <p>
-                                <a href={HELP_PAGES[page as keyof typeof HELP_PAGES]} target="_blank">
-                                    📺 How to Use This Tool?
+                        <div className="app-header__title-row">
+                            <h1>{EPageTitles[page]}</h1>
+                            {HELP_PAGES?.[page as keyof typeof HELP_PAGES] ? (
+                                <a
+                                    href={HELP_PAGES[page as keyof typeof HELP_PAGES]}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="app-header__help-link"
+                                    title="How to Use This Tool?"
+                                    aria-label="How to Use This Tool?"
+                                >
+                                    <Info size={22} strokeWidth={2} aria-hidden />
                                 </a>
-                            </p>
-                        ) : null}
+                            ) : null}
+                        </div>
                     </header>
 
                     <div key={calculatorKey}>
                         {PageToRender(page)}
                     </div>
-
-                    <ContactMe />
                 </div>
             </div>
         </div >

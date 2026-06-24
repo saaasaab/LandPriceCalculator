@@ -29,6 +29,7 @@ import React, { Suspense } from 'react';
 
 
 const SitePlanDesigner = React.lazy(() => import('./pages/SiteplanDesigner/SitePlanDesigner'));
+const CutFillCalculator = React.lazy(() => import('./pages/CutFillCalculator/CutFillCalculator'));
 
 
 
@@ -127,6 +128,7 @@ export function AppRouter() {
               <Route path={routes.HOW_TO_LAND_FOR_MULTIFAMILY} element={<BlogPost />} />
 
               <Route path={routes.SITE_PLAN_BUILDER} element={<SitePlanDesigner />} />
+              <Route path={routes.CUT_FILL_CALCULATOR} element={<CutFillCalculator />} />
 
               <Route path={routes.LOGIN} element={<Login />} />
               <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
