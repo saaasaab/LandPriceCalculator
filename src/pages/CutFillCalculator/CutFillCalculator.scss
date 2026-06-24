@@ -114,6 +114,18 @@
     padding-top: 8px;
   }
 
+  .cut-fill-save-actions {
+    flex-direction: row;
+    gap: 6px;
+    padding-top: 4px;
+
+    .cut-fill-btn {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+    }
+  }
+
   .cut-fill-btn {
     background: #007bff;
     color: white;

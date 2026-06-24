@@ -247,7 +247,7 @@ const CutFillCalculator = () => {
             </ol>
             <p className="cut-fill-hint">{STEPS[stepIndex]?.description}</p>
             {saveStatus ? <p className="cut-fill-meta">{saveStatus}</p> : null}
-            <div className="cut-fill-actions">
+            <div className="cut-fill-actions cut-fill-save-actions">
               <button type="button" className="cut-fill-btn cut-fill-btn-secondary" onClick={handleSaveNow}>
                 Save progress
               </button>
@@ -404,11 +404,6 @@ const CutFillCalculator = () => {
                 />
               </div>
               <p className="cut-fill-hint">Scroll on the map to zoom. Drag to orbit.</p>
-              <ul className="cut-fill-legend">
-                <li className="cut-fill-legend-existing">Brown = terrain surface</li>
-                <li className="cut-fill-legend-boundary">Blue line = property boundary</li>
-                <li className="cut-fill-legend-contour">Green line = contour lines</li>
-              </ul>
             </section>
           )}
 

@@ -28,7 +28,12 @@ export type { CutFillWorkflowStep } from '../../utils/cutFillCalculations';
 const SNAP_DISTANCE = 14;
 const VERTEX_HIT = 18;
 const EDGE_HIT = 12;
-const EXISTING_FILL: [number, number, number] = [166, 124, 82];
+const TERRAIN_FILL: [number, number, number] = [26, 72, 44];
+const BOUNDARY_STROKE: [number, number, number] = [20, 48, 100];
+const BOUNDARY_STROKE_SELECTED: [number, number, number] = [28, 65, 130];
+const BOUNDARY_VERTEX: [number, number, number] = [16, 40, 85];
+const CONTOUR_STROKE: [number, number, number] = [166, 124, 82];
+const CONTOUR_LABEL: [number, number, number] = [92, 64, 38];
 const CUT_COLOR: [number, number, number] = [220, 50, 45];
 const FILL_COLOR: [number, number, number] = [37, 99, 235];
 
@@ -402,14 +407,14 @@ const CutFillMapCanvas = ({
           props.corners.map((c) => c.elevationFt),
         );
 
-        p.stroke(30, 64, 110);
+        p.stroke(BOUNDARY_STROKE[0], BOUNDARY_STROKE[1], BOUNDARY_STROKE[2]);
         p.strokeWeight(2.5);
         p.noFill();
         drawPolyline3d(drapedBoundary, camera, false);
 
         for (const contour of props.contours) {
           if (contour.points.length < 2) continue;
-          p.stroke(22, 101, 52);
+          p.stroke(CONTOUR_STROKE[0], CONTOUR_STROKE[1], CONTOUR_STROKE[2]);
           p.strokeWeight(2);
           const contourPts: ElevPoint[] = contour.points.map((pt) => ({
             x: pt.x * props.ftPerPixel!,
@@ -436,12 +441,13 @@ const CutFillMapCanvas = ({
               const s0 = imageToScreen(props.boundary[i], t);
               const s1 = imageToScreen(props.boundary[(i + 1) % props.boundary.length], t);
               const selected = props.selectedScaleEdge === i;
-              p.stroke(selected ? 37 : 30, selected ? 99 : 64, selected ? 235 : 110);
+              const stroke = selected ? BOUNDARY_STROKE_SELECTED : BOUNDARY_STROKE;
+              p.stroke(stroke[0], stroke[1], stroke[2]);
               p.strokeWeight(selected ? 4 : 2);
               p.line(s0.x, s0.y, s1.x, s1.y);
             }
           } else {
-            p.stroke(30, 64, 110);
+            p.stroke(BOUNDARY_STROKE[0], BOUNDARY_STROKE[1], BOUNDARY_STROKE[2]);
             p.strokeWeight(2);
             p.noFill();
             p.beginShape();
@@ -456,14 +462,18 @@ const CutFillMapCanvas = ({
           props.boundary.forEach((pt, i) => {
             const s = imageToScreen(pt, t);
             p.noStroke();
-            p.fill(i === 0 ? 37 : 71, i === 0 ? 99 : 85, i === 0 ? 235 : 105);
+            p.fill(
+              i === 0 ? BOUNDARY_STROKE[0] : BOUNDARY_VERTEX[0],
+              i === 0 ? BOUNDARY_STROKE[1] : BOUNDARY_VERTEX[1],
+              i === 0 ? BOUNDARY_STROKE[2] : BOUNDARY_VERTEX[2],
+            );
             p.circle(s.x, s.y, i === 0 && !props.boundaryClosed && props.boundary.length >= 3 ? 14 : 12);
           });
         }
 
         for (const contour of props.contours) {
           if (contour.points.length < 2) continue;
-          p.stroke(34, 139, 87);
+          p.stroke(CONTOUR_STROKE[0], CONTOUR_STROKE[1], CONTOUR_STROKE[2]);
           p.strokeWeight(2);
           p.noFill();
           p.beginShape();
@@ -474,7 +484,7 @@ const CutFillMapCanvas = ({
           p.endShape();
           const mid = contour.points[Math.floor(contour.points.length / 2)];
           const ms = imageToScreen(mid, t);
-          p.fill(22, 101, 52);
+          p.fill(CONTOUR_LABEL[0], CONTOUR_LABEL[1], CONTOUR_LABEL[2]);
           p.noStroke();
           p.textSize(12);
           p.textAlign(p.CENTER, p.CENTER);
@@ -530,7 +540,7 @@ const CutFillMapCanvas = ({
             else if (delta < -0.05) p.fill(FILL_COLOR[0], FILL_COLOR[1], FILL_COLOR[2]);
             else p.fill(140, 145, 155);
           } else {
-            p.fill(EXISTING_FILL[0], EXISTING_FILL[1], EXISTING_FILL[2], 235);
+            p.fill(TERRAIN_FILL[0], TERRAIN_FILL[1], TERRAIN_FILL[2], 235);
           }
           p.noStroke();
           p.beginShape(p.TRIANGLES);
@@ -541,7 +551,7 @@ const CutFillMapCanvas = ({
         drawTerrainOverlays(props, camera, tinPoints, tinTriangles);
 
         if (props.step === 'terrain') {
-          setHud('Drag to orbit · scroll to zoom · blue = property line · green = contours');
+          setHud('Drag to orbit · scroll to zoom');
         } else if (props.ftPerPixel) {
           const totals = calculateTinCutFill(
             tinPoints,
