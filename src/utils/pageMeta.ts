@@ -4,7 +4,7 @@ import { getAioExtras, HowToStep, RelatedLink } from "./pageMetaAio";
 
 export const SITE_NAME = "Land Price Calculator";
 export const SITE_URL = "https://www.landpricecalculator.com";
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/LandCalculatorLogo.svg`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/favicon-192x192.png`;
 export const INDEXNOW_KEY = "8f3c2a9e1d4b7f6a0c5e8d2b9f1a4c7e";
 
 export type FaqItem = {
@@ -363,6 +363,19 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
       },
     ],
   ),
+  [routes.TOPOLOGY_ANALYSIS]: calculator(
+    routes.TOPOLOGY_ANALYSIS,
+    "How Do You Analyze Site Topography for Development?",
+    "Digitize a topo map and analyze slope, drainage, buildability, earthwork, and development feasibility metrics.",
+    "Topology analysis turns a survey or topo image into a triangulated terrain model. Developers use it to evaluate slope distribution, flat building pads, drainage paths, cut and fill volumes, deal-killer risks, and an overall site development score.",
+    [
+      {
+        question: "What can topology analysis tell a land developer?",
+        answer:
+          "It estimates gross and net buildable acreage, average and maximum slope, elevation range, drainage patterns, earthwork volumes, and flags common feasibility risks like steep slopes or large grade changes.",
+      },
+    ],
+  ),
   [routes.HOW_TO_LAND_FOR_MULTIFAMILY]: {
     path: routes.HOW_TO_LAND_FOR_MULTIFAMILY,
     title: `How Do You Analyze Land for Multifamily? | ${SITE_NAME}`,
@@ -467,6 +480,7 @@ const PAGE_META_BY_E_PAGE_NAME: Partial<Record<EPageNames, PageMetaConfig>> = {
   [EPageNames.CONSTRUCTION_LOAN_CALCULATOR]: PAGE_META[routes.CONSTRUCTION_LOAN_CALCULATOR],
   [EPageNames.SITE_PLAN_BUILDER]: PAGE_META[routes.SITE_PLAN_BUILDER],
   [EPageNames.CUT_FILL_CALCULATOR]: PAGE_META[routes.CUT_FILL_CALCULATOR],
+  [EPageNames.TOPOLOGY_ANALYSIS]: PAGE_META[routes.TOPOLOGY_ANALYSIS],
 };
 
 export function normalizePath(pathname: string): string {

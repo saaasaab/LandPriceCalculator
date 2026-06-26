@@ -52,6 +52,7 @@ export const routes = {
   CONSTRUCTION_BUDGET: "/construction-budget-generator",
   SITE_PLAN_BUILDER: "/site-plan-builder",
   CUT_FILL_CALCULATOR: "/cut-fill-calculator",
+  TOPOLOGY_ANALYSIS: "/topology-analysis",
   HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
   CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
   HOME_MORTGAGE_CALCULATOR: "/home-mortgage-calculator",
@@ -92,6 +93,7 @@ export const calculatorIcons: Record<string, React.ReactNode> = {
   [routes.CONSTRUCTION_LOAN_CALCULATOR]: <HardHat {...navIconProps} />,
   [routes.SITE_PLAN_BUILDER]: <Map {...navIconProps} />,
   [routes.CUT_FILL_CALCULATOR]: <Mountain {...navIconProps} />,
+  [routes.TOPOLOGY_ANALYSIS]: <Map {...navIconProps} />,
   [routes.LOGIN]: <LogIn {...authLinkIconProps} />,
 };
 
@@ -141,6 +143,7 @@ const NAV_MENUS: NavMenu[] = [
       { route: routes.CONSTRUCTION_BUDGET, title: EPageTitles.CONSTRUCTION_BUDGET },
       { route: routes.SITE_PLAN_BUILDER, title: EPageTitles.SITE_PLAN_BUILDER },
       { route: routes.CUT_FILL_CALCULATOR, title: EPageTitles.CUT_FILL_CALCULATOR },
+      { route: routes.TOPOLOGY_ANALYSIS, title: EPageTitles.TOPOLOGY_ANALYSIS },
       { route: routes.CONSTRUCTION_LOAN_CALCULATOR, title: EPageTitles.CONSTRUCTION_LOAN_CALCULATOR },
     ],
   },

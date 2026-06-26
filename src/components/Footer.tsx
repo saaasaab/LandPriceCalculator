@@ -13,7 +13,7 @@ const Footer = () => {
       </div>
 
       <div className="footer-contact-note">
-        <p>Let's talk. If you have any questions, suggestions, or if you're working on anything interesting, email me:</p>
+        <p>Questions, comments, or concerns? Contact us at:</p>
         <a href="mailto:ExpanseInvestments@gmail.com">ExpanseInvestments@gmail.com</a>
       </div>
     </footer>
