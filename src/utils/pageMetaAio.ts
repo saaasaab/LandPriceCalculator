@@ -1,4 +1,4 @@
-import { routes } from "../components/Navbar";
+import { routes } from "../config/routes";
 
 export type HowToStep = {
   name: string;

@@ -13,6 +13,10 @@
   max-width: 1400px;
   width: 100%;
 
+  &:has(.lease-expiry-schedule) {
+    max-width: min(1680px, 100%);
+  }
+
   .land-calculator-layout {
     display: grid;
     grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);

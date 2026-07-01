@@ -24,6 +24,10 @@ export interface LeaseExpiryMetrics {
   totalMonthlyRent: number;
   totalAnnualRent: number;
   leaseCount: number;
+  vacantCount: number;
+  totalUnitCount: number;
+  occupancyRate: number;
+  vacantSqft: number;
   totalSqft: number;
   avgRentPerUnit: number;
   avgRentPerSqft: number;
@@ -65,7 +69,20 @@ export function getLeaseMonthlyRent(lease: LeaseEntry): number {
   return amount;
 }
 
+export function isLeaseOccupied(lease: LeaseEntry): boolean {
+  if (!lease.unit.trim()) return false;
+  const name = lease.tenantName.trim();
+  if (!name || name.toLowerCase() === "vacant") return false;
+  return getLeaseMonthlyRent(lease) > 0;
+}
+
+export function isLeaseVacant(lease: LeaseEntry): boolean {
+  if (!lease.unit.trim()) return false;
+  return !isLeaseOccupied(lease);
+}
+
 export function formatLeaseRentBasis(lease: LeaseEntry): string {
+  if (isLeaseVacant(lease)) return "Vacant";
   if (getLeaseRentType(lease) === "annualPerSqft") {
     return `$${getLeaseRentAmount(lease).toFixed(2)}/SF/yr`;
   }
@@ -98,13 +115,20 @@ export function computeLeaseExpiryMetrics(
   asOf: Date = new Date(),
 ): LeaseExpiryMetrics {
   const today = new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate());
+  const vacantUnits = leases.filter((lease) => isLeaseVacant(lease));
   const validLeases = leases.filter(
-    (lease) => lease.tenantName.trim() && getLeaseMonthlyRent(lease) > 0 && parseDate(lease.endDate),
+    (lease) => isLeaseOccupied(lease) && parseDate(lease.endDate),
   );
 
   const totalMonthlyRent = validLeases.reduce((sum, lease) => sum + getLeaseMonthlyRent(lease), 0);
   const totalAnnualRent = totalMonthlyRent * 12;
   const totalSqft = validLeases.reduce((sum, lease) => sum + (lease.sqft || 0), 0);
+  const vacantSqft = vacantUnits.reduce((sum, lease) => sum + (lease.sqft || 0), 0);
+  const leaseCount = validLeases.length;
+  const vacantCount = vacantUnits.length;
+  const occupiedUnitCount = leases.filter((lease) => isLeaseOccupied(lease)).length;
+  const totalUnitCount = occupiedUnitCount + vacantCount;
+  const occupancyRate = totalUnitCount > 0 ? (occupiedUnitCount / totalUnitCount) * 100 : 0;
 
   const enriched = validLeases
     .map((lease) => {
@@ -185,9 +209,13 @@ export function computeLeaseExpiryMetrics(
   return {
     totalMonthlyRent,
     totalAnnualRent,
-    leaseCount: validLeases.length,
+    leaseCount,
+    vacantCount,
+    totalUnitCount,
+    occupancyRate,
+    vacantSqft,
     totalSqft,
-    avgRentPerUnit: validLeases.length > 0 ? totalMonthlyRent / validLeases.length : 0,
+    avgRentPerUnit: leaseCount > 0 ? totalMonthlyRent / leaseCount : 0,
     avgRentPerSqft: totalSqft > 0 ? (totalMonthlyRent * 12) / totalSqft : 0,
     waltYears,
     weightedAvgExpiryDate: weightedExpiryTimestamp > 0 ? new Date(weightedExpiryTimestamp) : null,

@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ConfirmationModal from "../components/ConfirmationModal";
 import ShareButton from "../components/ShareButton";
 import { usePersistedState2 } from "../hooks/usePersistedState";
 import {
@@ -11,22 +11,16 @@ import {
   getLeaseMonthlyRent,
   getLeaseRentAmount,
   getLeaseRentType,
+  isLeaseVacant,
   LeaseEntry,
   LeaseRentType,
 } from "../utils/leaseExpiryCalculations";
+import { downloadLeaseCsv, parseLeaseCsv } from "../utils/leaseExpiryCsv";
+import { createEmptyLease, serializeLeaseProject } from "../utils/leaseProjectDefaults";
 import { EAllStates, EPageNames } from "../utils/types";
 import "./LeaseExpiryScheduleCalculator.scss";
 
-const emptyLease = (): LeaseEntry => ({
-  id: uuidv4(),
-  tenantName: "",
-  unit: "",
-  rentType: "monthly",
-  rentAmount: 0,
-  startDate: "",
-  endDate: "",
-  sqft: 0,
-});
+const emptyLease = createEmptyLease;
 
 const SAMPLE_LEASES: LeaseEntry[] = [
   {
@@ -69,13 +63,25 @@ const SAMPLE_LEASES: LeaseEntry[] = [
     endDate: "2026-09-30",
     sqft: 2100,
   },
+  {
+    id: "sample-5",
+    tenantName: "",
+    unit: "118",
+    rentType: "monthly",
+    rentAmount: 0,
+    startDate: "",
+    endDate: "",
+    sqft: 1650,
+  },
 ];
 
 const LeaseExpiryScheduleCalculator = ({
   page,
+  onNewProject,
 }: {
   isMobile: boolean;
   page: EPageNames;
+  onNewProject?: () => void;
 }) => {
   const queryParams = new URLSearchParams(window.location.search);
   const [propertyName, setPropertyName] = usePersistedState2(
@@ -91,13 +97,62 @@ const LeaseExpiryScheduleCalculator = ({
     queryParams,
   );
 
+  const [csvError, setCsvError] = useState<string | null>(null);
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+  const baselineRef = useRef<string | null>(null);
   const metrics = useMemo(() => computeLeaseExpiryMetrics(leases), [leases]);
+
+  useEffect(() => {
+    baselineRef.current = serializeLeaseProject(propertyName, leases);
+  }, []);
+
+  const hasUnsavedChanges =
+    baselineRef.current !== null &&
+    serializeLeaseProject(propertyName, leases) !== baselineRef.current;
+
+  const startNewProject = () => {
+    setCsvError(null);
+    setIsNewProjectModalOpen(false);
+    onNewProject?.();
+  };
+
+  const handleNewProjectClick = () => {
+    if (hasUnsavedChanges) {
+      setIsNewProjectModalOpen(true);
+      return;
+    }
+    startNewProject();
+  };
+
+  const handleDownloadCsv = () => {
+    setCsvError(null);
+    const filename = propertyName.trim()
+      ? `${propertyName.trim().replace(/[^\w.-]+/g, "-").toLowerCase()}-leases.csv`
+      : "tenant-leases.csv";
+    downloadLeaseCsv(leases, filename);
+  };
+
+  const handleUploadCsv = async (file: File) => {
+    setCsvError(null);
+    try {
+      const text = await file.text();
+      const { leases: importedLeases, errors } = parseLeaseCsv(text);
+      if (errors.length > 0) {
+        setCsvError(errors.join(" "));
+        return;
+      }
+      setLeases(importedLeases);
+    } catch {
+      setCsvError("Could not read the CSV file. Please try again.");
+    }
+  };
 
   const updateLease = (id: string, updates: Partial<LeaseEntry>) => {
     setLeases(leases.map((lease) => (lease.id === id ? { ...lease, ...updates } : lease)));
   };
 
-  const addLease = () => {
+  const addUnit = () => {
     setLeases([...leases, emptyLease()]);
   };
 
@@ -133,27 +188,61 @@ const LeaseExpiryScheduleCalculator = ({
       </div>
 
       <div className="property-name-row screen-only">
-        <label htmlFor="property-name">Property / Portfolio Name</label>
-        <input
-          id="property-name"
-          type="text"
-          value={propertyName}
-          onChange={(e) => setPropertyName(e.target.value)}
-          placeholder="e.g. Oakwood Office Park"
-        />
+        <div className="property-name-row__content">
+          <label htmlFor="property-name">Property / Portfolio Name</label>
+          <input
+            id="property-name"
+            type="text"
+            value={propertyName}
+            onChange={(e) => setPropertyName(e.target.value)}
+            placeholder="e.g. Oakwood Office Park"
+          />
+        </div>
+        {onNewProject ? (
+          <button type="button" className="new-project-button no-print" onClick={handleNewProjectClick}>
+            New Project
+          </button>
+        ) : null}
       </div>
 
       <div className="lease-input-section screen-only">
         <div className="section-header">
           <h3>Tenant Leases</h3>
-          <button type="button" className="add-lease-button no-print" onClick={addLease}>
-            + Add Tenant
-          </button>
+          <div className="lease-actions no-print">
+            <button type="button" className="csv-button" onClick={handleDownloadCsv}>
+              Download CSV
+            </button>
+            <button
+              type="button"
+              className="csv-button"
+              onClick={() => csvInputRef.current?.click()}
+            >
+              Upload CSV
+            </button>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="csv-file-input"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleUploadCsv(file);
+                e.target.value = "";
+              }}
+            />
+            <button type="button" className="add-lease-button" onClick={addUnit}>
+              + Add Unit
+            </button>
+          </div>
         </div>
 
+        {csvError ? <p className="csv-error no-print">{csvError}</p> : null}
+
+        <div className="lease-table-wrapper no-print">
         <table className="lease-table">
           <thead>
             <tr>
+              <th>Status</th>
               <th>Tenant</th>
               <th>Unit</th>
               <th>Start</th>
@@ -166,12 +255,18 @@ const LeaseExpiryScheduleCalculator = ({
           </thead>
           <tbody>
             {leases.map((lease) => {
+              const vacant = isLeaseVacant(lease);
               const rentType = getLeaseRentType(lease);
               const rentAmount = getLeaseRentAmount(lease);
               const effectiveMonthly = getLeaseMonthlyRent(lease);
 
               return (
-              <tr key={lease.id}>
+              <tr key={lease.id} className={vacant ? "lease-row--vacant" : undefined}>
+                <td>
+                  <span className={`status-badge ${vacant ? "status-badge--vacant" : "status-badge--occupied"}`}>
+                    {vacant ? "Vacant" : lease.unit.trim() ? "Occupied" : "—"}
+                  </span>
+                </td>
                 <td>
                   <input
                     type="text"
@@ -262,6 +357,7 @@ const LeaseExpiryScheduleCalculator = ({
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       <div className="lease-input-print print-only">
@@ -269,6 +365,7 @@ const LeaseExpiryScheduleCalculator = ({
         <table className="schedule-table">
           <thead>
             <tr>
+              <th>Status</th>
               <th>Tenant</th>
               <th>Unit</th>
               <th>Start</th>
@@ -280,29 +377,49 @@ const LeaseExpiryScheduleCalculator = ({
           </thead>
           <tbody>
             {leases
-              .filter((lease) => lease.tenantName.trim() && lease.endDate)
-              .map((lease) => (
-                <tr key={lease.id}>
-                  <td>{lease.tenantName}</td>
+              .filter((lease) => isLeaseVacant(lease) || (lease.tenantName.trim() && lease.endDate))
+              .map((lease) => {
+                const vacant = isLeaseVacant(lease);
+                return (
+                <tr key={lease.id} className={vacant ? "lease-row--vacant" : undefined}>
+                  <td>{vacant ? "Vacant" : "Occupied"}</td>
+                  <td>{vacant ? "—" : lease.tenantName}</td>
                   <td>{lease.unit || "—"}</td>
                   <td>{lease.startDate ? formatDate(lease.startDate) : "—"}</td>
-                  <td>{formatDate(lease.endDate)}</td>
+                  <td>{vacant ? "—" : formatDate(lease.endDate)}</td>
                   <td>{formatLeaseRentBasis(lease)}</td>
-                  <td>{formatCurrency(getLeaseMonthlyRent(lease))}</td>
+                  <td>{vacant ? "—" : formatCurrency(getLeaseMonthlyRent(lease))}</td>
                   <td>{lease.sqft ? lease.sqft.toLocaleString() : "—"}</td>
                 </tr>
-              ))}
+              );
+              })}
           </tbody>
         </table>
       </div>
 
-      {metrics.leaseCount > 0 && (
+      {metrics.totalUnitCount > 0 && (
         <>
           <div className="lease-metrics-section">
             <div className="section-header">
               <h3>Portfolio Metrics</h3>
             </div>
             <div className="metrics-grid">
+              <div className="metric-card">
+                <div className="metric-label">Vacant Units</div>
+                <div className="metric-value">{metrics.vacantCount}</div>
+                <div className="metric-sub">
+                  {metrics.totalUnitCount} total units · {formatPercent(metrics.occupancyRate)} occupied
+                </div>
+              </div>
+              {metrics.vacantSqft > 0 && (
+                <div className="metric-card">
+                  <div className="metric-label">Vacant SF</div>
+                  <div className="metric-value">{metrics.vacantSqft.toLocaleString()}</div>
+                  <div className="metric-sub">Available space</div>
+                </div>
+              )}
+              {metrics.leaseCount > 0 && (
+                <>
               <div className="metric-card">
                 <div className="metric-label">Total Monthly Rent</div>
                 <div className="metric-value">{formatCurrency(metrics.totalMonthlyRent)}</div>
@@ -351,9 +468,12 @@ const LeaseExpiryScheduleCalculator = ({
                   <div className="metric-sub">{metrics.totalSqft.toLocaleString()} total SF</div>
                 </div>
               )}
+                </>
+              )}
             </div>
           </div>
 
+          {metrics.leaseCount > 0 && (
           <div className="lease-timeline-section">
             <div className="section-header">
               <h3>Rent Expiry Timeline</h3>
@@ -375,7 +495,9 @@ const LeaseExpiryScheduleCalculator = ({
               ))}
             </div>
           </div>
+          )}
 
+          {metrics.leaseCount > 0 && (
           <div className="lease-schedule-section">
             <div className="section-header">
               <h3>Lease Expiry Schedule</h3>
@@ -415,10 +537,18 @@ const LeaseExpiryScheduleCalculator = ({
               </tbody>
             </table>
           </div>
+          )}
         </>
       )}
 
       <ShareButton params={params} />
+
+      <ConfirmationModal
+        isOpen={isNewProjectModalOpen}
+        onClose={() => setIsNewProjectModalOpen(false)}
+        onConfirm={startNewProject}
+        message="You have unsaved changes. Start a new project anyway? Your current edits will be lost."
+      />
     </div>
   );
 };

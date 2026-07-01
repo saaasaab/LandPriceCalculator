@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FolderOpen, Save, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -14,7 +14,12 @@ type SavedProjectsPanelProps = {
   onProjectLoad: () => void;
 };
 
-const SavedProjectsPanel = ({ page, onProjectLoad }: SavedProjectsPanelProps) => {
+export type SavedProjectsPanelHandle = {
+  clearActiveProject: () => void;
+};
+
+const SavedProjectsPanel = forwardRef<SavedProjectsPanelHandle, SavedProjectsPanelProps>(
+  ({ page, onProjectLoad }, ref) => {
   const { user } = useAuth();
   const { projects, isLoading, error, saveProject, updateProject, deleteProject, loadProject } =
     useSavedProjects(page, !!user);
@@ -23,6 +28,10 @@ const SavedProjectsPanel = ({ page, onProjectLoad }: SavedProjectsPanelProps) =>
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loadingProjectId, setLoadingProjectId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    clearActiveProject: () => setActiveProjectId(null),
+  }));
 
   const activeProject = activeProjectId
     ? projects.find((project) => project.id === activeProjectId) ?? null
@@ -150,6 +159,8 @@ const SavedProjectsPanel = ({ page, onProjectLoad }: SavedProjectsPanelProps) =>
       />
     </aside>
   );
-};
+});
+
+SavedProjectsPanel.displayName = 'SavedProjectsPanel';
 
 export default SavedProjectsPanel;

@@ -1,0 +1,37 @@
+export const routes = {
+  MULTIFAMILY_DEVELOPMENT: "/multifamily-development",
+  INDUSTRIAL_DEVELOPMENT: "/industrial-development",
+  COMMERCIAL_DEVELOPMENT: "/commercial-development",
+  RESIDENTIAL_DEVELOPMENT: "/residential-development",
+  MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
+  INDUSTRIAL_PRICE_PER_SQFT: "/industrial-price-per-sqft-calculator",
+  MULTIFAMILY_ANALYSIS: "/multifamily-analysis",
+  INDUSTRIAL_PROFORMA: "/industrial-commercial-proforma",
+  HOW_TO_LAND_FOR_MULTIFAMILY: "/how-to-analyzis-land-for-multifamily",
+  IRR_CALCULATOR: "/irr-calculator",
+  HARD_MONEY_COST_ESTIMATOR: "/hard-money-calculator",
+  WATERFALL: "/waterfall-generator",
+  CONSTRUCTION_BUDGET: "/construction-budget-generator",
+  SITE_PLAN_BUILDER: "/site-plan-builder",
+  CUT_FILL_CALCULATOR: "/cut-fill-calculator",
+  TOPOLOGY_ANALYSIS: "/topology-analysis",
+  HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
+  CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
+  HOME_MORTGAGE_CALCULATOR: "/home-mortgage-calculator",
+  LEASE_EXPIRY_SCHEDULE: "/lease-expiry-schedule",
+  HOME: "/",
+
+  // Authentication & User-related Routes
+  LOGIN: "/login",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
+  REGISTER: "/register",
+
+  // General Pages
+  LANDING_PAGE: "/landing",
+  END_FREE_TRIAL: "/end-free-trial",
+  PAYMENT: "/payment",
+  COMPLETION: "/completion",
+  SIGN_UP: "/sign-up",
+  TERMS: "/terms",
+} as const;

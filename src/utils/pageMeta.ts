@@ -1,4 +1,4 @@
-import { routes } from "../components/Navbar";
+import { routes } from "../config/routes";
 import { EPageNames } from "./types";
 import { getAioExtras, HowToStep, RelatedLink } from "./pageMetaAio";
 
@@ -535,7 +535,7 @@ function upsertCanonical(href: string) {
   element.href = href;
 }
 
-function buildJsonLdGraph(meta: PageMetaConfig, canonicalUrl: string) {
+export function buildJsonLdGraph(meta: PageMetaConfig, canonicalUrl: string) {
   const graph: Record<string, unknown>[] = [
     ORGANIZATION_SCHEMA,
     {

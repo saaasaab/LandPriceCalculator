@@ -125,6 +125,18 @@
     <lastmod>2026-06-19T00:00:00+00:00</lastmod>
   </url>
 
+  <!-- Cut & Fill Calculator: estimate earthwork volumes from topo digitization and TIN terrain. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/cut-fill-calculator</loc>
+    <lastmod>2026-06-26T00:00:00+00:00</lastmod>
+  </url>
+
+  <!-- Topology Analysis: slope, drainage, buildability, and development feasibility from topo maps. -->
+  <url>
+    <loc>https://www.landpricecalculator.com/topology-analysis</loc>
+    <lastmod>2026-06-26T00:00:00+00:00</lastmod>
+  </url>
+
   <!-- Terms of service and usage policies for Land Price Calculator. -->
   <url>
     <loc>https://www.landpricecalculator.com/terms</loc>

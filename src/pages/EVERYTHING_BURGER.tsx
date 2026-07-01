@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { EPageNames, EPageTitles } from '../utils/types';
 import IndustrialDevelopmentCalculator from './IndustrialDevelopmentCalculator';
 import ResidentialDevelopmentCalculator from './ResidentialDevelopmentCalculator';
@@ -20,7 +20,8 @@ import ConstructionLoanCalculator from '../futureItems/ConstructionLoanCalculato
 import LeaseExpiryScheduleCalculator from './LeaseExpiryScheduleCalculator';
 import { Info } from 'lucide-react';
 import { HELP_PAGES } from '../utils/constants';
-import SavedProjectsPanel from '../components/SavedProjects/SavedProjectsPanel';
+import SavedProjectsPanel, { SavedProjectsPanelHandle } from '../components/SavedProjects/SavedProjectsPanel';
+import { resetLeaseProject } from '../utils/leaseProjectDefaults';
 
 
 const EVERYTHING_BURGER = ({
@@ -33,8 +34,17 @@ const EVERYTHING_BURGER = ({
     showSavedProjects?: boolean;
 }) => {
     const [calculatorKey, setCalculatorKey] = useState(0);
+    const savedProjectsRef = useRef<SavedProjectsPanelHandle>(null);
 
     const handleProjectLoad = () => {
+        setCalculatorKey((current) => current + 1);
+    };
+
+    const handleNewProject = () => {
+        if (page === EPageNames.LEASE_EXPIRY_SCHEDULE) {
+            resetLeaseProject(page);
+        }
+        savedProjectsRef.current?.clearActiveProject();
         setCalculatorKey((current) => current + 1);
     };
     const PageToRender = (page: EPageNames) => {
@@ -119,6 +129,7 @@ const EVERYTHING_BURGER = ({
                 return <LeaseExpiryScheduleCalculator
                     isMobile={isMobile}
                     page={page}
+                    onNewProject={handleNewProject}
                 />
 
 
@@ -132,7 +143,11 @@ const EVERYTHING_BURGER = ({
         <div className="land-calculator">
             <div className={`land-calculator-layout ${showSavedProjects ? '' : 'no-sidebar'}`}>
                 {showSavedProjects ? (
-                    <SavedProjectsPanel page={page} onProjectLoad={handleProjectLoad} />
+                    <SavedProjectsPanel
+                        ref={savedProjectsRef}
+                        page={page}
+                        onProjectLoad={handleProjectLoad}
+                    />
                 ) : null}
 
                 <div className="land-calculator-main">

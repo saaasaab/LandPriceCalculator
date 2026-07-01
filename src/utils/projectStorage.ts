@@ -74,6 +74,10 @@ export const applyPageInputs = (page: EPageNames, inputs: Record<string, unknown
   }
 };
 
+export const setPageInputs = (page: EPageNames, inputs: Record<string, unknown>): void => {
+  applyPageInputs(page, inputs);
+};
+
 export const formatProjectDate = (dateString: string): string => {
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return '';
