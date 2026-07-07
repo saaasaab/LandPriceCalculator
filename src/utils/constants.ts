@@ -233,6 +233,9 @@ export const DEFAULT_VALUES = {
     [EPageNames.TOPOLOGY_ANALYSIS]: {
         ...DEFAULT_VALUES_ZEROS,
     },
+    [EPageNames.SUBDIVISION_GENERATOR]: {
+        ...DEFAULT_VALUES_ZEROS,
+    },
     [EPageNames.RESIDENTIAL_DEVELOPMENT]: {
         ...DEFAULT_VALUES_ZEROS,
         grossAcres: "1.65",

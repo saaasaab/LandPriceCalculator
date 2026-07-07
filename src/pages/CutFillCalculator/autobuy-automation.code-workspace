@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../client-projects/swickard/autobuy-automation"
+		},
+		{
+			"path": "../../../../../client-projects/swickard/service-appointment-api"
+		},
+		{
+			"path": "../../../../../client-projects/swickard/credit-card-audit"
+		},
+		{
+			"path": "../../../../../client-projects/vertical-email-server"
+		},
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../LandPriceCalculatorAPI"
+		}
+	],
+	"settings": {}
+}

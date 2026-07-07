@@ -376,6 +376,19 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
       },
     ],
   ),
+  [routes.SUBDIVISION_GENERATOR]: calculator(
+    routes.SUBDIVISION_GENERATOR,
+    "How Do You Lay Out a Residential Subdivision on a Parcel?",
+    "Upload a site image, trace the property boundary, set scale, and prepare for lot layout design.",
+    "Subdivision layout starts with an accurate property boundary and map scale. Upload a survey or aerial image, digitize the parcel outline, and set a known edge length so lot widths, setbacks, and street frontage can be designed to real-world dimensions.",
+    [
+      {
+        question: "Why do you need scale before designing lots?",
+        answer:
+          "Without a calibrated scale, drawn lot dimensions are only proportional to the image. Setting scale from a known boundary length converts pixels to feet so lot sizes, setbacks, and road widths match zoning and engineering requirements.",
+      },
+    ],
+  ),
   [routes.HOW_TO_LAND_FOR_MULTIFAMILY]: {
     path: routes.HOW_TO_LAND_FOR_MULTIFAMILY,
     title: `How Do You Analyze Land for Multifamily? | ${SITE_NAME}`,
@@ -481,6 +494,7 @@ const PAGE_META_BY_E_PAGE_NAME: Partial<Record<EPageNames, PageMetaConfig>> = {
   [EPageNames.SITE_PLAN_BUILDER]: PAGE_META[routes.SITE_PLAN_BUILDER],
   [EPageNames.CUT_FILL_CALCULATOR]: PAGE_META[routes.CUT_FILL_CALCULATOR],
   [EPageNames.TOPOLOGY_ANALYSIS]: PAGE_META[routes.TOPOLOGY_ANALYSIS],
+  [EPageNames.SUBDIVISION_GENERATOR]: PAGE_META[routes.SUBDIVISION_GENERATOR],
 };
 
 export function normalizePath(pathname: string): string {

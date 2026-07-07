@@ -15,6 +15,7 @@ export const routes = {
   SITE_PLAN_BUILDER: "/site-plan-builder",
   CUT_FILL_CALCULATOR: "/cut-fill-calculator",
   TOPOLOGY_ANALYSIS: "/topology-analysis",
+  SUBDIVISION_GENERATOR: "/subdivision-generator",
   HOUSE_FLIPPING_CALCULATOR: "/house-flipping-calculator",
   CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
   HOME_MORTGAGE_CALCULATOR: "/home-mortgage-calculator",

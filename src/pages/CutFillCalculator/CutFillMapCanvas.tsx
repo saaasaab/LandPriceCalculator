@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import p5 from 'p5';
-import type { BoundaryCorner, BoundaryPoint, ContourLine, CutFillWorkflowStep } from '../../utils/cutFillCalculations';
-import { distancePointToSegment } from '../../utils/cutFillCalculations';
+import type { BoundaryCorner, BoundaryPoint, ContourLine } from '../../utils/siteMapCalculations';
+import { distancePointToSegment } from '../../utils/siteMapCalculations';
+import type { CutFillWorkflowStep } from '../../utils/cutFillTypes';
 import {
   buildElevPoints,
   calculateTinCutFill,
@@ -13,6 +14,7 @@ import {
 } from '../../utils/cutFillTin';
 import {
   computeImageTransform,
+  getPlanTransform,
   imagePointToScreen,
   type ImageTransform,
 } from './cutFillImageLayout';
@@ -22,8 +24,9 @@ import {
   feetToScene3d,
   type Scene3dCamera,
 } from './cutFillScene3d';
+import './CutFillMapCanvas.scss';
 
-export type { CutFillWorkflowStep } from '../../utils/cutFillCalculations';
+export type { CutFillWorkflowStep } from '../../utils/cutFillTypes';
 
 const SNAP_DISTANCE = 14;
 const VERTEX_HIT = 18;
@@ -56,8 +59,8 @@ type CutFillMapCanvasProps = {
   onCornerElevChange: (index: number, elevationFt: number) => void;
 };
 
-function getImageTransform(p: p5, imgW: number, imgH: number, pad = 16): ImageTransform {
-  return computeImageTransform(p.width, p.height, imgW, imgH, pad);
+function getImageTransform(p: p5, imgW: number, imgH: number, hasImage: boolean, pad = 16): ImageTransform {
+  return getPlanTransform(p.width, p.height, imgW, imgH, hasImage, pad);
 }
 
 function imageToScreen(p: BoundaryPoint, t: ImageTransform) {
@@ -91,6 +94,7 @@ const CutFillMapCanvas = ({
 }: CutFillMapCanvasProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const hudRef = useRef<HTMLDivElement>(null);
+  const p5InstanceRef = useRef<p5 | null>(null);
   const [imageSize, setImageSize] = useState<{ w: number; h: number } | null>(null);
   const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 });
   const propsRef = useRef({
@@ -144,7 +148,15 @@ const CutFillMapCanvas = ({
     const el = containerRef.current;
     if (!el) return;
 
-    const updateSize = () => setCanvasSize({ w: el.clientWidth, h: el.clientHeight });
+    const updateSize = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      setCanvasSize({ w, h });
+      const instance = p5InstanceRef.current;
+      if (instance && w > 0 && h > 0) {
+        instance.resizeCanvas(w, h);
+      }
+    };
     updateSize();
 
     const observer = new ResizeObserver(updateSize);
@@ -270,8 +282,8 @@ const CutFillMapCanvas = ({
           }
           return;
         }
-        if (!bgImage) return;
-        const t = getImageTransform(p, imgW, imgH);
+        if (!bgImage && props.step !== 'boundary') return;
+        const t = getImageTransform(p, imgW, imgH, Boolean(bgImage));
         const imgPt = screenToImage(p.mouseX, p.mouseY, t);
         if (!imgPt) return;
 
@@ -329,7 +341,7 @@ const CutFillMapCanvas = ({
           dragStartMouse &&
           props.boundaryClosed
         ) {
-          const t = getImageTransform(p, imgW, imgH);
+          const t = getImageTransform(p, imgW, imgH, Boolean(bgImage));
           const imgPt = screenToImage(p.mouseX, p.mouseY, t);
           if (!imgPt) return;
           const dx = imgPt.x - dragStartMouse.x;
@@ -427,13 +439,18 @@ const CutFillMapCanvas = ({
 
       const drawImagePlan = () => {
         const props = propsRef.current;
+        const hasImage = Boolean(bgImage);
         p.background(248, 250, 252);
-        if (!bgImage) {
+        if (!hasImage && props.step !== 'boundary') {
           setHud('Upload a property image to begin.');
           return;
         }
-        const t = getImageTransform(p, imgW, imgH);
-        p.image(bgImage, t.offsetX, t.offsetY, t.drawW, t.drawH);
+        const t = getImageTransform(p, imgW, imgH, hasImage);
+        if (hasImage && bgImage) {
+          p.image(bgImage, t.offsetX, t.offsetY, t.drawW, t.drawH);
+        } else if (props.step === 'boundary') {
+          setHud('Click to trace the property boundary. Upload an image from step 1 anytime.');
+        }
 
         if (props.boundary.length > 0) {
           if (props.boundaryClosed && props.scaleMode) {
@@ -573,7 +590,9 @@ const CutFillMapCanvas = ({
     };
 
     const instance = new p5(sketch, parent);
+    p5InstanceRef.current = instance;
     return () => {
+      p5InstanceRef.current = null;
       removeOrbitListeners?.();
       removeWheelListener?.();
       instance.remove();

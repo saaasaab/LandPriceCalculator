@@ -91,9 +91,70 @@ export function formatLeaseRentBasis(lease: LeaseEntry): string {
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+function parseExcelSerial(serial: number): string {
+  const date = new Date(1899, 11, 30);
+  date.setDate(date.getDate() + Math.round(serial));
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+export function normalizeLeaseDate(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+
+  if (/^\d{4,5}(\.\d+)?$/.test(trimmed)) {
+    const serial = Math.round(Number(trimmed));
+    if (serial >= 25000 && serial <= 60000) {
+      return parseExcelSerial(serial);
+    }
+  }
+
+  const slashMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(?:\s+.*)?$/);
+  if (slashMatch) {
+    const month = Number(slashMatch[1]);
+    const day = Number(slashMatch[2]);
+    let year = Number(slashMatch[3]);
+    if (year < 100) year += 2000;
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+  }
+
+  const dashMatch = trimmed.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})(?:\s+.*)?$/);
+  if (dashMatch) {
+    const month = Number(dashMatch[1]);
+    const day = Number(dashMatch[2]);
+    let year = Number(dashMatch[3]);
+    if (year < 100) year += 2000;
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+  }
+
+  if (!/^\d+$/.test(trimmed)) {
+    const parsed = new Date(trimmed);
+    if (!Number.isNaN(parsed.getTime())) {
+      return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
+    }
+  }
+
+  return "";
+}
+
+export function formatLeaseDateForInput(value: string): string {
+  if (!value) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map(Number);
+    return `${month}/${day}/${year}`;
+  }
+  return value;
+}
+
 function parseDate(value: string): Date | null {
-  if (!value) return null;
-  const date = new Date(`${value}T00:00:00`);
+  const normalized = normalizeLeaseDate(value);
+  if (!normalized) return null;
+  const date = new Date(`${normalized}T00:00:00`);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 

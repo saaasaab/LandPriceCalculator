@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import p5 from 'p5';
-import type { BoundaryCorner, BoundaryPoint, ContourLine } from '../../utils/cutFillCalculations';
-import { distancePointToSegment } from '../../utils/cutFillCalculations';
+import type { BoundaryCorner, BoundaryPoint, ContourLine } from '../../utils/siteMapCalculations';
+import { distancePointToSegment } from '../../utils/siteMapCalculations';
 import {
   aspectColor,
   elevationColor,

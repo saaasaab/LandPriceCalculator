@@ -1,4 +1,4 @@
-import type { BoundaryCorner, BoundaryPoint, ContourLine } from './cutFillCalculations';
+import type { BoundaryCorner, BoundaryPoint, ContourLine } from './siteMapCalculations';
 import type { TopologyAnalysisView } from './topologyAnalysis';
 
 export const TOPOLOGY_STORAGE_KEY = 'topology-analysis-project';

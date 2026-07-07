@@ -31,6 +31,7 @@ import React, { Suspense } from 'react';
 const SitePlanDesigner = React.lazy(() => import('./pages/SiteplanDesigner/SitePlanDesigner'));
 const CutFillCalculator = React.lazy(() => import('./pages/CutFillCalculator/CutFillCalculator'));
 const TopologyAnalysis = React.lazy(() => import('./pages/TopologyAnalysis/TopologyAnalysis'));
+const SubdivisionGenerator = React.lazy(() => import('./pages/SubdivisionGenerator/SubdivisionGenerator'));
 
 
 
@@ -131,6 +132,7 @@ export function AppRouter() {
               <Route path={routes.SITE_PLAN_BUILDER} element={<SitePlanDesigner />} />
               <Route path={routes.CUT_FILL_CALCULATOR} element={<CutFillCalculator />} />
               <Route path={routes.TOPOLOGY_ANALYSIS} element={<TopologyAnalysis />} />
+              <Route path={routes.SUBDIVISION_GENERATOR} element={<SubdivisionGenerator />} />
 
               <Route path={routes.LOGIN} element={<Login />} />
               <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { LeaseEntry, LeaseRentType, isLeaseVacant } from "./leaseExpiryCalculations";
+import { LeaseEntry, LeaseRentType, isLeaseVacant, normalizeLeaseDate } from "./leaseExpiryCalculations";
 
 export const LEASE_CSV_HEADERS = [
   "Tenant",
@@ -25,11 +25,7 @@ function escapeCsvValue(value: string | number): string {
 }
 
 function formatCsvDate(value: string): string {
-  if (!value) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toISOString().slice(0, 10);
+  return normalizeLeaseDate(value);
 }
 
 function parseRentType(value: string): LeaseRentType | null {
@@ -56,6 +52,15 @@ function parseRentType(value: string): LeaseRentType | null {
     return "annualPerSqft";
   }
   return null;
+}
+
+function parseDelimitedLine(line: string): string[] {
+  const tabCount = (line.match(/\t/g) ?? []).length;
+  const commaCount = (line.match(/,/g) ?? []).length;
+  if (tabCount > 0 && tabCount >= commaCount) {
+    return line.split("\t");
+  }
+  return parseCsvLine(line);
 }
 
 function parseCsvLine(line: string): string[] {
@@ -115,7 +120,7 @@ function parseCsv(text: string): string[][] {
 
     if ((char === "\n" || char === "\r") && !inQuotes) {
       if (char === "\r" && next === "\n") i += 1;
-      if (currentLine.trim()) rows.push(parseCsvLine(currentLine));
+      if (currentLine.trim()) rows.push(parseDelimitedLine(currentLine));
       currentLine = "";
       continue;
     }
@@ -123,35 +128,113 @@ function parseCsv(text: string): string[][] {
     currentLine += char;
   }
 
-  if (currentLine.trim()) rows.push(parseCsvLine(currentLine));
+  if (currentLine.trim()) rows.push(parseDelimitedLine(currentLine));
   return rows;
 }
 
 function isHeaderRow(values: string[]): boolean {
-  const first = values[0]?.trim().toLowerCase();
-  return first === "tenant" || first === "tenant name" || first === "status";
+  const normalized = values.map((value) => value.trim().toLowerCase());
+  return normalized.some((value) =>
+    ["tenant", "tenant name", "status", "unit", "start", "start date", "end", "end date"].includes(value),
+  );
 }
 
-function normalizeRow(values: string[]): string[] {
-  const first = values[0]?.trim().toLowerCase();
-  if (first === "status" && values.length >= 8) {
-    return values.slice(1);
-  }
-  return values;
+type LeaseCsvColumns = {
+  tenantName: string;
+  unit: string;
+  startDate: string;
+  endDate: string;
+  rentTypeRaw: string;
+  rentRaw: string;
+  sqftRaw: string;
+};
+
+function normalizeHeader(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-function rowToLease(values: string[], rowNumber: number): { lease?: LeaseEntry; error?: string } {
-  const [
-    tenantName = "",
-    unit = "",
-    startDate = "",
-    endDate = "",
-    rentTypeRaw = "",
-    rentRaw = "",
-    sqftRaw = "",
-  ] = normalizeRow(values);
+function mapRowToColumns(headers: string[], values: string[]): LeaseCsvColumns {
+  const mapped: LeaseCsvColumns = {
+    tenantName: "",
+    unit: "",
+    startDate: "",
+    endDate: "",
+    rentTypeRaw: "",
+    rentRaw: "",
+    sqftRaw: "",
+  };
+
+  headers.forEach((header, index) => {
+    const value = values[index] ?? "";
+    switch (normalizeHeader(header)) {
+      case "tenant":
+      case "tenant name":
+        mapped.tenantName = value;
+        break;
+      case "unit":
+      case "suite":
+        mapped.unit = value;
+        break;
+      case "start":
+      case "start date":
+      case "lease start":
+        mapped.startDate = value;
+        break;
+      case "end":
+      case "end date":
+      case "lease end":
+      case "expiry":
+      case "expiration":
+        mapped.endDate = value;
+        break;
+      case "rent type":
+      case "rent basis":
+        mapped.rentTypeRaw = value;
+        break;
+      case "rent":
+      case "monthly rent":
+      case "rent amount":
+        mapped.rentRaw = value;
+        break;
+      case "sq ft":
+      case "sqft":
+      case "square feet":
+      case "sf":
+        mapped.sqftRaw = value;
+        break;
+      default:
+        break;
+    }
+  });
+
+  return mapped;
+}
+
+function rowToLease(values: string[], rowNumber: number, headers?: string[]): { lease?: LeaseEntry; error?: string } {
+  const columns = headers
+    ? mapRowToColumns(headers, values)
+    : {
+        tenantName: values[0] ?? "",
+        unit: values[1] ?? "",
+        startDate: values[2] ?? "",
+        endDate: values[3] ?? "",
+        rentTypeRaw: values[4] ?? "",
+        rentRaw: values[5] ?? "",
+        sqftRaw: values[6] ?? "",
+      };
+
+  const {
+    tenantName,
+    unit,
+    startDate,
+    endDate,
+    rentTypeRaw,
+    rentRaw,
+    sqftRaw,
+  } = columns;
 
   const trimmedTenant = tenantName.trim();
+  const trimmedStart = startDate.trim();
   const trimmedEnd = endDate.trim();
   const trimmedUnit = unit.trim();
 
@@ -161,6 +244,20 @@ function rowToLease(values: string[], rowNumber: number): { lease?: LeaseEntry; 
 
   if (!trimmedUnit) {
     return { error: `Row ${rowNumber}: Unit is required.` };
+  }
+
+  const normalizedStart = formatCsvDate(trimmedStart);
+  if (trimmedStart && !normalizedStart) {
+    return {
+      error: `Row ${rowNumber}: Invalid start date "${trimmedStart}". Use M/D/YYYY or YYYY-MM-DD.`,
+    };
+  }
+
+  const normalizedEnd = formatCsvDate(trimmedEnd);
+  if (trimmedEnd && !normalizedEnd) {
+    return {
+      error: `Row ${rowNumber}: Invalid end date "${trimmedEnd}". Use M/D/YYYY or YYYY-MM-DD.`,
+    };
   }
 
   const rentType = parseRentType(rentTypeRaw);
@@ -185,8 +282,8 @@ function rowToLease(values: string[], rowNumber: number): { lease?: LeaseEntry; 
       id: uuidv4(),
       tenantName: trimmedTenant,
       unit: trimmedUnit,
-      startDate: formatCsvDate(startDate.trim()),
-      endDate: formatCsvDate(trimmedEnd),
+      startDate: normalizedStart,
+      endDate: normalizedEnd,
       rentType,
       rentAmount,
       sqft,
@@ -234,12 +331,13 @@ export function parseLeaseCsv(text: string): { leases: LeaseEntry[]; errors: str
   }
 
   const dataRows = isHeaderRow(rows[0]) ? rows.slice(1) : rows;
+  const headers = isHeaderRow(rows[0]) ? rows[0] : undefined;
   const leases: LeaseEntry[] = [];
   const errors: string[] = [];
 
   dataRows.forEach((row, index) => {
-    const rowNumber = index + (isHeaderRow(rows[0]) ? 2 : 1);
-    const result = rowToLease(row, rowNumber);
+    const rowNumber = index + (headers ? 2 : 1);
+    const result = rowToLease(row, rowNumber, headers);
     if (result.error) errors.push(result.error);
     if (result.lease) leases.push(result.lease);
   });

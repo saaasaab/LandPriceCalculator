@@ -6,6 +6,7 @@ import {
   computeLeaseExpiryMetrics,
   formatCurrency,
   formatDate,
+  formatLeaseDateForInput,
   formatLeaseRentBasis,
   formatPercent,
   getLeaseMonthlyRent,
@@ -14,6 +15,7 @@ import {
   isLeaseVacant,
   LeaseEntry,
   LeaseRentType,
+  normalizeLeaseDate,
 } from "../utils/leaseExpiryCalculations";
 import { downloadLeaseCsv, parseLeaseCsv } from "../utils/leaseExpiryCsv";
 import { createEmptyLease, serializeLeaseProject } from "../utils/leaseProjectDefaults";
@@ -177,6 +179,17 @@ const LeaseExpiryScheduleCalculator = ({
   const rentInputStep = (rentType: LeaseRentType) =>
     rentType === "annualPerSqft" ? "0.01" : "1";
 
+  const handleDateBlur = (id: string, field: "startDate" | "endDate", value: string) => {
+    const normalized = normalizeLeaseDate(value);
+    if (normalized) {
+      updateLease(id, { [field]: normalized });
+      return;
+    }
+    if (!value.trim()) {
+      updateLease(id, { [field]: "" });
+    }
+  };
+
   return (
     <div className="lease-expiry-schedule">
       <div className="print-report-header print-only">
@@ -285,16 +298,22 @@ const LeaseExpiryScheduleCalculator = ({
                 </td>
                 <td>
                   <input
-                    type="date"
-                    value={lease.startDate}
+                    type="text"
+                    className="date-input"
+                    value={formatLeaseDateForInput(lease.startDate)}
                     onChange={(e) => updateLease(lease.id, { startDate: e.target.value })}
+                    onBlur={(e) => handleDateBlur(lease.id, "startDate", e.target.value)}
+                    placeholder="M/D/YYYY"
                   />
                 </td>
                 <td>
                   <input
-                    type="date"
-                    value={lease.endDate}
+                    type="text"
+                    className="date-input"
+                    value={formatLeaseDateForInput(lease.endDate)}
                     onChange={(e) => updateLease(lease.id, { endDate: e.target.value })}
+                    onBlur={(e) => handleDateBlur(lease.id, "endDate", e.target.value)}
+                    placeholder="M/D/YYYY"
                   />
                 </td>
                 <td>

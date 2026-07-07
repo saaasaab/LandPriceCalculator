@@ -7,11 +7,11 @@ import {
   boundaryEdgeLength,
   calculateBoundaryAreaSqFt,
   computeFtPerPixel,
-  formatCuYd,
   type BoundaryCorner,
   type BoundaryPoint,
   type ContourLine,
-} from '../../utils/cutFillCalculations';
+} from '../../utils/siteMapCalculations';
+import { formatCuYd } from '../../utils/cutFillTypes';
 import { buildElevPoints, calculateTinCutFill, triangulateSurface } from '../../utils/cutFillTin';
 import {
   buildTerrainGrid,

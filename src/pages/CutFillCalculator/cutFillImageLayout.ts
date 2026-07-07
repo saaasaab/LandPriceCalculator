@@ -1,4 +1,4 @@
-import type { BoundaryPoint } from '../../utils/cutFillCalculations';
+import type { BoundaryPoint } from '../../utils/siteMapCalculations';
 
 export type ImageTransform = {
   scale: number;
@@ -27,6 +27,34 @@ export function computeImageTransform(
     drawW,
     drawH,
   };
+}
+
+export function computeBlankCanvasTransform(
+  canvasW: number,
+  canvasH: number,
+  pad = 16,
+): ImageTransform {
+  const drawW = Math.max(canvasW - pad * 2, 1);
+  const drawH = Math.max(canvasH - pad * 2, 1);
+  return {
+    scale: 1,
+    offsetX: pad,
+    offsetY: pad,
+    drawW,
+    drawH,
+  };
+}
+
+export function getPlanTransform(
+  canvasW: number,
+  canvasH: number,
+  imgW: number,
+  imgH: number,
+  hasImage: boolean,
+  pad = 16,
+): ImageTransform {
+  if (hasImage) return computeImageTransform(canvasW, canvasH, imgW, imgH, pad);
+  return computeBlankCanvasTransform(canvasW, canvasH, pad);
 }
 
 export function imagePointToScreen(point: BoundaryPoint, transform: ImageTransform) {

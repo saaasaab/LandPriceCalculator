@@ -1,0 +1,188 @@
+.subdivision-generator {
+  max-width: min(100%, 1920px);
+  padding: 10px 12px 24px;
+
+  .subdivision-generator-header {
+    padding: 8px 12px;
+    text-align: left;
+    border-radius: 6px;
+    border-bottom: 1px solid #e2e8f0;
+
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  .topo-workflow-layout {
+    padding-top: 8px;
+    align-items: stretch;
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+
+  .topo-workflow-main {
+    min-width: 0;
+    min-height: calc(100vh - 120px);
+  }
+
+  .topo-workflow-map-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: calc(100vh - 130px);
+    padding: 10px 12px 12px;
+
+    h2 {
+      font-size: 0.9rem;
+      margin: 0 0 6px;
+      color: #64748b;
+      font-weight: 600;
+      text-align: left;
+    }
+  }
+
+  .topo-workflow-interactive-wrap {
+    flex: 1;
+    min-height: calc(100vh - 170px);
+
+    .cut-fill-map-canvas-wrap {
+      height: calc(100vh - 190px);
+      min-height: 680px;
+    }
+
+    .topo-workflow-upload-area {
+      min-height: calc(100vh - 190px);
+    }
+  }
+
+  .topo-workflow-placeholder {
+    margin-top: 8px;
+  }
+
+  .subdivision-road-corners {
+    list-style: none;
+    padding: 8px 0 0;
+    font-size: 0.85rem;
+    color: #475569;
+
+    li {
+      padding: 2px 0;
+    }
+  }
+
+  .subdivision-road-warning {
+    color: #b45309;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .subdivision-road-legend {
+    list-style: none;
+    padding: 8px 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+
+    li {
+      padding: 2px 0 2px 18px;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        transform: translateY(-50%);
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px #cbd5e1;
+      }
+    }
+  }
+
+  .subdivision-road-legend-entrance::before {
+    background: #16a34a;
+  }
+
+  .subdivision-road-legend-junction::before {
+    background: #2563eb;
+  }
+
+  .subdivision-road-legend-deadend::before {
+    background: #dc2626;
+  }
+
+  .subdivision-lot-legend {
+    list-style: none;
+    padding: 8px 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+
+    li {
+      padding: 2px 0 2px 18px;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        transform: translateY(-50%);
+      }
+    }
+  }
+
+  .subdivision-lot-legend-left::before {
+    background: rgba(94, 234, 212, 0.7);
+    border: 1px solid #0d9488;
+  }
+
+  .subdivision-lot-legend-right::before {
+    background: rgba(125, 211, 252, 0.7);
+    border: 1px solid #0284c7;
+  }
+
+  .subdivision-lot-legend-spawn::before {
+    border-radius: 50%;
+    background: #14b8a6;
+  }
+
+
+  .subdivision-lot-row-control {
+    align-items: center;
+  }
+
+  .subdivision-lot-row-stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .subdivision-lot-row-value {
+    min-width: 4.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #334155;
+  }
+
+  @media (max-width: 900px) {
+    .topo-workflow-main,
+    .topo-workflow-map-panel {
+      min-height: 0;
+    }
+
+    .topo-workflow-interactive-wrap {
+      min-height: 560px;
+
+      .cut-fill-map-canvas-wrap {
+        height: 560px;
+        min-height: 560px;
+      }
+    }
+  }
+}

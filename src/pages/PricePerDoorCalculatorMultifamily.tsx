@@ -82,7 +82,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
     return (
 
-        <div className="group-section">
+        <div className="group-section price-per-door-calculator">
             <div className="input-fields-container has-bottom-border">
 
                 <InputRow

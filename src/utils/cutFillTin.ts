@@ -1,6 +1,7 @@
 import { Delaunay } from 'd3-delaunay';
-import type { BoundaryPoint, ContourLine, CutFillTotals } from './cutFillCalculations';
-import { boundaryToFeet, calculateBoundaryAreaSqFt, isInsideBoundary } from './cutFillCalculations';
+import type { BoundaryPoint, ContourLine } from './siteMapCalculations';
+import { boundaryToFeet, calculateBoundaryAreaSqFt, isInsideBoundary } from './siteMapCalculations';
+import type { CutFillTotals } from './cutFillTypes';
 
 export type ElevPoint = { x: number; y: number; z: number };
 

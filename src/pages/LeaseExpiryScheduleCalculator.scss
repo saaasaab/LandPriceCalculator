@@ -204,8 +204,9 @@
       box-sizing: border-box;
     }
 
-    input[type="date"] {
-      min-width: 136px;
+    input[type="date"],
+    .date-input {
+      min-width: 108px;
     }
 
     .rent-input {

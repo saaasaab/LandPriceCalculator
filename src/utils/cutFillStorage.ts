@@ -1,4 +1,5 @@
-import type { BoundaryCorner, BoundaryPoint, ContourLine, CutFillWorkflowStep } from './cutFillCalculations';
+import type { BoundaryCorner, BoundaryPoint, ContourLine } from './siteMapCalculations';
+import type { CutFillWorkflowStep } from './cutFillTypes';
 
 export const CUT_FILL_STORAGE_KEY = 'cut-fill-calculator-project';
 

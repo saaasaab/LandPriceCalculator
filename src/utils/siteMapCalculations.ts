@@ -2,28 +2,12 @@ import classifyPoint from 'robust-point-in-polygon';
 
 export type BoundaryPoint = { x: number; y: number };
 
-export type CutFillWorkflowStep =
-  | 'upload'
-  | 'boundary'
-  | 'corners'
-  | 'contours'
-  | 'terrain'
-  | 'cutfill';
-
 export type BoundaryCorner = BoundaryPoint & { elevationFt: number };
 
 export type ContourLine = {
   id: string;
   points: BoundaryPoint[];
   elevationFt: number;
-};
-
-export type CutFillTotals = {
-  cutCuYd: number;
-  fillCuYd: number;
-  netCuYd: number;
-  triangleCount: number;
-  propertyAreaSqFt: number;
 };
 
 export function boundaryEdgeLength(boundary: BoundaryPoint[], edgeIndex: number): number {
@@ -96,10 +80,6 @@ export function isInsideBoundary(boundary: BoundaryPoint[], x: number, y: number
   if (boundary.length < 3) return false;
   const poly = boundary.map((p) => [p.x, p.y] as [number, number]);
   return classifyPoint(poly, [x, y]) < 0;
-}
-
-export function formatCuYd(value: number): string {
-  return value.toLocaleString(undefined, { maximumFractionDigits: 1 });
 }
 
 export function boundaryToFeet(boundary: BoundaryPoint[], ftPerPixel: number): BoundaryPoint[] {

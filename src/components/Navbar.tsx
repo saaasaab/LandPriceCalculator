@@ -11,6 +11,7 @@ import {
   HardHat,
   Home,
   Landmark,
+  LayoutGrid,
   LineChart,
   LogIn,
   LogOut,
@@ -60,6 +61,7 @@ export const calculatorIcons: Record<string, React.ReactNode> = {
   [routes.SITE_PLAN_BUILDER]: <Map {...navIconProps} />,
   [routes.CUT_FILL_CALCULATOR]: <Mountain {...navIconProps} />,
   [routes.TOPOLOGY_ANALYSIS]: <Map {...navIconProps} />,
+  [routes.SUBDIVISION_GENERATOR]: <LayoutGrid {...navIconProps} />,
   [routes.LOGIN]: <LogIn {...authLinkIconProps} />,
 };
 
@@ -110,6 +112,7 @@ const NAV_MENUS: NavMenu[] = [
       { route: routes.SITE_PLAN_BUILDER, title: EPageTitles.SITE_PLAN_BUILDER },
       { route: routes.CUT_FILL_CALCULATOR, title: EPageTitles.CUT_FILL_CALCULATOR },
       { route: routes.TOPOLOGY_ANALYSIS, title: EPageTitles.TOPOLOGY_ANALYSIS },
+      { route: routes.SUBDIVISION_GENERATOR, title: EPageTitles.SUBDIVISION_GENERATOR },
       { route: routes.CONSTRUCTION_LOAN_CALCULATOR, title: EPageTitles.CONSTRUCTION_LOAN_CALCULATOR },
     ],
   },

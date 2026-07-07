@@ -140,6 +140,140 @@
   }
 }
 
+@media print {
+  @page {
+    margin: 0.15in 0.45in 0.3in;
+  }
+
+  html,
+  body,
+  #root,
+  .app,
+  .land-calculator-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: unset !important;
+    background: white !important;
+  }
+
+  .land-calculator:has(.price-per-door-calculator) {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+
+    .land-calculator-layout {
+      gap: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .land-calculator-main {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .app-header {
+      padding: 0 12px 4px !important;
+      margin: 0 0 4px !important;
+      border-bottom-width: 1px !important;
+      border-radius: 0 !important;
+
+      h1 {
+        font-size: 1rem !important;
+        margin: 0 !important;
+      }
+
+      &__help-link {
+        display: none !important;
+      }
+    }
+  }
+
+  .price-per-door-calculator {
+    padding: 0 !important;
+    margin: 0 !important;
+    page-break-inside: avoid;
+
+    .input-fields-container {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      column-count: unset !important;
+      -webkit-column-count: unset !important;
+      gap: 0 16px !important;
+      padding: 0 12px 8px !important;
+      border-bottom-width: 1px !important;
+
+      .input-row {
+        min-height: unset !important;
+        padding: 3px 4px !important;
+        gap: 8px !important;
+
+        .info-cell h4 {
+          font-size: 0.7rem !important;
+          line-height: 1.2 !important;
+          font-weight: 500 !important;
+        }
+
+        .input-cell input {
+          font-size: 0.7rem !important;
+          min-height: unset !important;
+          width: 56px !important;
+          max-width: 56px !important;
+          padding: 0 4px !important;
+          text-align: right !important;
+        }
+      }
+    }
+
+    .output-fields-container {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 4px 8px !important;
+      padding: 8px 12px !important;
+
+      .output-row-container {
+        page-break-inside: avoid;
+      }
+
+      .output-row {
+        min-height: unset !important;
+        padding: 4px 6px !important;
+        border-radius: 4px !important;
+        gap: 2px !important;
+
+        .info-cell h4 {
+          font-size: 0.62rem !important;
+          line-height: 1.15 !important;
+          font-weight: 600 !important;
+          color: #0f172a !important;
+        }
+
+        .question-mark {
+          display: none !important;
+        }
+      }
+
+      .output-cell {
+        font-size: 0.95rem !important;
+        line-height: 1.1 !important;
+        font-weight: 700 !important;
+        color: rgb(5 150 105) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .description-cell {
+        display: none !important;
+      }
+    }
+
+    .copy-url-button,
+    .action-buttons {
+      display: none !important;
+    }
+  }
+}
+
 $breakpoint-small-desktop: 1000px;
 $breakpoint-tablet: 768px;
 @media (max-width: $breakpoint-small-desktop) {
