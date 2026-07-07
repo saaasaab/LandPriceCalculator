@@ -125,71 +125,11 @@ function ringToPoints(ring: [number, number][]): BoundaryPoint[] {
   return pts;
 }
 
-function pointToSegmentDistance(point: BoundaryPoint, a: BoundaryPoint, b: BoundaryPoint): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const lengthSq = dx * dx + dy * dy;
-  if (lengthSq < 1e-10) return Math.hypot(point.x - a.x, point.y - a.y);
-  const t = Math.max(0, Math.min(1, ((point.x - a.x) * dx + (point.y - a.y) * dy) / lengthSq));
-  return Math.hypot(point.x - (a.x + dx * t), point.y - (a.y + dy * t));
-}
-
-function simplifyOpenPolyline(points: BoundaryPoint[], tolerancePx: number): BoundaryPoint[] {
-  if (points.length <= 2) return points;
-
-  const first = points[0];
-  const last = points[points.length - 1];
-  let maxDist = 0;
-  let splitIndex = -1;
-
-  for (let i = 1; i < points.length - 1; i++) {
-    const dist = pointToSegmentDistance(points[i], first, last);
-    if (dist > maxDist) {
-      maxDist = dist;
-      splitIndex = i;
-    }
-  }
-
-  if (maxDist <= tolerancePx || splitIndex < 0) {
-    return [first, last];
-  }
-
-  const left = simplifyOpenPolyline(points.slice(0, splitIndex + 1), tolerancePx);
-  const right = simplifyOpenPolyline(points.slice(splitIndex), tolerancePx);
-  return [...left.slice(0, -1), ...right];
-}
-
-function simplifyPolygonVertices(polygon: BoundaryPoint[], tolerancePx = 1.25): BoundaryPoint[] {
-  const pts = polygon.filter((point, i) => {
+function dedupePolygonVertices(polygon: BoundaryPoint[], minDistPx = 0.35): BoundaryPoint[] {
+  return polygon.filter((point, i) => {
     const prev = polygon[(i - 1 + polygon.length) % polygon.length];
-    return Math.hypot(point.x - prev.x, point.y - prev.y) > 0.25;
+    return Math.hypot(point.x - prev.x, point.y - prev.y) > minDistPx;
   });
-  if (pts.length <= 3) return pts;
-
-  // Split the closed polygon into two long open chains so RDP can preserve curved road edges
-  // instead of flattening them through repeated local collinear checks.
-  let startIndex = 0;
-  let endIndex = Math.floor(pts.length / 2);
-  let maxDistance = 0;
-
-  for (let i = 0; i < pts.length; i++) {
-    for (let j = i + 1; j < pts.length; j++) {
-      const dist = Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y);
-      if (dist > maxDistance) {
-        maxDistance = dist;
-        startIndex = i;
-        endIndex = j;
-      }
-    }
-  }
-
-  const chainA = pts.slice(startIndex, endIndex + 1);
-  const chainB = [...pts.slice(endIndex), ...pts.slice(0, startIndex + 1)];
-  const simplifiedA = simplifyOpenPolyline(chainA, tolerancePx);
-  const simplifiedB = simplifyOpenPolyline(chainB, tolerancePx);
-  const simplified = [...simplifiedA, ...simplifiedB.slice(1, -1)];
-
-  return simplified.length >= 3 ? simplified : pts;
 }
 
 function polygonAreaSqFt(polygon: BoundaryPoint[], ftPerPixel: number): number {
@@ -328,25 +268,22 @@ export function createSpawnPointId(): string {
   return `sp-${Date.now()}-${spawnIdCounter}`;
 }
 
-/** Each road row creates a left + right lot; estimate rows from developable area and aspect ratio. */
+/** Total spawn points from developable area and minimum lot size (one lot per spawn). */
+export function estimateSpawnPointCount(
+  developableAreaSqFt: number,
+  minLotSizeSqFt: number,
+): number {
+  if (minLotSizeSqFt <= 0) return DEFAULT_LOT_PAIR_COUNT * 2;
+  if (developableAreaSqFt <= 0) return DEFAULT_LOT_PAIR_COUNT * 2;
+  return Math.max(1, Math.floor(developableAreaSqFt / minLotSizeSqFt));
+}
+
+/** @deprecated Use estimateSpawnPointCount; returns row pairs for legacy callers. */
 export function estimateLotPairCount(
   developableAreaSqFt: number,
   targetLotSizeSqFt: number,
-  totalRoadLengthFt = 0,
 ): number {
-  if (targetLotSizeSqFt <= 0) return DEFAULT_LOT_PAIR_COUNT;
-
-  const fromArea =
-    developableAreaSqFt > 0
-      ? Math.max(1, Math.round(developableAreaSqFt / targetLotSizeSqFt / 2))
-      : DEFAULT_LOT_PAIR_COUNT;
-
-  if (totalRoadLengthFt <= 0) return fromArea;
-
-  const minFrontageFt = Math.sqrt(targetLotSizeSqFt / MAX_LOT_ASPECT_RATIO);
-  const fromAspect = Math.max(1, Math.ceil(totalRoadLengthFt / minFrontageFt));
-
-  return Math.max(fromArea, fromAspect);
+  return Math.max(1, Math.ceil(estimateSpawnPointCount(developableAreaSqFt, targetLotSizeSqFt) / 2));
 }
 
 /** Spacing between lot centers along the road for roughly uniform lot areas. */
@@ -384,9 +321,9 @@ export function generateBoundaryVoronoiSeeds(
   return seeds;
 }
 
-function roadAccessOffsetPx(roadWidthFt: number, ftPerPixel: number): number {
+function roadBoundaryOffsetPx(roadWidthFt: number, ftPerPixel: number): number {
   if (roadWidthFt <= 0 || ftPerPixel <= 0) return 0;
-  return (roadWidthFt / 2 / ftPerPixel) * 0.7;
+  return roadWidthFt / 2 / ftPerPixel;
 }
 
 function lotSeedOffsetPx(
@@ -403,6 +340,78 @@ function lotSeedOffsetPx(
   return halfWidthPx + depthPx;
 }
 
+function normalizeVec(dx: number, dy: number): BoundaryPoint {
+  const len = Math.hypot(dx, dy);
+  if (len < 1e-10) return { x: 0, y: 1 };
+  return { x: dx / len, y: dy / len };
+}
+
+function polygonCentroid(polygon: BoundaryPoint[]): BoundaryPoint {
+  if (polygon.length === 0) return { x: 0, y: 0 };
+  let x = 0;
+  let y = 0;
+  for (const p of polygon) {
+    x += p.x;
+    y += p.y;
+  }
+  return { x: x / polygon.length, y: y / polygon.length };
+}
+
+function pointInPolygon(point: BoundaryPoint, polygon: BoundaryPoint[]): boolean {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const pi = polygon[i];
+    const pj = polygon[j];
+    const intersects =
+      pi.y > point.y !== pj.y > point.y &&
+      point.x < ((pj.x - pi.x) * (point.y - pi.y)) / (pj.y - pi.y || 1e-10) + pi.x;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+/** Perpendicular from the road centerline that points into developable land. */
+function lotSidePerpendicular(
+  point: BoundaryPoint,
+  tangent: BoundaryPoint,
+  boundary: BoundaryPoint[],
+  side: SpawnSide,
+): BoundaryPoint {
+  const perpA = normalizeVec(-tangent.y, tangent.x);
+  const perpB = { x: -perpA.x, y: -perpA.y };
+  const probe = 12;
+
+  const aInside = pointInPolygon(
+    { x: point.x + perpA.x * probe, y: point.y + perpA.y * probe },
+    boundary,
+  );
+  const bInside = pointInPolygon(
+    { x: point.x + perpB.x * probe, y: point.y + perpB.y * probe },
+    boundary,
+  );
+
+  let leftPerp = perpA;
+  if (!aInside && bInside) leftPerp = perpB;
+  else if (!aInside && !bInside) {
+    const centroid = polygonCentroid(boundary);
+    leftPerp = normalizeVec(centroid.x - point.x, centroid.y - point.y);
+  }
+
+  const rightPerp = { x: -leftPerp.x, y: -leftPerp.y };
+  const chosen = side === 'left' ? leftPerp : rightPerp;
+
+  if (
+    !pointInPolygon(
+      { x: point.x + chosen.x * probe, y: point.y + chosen.y * probe },
+      boundary,
+    )
+  ) {
+    return { x: -chosen.x, y: -chosen.y };
+  }
+
+  return chosen;
+}
+
 function sidePerpendicular(tangent: BoundaryPoint, side: SpawnSide): BoundaryPoint {
   const perpX = -tangent.y;
   const perpY = tangent.x;
@@ -413,18 +422,30 @@ function addSpawn(
   spawns: SpawnPoint[],
   point: BoundaryPoint,
   tangent: BoundaryPoint,
-  accessOffsetPx: number,
+  perp: BoundaryPoint,
+  boundaryOffsetPx: number,
   seedOffsetPx: number,
   side: SpawnSide,
   segmentId: string,
+  boundary: BoundaryPoint[],
 ) {
-  const perp = sidePerpendicular(tangent, side);
+  const frontage = {
+    x: point.x + perp.x * boundaryOffsetPx,
+    y: point.y + perp.y * boundaryOffsetPx,
+  };
+  const seed = {
+    x: point.x + perp.x * seedOffsetPx,
+    y: point.y + perp.y * seedOffsetPx,
+  };
+
+  if (!pointInPolygon(seed, boundary) && !pointInPolygon(frontage, boundary)) return;
+
   spawns.push({
     id: createSpawnPointId(),
-    x: point.x + perp.x * accessOffsetPx,
-    y: point.y + perp.y * accessOffsetPx,
-    seedX: point.x + perp.x * seedOffsetPx,
-    seedY: point.y + perp.y * seedOffsetPx,
+    x: frontage.x,
+    y: frontage.y,
+    seedX: seed.x,
+    seedY: seed.y,
     side,
     segmentId,
     tangentX: tangent.x,
@@ -432,19 +453,19 @@ function addSpawn(
   });
 }
 
-/** Distribute lot rows along road chains (each row = left + right lot). */
+/** Distribute spawn points along road chains (one per estimated lot). */
 export function generateSpawnPoints(
   network: RoadNetwork,
-  lotPairCount: number,
+  spawnCount: number,
   roadWidthFt: number,
   ftPerPixel: number,
   targetLotSizeSqFt: number,
   boundary: BoundaryPoint[],
   nodeRoles: Map<string, RoadEndpointRole>,
 ): SpawnPoint[] {
-  if (lotPairCount <= 0 || network.segments.length === 0 || ftPerPixel <= 0) return [];
+  if (spawnCount <= 0 || network.segments.length === 0 || ftPerPixel <= 0) return [];
 
-  const accessOffsetPx = roadAccessOffsetPx(roadWidthFt, ftPerPixel);
+  const boundaryOffsetPx = roadBoundaryOffsetPx(roadWidthFt, ftPerPixel);
   const seedOffsetPx = lotSeedOffsetPx(targetLotSizeSqFt, roadWidthFt, ftPerPixel);
   const chains = renderedRoadSampleChains(network, boundary, ftPerPixel, nodeRoles);
 
@@ -473,8 +494,8 @@ export function generateSpawnPoints(
 
   const spawns: SpawnPoint[] = [];
 
-  for (let row = 0; row < lotPairCount; row++) {
-    const targetDistance = totalLen * ((row + 0.5) / lotPairCount);
+  for (let i = 0; i < spawnCount; i++) {
+    const targetDistance = totalLen * ((i + 0.5) / spawnCount);
     let distanceSoFar = 0;
     for (const { a, b, len, segmentId } of chainSegments) {
       const nextDistance = distanceSoFar + len;
@@ -484,8 +505,19 @@ export function generateSpawnPoints(
       }
       const t = Math.max(0, Math.min(1, (targetDistance - distanceSoFar) / len));
       const { point, tangent } = sampleOnSegment(a, b, t);
-      addSpawn(spawns, point, tangent, accessOffsetPx, seedOffsetPx, 'left', segmentId);
-      addSpawn(spawns, point, tangent, accessOffsetPx, seedOffsetPx, 'right', segmentId);
+      const side: SpawnSide = i % 2 === 0 ? 'left' : 'right';
+      const perp = lotSidePerpendicular(point, tangent, boundary, side);
+      addSpawn(
+        spawns,
+        point,
+        tangent,
+        perp,
+        boundaryOffsetPx,
+        seedOffsetPx,
+        side,
+        segmentId,
+        boundary,
+      );
       break;
     }
   }
@@ -585,7 +617,7 @@ export function computeLotCells(
     if (clipped.length === 0) continue;
 
     const spawn = spawnPoints[i];
-    const polygon = simplifyPolygonVertices(chooseRoadConnectedFragment(clipped, spawn));
+    const polygon = dedupePolygonVertices(chooseRoadConnectedFragment(clipped, spawn));
     if (polygon.length < 3) continue;
 
     lots.push({
@@ -597,31 +629,7 @@ export function computeLotCells(
     });
   }
 
-  return lots;
-}
-
-function polygonCentroid(polygon: BoundaryPoint[]): BoundaryPoint {
-  if (polygon.length === 0) return { x: 0, y: 0 };
-  let x = 0;
-  let y = 0;
-  for (const p of polygon) {
-    x += p.x;
-    y += p.y;
-  }
-  return { x: x / polygon.length, y: y / polygon.length };
-}
-
-function pointInPolygon(point: BoundaryPoint, polygon: BoundaryPoint[]): boolean {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const pi = polygon[i];
-    const pj = polygon[j];
-    const intersects =
-      pi.y > point.y !== pj.y > point.y &&
-      point.x < ((pj.x - pi.x) * (point.y - pi.y)) / (pj.y - pi.y || 1e-10) + pi.x;
-    if (intersects) inside = !inside;
-  }
-  return inside;
+  return mergeDevelopableGapsIntoLots(boundary, roadMulti, lots, spawnPoints, ftPerPixel);
 }
 
 function distancePointToPolygon(point: BoundaryPoint, polygon: BoundaryPoint[]): number {
@@ -737,11 +745,22 @@ export function mergeDevelopableGapsIntoLots(
   const spawnById = new Map(spawnPoints.map((s) => [s.id, s]));
   const lots = lotCells.map((lot) => ({ ...lot, polygon: [...lot.polygon] }));
 
-  const findNearestTouchingLotIndex = (gap: BoundaryPoint[], centroid: BoundaryPoint): number => {
+  const findLotIndexForGap = (gap: BoundaryPoint[], centroid: BoundaryPoint): number => {
     let bestIdx = -1;
     let bestDist = Infinity;
     for (let i = 0; i < lots.length; i++) {
-      if (!polygonsTouch(lots[i].polygon, gap)) continue;
+      if (!polygonsTouch(lots[i].polygon, gap, 5)) continue;
+      const spawn = spawnById.get(lots[i].spawnPointId);
+      if (!spawn) continue;
+      const d = Math.hypot(centroid.x - spawn.x, centroid.y - spawn.y);
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    }
+    if (bestIdx >= 0) return bestIdx;
+
+    for (let i = 0; i < lots.length; i++) {
       const spawn = spawnById.get(lots[i].spawnPointId);
       if (!spawn) continue;
       const d = Math.hypot(centroid.x - spawn.x, centroid.y - spawn.y);
@@ -772,12 +791,12 @@ export function mergeDevelopableGapsIntoLots(
 
     for (const gap of gaps) {
       if (gap.areaSqFt <= 0) continue;
-      const bestIdx = findNearestTouchingLotIndex(gap.polygon, gap.centroid);
+      const bestIdx = findLotIndexForGap(gap.polygon, gap.centroid);
       if (bestIdx < 0) continue;
 
       const merged = unionPolygons(lots[bestIdx].polygon, gap.polygon);
       if (merged.length < 3) continue;
-      const polygon = simplifyPolygonVertices(merged);
+      const polygon = dedupePolygonVertices(merged);
 
       lots[bestIdx] = {
         ...lots[bestIdx],
@@ -791,35 +810,11 @@ export function mergeDevelopableGapsIntoLots(
   }
 
   return lots.map((lot) => {
-    const polygon = simplifyPolygonVertices(lot.polygon);
+    const polygon = dedupePolygonVertices(lot.polygon);
     return {
       ...lot,
       polygon,
       areaSqFt: polygonAreaSqFt(polygon, ftPerPixel),
     };
-  });
-}
-
-export function computeSpawnGrowthRadii(
-  spawnPoints: SpawnPoint[],
-  ftPerPixel: number,
-): number[] {
-  if (spawnPoints.length === 0) return [];
-
-  const coords: [number, number][] = spawnPoints.map((s) => [s.x, s.y]);
-  const delaunay = Delaunay.from(coords);
-
-  return spawnPoints.map((spawn, i) => {
-    let minDist = Infinity;
-    const neighbors = delaunay.neighbors(i);
-    for (const j of neighbors) {
-      const other = spawnPoints[j];
-      const d = Math.hypot(spawn.x - other.x, spawn.y - other.y);
-      if (d < minDist) minDist = d;
-    }
-    if (!Number.isFinite(minDist) || minDist <= 0) {
-      minDist = 40 / ftPerPixel;
-    }
-    return minDist * 0.55;
   });
 }

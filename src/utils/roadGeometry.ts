@@ -365,9 +365,20 @@ export function denseSampleRoadPath(
 
   const push = (pt: BoundaryPoint) => {
     const last = samples[samples.length - 1];
-    if (!last || Math.hypot(pt.x - last.x, pt.y - last.y) > 0.5) {
+    if (!last || Math.hypot(pt.x - last.x, pt.y - last.y) > 0.35) {
       samples.push(pt);
     }
+  };
+
+  const estimateCubicLength = (seg: Extract<RoadPathSegment, { type: 'cubic' }>): number => {
+    let len = 0;
+    let prev = cubicPoint(seg.p0, seg.p1, seg.p2, seg.p3, 0);
+    for (let s = 1; s <= 10; s++) {
+      const pt = cubicPoint(seg.p0, seg.p1, seg.p2, seg.p3, s / 10);
+      len += Math.hypot(pt.x - prev.x, pt.y - prev.y);
+      prev = pt;
+    }
+    return len;
   };
 
   for (const seg of segments) {
@@ -382,7 +393,8 @@ export function denseSampleRoadPath(
         });
       }
     } else if (seg.type === 'cubic') {
-      const steps = 16;
+      const approxLen = estimateCubicLength(seg);
+      const steps = Math.max(20, Math.ceil(approxLen / minStepPx));
       for (let i = 0; i <= steps; i++) {
         push(cubicPoint(seg.p0, seg.p1, seg.p2, seg.p3, i / steps));
       }

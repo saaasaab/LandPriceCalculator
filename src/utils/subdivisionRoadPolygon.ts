@@ -170,12 +170,15 @@ function buildOffsetEndpoints(
   return endpoints;
 }
 
+/** Sample interval (px) when building road pavement polygons for clipping and display. */
+const ROAD_POLYGON_SAMPLE_PX = 1.5;
+
 function offsetPathToRing(
   segments: RoadPathSegment[],
   halfWidthPx: number,
   endpoints?: OffsetEndpointOptions,
 ): BoundaryPoint[] | null {
-  const samples = denseSampleRoadPath(segments, 3);
+  const samples = denseSampleRoadPath(segments, ROAD_POLYGON_SAMPLE_PX);
   if (samples.length < 2) return null;
 
   const left = offsetSide(samples, halfWidthPx, 'left', endpoints);

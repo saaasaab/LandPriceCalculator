@@ -20,8 +20,16 @@ import {
   type RoadDrawingState,
   type RoadNetwork,
 } from '../../utils/roadNetwork';
-import { DEFAULT_TARGET_LOT_SIZE_SQFT } from '../../utils/subdivisionLotLayout';
-import { buildRoadPolygonRings, DEFAULT_ROAD_WIDTH_FT } from '../../utils/subdivisionRoadPolygon';
+import {
+  computeDevelopableAreaSqFt,
+  computeLotCells,
+  DEFAULT_TARGET_LOT_SIZE_SQFT,
+  estimateSpawnPointCount,
+  generateSpawnPoints,
+  type LotCell,
+  type SpawnPoint,
+} from '../../utils/subdivisionLotLayout';
+import { buildRoadPolygonMulti, buildRoadPolygonRings, DEFAULT_ROAD_WIDTH_FT } from '../../utils/subdivisionRoadPolygon';
 import {
   clearSubdivisionProject,
   loadSubdivisionProject,
@@ -203,6 +211,64 @@ const SubdivisionGenerator = () => {
       return { outers: [], holes: [], pieces: [] };
     }
   }, [isMapStep, roadNetwork, roadWidthFt, topo.ftPerPixel, topo.boundary, nodeRoles]);
+
+  const lotLayout = useMemo((): {
+    spawnPoints: SpawnPoint[];
+    lotCells: LotCell[];
+  } => {
+    if (!isMapStep || !topo.ftPerPixel || roadNetwork.segments.length === 0) {
+      return { spawnPoints: [], lotCells: [] };
+    }
+
+    try {
+      const roadMulti = buildRoadPolygonMulti(
+        roadNetwork,
+        roadWidthFt,
+        topo.ftPerPixel,
+        topo.boundary,
+        nodeRoles,
+      );
+      const developableAreaSqFt = computeDevelopableAreaSqFt(
+        topo.boundary,
+        roadMulti,
+        topo.ftPerPixel,
+      );
+      const spawnCount =
+        lotPairCountOverride ??
+        estimateSpawnPointCount(developableAreaSqFt, targetLotSizeSqFt);
+
+      const spawnPoints = generateSpawnPoints(
+        roadNetwork,
+        spawnCount,
+        roadWidthFt,
+        topo.ftPerPixel,
+        targetLotSizeSqFt,
+        topo.boundary,
+        nodeRoles,
+      );
+      const lotCells = computeLotCells(
+        topo.boundary,
+        roadMulti,
+        spawnPoints,
+        topo.ftPerPixel,
+      );
+
+      return { spawnPoints, lotCells };
+    } catch {
+      return { spawnPoints: [], lotCells: [] };
+    }
+  }, [
+    isMapStep,
+    roadNetwork,
+    roadWidthFt,
+    topo.ftPerPixel,
+    topo.boundary,
+    nodeRoles,
+    lotPairCountOverride,
+    targetLotSizeSqFt,
+  ]);
+
+  const { spawnPoints, lotCells } = lotLayout;
 
   const entranceCount = useMemo(() => {
     let count = 0;
@@ -449,7 +515,7 @@ const SubdivisionGenerator = () => {
                 />
               </div>
               <div className="topo-workflow-field-row">
-                <label htmlFor="subdivision-target-lot-size">Target lot size (sq ft, excl. road)</label>
+                <label htmlFor="subdivision-target-lot-size">Minimum lot size (sq ft, excl. road)</label>
                 <input
                   id="subdivision-target-lot-size"
                   type="number"
@@ -481,6 +547,15 @@ const SubdivisionGenerator = () => {
                 </div>
               ) : null}
               {roadSummary}
+              {spawnPoints.length > 0 ? (
+                <p className="topo-workflow-meta">
+                  {spawnPoints.length} spawn points · {lotCells.length} lots (
+                  {lotCells
+                    .reduce((sum, lot) => sum + lot.areaSqFt, 0)
+                    .toLocaleString(undefined, { maximumFractionDigits: 0 })}{' '}
+                  sq ft)
+                </p>
+              ) : null}
               <div className="topo-workflow-actions">
                 <button
                   type="button"
@@ -520,7 +595,8 @@ const SubdivisionGenerator = () => {
                   roadPolygonOuters={roadPolygonRings.outers}
                   roadPolygonHoles={roadPolygonRings.holes}
                   roadPolygonPieces={roadPolygonRings.pieces}
-                  
+                  spawnPoints={spawnPoints}
+                  lotCells={lotCells}
                   onRoadNetworkChange={setRoadNetwork}
                   onRoadDrawingChange={setRoadDrawing}
                 />

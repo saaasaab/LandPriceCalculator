@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "../../../../LandPriceCalculatorAPI"
+		},
+		{
+			"path": "../../../../../client-projects/replify/replifyIntegrationsLab"
 		}
 	],
 	"settings": {}

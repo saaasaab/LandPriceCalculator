@@ -24,6 +24,7 @@ import {
 } from '../CutFillCalculator/cutFillImageLayout';
 import { buildNetworkCenterlinePaths, type RoadPolygonPiece } from '../../utils/subdivisionRoadPolygon';
 import type { RoadPathSegment } from '../../utils/roadGeometry';
+import type { LotCell, SpawnPoint } from '../../utils/subdivisionLotLayout';
 import '../CutFillCalculator/CutFillMapCanvas.scss';
 
 const BOUNDARY_STROKE: [number, number, number] = [20, 48, 100];
@@ -32,6 +33,12 @@ const ROAD_CONTROL: [number, number, number] = [180, 83, 9];
 const ROAD_PREVIEW: [number, number, number] = [148, 163, 184];
 const ROAD_POLYGON_FILL: [number, number, number] = [51, 65, 85];
 const ROAD_OPACITY = 128;
+const SPAWN_LEFT_FILL: [number, number, number] = [20, 184, 166];
+const SPAWN_RIGHT_FILL: [number, number, number] = [56, 189, 248];
+const LOT_LEFT_FILL: [number, number, number] = [94, 234, 212];
+const LOT_RIGHT_FILL: [number, number, number] = [125, 211, 252];
+const LOT_LEFT_STROKE: [number, number, number] = [13, 148, 136];
+const LOT_RIGHT_STROKE: [number, number, number] = [2, 132, 199];
 const NODE_ENTRANCE: [number, number, number] = [22, 163, 74];
 const NODE_DEAD_END: [number, number, number] = [220, 38, 38];
 const NODE_JUNCTION: [number, number, number] = [37, 99, 235];
@@ -50,6 +57,8 @@ type SubdivisionMapCanvasProps = {
   roadPolygonOuters: BoundaryPoint[][];
   roadPolygonHoles: BoundaryPoint[][];
   roadPolygonPieces: RoadPolygonPiece[];
+  spawnPoints: SpawnPoint[];
+  lotCells: LotCell[];
 
   onRoadNetworkChange: (network: RoadNetwork) => void;
   onRoadDrawingChange: (drawing: RoadDrawingState | null) => void;
@@ -66,6 +75,8 @@ const SubdivisionMapCanvas = ({
   roadPolygonOuters,
   roadPolygonHoles,
   roadPolygonPieces,
+  spawnPoints,
+  lotCells,
   onRoadNetworkChange,
   onRoadDrawingChange,
 }: SubdivisionMapCanvasProps) => {
@@ -89,6 +100,8 @@ const SubdivisionMapCanvas = ({
     roadPolygonOuters,
     roadPolygonHoles,
     roadPolygonPieces,
+    spawnPoints,
+    lotCells,
     nodeRoles,
     onRoadNetworkChange,
     onRoadDrawingChange,
@@ -104,6 +117,8 @@ const SubdivisionMapCanvas = ({
     roadPolygonOuters,
     roadPolygonHoles,
     roadPolygonPieces,
+    spawnPoints,
+    lotCells,
     nodeRoles,
     onRoadNetworkChange,
     onRoadDrawingChange,
@@ -328,6 +343,39 @@ const SubdivisionMapCanvas = ({
         }
       };
 
+      const drawLotCells = (t: ImageTransform) => {
+        const props = propsRef.current;
+        for (const lot of props.lotCells) {
+          if (lot.polygon.length < 3) continue;
+          const fill = lot.side === 'left' ? LOT_LEFT_FILL : LOT_RIGHT_FILL;
+          const stroke = lot.side === 'left' ? LOT_LEFT_STROKE : LOT_RIGHT_STROKE;
+          p.fill(fill[0], fill[1], fill[2], 150);
+          p.stroke(stroke[0], stroke[1], stroke[2]);
+          p.strokeWeight(2);
+          p.beginShape();
+          for (const pt of lot.polygon) {
+            const s = imageToScreen(pt, t);
+            p.vertex(s.x, s.y);
+          }
+          p.endShape(p.CLOSE);
+        }
+      };
+
+      const drawSpawnPoints = (t: ImageTransform) => {
+        const props = propsRef.current;
+        for (const spawn of props.spawnPoints) {
+          const s = imageToScreen({ x: spawn.x, y: spawn.y }, t);
+          const fill = spawn.side === 'left' ? SPAWN_LEFT_FILL : SPAWN_RIGHT_FILL;
+          p.noStroke();
+          p.fill(fill[0], fill[1], fill[2]);
+          p.circle(s.x, s.y, 10);
+          p.noFill();
+          p.stroke(255);
+          p.strokeWeight(1.5);
+          p.circle(s.x, s.y, 10);
+        }
+      };
+
       p.setup = () => {
         p.createCanvas(parent.clientWidth, parent.clientHeight);
         if (propsRef.current.imageUrl) loadImage(propsRef.current.imageUrl);
@@ -443,7 +491,9 @@ const SubdivisionMapCanvas = ({
         }
         drawBoundary(t);
         drawRoadPavement(t);
+        drawLotCells(t);
         drawRoad(t);
+        drawSpawnPoints(t);
 
         if (props.mode === 'reposition') {
           if (props.roadNetwork.segments.length === 0) {
