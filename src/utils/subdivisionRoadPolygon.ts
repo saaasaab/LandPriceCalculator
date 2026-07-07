@@ -53,10 +53,16 @@ function pushDeduped(out: BoundaryPoint[], pt: BoundaryPoint) {
 }
 
 /** Offset one side of a sampled centerline with miter joins on outer corners and bevels on inner corners. */
+type OffsetEndpointOptions = {
+  startTravel?: BoundaryPoint;
+  endTravel?: BoundaryPoint;
+};
+
 function offsetSide(
   samples: BoundaryPoint[],
   halfWidth: number,
   side: 'left' | 'right',
+  endpoints?: OffsetEndpointOptions,
 ): BoundaryPoint[] {
   const sign = side === 'left' ? 1 : -1;
   const n = samples.length;
@@ -72,23 +78,31 @@ function offsetSide(
     let tIn: BoundaryPoint;
     let tOut: BoundaryPoint;
     if (i === 0) {
-      tIn = tOut = {
-        x: next.x - curr.x,
-        y: next.y - curr.y,
-      };
-      const len = Math.hypot(tOut.x, tOut.y);
-      if (len < 1e-10) continue;
-      tIn = tOut = { x: tOut.x / len, y: tOut.y / len };
+      if (endpoints?.startTravel) {
+        tIn = tOut = endpoints.startTravel;
+      } else {
+        tIn = tOut = {
+          x: next.x - curr.x,
+          y: next.y - curr.y,
+        };
+        const len = Math.hypot(tOut.x, tOut.y);
+        if (len < 1e-10) continue;
+        tIn = tOut = { x: tOut.x / len, y: tOut.y / len };
+      }
       const nx = -tOut.y * sign * halfWidth;
       const ny = tOut.x * sign * halfWidth;
       pushDeduped(out, { x: curr.x + nx, y: curr.y + ny });
       continue;
     }
     if (i === n - 1) {
-      tIn = { x: curr.x - prev.x, y: curr.y - prev.y };
-      const len = Math.hypot(tIn.x, tIn.y);
-      if (len < 1e-10) continue;
-      tIn = { x: tIn.x / len, y: tIn.y / len };
+      if (endpoints?.endTravel) {
+        tIn = endpoints.endTravel;
+      } else {
+        tIn = { x: curr.x - prev.x, y: curr.y - prev.y };
+        const len = Math.hypot(tIn.x, tIn.y);
+        if (len < 1e-10) continue;
+        tIn = { x: tIn.x / len, y: tIn.y / len };
+      }
       const nx = -tIn.y * sign * halfWidth;
       const ny = tIn.x * sign * halfWidth;
       pushDeduped(out, { x: curr.x + nx, y: curr.y + ny });
@@ -139,15 +153,33 @@ function offsetSide(
   return out;
 }
 
+function buildOffsetEndpoints(
+  pathOptions: ReturnType<typeof buildRoadPathOptionsForChain>,
+): OffsetEndpointOptions {
+  const endpoints: OffsetEndpointOptions = {};
+
+  if (pathOptions.startEntrance) {
+    endpoints.startTravel = pathOptions.startEntrance.inwardNormal;
+  }
+
+  if (pathOptions.endEntrance) {
+    const inward = pathOptions.endEntrance.inwardNormal;
+    endpoints.endTravel = { x: -inward.x, y: -inward.y };
+  }
+
+  return endpoints;
+}
+
 function offsetPathToRing(
   segments: RoadPathSegment[],
   halfWidthPx: number,
+  endpoints?: OffsetEndpointOptions,
 ): BoundaryPoint[] | null {
   const samples = denseSampleRoadPath(segments, 3);
   if (samples.length < 2) return null;
 
-  const left = offsetSide(samples, halfWidthPx, 'left');
-  const right = offsetSide(samples, halfWidthPx, 'right');
+  const left = offsetSide(samples, halfWidthPx, 'left', endpoints);
+  const right = offsetSide(samples, halfWidthPx, 'right', endpoints);
   if (left.length < 2 || right.length < 2) return null;
 
   return [...left, ...right.reverse()];
@@ -172,7 +204,8 @@ function chainToPolygon(
   );
   const path = buildRoadPath(chain, ftPerPixel, pathOptions);
   const halfWidthPx = roadWidthFt / 2 / ftPerPixel;
-  const ringPts = offsetPathToRing(path.segments, halfWidthPx);
+  const offsetEndpoints = buildOffsetEndpoints(pathOptions);
+  const ringPts = offsetPathToRing(path.segments, halfWidthPx, offsetEndpoints);
   if (!ringPts || ringPts.length < 4) return null;
 
   const ring = closeRing(ringPts);

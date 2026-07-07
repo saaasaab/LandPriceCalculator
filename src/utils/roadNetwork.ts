@@ -325,44 +325,86 @@ function normalizeVec(dx: number, dy: number): BoundaryPoint {
   return { x: dx / len, y: dy / len };
 }
 
-/** Inward unit normal at the closest property boundary edge to a point. */
-export function inwardNormalAtBoundary(
+export type BoundaryEdgeLocation = {
+  edgeIndex: number;
+  /** Parametric position on edge from vertex i toward i+1 (0–1). */
+  t: number;
+  snap: BoundaryPoint;
+  /** Unit tangent along edge i → i+1. */
+  tangent: BoundaryPoint;
+};
+
+/** Closest boundary edge projection for a point. */
+export function boundaryEdgeAtPoint(
   boundary: BoundaryPoint[],
   point: BoundaryPoint,
-): BoundaryPoint | null {
+): BoundaryEdgeLocation | null {
   if (boundary.length < 2) return null;
 
-  let bestA: BoundaryPoint | null = null;
-  let bestB: BoundaryPoint | null = null;
+  let best: BoundaryEdgeLocation | null = null;
   let bestDist = Infinity;
   const n = boundary.length;
 
   for (let i = 0; i < n; i++) {
     const a = boundary[i];
     const b = boundary[(i + 1) % n];
-    const d = distancePointToSegment(point.x, point.y, a.x, a.y, b.x, b.y);
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const lengthSq = dx * dx + dy * dy;
+    let t = 0;
+    let snapX = a.x;
+    let snapY = a.y;
+    if (lengthSq >= 1e-10) {
+      t = Math.max(0, Math.min(1, ((point.x - a.x) * dx + (point.y - a.y) * dy) / lengthSq));
+      snapX = a.x + t * dx;
+      snapY = a.y + t * dy;
+    }
+    const d = Math.hypot(point.x - snapX, point.y - snapY);
     if (d < bestDist) {
       bestDist = d;
-      bestA = a;
-      bestB = b;
+      best = {
+        edgeIndex: i,
+        t,
+        snap: { x: snapX, y: snapY },
+        tangent: normalizeVec(dx, dy),
+      };
     }
   }
 
-  if (!bestA || !bestB) return null;
+  return best;
+}
 
-  const tangent = normalizeVec(bestB.x - bestA.x, bestB.y - bestA.y);
+function inwardNormalForEdge(
+  boundary: BoundaryPoint[],
+  edgeIndex: number,
+  atPoint: BoundaryPoint,
+): BoundaryPoint | null {
+  const n = boundary.length;
+  const a = boundary[edgeIndex];
+  const b = boundary[(edgeIndex + 1) % n];
+  const tangent = normalizeVec(b.x - a.x, b.y - a.y);
   const perpA = { x: -tangent.y, y: tangent.x };
   const perpB = { x: tangent.y, y: -tangent.x };
   const probe = 4;
 
-  if (isInsideBoundary(boundary, point.x + perpA.x * probe, point.y + perpA.y * probe)) {
+  if (isInsideBoundary(boundary, atPoint.x + perpA.x * probe, atPoint.y + perpA.y * probe)) {
     return perpA;
   }
-  if (isInsideBoundary(boundary, point.x + perpB.x * probe, point.y + perpB.y * probe)) {
+  if (isInsideBoundary(boundary, atPoint.x + perpB.x * probe, atPoint.y + perpB.y * probe)) {
     return perpB;
   }
 
   return perpA;
+}
+
+/** Inward unit normal at the closest property boundary edge to a point. */
+export function inwardNormalAtBoundary(
+  boundary: BoundaryPoint[],
+  point: BoundaryPoint,
+): BoundaryPoint | null {
+  const edge = boundaryEdgeAtPoint(boundary, point);
+  if (!edge) return null;
+  return inwardNormalForEdge(boundary, edge.edgeIndex, edge.snap);
 }
 
 export function buildRoadPathOptionsForChain(

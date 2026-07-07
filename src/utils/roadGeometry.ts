@@ -144,13 +144,10 @@ function dot(a: Point, b: Point): number {
   return a.x * b.x + a.y * b.y;
 }
 
-function entranceCubicTensionFt(spanFt: number, inward: Point, exitDir: Point): number {
+function entranceCubicTensionFt(spanFt: number): number {
   if (spanFt < 0.01) return 0;
-  const alignment = Math.max(-1, Math.min(1, dot(exitDir, inward)));
-  const deflection = Math.acos(alignment);
-  const angleFactor = 0.4 + 0.5 * (deflection / (Math.PI / 2));
   const base = Math.min(spanFt * 0.38, RESIDENTIAL_MIN_ROAD_RADIUS_FT * 1.25);
-  return Math.max(ENTRANCE_HANDLE_MIN_FT, base * angleFactor);
+  return Math.max(ENTRANCE_HANDLE_MIN_FT, base);
 }
 
 function applyEntranceDeparture(
@@ -167,10 +164,7 @@ function applyEntranceDeparture(
     return { lengthFt, entry: next };
   }
 
-  const tension = Math.min(
-    entranceCubicTensionFt(spanFt, inward, dirToNext),
-    spanFt * 0.42,
-  );
+  const tension = Math.min(entranceCubicTensionFt(spanFt), spanFt * 0.42);
   const lengthFt = addCubicFt(
     segments,
     entrance,
@@ -197,10 +191,7 @@ function applyEntranceArrival(
     return addLineFt(segments, from, entrance, ftPerPixel);
   }
 
-  const tension = Math.min(
-    entranceCubicTensionFt(spanFt, inward, arrivalDir),
-    spanFt * 0.42,
-  );
+  const tension = Math.min(entranceCubicTensionFt(spanFt), spanFt * 0.42);
   return addCubicFt(
     segments,
     from,
@@ -246,12 +237,11 @@ function buildSmoothCubicPath(
     const spanFt = lineLength(from, to);
     if (spanFt < 0.01) continue;
 
-    const dir = normalize(to.x - from.x, to.y - from.y);
     let fromHandle = spanFt * 0.34;
     let toHandle = spanFt * 0.34;
 
     if (i === 0 && inwardStart) {
-      fromHandle = Math.min(entranceCubicTensionFt(spanFt, inwardStart, dir), spanFt * 0.42);
+      fromHandle = Math.min(entranceCubicTensionFt(spanFt), spanFt * 0.42);
     }
     if (i === pointsFt.length - 2 && inwardEnd) {
       toHandle = Math.min(spanFt * 0.42, Math.max(ENTRANCE_HANDLE_MIN_FT, spanFt * 0.34));
