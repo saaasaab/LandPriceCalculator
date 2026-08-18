@@ -4,6 +4,7 @@ export const routes = {
   COMMERCIAL_DEVELOPMENT: "/commercial-development",
   RESIDENTIAL_DEVELOPMENT: "/residential-development",
   MULTI_FAMILY_PRICE_PER_DOOR: "/multifamily-price-calculator",
+  HOTEL_PRICE_PER_KEY: "/hotel-price-calculator",
   INDUSTRIAL_PRICE_PER_SQFT: "/industrial-price-per-sqft-calculator",
   MULTIFAMILY_ANALYSIS: "/multifamily-analysis",
   INDUSTRIAL_PROFORMA: "/industrial-commercial-proforma",

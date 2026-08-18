@@ -218,6 +218,29 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
       },
     ],
   ),
+  [routes.HOTEL_PRICE_PER_KEY]: calculator(
+    routes.HOTEL_PRICE_PER_KEY,
+    "What Should I Pay Per Key for a Hotel?",
+    "Calculate max hotel price per key from ADR, vacancy, operating expenses, financing, and cash-on-cash return. Free hotel per-key pricing calculator.",
+    "You should pay per key the price that achieves your target cash-on-cash return after ADR, vacancy, operating expenses, down payment, and mortgage payment. Enter room rate and occupancy assumptions to get a max offer price.",
+    [
+      {
+        question: "How do you calculate price per key for a hotel?",
+        answer:
+          "Convert ADR to monthly room revenue, reduce it by vacancy, then subtract operating expenses to get NOI per room. Solve for the price where that NOI minus debt service equals your required cash-on-cash return.",
+      },
+      {
+        question: "Why is vacancy separate from hotel operating expenses?",
+        answer:
+          "Vacancy is unoccupied room-nights and reduces gross room revenue first. Operating expenses are then applied to occupied revenue. Splitting them lets you stress-test occupancy without changing the expense ratio.",
+      },
+      {
+        question: "What is RevPAR?",
+        answer:
+          "RevPAR is revenue per available room, calculated as ADR multiplied by occupancy. Occupancy is 100% minus the vacancy rate you enter.",
+      },
+    ],
+  ),
   [routes.HOME_MORTGAGE_CALCULATOR]: calculator(
     routes.HOME_MORTGAGE_CALCULATOR,
     "How Much Will My Monthly Mortgage Payment Be?",
@@ -483,6 +506,7 @@ const PAGE_META_BY_E_PAGE_NAME: Partial<Record<EPageNames, PageMetaConfig>> = {
   [EPageNames.MULTIFAMILY_ANALYSIS]: PAGE_META[routes.MULTIFAMILY_ANALYSIS],
   [EPageNames.INDUSTRIAL_PROFORMA]: PAGE_META[routes.INDUSTRIAL_PROFORMA],
   [EPageNames.MULTI_FAMILY_PRICE_PER_DOOR]: PAGE_META[routes.MULTI_FAMILY_PRICE_PER_DOOR],
+  [EPageNames.HOTEL_PRICE_PER_KEY]: PAGE_META[routes.HOTEL_PRICE_PER_KEY],
   [EPageNames.HOME_MORTGAGE_CALCULATOR]: PAGE_META[routes.HOME_MORTGAGE_CALCULATOR],
   [EPageNames.LEASE_EXPIRY_SCHEDULE]: PAGE_META[routes.LEASE_EXPIRY_SCHEDULE],
   [EPageNames.INDUSTRIAL_PRICE_PER_SQFT]: PAGE_META[routes.INDUSTRIAL_PRICE_PER_SQFT],

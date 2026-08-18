@@ -6,6 +6,7 @@ import ResidentialDevelopmentCalculator from './ResidentialDevelopmentCalculator
 import './LandCalculator.scss';
 import ResidentialCashFlowCalculator from './ResidentialCashFlowCalculator';
 import ResidentialPriceCalculator from './PricePerDoorCalculatorMultifamily';
+import HotelPriceCalculator from './PricePerKeyCalculatorHotel';
 import IRRCalculator from './IRRCalculator';
 // import HardMoneyLoanCalculator from './HardMoneyLoanCalculator';
 import WaterfallGenerator from '../futureItems/WaterfallGenerator';
@@ -81,6 +82,11 @@ const EVERYTHING_BURGER = ({
                 />
             case EPageNames.MULTI_FAMILY_PRICE_PER_DOOR:
                 return <ResidentialPriceCalculator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.HOTEL_PRICE_PER_KEY:
+                return <HotelPriceCalculator
                     isMobile={isMobile}
                     page={page}
                 />

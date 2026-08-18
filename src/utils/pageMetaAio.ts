@@ -165,9 +165,26 @@ export const AIO_EXTRAS: Record<string, AioExtras> = {
       { name: "Set your return hurdle", text: "Enter target cash-on-cash return to see the maximum price per door." },
     ],
     relatedLinks: [
+      { path: routes.HOTEL_PRICE_PER_KEY, label: "Hotel price per key calculator" },
       { path: routes.MULTIFAMILY_ANALYSIS, label: "Multifamily underwriting proforma" },
-      { path: routes.HOME_MORTGAGE_CALCULATOR, label: "Home mortgage PITI calculator" },
       { path: routes.MULTIFAMILY_DEVELOPMENT, label: "Apartment development feasibility tool" },
+    ],
+  },
+  [routes.HOTEL_PRICE_PER_KEY]: {
+    keyTakeaways: [
+      "Max price per key is the price that hits your target cash-on-cash return after vacancy, expenses, and debt service.",
+      "Vacancy reduces room revenue first; operating expenses are then applied to occupied revenue.",
+      "RevPAR equals ADR multiplied by occupancy (100% minus vacancy).",
+    ],
+    howToSteps: [
+      { name: "Enter ADR, rooms, and vacancy", text: "Input average daily rate, room count, and vacancy so occupancy is modeled separately from expenses." },
+      { name: "Set operating expenses and financing", text: "Add expense ratio, down payment, interest rate, and loan amortization." },
+      { name: "Set your return hurdle", text: "Enter target cash-on-cash return to see the maximum price per key and offer price." },
+    ],
+    relatedLinks: [
+      { path: routes.MULTI_FAMILY_PRICE_PER_DOOR, label: "Multifamily price per door calculator" },
+      { path: routes.INDUSTRIAL_PRICE_PER_SQFT, label: "Industrial price per square foot calculator" },
+      { path: routes.MULTIFAMILY_ANALYSIS, label: "Multifamily underwriting proforma" },
     ],
   },
   [routes.HOME_MORTGAGE_CALCULATOR]: {

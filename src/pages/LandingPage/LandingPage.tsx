@@ -17,6 +17,7 @@ import {
   BarChart4,
   Ruler,
   TowerControl,
+  Hotel,
   TrendingUp,
   Map,
   // LayoutGrid,
@@ -89,6 +90,15 @@ const LandingPage: React.FC = () => {
       link: routes.MULTI_FAMILY_PRICE_PER_DOOR,
       component: EVERYTHING_BURGER,
       pageType: EPageNames.MULTI_FAMILY_PRICE_PER_DOOR
+    },
+    {
+      id: 'hotel-price-per-key',
+      title: 'Hotel Per Key Calculator',
+      description: 'Max price per key from ADR, vacancy, expenses, and cash-on-cash return.',
+      icon: <Hotel size={24} />,
+      link: routes.HOTEL_PRICE_PER_KEY,
+      component: EVERYTHING_BURGER,
+      pageType: EPageNames.HOTEL_PRICE_PER_KEY
     },
     {
       id: 'home-mortgage',

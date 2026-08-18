@@ -6,6 +6,7 @@ import {
   Building2,
   CircleDollarSign,
   DoorOpen,
+  Hotel,
   Factory,
   GitFork,
   HardHat,
@@ -31,8 +32,8 @@ import { EPageTitles } from "../utils/types";
 import { useAuth } from "../context/AuthContext";
 import { getPurchaseRoute } from "../utils/constants";
 
-const navIconProps = { size: 22, strokeWidth: 2, "aria-hidden": true as const };
-const authLinkIconProps = { size: 18, strokeWidth: 2, "aria-hidden": true as const };
+const navIconProps = { size: 16, strokeWidth: 2, "aria-hidden": true as const };
+const authLinkIconProps = { size: 14, strokeWidth: 2, "aria-hidden": true as const };
 
 
 
@@ -51,6 +52,7 @@ export const calculatorIcons: Record<string, React.ReactNode> = {
   [routes.INDUSTRIAL_PROFORMA]: <LineChart {...navIconProps} />,
   [routes.INDUSTRIAL_PRICE_PER_SQFT]: <Ruler {...navIconProps} />,
   [routes.MULTI_FAMILY_PRICE_PER_DOOR]: <DoorOpen {...navIconProps} />,
+  [routes.HOTEL_PRICE_PER_KEY]: <Hotel {...navIconProps} />,
   [routes.IRR_CALCULATOR]: <TrendingUp {...navIconProps} />,
   [routes.HARD_MONEY_COST_ESTIMATOR]: <PiggyBank {...navIconProps} />,
   [routes.HOUSE_FLIPPING_CALCULATOR]: <PaintRoller {...navIconProps} />,
@@ -120,6 +122,7 @@ const NAV_MENUS: NavMenu[] = [
     label: "Investor",
     items: [
       { route: routes.MULTI_FAMILY_PRICE_PER_DOOR, title: EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR },
+      { route: routes.HOTEL_PRICE_PER_KEY, title: EPageTitles.HOTEL_PRICE_PER_KEY },
       { route: routes.INDUSTRIAL_PRICE_PER_SQFT, title: EPageTitles.INDUSTRIAL_PRICE_PER_SQFT },
       { route: routes.WATERFALL, title: EPageTitles.WATERFALL_GENERATOR },
       { route: routes.MULTIFAMILY_ANALYSIS, title: EPageTitles.MULTIFAMILY_ANALYSIS },
@@ -213,12 +216,12 @@ const Navbar = () => {
                   className="upgrade-btn"
                   onClick={handleToggleMenu}
                 >
-                  <Sparkles size={18} strokeWidth={2} aria-hidden />
+                  <Sparkles size={14} strokeWidth={2} aria-hidden />
                   <span>Upgrade</span>
                 </Link>
               ) : null}
               <button type="button" onClick={logout} className="logout-btn">
-                <LogOut size={18} strokeWidth={2} aria-hidden />
+                <LogOut size={14} strokeWidth={2} aria-hidden />
                 <span>Logout</span>
               </button>
             </>

@@ -117,6 +117,7 @@ export function AppRouter() {
 
               <Route path={routes.HOME_MORTGAGE_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HOME_MORTGAGE_CALCULATOR} />} />
               <Route path={routes.MULTI_FAMILY_PRICE_PER_DOOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.MULTI_FAMILY_PRICE_PER_DOOR} />} />
+              <Route path={routes.HOTEL_PRICE_PER_KEY} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HOTEL_PRICE_PER_KEY} />} />
               <Route path={routes.INDUSTRIAL_PRICE_PER_SQFT} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.INDUSTRIAL_PRICE_PER_SQFT} />} />
 
               <Route path={routes.IRR_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.IRR_CALCULATOR} />} />

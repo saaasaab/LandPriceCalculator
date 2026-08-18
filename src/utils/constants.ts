@@ -332,6 +332,19 @@ export const DEFAULT_VALUES = {
         buyersAgentFee: "2.5",
         closingCosts: "1.5"
     },
+    [EPageNames.HOTEL_PRICE_PER_KEY]: {
+        ...DEFAULT_VALUES_ZEROS,
+        rents: "150",
+        interestRate: "7.75",
+        numberOfYears: "25",
+        cashOnCashReturn: "10",
+        expensePercentage: "65",
+        vacancy: "30",
+        downPayment: "30",
+        units: "80",
+        buyersAgentFee: "2.5",
+        clostingCostsFee: "1.5",
+    },
     [EPageNames.MULTIFAMILY_ANALYSIS]: {
         ...DEFAULT_VALUES_ZEROS,
         purchasePrice: "500,000",
