@@ -51,15 +51,32 @@
       gap: 15px;
       justify-content: space-between;
       min-height: 40px;
-      align-items: center;
-      padding: 0 10px 0 10px;
+      align-items: flex-start;
+      padding: 6px 10px;
 
       &.is-greyed-out{
          background-color: #ececec;
       }
+      &.has-error input {
+        border-color: #b91c1c;
+      }
       .info-cell{
         h4{
           font-size: .8rem !important;
+        }
+        label {
+          cursor: pointer;
+        }
+        .description-cell.is-visible {
+          font-size: 0.72rem;
+          color: #5b5b5b;
+          line-height: 1.35;
+          padding-top: 2px;
+        }
+        .input-error {
+          font-size: 0.72rem;
+          color: #b91c1c;
+          padding-top: 4px;
         }
       }
 

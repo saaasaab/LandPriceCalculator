@@ -88,8 +88,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setRents(value)}
-                    cellValues={["Rental Income one unit ", rents]}
-                    description="The current rental income from one unit"
+                    cellValues={["Monthly rent per unit", rents]}
+                    description="Monthly rent collected for one unit"
                 />
                  <InputRow
                     isMobile={isMobile}
@@ -120,8 +120,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setExpensePercentage(value)}
-                    cellValues={["Expense Percentages (%)", expensePercentage]}
-                    description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
+                    cellValues={["Operating expenses (% of gross income)", expensePercentage]}
+                    description="Share of gross rental income that goes to operating expenses. A common starting point is 50%. Vacancy is included in this percentage."
                     isPercent={true}
                 />
                 <InputRow

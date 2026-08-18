@@ -29,9 +29,26 @@ export const AIO_EXTRAS: Record<string, AioExtras> = {
       { name: "Review outputs and iterate", text: "Compare results to your return hurdle and adjust inputs until the deal meets your target." },
     ],
     relatedLinks: [
+      { path: routes.TOOLS, label: "All calculators" },
       { path: routes.MULTI_FAMILY_PRICE_PER_DOOR, label: "Multifamily price per door calculator" },
+      { path: routes.RESIDENTIAL_DEVELOPMENT, label: "Residential development feasibility calculator" },
+    ],
+  },
+  [routes.TOOLS]: {
+    keyTakeaways: [
+      "Search by the number you need: land price, price per door, construction loan, or slope.",
+      "Filter by purpose or audience. Developer and Investor are filters, not the main navigation.",
+      "Each card opens a dedicated calculator URL you can bookmark and share.",
+    ],
+    howToSteps: [
+      { name: "Search or filter", text: "Type the outcome you need, or filter by land, valuation, construction, financing, operations, or flipping." },
+      { name: "Open a calculator", text: "Choose a card to go to that tool's dedicated page." },
+      { name: "Enter assumptions", text: "Fill in the inputs to get the primary answer, such as maximum price per door or lot yield." },
+    ],
+    relatedLinks: [
+      { path: routes.MULTI_FAMILY_PRICE_PER_DOOR, label: "Multifamily price per door calculator" },
+      { path: routes.RESIDENTIAL_DEVELOPMENT, label: "Residential development feasibility calculator" },
       { path: routes.HOME_MORTGAGE_CALCULATOR, label: "Home mortgage payment calculator" },
-      { path: routes.MULTIFAMILY_DEVELOPMENT, label: "Multifamily development feasibility calculator" },
     ],
   },
   [routes.MULTIFAMILY_DEVELOPMENT]: {

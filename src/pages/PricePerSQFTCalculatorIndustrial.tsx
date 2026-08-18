@@ -124,7 +124,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setExpensePercentage(value)}
-                    cellValues={["Expense Percentages (%)", expensePercentage]}
+                    cellValues={["Operating expenses (% of gross income)", expensePercentage]}
                     description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
                     isPercent={true}
                 />

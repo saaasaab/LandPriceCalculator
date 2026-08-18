@@ -13,6 +13,7 @@ import ResetPassword from './components/Auth/ResetPassword';
 import Register from './components/Auth/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LandingPage from './pages/LandingPage/LandingPage';
+import ToolsDirectory from './pages/ToolsDirectory/ToolsDirectory';
 import EVERYTHING_BURGER from './pages/EVERYTHING_BURGER';
 
 import Payment from './pages/Payment';
@@ -107,6 +108,7 @@ export function AppRouter() {
 
             <Routes>
               <Route path={routes.HOME} element={<LandingPage />} />
+              <Route path={routes.TOOLS} element={<ToolsDirectory />} />
 
               <Route path={routes.RESIDENTIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
               <Route path={routes.INDUSTRIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
@@ -161,6 +163,7 @@ export function AppRouter() {
             <Route path="*" element={expiredTrialPage} />
             <Route path={routes.COMPLETION} element={<Completion />} />
             <Route path={routes.HOME} element={<LandingPage />} />
+            <Route path={routes.TOOLS} element={<ToolsDirectory />} />
             <Route path={routes.LOGIN} element={<Login />} />
             <Route path={routes.FORGOT_PASSWORD} element={<ForgotPassword />} />
             <Route path={`${routes.RESET_PASSWORD}/:token`} element={<ResetPassword />} />

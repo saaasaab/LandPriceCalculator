@@ -99,6 +99,19 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
     type: "website",
     schemaType: "WebPage",
   },
+  [routes.TOOLS]: calculator(
+    routes.TOOLS,
+    "Which Real Estate Calculator Do I Need?",
+    "Search practical calculators for land price, price per door, construction loans, site plans, flipping, and operations. Filter by purpose or audience.",
+    "Use the tools directory to search by the question you need answered, then open the calculator that produces that number. Filter by land, valuation, construction, financing, operations, or flipping.",
+    [
+      {
+        question: "How do I find the right calculator?",
+        answer:
+          "Search for the outcome you need, such as maximum land price, price per door, or construction loan cost. You can also filter by purpose or by audience such as developer or investor.",
+      },
+    ],
+  ),
   [routes.MULTIFAMILY_DEVELOPMENT]: calculator(
     routes.MULTIFAMILY_DEVELOPMENT,
     "How Do You Analyze a Multifamily Development Site?",
@@ -390,7 +403,7 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
     routes.TOPOLOGY_ANALYSIS,
     "How Do You Analyze Site Topography for Development?",
     "Digitize a topo map and analyze slope, drainage, buildability, earthwork, and development feasibility metrics.",
-    "Topology analysis turns a survey or topo image into a triangulated terrain model. Developers use it to evaluate slope distribution, flat building pads, drainage paths, cut and fill volumes, deal-killer risks, and an overall site development score.",
+    "Terrain and slope analysis turns a survey or topo image into a triangulated terrain model. Developers use it to evaluate slope distribution, flat building pads, drainage paths, cut and fill volumes, deal-killer risks, and an overall site development score.",
     [
       {
         question: "What can topology analysis tell a land developer?",

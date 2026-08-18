@@ -126,7 +126,7 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setExpensePercentage(value)}
-                    cellValues={["Expense Percentages (%)", expensePercentage]}
+                    cellValues={["Operating expenses (% of occupied room revenue)", expensePercentage]}
                     description="Operating expenses as a percentage of occupied room revenue. Vacancy is entered separately. Limited-service hotels often run 60-70% expense ratios."
                     isPercent={true}
                 />

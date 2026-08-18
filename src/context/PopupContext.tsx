@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import EmailPopup from '../components/EmailPopup/EmailPopup';
 import { useAuth } from './AuthContext';
+import { routes } from '../config/routes';
 
 interface PopupContextType {
   showPopup: boolean;
@@ -10,13 +12,29 @@ interface PopupContextType {
 
 const PopupContext = createContext<PopupContextType | undefined>(undefined);
 
+const MARKETING_PATHS = new Set<string>([
+  routes.HOME,
+  routes.TOOLS,
+  routes.LANDING_PAGE,
+  routes.LOGIN,
+  routes.REGISTER,
+  routes.SIGN_UP,
+  routes.FORGOT_PASSWORD,
+  routes.PAYMENT,
+  routes.TERMS,
+  routes.COMPLETION,
+  routes.END_FREE_TRIAL,
+]);
+
 export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [showPopup, setShowPopup] = useState(false);
   const popupTimerRef = useRef<number>();
   const { user } = useAuth();
+  const location = useLocation();
+  const isCalculatorPage = !MARKETING_PATHS.has(location.pathname) && !location.pathname.startsWith(routes.RESET_PASSWORD);
 
   useEffect(() => {
-    if (user) {
+    if (user || !isCalculatorPage) {
       if (popupTimerRef.current) {
         clearTimeout(popupTimerRef.current);
         popupTimerRef.current = undefined;
@@ -30,7 +48,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!hasSeenPopup) {
       popupTimerRef.current = window.setTimeout(() => {
         setShowPopup(true);
-      }, 60000); // 60 seconds
+      }, 90000);
     }
 
     return () => {
@@ -38,7 +56,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         clearTimeout(popupTimerRef.current);
       }
     };
-  }, [user]);
+  }, [user, isCalculatorPage]);
 
   const handleClosePopup = () => {
     setShowPopup(false);

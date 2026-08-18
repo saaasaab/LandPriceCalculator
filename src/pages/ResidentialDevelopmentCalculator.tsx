@@ -406,8 +406,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     />
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.infrastructurePercentage}`); setInfrastructurePercentage(value) }}
-                        cellValues={["Adjusted for Infrastructure (%)", infrastructurePercentage]}
-                        description="Every lot requires infrastructure like streets, which reduces the buildable area."
+                        cellValues={["Usable land after infrastructure (%)", infrastructurePercentage]}
+                        description="Percent of net acres remaining after streets and other infrastructure. 70% means 70% is usable lots and 30% is deducted for infrastructure."
                         isMobile={isMobile}
                         isPercent={true}
                     />
@@ -484,8 +484,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
                     {/* Hard Cost Per Sq Ft */}
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.hardCostPerSqFt}`); setHardCostPerSqFt(value) }}
-                        cellValues={["Hard Cost to Build House ($)", hardCostPerSqFt, (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)).toLocaleString()]}
-                        description="The hard costs for building the house based on square foot cost."
+                        cellValues={["Hard cost to build ($ per sq ft)", hardCostPerSqFt, (removeCommas(hardCostPerSqFt) * removeCommas(houseSize)).toLocaleString()]}
+                        description="Vertical construction cost per square foot of house size, not the total house cost."
                         isMobile={isMobile}
                     />
 
@@ -558,8 +558,8 @@ const ResidentialDevelopmentCalculator: React.FC<ResidentialDevelopmentCalculati
 
                     <InputRow
                         setInput={(value) => { setInLocalStorage(Number(value), `${EPageNames.RESIDENTIAL_DEVELOPMENT}_${EAllStates.ownedLandCost}`); setOwnedLandCost(value) }}
-                        description="If you own the property already, enter in the price of the property here"
-                        cellValues={["Land value if already own ($)", removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
+                        description="If you already own the land, enter what you have in it. This replaces the calculated land offer with your basis so you can see remaining profit."
+                        cellValues={["Land value if already owned ($)", removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
                         isMobile={isMobile}
                     />
                 </div>

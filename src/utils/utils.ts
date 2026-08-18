@@ -28,7 +28,9 @@ export const setInLocalStorage = (value: number | boolean | undefined, key: stri
 }
 
 export const roundAndLocalString = (value: number) => {
-  return Math.round(removeCommas(value.toString())).toLocaleString();
+  const numeric = removeCommas(value.toString());
+  if (!Number.isFinite(numeric)) return "-";
+  return Math.round(numeric).toLocaleString();
 };
 
 export const convertToPercent = (value: number, decimals = 1) => {

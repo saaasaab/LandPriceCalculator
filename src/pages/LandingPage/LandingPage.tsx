@@ -1,329 +1,42 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './LandingPage.scss';
-import { useNavigate } from 'react-router-dom';
-import { routes } from '../../components/Navbar';
-import EVERYTHING_BURGER from '../EVERYTHING_BURGER';
-import { EPageNames, } from '../../utils/types';
-import SitePlanDesigner from '../SiteplanDesigner/SitePlanDesigner';
-import HeroSection from './HeroSection';
-import SummerSpecialBanner from '../../components/SummerSpecialBanner/SummerSpecialBanner';
-import {
-  Banknote,
-  Building2,
-  Factory,
-  Building,
-  Home,
-  Calculator,
-  BarChart4,
-  Ruler,
-  TowerControl,
-  Hotel,
-  TrendingUp,
-  Map,
-  // LayoutGrid,
-  Coins,
-  Home as HomeIcon,
-  GitFork,
-  CalendarClock,
-  // Construction
-} from 'lucide-react';
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import "./LandingPage.scss";
+import { routes } from "../../config/routes";
+import HeroSection from "./HeroSection";
+import SummerSpecialBanner from "../../components/SummerSpecialBanner/SummerSpecialBanner";
+import CalculatorCard from "../../components/CalculatorCard";
+import { searchCalculators } from "../../config/calculators";
 
-interface Calculator {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  link: string;
-  component: React.ComponentType<any>;
-  pageType?: EPageNames;
-}
-
-const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [activeCalculator, setActiveCalculator] = useState<Calculator | null>(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const mainContentRef = useRef<HTMLDivElement>(null);
-  const calculatorViewRef = useRef<HTMLDivElement>(null);
-  
-  // Handle window resize and height calculations
-  useEffect(() => {
-    const updateLayout = () => {
-      setIsMobile(window.innerWidth <= 768);
-      
-      // Calculate available height
-      // if (heroRef.current) {
-        // const heroHeight = heroRef.current.offsetHeight;
-        const navHeight = document.querySelector('nav')?.offsetHeight || 0;
-        const availableHeight = window.innerHeight - (navHeight);
-        
-        // Set both heights as CSS variables
-        document.documentElement.style.setProperty('--nav-height', `${navHeight}px`);
-        document.documentElement.style.setProperty('--available-height', `${availableHeight}px`);
-      // }
-    };
-
-    // Initial calculation
-    updateLayout();
-    
-    // Recalculate on resize
-    window.addEventListener('resize', updateLayout);
-    
-    // Add a small delay to ensure accurate hero height calculation
-    const timeoutId = setTimeout(updateLayout, 100);
-
-    return () => {
-      window.removeEventListener('resize', updateLayout);
-      clearTimeout(timeoutId);
-      // document.documentElement.style.removeProperty('--hero-height');
-      document.documentElement.style.removeProperty('--nav-height');
-      document.documentElement.style.removeProperty('--available-height');
-    };
-  }, []);
-
-  const calculators: Calculator[] = [
-    {
-      id: 'multi-family-door',
-      title: 'Multi-family Per Door Calculator',
-      description: 'Essential metrics calculator for multi-family properties.',
-      icon: <TowerControl size={24} />,
-      link: routes.MULTI_FAMILY_PRICE_PER_DOOR,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.MULTI_FAMILY_PRICE_PER_DOOR
-    },
-    {
-      id: 'hotel-price-per-key',
-      title: 'Hotel Per Key Calculator',
-      description: 'Max price per key from ADR, vacancy, expenses, and cash-on-cash return.',
-      icon: <Hotel size={24} />,
-      link: routes.HOTEL_PRICE_PER_KEY,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.HOTEL_PRICE_PER_KEY
-    },
-    {
-      id: 'home-mortgage',
-      title: 'Home Mortgage Calculator',
-      description: 'Monthly payments, PITI, balloon options, and amortization over time.',
-      icon: <Banknote size={24} />,
-      link: routes.HOME_MORTGAGE_CALCULATOR,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.HOME_MORTGAGE_CALCULATOR
-    },
-    {
-      id: 'multi-family-dev',
-      title: 'Multi-family Development Calculator',
-      description: 'Comprehensive analysis tool for multi-family development projects.',
-      icon: <Building2 size={24} />,
-      link: routes.MULTIFAMILY_DEVELOPMENT,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.MULTIFAMILY_DEVELOPMENT
-    },
-    {
-      id: 'industrial-dev',
-      title: 'Industrial Development Calculator',
-      description: 'Advanced calculator for industrial development projects.',
-      icon: <Factory size={24} />,
-      link: routes.INDUSTRIAL_DEVELOPMENT,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.INDUSTRIAL_DEVELOPMENT
-    },
-    {
-      id: 'commercial-dev',
-      title: 'Commercial Development Calculator',
-      description: 'Advanced calculator for commercial development projects.',
-      icon: <Building size={24} />,
-      link: routes.COMMERCIAL_DEVELOPMENT,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.COMMERCIAL_DEVELOPMENT
-    },
-    {
-      id: 'residential-dev',
-      title: 'Residential Development Calculator',
-      description: 'Essential tool for residential developers.',
-      icon: <Home size={24} />,
-      link: routes.RESIDENTIAL_DEVELOPMENT,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.RESIDENTIAL_DEVELOPMENT
-    },
-    {
-      id: 'construction-budget',
-      title: 'Construction Budget Generator',
-      description: 'Automated budget creation tool.',
-      icon: <Calculator size={24} />,
-      link: routes.CONSTRUCTION_BUDGET,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.CONSTRUCTION_BUDGET
-    },
-    {
-      id: 'multi-family-proforma',
-      title: 'Multi-family Proforma',
-      description: 'Detailed financial modeling tool.',
-      icon: <BarChart4 size={24} />,
-      link: routes.MULTIFAMILY_ANALYSIS,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.MULTIFAMILY_ANALYSIS
-    },
-    {
-      id: 'lease-expiry-schedule',
-      title: 'Lease Expiry Schedule',
-      description: 'Track tenant expirations, WALT, and rent rollover risk with a printable report.',
-      icon: <CalendarClock size={24} />,
-      link: routes.LEASE_EXPIRY_SCHEDULE,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.LEASE_EXPIRY_SCHEDULE
-    },
-    {
-      id: 'industrial-sqft',
-      title: 'Industrial Per SQFT Calculator',
-      description: 'Quick calculations for industrial property metrics.',
-      icon: <Ruler size={24} />,
-      link: routes.INDUSTRIAL_PRICE_PER_SQFT,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.INDUSTRIAL_PRICE_PER_SQFT
-    },
-    {
-      id: 'seller-irr',
-      title: "Seller's IRR Estimator",
-      description: 'Sophisticated tool for calculating IRR.',
-      icon: <TrendingUp size={24} />,
-      link: routes.IRR_CALCULATOR,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.IRR_CALCULATOR
-    },
-   
-    {
-      id: 'hard-money-calculator',
-      title: 'Hard Money Cost Estimator',
-      description: 'Calculate costs and terms for hard money loans.',
-      icon: <Coins size={24} />,
-      link: routes.HARD_MONEY_COST_ESTIMATOR,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.HARD_MONEY_COST_ESTIMATOR
-    },
-    {
-      id: 'house-flipping',
-      title: 'House Flipping Calculator',
-      description: 'Analyze potential returns on house flipping projects.',
-      icon: <HomeIcon size={24} />,
-      link: routes.HOUSE_FLIPPING_CALCULATOR,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.HOUSE_FLIPPING_CALCULATOR
-    },
-    {
-      id: 'waterfall',
-      title: 'Waterfall Generator',
-      description: 'Generate and analyze waterfall distribution structures.',
-      icon: <GitFork size={24} />,
-      link: routes.WATERFALL,
-      component: EVERYTHING_BURGER,
-      pageType: EPageNames.WATERFALL_GENERATOR
-    },
-    // {
-    //   id: 'construction-loan',
-    //   title: 'Construction Loan Calculator',
-    //   description: 'Calculate construction loan terms and payments.',
-    //   icon: <Construction size={24} />,
-    //   link: routes.CONSTRUCTION_LOAN_CALCULATOR,
-    //   component: EVERYTHING_BURGER,
-    //   pageType: EPageNames.CONSTRUCTION_LOAN_CALCULATOR
-    // },
-    {
-      id: 'site-plan',
-      title: 'Site Plan Generator',
-      description: 'Innovative tool for creating site plans.',
-      icon: <Map size={24} />,
-      link: routes.SITE_PLAN_BUILDER,
-      component: SitePlanDesigner
-    },
-    // {
-    //   id: 'floor-plan',
-    //   title: EPageTitles.FLOOR_PLAN_GENERATOR,
-    //   description:
-    //     'Draw the unit outline, dimension edges, and place draggable rooms clipped to that boundary.',
-    //   icon: <LayoutGrid size={24} />,
-    //   link: routes.FLOOR_PLAN_GENERATOR,
-    //   component: FloorPlanDesigner,
-    //   pageType: EPageNames.FLOOR_PLAN_GENERATOR,
-    // },
-  ];
-
-  // Set initial active calculator
-  useEffect(() => {
-    if (!activeCalculator && calculators.length > 0) {
-      setActiveCalculator(calculators[0]);
-    }
-  }, []);
-
-  // Scroll to top when calculator changes
-  useEffect(() => {
-    if (mainContentRef.current) {
-      mainContentRef.current.scrollTo({
-        top: 0,
-        behavior: 'instant'
-      });
-    }
-    if (calculatorViewRef.current) {
-      calculatorViewRef.current.scrollTo({
-        top: 0,
-        behavior: 'instant'
-      });
-    }
-  }, [activeCalculator]);
-
-  const handleCalculatorInteraction = (calculator: Calculator) => {
-    if (isMobile) {
-      navigate(calculator.link);
-    } else {
-      // Force scroll reset before changing calculator
-      if (mainContentRef.current) {
-        mainContentRef.current.scrollTop = 0;
-      }
-      setActiveCalculator(calculator);
-    }
-  };
-
-  const currentCalculator = activeCalculator || calculators[0];
-  const CurrentComponent = currentCalculator.component;
-
-  // Memoize calculators to prevent unnecessary re-renders
-  const calculatorItems = React.useMemo(() => calculators.map(calc => (
-    <div
-      key={calc.id}
-      className={`calculator-item ${calc.id === activeCalculator?.id ? 'active' : ''}`}
-      onClick={() => handleCalculatorInteraction(calc)}
-      onMouseEnter={() => !isMobile && handleCalculatorInteraction(calc)}
-    >
-      <span className="calculator-icon">{calc.icon}</span>
-      <h3>{calc.title}</h3>
-      {isMobile ? <p>{calc.description}</p>: null} 
-    </div>
-  )), [activeCalculator?.id, isMobile]);
+const LandingPage = () => {
+  const [query, setQuery] = useState("");
+  const results = useMemo(() => searchCalculators(query), [query]);
 
   return (
     <div className="landing-page">
       <SummerSpecialBanner />
-      <div ref={heroRef}>
-        <HeroSection />
-      </div>
-      <div className="app-content">
-        <div className="sidebar">
-          <div className="calculator-list">
-            {calculatorItems}
-          </div>
+      <HeroSection query={query} onQueryChange={setQuery} />
+      <section className="landing-tools" aria-labelledby="landing-tools-heading">
+        <div className="landing-tools-header">
+          <h2 id="landing-tools-heading">
+            {query.trim() ? `Matching calculators (${results.length})` : "Choose a calculator"}
+          </h2>
+          <p>
+            {query.trim()
+              ? "Results update as you type, with the closest matches first."
+              : "Each card opens its own page so you can bookmark, share, and use the back button."}
+          </p>
+          <Link className="landing-tools-all" to={routes.TOOLS}>Browse all tools</Link>
         </div>
-
-        <div ref={mainContentRef} className="main-content">
-          <div ref={calculatorViewRef} className="calculator-view">
-            {activeCalculator && (
-              <CurrentComponent
-                page={activeCalculator.pageType}
-                isMobile={isMobile}
-                showSavedProjects={false}
-              />
-            )}
+        {results.length === 0 ? (
+          <p className="landing-tools-empty">No calculators matched "{query.trim()}". Try a shorter phrase.</p>
+        ) : (
+          <div className="landing-tools-grid" aria-live="polite">
+            {results.map((tool) => (
+              <CalculatorCard key={tool.id} tool={tool} />
+            ))}
           </div>
-        </div>
-      </div>
+        )}
+      </section>
     </div>
   );
 };

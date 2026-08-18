@@ -449,7 +449,7 @@ const MultifamilyDevelopmentCalculator: React.FC<MultifamilyDevelopmentCalculati
                         <InputRow
                             setInput={(value) => setOwnedLandCost(value)}
                             description="If you own the property already, enter in the price of the property here"
-                            cellValues={["Land value if already own ($)", removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
+                            cellValues={["Land value if already owned ($)", removeCommas(ownedLandCost) === 0 ? '' : ownedLandCost]}
                             isMobile={isMobile}
                         />
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { getPurchaseRoute } from '../../utils/constants';
+import { getPurchaseRoute, LIFETIME_PRICE, PROMOTION_END_DATE, PRICING_CTA } from '../../utils/constants';
 import './SummerSpecialBanner.scss';
 
 const SUMMER_BANNER_DISMISSED_KEY = 'summerSpecialBannerDismissed';
@@ -26,10 +26,10 @@ const SummerSpecialBanner = () => {
     <div className="summer-special-banner" role="region" aria-label="Summer special offer">
       <div className="content">
         <p>
-          <strong>Summer special:</strong> $20 for life. After summer, pricing moves to $20/month.
+          <strong>Summer special:</strong> ${LIFETIME_PRICE} for life through {PROMOTION_END_DATE}. Then pricing moves to ${LIFETIME_PRICE}/month.
         </p>
         <Link to={getPurchaseRoute(user)} className="cta">
-          Get lifetime access
+          {PRICING_CTA}
         </Link>
       </div>
 

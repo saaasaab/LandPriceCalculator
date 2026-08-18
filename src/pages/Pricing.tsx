@@ -5,7 +5,7 @@ import { useAuth, User } from '../context/AuthContext';
 import Payment from './Payment';
 import { postRequest } from '../utils/api';
 import { routes } from '../components/Navbar';
-import { PROJECT_NAME } from '../utils/constants';
+import { PROJECT_NAME, PRICING_CTA, PRICING_HEADLINE, TRIAL_DAYS } from '../utils/constants';
 
 export const plans = [
     {
@@ -146,12 +146,12 @@ const Pricing = () => {
             <div className="container">
                 <div className="header">
                     <div className="header-copy">
-                        <h2 className="title">Lifetime access</h2>
-                        <p className="subtitle">to advanced real estate tools</p>
+                        <h2 className="title">Start a free {TRIAL_DAYS}-day trial</h2>
+                        <p className="subtitle">{PRICING_HEADLINE}</p>
                     </div>
                     <div className="price-display">
                         <span className="price">${plan.price}</span>
-                        <span className="duration">{plan.duration}</span>
+                        <span className="duration">one-time after trial</span>
                     </div>
                 </div>
 
@@ -231,7 +231,7 @@ const Pricing = () => {
 
                                 <div className="subscribe-button">
                                     <button type="submit" className="btn btn-primary" >
-                                        Access
+                                        {PRICING_CTA}
                                     </button>
                                 </div>
 

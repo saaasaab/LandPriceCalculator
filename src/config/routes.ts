@@ -21,6 +21,7 @@ export const routes = {
   CONSTRUCTION_LOAN_CALCULATOR: "/construction-loan-calculator",
   HOME_MORTGAGE_CALCULATOR: "/home-mortgage-calculator",
   LEASE_EXPIRY_SCHEDULE: "/lease-expiry-schedule",
+  TOOLS: "/tools",
   HOME: "/",
 
   // Authentication & User-related Routes

@@ -4,6 +4,10 @@ export const SQ_FT_PER_ACRE = 43560;
 export const infrastructurePercentage = 70;
 export const PROJECT_NAME = "Land Price Calculator";
 export const TRIAL_DAYS = 14;
+export const LIFETIME_PRICE = 20;
+export const PROMOTION_END_DATE = "September 15, 2026";
+export const PRICING_HEADLINE = `Start a free ${TRIAL_DAYS}-day trial. No credit card required. Upgrade during the summer promotion for a one-time $${LIFETIME_PRICE} payment. Promotion ends ${PROMOTION_END_DATE}.`;
+export const PRICING_CTA = "Start free trial";
 
 const PURCHASE_ROUTES = {
   SIGN_UP: '/sign-up',

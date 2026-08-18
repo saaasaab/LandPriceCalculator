@@ -289,7 +289,7 @@ const TopologyAnalysis = () => {
       <AlphaBanner page={EPageNames.TOPOLOGY_ANALYSIS} />
 
       <header className="topology-header">
-        <h1>Topology Analysis</h1>
+        <h1>Terrain and Slope Analysis</h1>
         <p>
           Upload a topo image, digitize your site, then explore slope, drainage, buildability, earthwork,
           and development feasibility metrics.

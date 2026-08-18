@@ -1,247 +1,247 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { FormEvent, type ReactNode, useEffect, useId, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Banknote,
-  BarChart3,
-  Building2,
-  CircleDollarSign,
-  DoorOpen,
-  Hotel,
-  Factory,
-  GitFork,
-  HardHat,
-  Home,
-  Landmark,
-  LayoutGrid,
-  LineChart,
+  ChevronDown,
   LogIn,
   LogOut,
-  Map,
-  Mountain,
-  PaintRoller,
-  PiggyBank,
-  Ruler,
+  Search,
   Sparkles,
-  TrendingUp,
-  CalendarClock,
 } from "lucide-react";
 import logo from "../assets/LandCalculatorLogo.svg";
 import "./Navbar.scss";
 import Hamburger from "./Hamburger";
-import { EPageTitles } from "../utils/types";
 import { useAuth } from "../context/AuthContext";
 import { getPurchaseRoute } from "../utils/constants";
-
-const navIconProps = { size: 16, strokeWidth: 2, "aria-hidden": true as const };
-const authLinkIconProps = { size: 14, strokeWidth: 2, "aria-hidden": true as const };
-
-
-
-
 import { routes } from "../config/routes";
+import {
+  LEARN_LINKS,
+  TOOL_CATEGORIES,
+  CALCULATORS,
+  WORKFLOWS,
+} from "../config/calculators";
+import CalculatorIcon from "./CalculatorIcon";
 
 export { routes };
 
-export const calculatorIcons: Record<string, React.ReactNode> = {
-  [routes.RESIDENTIAL_DEVELOPMENT]: <Home {...navIconProps} />,
-  [routes.MULTIFAMILY_DEVELOPMENT]: <Building2 {...navIconProps} />,
-  [routes.INDUSTRIAL_DEVELOPMENT]: <Factory {...navIconProps} />,
-  [routes.COMMERCIAL_DEVELOPMENT]: <Landmark {...navIconProps} />,
-  [routes.CONSTRUCTION_BUDGET]: <BarChart3 {...navIconProps} />,
-  [routes.MULTIFAMILY_ANALYSIS]: <CircleDollarSign {...navIconProps} />,
-  [routes.INDUSTRIAL_PROFORMA]: <LineChart {...navIconProps} />,
-  [routes.INDUSTRIAL_PRICE_PER_SQFT]: <Ruler {...navIconProps} />,
-  [routes.MULTI_FAMILY_PRICE_PER_DOOR]: <DoorOpen {...navIconProps} />,
-  [routes.HOTEL_PRICE_PER_KEY]: <Hotel {...navIconProps} />,
-  [routes.IRR_CALCULATOR]: <TrendingUp {...navIconProps} />,
-  [routes.HARD_MONEY_COST_ESTIMATOR]: <PiggyBank {...navIconProps} />,
-  [routes.HOUSE_FLIPPING_CALCULATOR]: <PaintRoller {...navIconProps} />,
-  [routes.WATERFALL]: <GitFork {...navIconProps} />,
-  [routes.HOME_MORTGAGE_CALCULATOR]: <Banknote {...navIconProps} />,
-  [routes.LEASE_EXPIRY_SCHEDULE]: <CalendarClock {...navIconProps} />,
-  [routes.CONSTRUCTION_LOAN_CALCULATOR]: <HardHat {...navIconProps} />,
-  [routes.SITE_PLAN_BUILDER]: <Map {...navIconProps} />,
-  [routes.CUT_FILL_CALCULATOR]: <Mountain {...navIconProps} />,
-  [routes.TOPOLOGY_ANALYSIS]: <Map {...navIconProps} />,
-  [routes.SUBDIVISION_GENERATOR]: <LayoutGrid {...navIconProps} />,
-  [routes.LOGIN]: <LogIn {...authLinkIconProps} />,
-};
-
-const IconLink = ({
-  route,
-  text,
-  handleToggleMenu,
-  className,
-}: {
-  route: string;
-  text: string;
-  handleToggleMenu: () => void;
-  className?: string;
-}) => {
-  const icon = calculatorIcons[route];
-
-  return (
-    <Link
-      className={`icon-link ${className ?? ""}`}
-      to={route}
-      onClick={handleToggleMenu}
-    >
-      {icon ? <span className="calculator-icon">{icon}</span> : null}
-      <span className="icon-link__text">{text}</span>
-    </Link>
-  );
-};
-
-type NavMenuItem = {
-  route: string;
-  title: string;
-};
-
-type NavMenu = {
-  label: string;
-  items: NavMenuItem[];
-};
-
-const NAV_MENUS: NavMenu[] = [
-  {
-    label: "Developer",
-    items: [
-      { route: routes.RESIDENTIAL_DEVELOPMENT, title: EPageTitles.RESIDENTIAL_DEVELOPMENT },
-      { route: routes.MULTIFAMILY_DEVELOPMENT, title: EPageTitles.MULTIFAMILY_DEVELOPMENT },
-      { route: routes.INDUSTRIAL_DEVELOPMENT, title: EPageTitles.INDUSTRIAL_DEVELOPMENT },
-      { route: routes.COMMERCIAL_DEVELOPMENT, title: EPageTitles.COMMERCIAL_DEVELOPMENT },
-      { route: routes.CONSTRUCTION_BUDGET, title: EPageTitles.CONSTRUCTION_BUDGET },
-      { route: routes.SITE_PLAN_BUILDER, title: EPageTitles.SITE_PLAN_BUILDER },
-      { route: routes.CUT_FILL_CALCULATOR, title: EPageTitles.CUT_FILL_CALCULATOR },
-      { route: routes.TOPOLOGY_ANALYSIS, title: EPageTitles.TOPOLOGY_ANALYSIS },
-      { route: routes.SUBDIVISION_GENERATOR, title: EPageTitles.SUBDIVISION_GENERATOR },
-      { route: routes.CONSTRUCTION_LOAN_CALCULATOR, title: EPageTitles.CONSTRUCTION_LOAN_CALCULATOR },
-    ],
-  },
-  {
-    label: "Investor",
-    items: [
-      { route: routes.MULTI_FAMILY_PRICE_PER_DOOR, title: EPageTitles.MULTI_FAMILY_PRICE_PER_DOOR },
-      { route: routes.HOTEL_PRICE_PER_KEY, title: EPageTitles.HOTEL_PRICE_PER_KEY },
-      { route: routes.INDUSTRIAL_PRICE_PER_SQFT, title: EPageTitles.INDUSTRIAL_PRICE_PER_SQFT },
-      { route: routes.WATERFALL, title: EPageTitles.WATERFALL_GENERATOR },
-      { route: routes.MULTIFAMILY_ANALYSIS, title: EPageTitles.MULTIFAMILY_ANALYSIS },
-      { route: routes.LEASE_EXPIRY_SCHEDULE, title: EPageTitles.LEASE_EXPIRY_SCHEDULE },
-    ],
-  },
-  {
-    label: "Property Manager",
-    items: [
-      { route: routes.MULTIFAMILY_ANALYSIS, title: EPageTitles.MULTIFAMILY_ANALYSIS },
-      { route: routes.LEASE_EXPIRY_SCHEDULE, title: EPageTitles.LEASE_EXPIRY_SCHEDULE },
-    ],
-  },
-  {
-    label: "Realtor",
-    items: [
-      { route: routes.HOME_MORTGAGE_CALCULATOR, title: EPageTitles.HOME_MORTGAGE_CALCULATOR },
-      { route: routes.IRR_CALCULATOR, title: EPageTitles.IRR_CALCULATOR },
-    ],
-  },
-  {
-    label: "Flipper",
-    items: [
-      { route: routes.HOUSE_FLIPPING_CALCULATOR, title: EPageTitles.HOUSE_FLIPPING_CALCULATOR },
-      { route: routes.HARD_MONEY_COST_ESTIMATOR, title: EPageTitles.HARD_MONEY_COST_ESTIMATOR },
-    ],
-  },
-];
-
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const navRef = useRef<HTMLElement>(null);
+
+  const closeMenus = () => {
+    setIsMobileMenuOpen(false);
+    setOpenMenu(null);
+  };
 
   const handleToggleMenu = () => {
     setIsMobileMenuOpen((prev) => !prev);
+    setOpenMenu(null);
+  };
+
+  useEffect(() => {
+    const handlePointer = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setOpenMenu(null);
+      }
+    };
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handlePointer);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handlePointer);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, []);
+
+  const handleSearch = (event: FormEvent) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    closeMenus();
+    navigate(query ? `${routes.TOOLS}?q=${encodeURIComponent(query)}` : routes.TOOLS);
   };
 
   return (
-
-    <nav className={`navbar ${isMobileMenuOpen ? 'is-open-navbar' : ''}`}>
-
+    <nav
+      ref={navRef}
+      className={`navbar ${isMobileMenuOpen ? "is-open-navbar" : ""}`}
+    >
       <Hamburger isOpen={isMobileMenuOpen} onClick={handleToggleMenu} />
 
-      <div className="navbar-logo">
-        <img src={logo} alt="Land Price Calculator Logo" />
+      <Link className="navbar-logo" to={routes.HOME} onClick={closeMenus}>
+        <img src={logo} alt="Land Price Calculator" />
         <h3>Land Price Calculator</h3>
-      </div>
-
+      </Link>
 
       <div className={`navbar-menu ${isMobileMenuOpen ? "is-open" : ""}`}>
-      <ul className="navbar-links">
+        <ul className="navbar-links">
+          <NavDropdown
+            id="tools"
+            label="Tools"
+            isOpen={openMenu === "tools"}
+            enableHover={!isMobileMenuOpen}
+            onOpen={() => setOpenMenu("tools")}
+            onClose={() => setOpenMenu((current) => (current === "tools" ? null : current))}
+            onToggle={() => setOpenMenu((current) => (current === "tools" ? null : "tools"))}
+          >
+            <Link className="dropdown-overview" to={routes.TOOLS} onClick={closeMenus}>
+              All calculators
+            </Link>
+            {TOOL_CATEGORIES.map((category) => (
+              <div key={category.id} className="dropdown-group">
+                <p className="dropdown-heading">{category.label}</p>
+                {CALCULATORS.filter((tool) => tool.category === category.id).map((tool) => (
+                  <Link key={tool.id} to={tool.route} onClick={closeMenus}>
+                    <span className="calculator-icon">
+                      <CalculatorIcon name={tool.icon} size={16} />
+                    </span>
+                    <span className="icon-link-text">{tool.name}</span>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </NavDropdown>
 
-        <li className="dropdown">
-          <Link className="dropdown-title" onClick={handleToggleMenu} to={routes.HOME}>{EPageTitles.HOME}</Link>
+          <NavDropdown
+            id="workflows"
+            label="Workflows"
+            isOpen={openMenu === "workflows"}
+            enableHover={!isMobileMenuOpen}
+            onOpen={() => setOpenMenu("workflows")}
+            onClose={() => setOpenMenu((current) => (current === "workflows" ? null : current))}
+            onToggle={() => setOpenMenu((current) => (current === "workflows" ? null : "workflows"))}
+          >
+            {WORKFLOWS.map((workflow) => (
+              <Link key={workflow.question} to={workflow.route} onClick={closeMenus}>
+                {workflow.question}
+              </Link>
+            ))}
+          </NavDropdown>
 
-        </li>
+          <NavDropdown
+            id="learn"
+            label="Learn"
+            isOpen={openMenu === "learn"}
+            enableHover={!isMobileMenuOpen}
+            onOpen={() => setOpenMenu("learn")}
+            onClose={() => setOpenMenu((current) => (current === "learn" ? null : current))}
+            onToggle={() => setOpenMenu((current) => (current === "learn" ? null : "learn"))}
+          >
+            {LEARN_LINKS.map((link) => (
+              <Link key={link.route} to={link.route} onClick={closeMenus}>
+                {link.label}
+              </Link>
+            ))}
+          </NavDropdown>
 
-
-        {NAV_MENUS.map((menu) => (
-          <li key={menu.label} className="dropdown">
-            <span className="dropdown-title">{menu.label}</span>
-            <div className="dropdown-content">
-              {menu.items.map((item) => (
-                <IconLink
-                  key={item.route}
-                  route={item.route}
-                  handleToggleMenu={handleToggleMenu}
-                  text={item.title}
-                />
-              ))}
-            </div>
+          <li>
+            <Link className="nav-text-link" to={routes.SIGN_UP} onClick={closeMenus}>
+              Pricing
+            </Link>
           </li>
-        ))}
+        </ul>
 
-        {/* Howto and Blogs */}
-        {/* <li className="dropdown">
-          <span className="dropdown-title">Education Center</span>
-          <div className="dropdown-content">
-            <Link onClick={handleToggleMenu} to={routes.HOW_TO_LAND_FOR_MULTIFAMILY}>How to analyze land for multifamily</Link>
-            <Link onClick={handleToggleMenu} to={routes.ARTICLES}>Articles</Link>
-          </div>
-        </li> */}
-      </ul>
-
-        <div className="navbar-auth">
-          {user ? (
-            <>
-              {!user.is_paid ? (
-                <Link
-                  to={getPurchaseRoute(user)}
-                  className="upgrade-btn"
-                  onClick={handleToggleMenu}
-                >
-                  <Sparkles size={14} strokeWidth={2} aria-hidden />
-                  <span>Upgrade</span>
-                </Link>
-              ) : null}
-              <button type="button" onClick={logout} className="logout-btn">
-                <LogOut size={14} strokeWidth={2} aria-hidden />
-                <span>Logout</span>
-              </button>
-            </>
-          ) : (
-            <IconLink
-              className="navbar-auth__link"
-              route={routes.LOGIN}
-              handleToggleMenu={handleToggleMenu}
-              text="Login"
+        <div className="navbar-actions">
+          <form className="navbar-search" onSubmit={handleSearch} role="search">
+            <label htmlFor="navbar-search" className="visually-hidden">
+              Search calculators
+            </label>
+            <Search size={14} aria-hidden />
+            <input
+              id="navbar-search"
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search"
             />
-          )}
+          </form>
+
+          <div className="navbar-auth">
+            {user ? (
+              <>
+                {!user.is_paid ? (
+                  <Link
+                    to={getPurchaseRoute(user)}
+                    className="upgrade-btn"
+                    onClick={closeMenus}
+                  >
+                    <Sparkles size={14} strokeWidth={2} aria-hidden />
+                    <span>Upgrade</span>
+                  </Link>
+                ) : null}
+                <button type="button" onClick={logout} className="logout-btn">
+                  <LogOut size={14} strokeWidth={2} aria-hidden />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <Link className="navbar-auth-link" to={routes.LOGIN} onClick={closeMenus}>
+                <LogIn size={14} strokeWidth={2} aria-hidden />
+                <span>Sign in</span>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
-
-
-
-
-
     </nav>
+  );
+};
 
+const NavDropdown = ({
+  id,
+  label,
+  isOpen,
+  enableHover,
+  onOpen,
+  onClose,
+  onToggle,
+  children,
+}: {
+  id: string;
+  label: string;
+  isOpen: boolean;
+  enableHover: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onToggle: () => void;
+  children: ReactNode;
+}) => {
+  const menuId = useId();
+
+  return (
+    <li
+      className={`dropdown ${isOpen ? "is-open" : ""}`}
+      onMouseEnter={enableHover ? onOpen : undefined}
+      onMouseLeave={enableHover ? onClose : undefined}
+    >
+      <button
+        type="button"
+        className="dropdown-title"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
+        aria-controls={menuId}
+        id={`${id}-button`}
+        onClick={onToggle}
+      >
+        {label}
+        <ChevronDown size={14} aria-hidden />
+      </button>
+      <div
+        id={menuId}
+        className="dropdown-content"
+        role="menu"
+        aria-labelledby={`${id}-button`}
+        hidden={!isOpen}
+      >
+        {children}
+      </div>
+    </li>
   );
 };
 
