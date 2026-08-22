@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, useLocation, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 
 import NotFound from './pages/NotFound';
 import Navbar, { routes } from './components/Navbar';
+import { LEGACY_TOOL_REDIRECTS } from './config/routes';
 // import EVERYTHING_BURGER from './pages/EVERYTHING_BURGER';
 import { EPageNames } from './utils/types';
 
@@ -40,6 +41,11 @@ import './App.css'
 import { PopupProvider } from './context/PopupContext';
 import PageMeta from './components/PageMeta';
 import { TRIAL_DAYS } from './utils/constants';
+
+function LegacyToolRedirect({ to }: { to: string }) {
+  const { search, hash } = useLocation();
+  return <Navigate to={`${to}${search}${hash}`} replace />;
+}
 
 export function AppRouter() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -109,6 +115,9 @@ export function AppRouter() {
             <Routes>
               <Route path={routes.HOME} element={<LandingPage />} />
               <Route path={routes.TOOLS} element={<ToolsDirectory />} />
+              {Object.entries(LEGACY_TOOL_REDIRECTS).map(([from, to]) => (
+                <Route key={from} path={from} element={<LegacyToolRedirect to={to} />} />
+              ))}
 
               <Route path={routes.RESIDENTIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.RESIDENTIAL_DEVELOPMENT} isMobile={isMobile} />} />
               <Route path={routes.INDUSTRIAL_DEVELOPMENT} element={<EVERYTHING_BURGER page={EPageNames.INDUSTRIAL_DEVELOPMENT} isMobile={isMobile} />} />
@@ -160,6 +169,9 @@ export function AppRouter() {
         <div className="land-calculator-container">
           <Navbar />
           <Routes>
+            {Object.entries(LEGACY_TOOL_REDIRECTS).map(([from, to]) => (
+              <Route key={from} path={from} element={<LegacyToolRedirect to={to} />} />
+            ))}
             <Route path="*" element={expiredTrialPage} />
             <Route path={routes.COMPLETION} element={<Completion />} />
             <Route path={routes.HOME} element={<LandingPage />} />

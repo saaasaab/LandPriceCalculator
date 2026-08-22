@@ -5,7 +5,7 @@ import { useAuth, User } from '../context/AuthContext';
 import Payment from './Payment';
 import { postRequest } from '../utils/api';
 import { routes } from '../components/Navbar';
-import { PROJECT_NAME, PRICING_CTA, PRICING_HEADLINE, TRIAL_DAYS } from '../utils/constants';
+import { PROJECT_NAME, PRICING_CTA, PRICING_HEADLINE, TRIAL_DAYS, TRIAL_ENDED_CTA, TRIAL_ENDED_HEADLINE, TRIAL_ENDED_TITLE } from '../utils/constants';
 
 export const plans = [
     {
@@ -22,7 +22,11 @@ export const plans = [
     // }
 ];
 
-const Pricing = () => {
+type PricingProps = {
+    trialEnded?: boolean;
+};
+
+const Pricing = ({ trialEnded = false }: PricingProps) => {
 
     const { login, tempEmail, user, authLoading } = useAuth();
     const navigate = useNavigate();
@@ -43,13 +47,15 @@ const Pricing = () => {
         }
 
         if (user.free_access_expired) {
-            navigate(routes.END_FREE_TRIAL);
+            if (!trialEnded) {
+                navigate(routes.END_FREE_TRIAL);
+            }
             return;
         }
 
         setEmail(user.email);
         setShowPaymentForm(true);
-    }, [authLoading, navigate, user]);
+    }, [authLoading, navigate, trialEnded, user]);
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -146,12 +152,15 @@ const Pricing = () => {
             <div className="container">
                 <div className="header">
                     <div className="header-copy">
-                        <h2 className="title">Start a free {TRIAL_DAYS}-day trial</h2>
-                        <p className="subtitle">{PRICING_HEADLINE}</p>
+                        <h2 className="title">
+                            {trialEnded ? TRIAL_ENDED_TITLE : `Start a free ${TRIAL_DAYS}-day trial`}
+                        </h2>
+                        <p className="subtitle">{trialEnded ? TRIAL_ENDED_HEADLINE : PRICING_HEADLINE}</p>
                     </div>
                     <div className="price-display">
                         <span className="price">${plan.price}</span>
-                        <span className="duration">one-time after trial</span>
+                        <span className="duration">lifetime access</span>
+                        {!trialEnded && <span className="price-note">after trial</span>}
                     </div>
                 </div>
 
@@ -231,7 +240,7 @@ const Pricing = () => {
 
                                 <div className="subscribe-button">
                                     <button type="submit" className="btn btn-primary" >
-                                        {PRICING_CTA}
+                                        {trialEnded ? TRIAL_ENDED_CTA : PRICING_CTA}
                                     </button>
                                 </div>
 

@@ -1,3 +1,25 @@
+/multifamily-development /tool/multifamily-development 301
+/industrial-development /tool/industrial-development 301
+/commercial-development /tool/commercial-development 301
+/residential-development /tool/residential-development 301
+/multifamily-price-calculator /tool/multifamily-price-calculator 301
+/hotel-price-calculator /tool/hotel-price-calculator 301
+/industrial-price-per-sqft-calculator /tool/industrial-price-per-sqft-calculator 301
+/multifamily-analysis /tool/multifamily-analysis 301
+/industrial-commercial-proforma /tool/industrial-commercial-proforma 301
+/irr-calculator /tool/irr-calculator 301
+/hard-money-calculator /tool/hard-money-calculator 301
+/waterfall-generator /tool/waterfall-generator 301
+/construction-budget-generator /tool/construction-budget-generator 301
+/site-plan-builder /tool/site-plan-builder 301
+/cut-fill-calculator /tool/cut-fill-calculator 301
+/topology-analysis /tool/topology-analysis 301
+/subdivision-generator /tool/subdivision-generator 301
+/house-flipping-calculator /tool/house-flipping-calculator 301
+/construction-loan-calculator /tool/construction-loan-calculator 301
+/home-mortgage-calculator /tool/home-mortgage-calculator 301
+/lease-expiry-schedule /tool/lease-expiry-schedule 301
+
 /* /index.html 200
 
 https://www.landpricecalculator.com/* https://app.landpricecalculator.com/:splat 301!

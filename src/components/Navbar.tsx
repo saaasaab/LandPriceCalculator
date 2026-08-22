@@ -84,6 +84,7 @@ const Navbar = () => {
           <NavDropdown
             id="tools"
             label="Tools"
+            contentClassName="tools-dropdown"
             isOpen={openMenu === "tools"}
             enableHover={!isMobileMenuOpen}
             onOpen={() => setOpenMenu("tools")}
@@ -93,19 +94,21 @@ const Navbar = () => {
             <Link className="dropdown-overview" to={routes.TOOLS} onClick={closeMenus}>
               All calculators
             </Link>
-            {TOOL_CATEGORIES.map((category) => (
-              <div key={category.id} className="dropdown-group">
-                <p className="dropdown-heading">{category.label}</p>
-                {CALCULATORS.filter((tool) => tool.category === category.id).map((tool) => (
-                  <Link key={tool.id} to={tool.route} onClick={closeMenus}>
-                    <span className="calculator-icon">
-                      <CalculatorIcon name={tool.icon} size={16} />
-                    </span>
-                    <span className="icon-link-text">{tool.name}</span>
-                  </Link>
-                ))}
-              </div>
-            ))}
+            <div className="dropdown-columns">
+              {TOOL_CATEGORIES.map((category) => (
+                <div key={category.id} className="dropdown-group">
+                  <p className="dropdown-heading">{category.label}</p>
+                  {CALCULATORS.filter((tool) => tool.category === category.id).map((tool) => (
+                    <Link key={tool.id} to={tool.route} onClick={closeMenus}>
+                      <span className="calculator-icon">
+                        <CalculatorIcon name={tool.icon} size={16} />
+                      </span>
+                      <span className="icon-link-text">{tool.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              ))}
+            </div>
           </NavDropdown>
 
           <NavDropdown
@@ -140,11 +143,13 @@ const Navbar = () => {
             ))}
           </NavDropdown>
 
-          <li>
-            <Link className="nav-text-link" to={routes.SIGN_UP} onClick={closeMenus}>
-              Pricing
-            </Link>
-          </li>
+          {!user ? (
+            <li>
+              <Link className="nav-text-link" to={routes.SIGN_UP} onClick={closeMenus}>
+                Pricing
+              </Link>
+            </li>
+          ) : null}
         </ul>
 
         <div className="navbar-actions">
@@ -183,7 +188,7 @@ const Navbar = () => {
             ) : (
               <Link className="navbar-auth-link" to={routes.LOGIN} onClick={closeMenus}>
                 <LogIn size={14} strokeWidth={2} aria-hidden />
-                <span>Sign in</span>
+                <span>Sign in to save</span>
               </Link>
             )}
           </div>
@@ -201,6 +206,7 @@ const NavDropdown = ({
   onOpen,
   onClose,
   onToggle,
+  contentClassName,
   children,
 }: {
   id: string;
@@ -210,6 +216,7 @@ const NavDropdown = ({
   onOpen: () => void;
   onClose: () => void;
   onToggle: () => void;
+  contentClassName?: string;
   children: ReactNode;
 }) => {
   const menuId = useId();
@@ -234,7 +241,7 @@ const NavDropdown = ({
       </button>
       <div
         id={menuId}
-        className="dropdown-content"
+        className={`dropdown-content${contentClassName ? ` ${contentClassName}` : ""}`}
         role="menu"
         aria-labelledby={`${id}-button`}
         hidden={!isOpen}

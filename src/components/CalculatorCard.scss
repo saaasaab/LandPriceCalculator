@@ -1,11 +1,12 @@
 .calculator-card {
   display: grid;
-  grid-template-columns: 48px 1fr;
-  gap: 14px;
-  padding: 16px;
+  grid-template-columns: 32px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
   background: #fff;
   border: 1px solid #e6e6e6;
-  border-radius: 12px;
+  border-radius: 8px;
   text-decoration: none;
   color: #1a1a1a;
   text-align: left;
@@ -19,15 +20,16 @@
   }
 
   h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.3;
+    font-size: 0.8125rem;
+    font-weight: 650;
+    line-height: 1.25;
+    color: #0f172a;
   }
 
   p {
-    font-size: 0.875rem;
-    color: #4a4a4a;
-    line-height: 1.45;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.35;
   }
 }
 
@@ -35,44 +37,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   background: rgba(37, 99, 235, 0.1);
   color: #2563eb;
-  border-radius: 10px;
+  border-radius: 999px;
   flex-shrink: 0;
 }
 
 .calculator-card-body {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
   min-width: 0;
-}
-
-.calculator-card-answer {
-  font-weight: 600;
-  color: #1e40af;
 }
 
 .calculator-card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
 }
 
-.calculator-card-tag,
 .calculator-card-badge {
-  font-size: 0.75rem;
+  font-size: 0.625rem;
   line-height: 1;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
-}
-
-.calculator-card-badge {
   background: #fef3c7;
   color: #92400e;
+}
+
+.calculator-card-arrow {
+  color: #2563eb;
+  font-size: 0.875rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
