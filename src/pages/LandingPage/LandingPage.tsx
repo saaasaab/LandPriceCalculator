@@ -43,6 +43,7 @@ const LandingPage = () => {
     event.preventDefault();
   };
 
+
   return (
     <div className="landing-page">
       <SummerSpecialBanner />
@@ -52,7 +53,9 @@ const LandingPage = () => {
             <h1 id="landing-intro-heading">Land, Deals, and Financing calculators</h1>
             <p>
               Run feasibility, pricing, proformas, and loan numbers before you buy, build, or finance.
-              Free to use. Sign in to save projects across sessions.
+              {user
+                ? " Your projects stay saved across sessions."
+                : " Free to use. Sign in to save projects across sessions."}
             </p>
           </div>
           <aside className="landing-intro-auth">
