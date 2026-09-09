@@ -1,6 +1,6 @@
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FolderOpen, Save, Trash2 } from 'lucide-react';
+import { ChevronDown, FolderOpen, Save, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSavedProjects } from '../../hooks/useSavedProjects';
 import { applyPageInputs, collectPageInputs, formatProjectDate } from '../../utils/projectStorage';
@@ -18,9 +18,15 @@ export type SavedProjectsPanelHandle = {
   clearActiveProject: () => void;
 };
 
+const NARROW_LAYOUT_QUERY = '(max-width: 1024px)';
+
 const SavedProjectsPanel = forwardRef<SavedProjectsPanelHandle, SavedProjectsPanelProps>(
   ({ page, onProjectLoad }, ref) => {
   const { user } = useAuth();
+  const [isNarrowLayout, setIsNarrowLayout] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(NARROW_LAYOUT_QUERY).matches
+  );
+  const [isExpanded, setIsExpanded] = useState(() => !isNarrowLayout);
   const { projects, isLoading, error, saveProject, updateProject, deleteProject, loadProject } =
     useSavedProjects(page, !!user);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -32,6 +38,21 @@ const SavedProjectsPanel = forwardRef<SavedProjectsPanelHandle, SavedProjectsPan
   useImperativeHandle(ref, () => ({
     clearActiveProject: () => setActiveProjectId(null),
   }));
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(NARROW_LAYOUT_QUERY);
+    const handleChange = () => {
+      const isNarrow = mediaQuery.matches;
+      setIsNarrowLayout(isNarrow);
+      if (!isNarrow) {
+        setIsExpanded(true);
+      }
+    };
+
+    handleChange();
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const activeProject = activeProjectId
     ? projects.find((project) => project.id === activeProjectId) ?? null
@@ -79,13 +100,28 @@ const SavedProjectsPanel = forwardRef<SavedProjectsPanelHandle, SavedProjectsPan
     }
   };
 
+  const showList = !isNarrowLayout || isExpanded;
+
   return (
-    <aside className="saved-projects-panel">
+    <aside className={`saved-projects-panel${isNarrowLayout ? ' is-narrow' : ''}${isNarrowLayout && !isExpanded ? ' is-collapsed' : ''}`}>
       <div className="header">
-        <div className="title-row">
-          <FolderOpen size={18} aria-hidden />
-          <h2>Saved Projects</h2>
-        </div>
+        {isNarrowLayout ? (
+          <button
+            type="button"
+            className="title-row"
+            onClick={() => setIsExpanded((current) => !current)}
+            aria-expanded={isExpanded}
+          >
+            <FolderOpen size={18} aria-hidden />
+            <h2>Saved Projects</h2>
+            <ChevronDown size={16} className={`chevron${isExpanded ? ' is-open' : ''}`} aria-hidden />
+          </button>
+        ) : (
+          <div className="title-row">
+            <FolderOpen size={18} aria-hidden />
+            <h2>Saved Projects</h2>
+          </div>
+        )}
 
         {user ? (
           <button
@@ -99,57 +135,59 @@ const SavedProjectsPanel = forwardRef<SavedProjectsPanelHandle, SavedProjectsPan
         ) : null}
       </div>
 
-      {!user ? (
-        <div className="empty">
-          <p>Log in to save and load your project history.</p>
-          <Link to={routes.LOGIN}>Log in</Link>
-        </div>
-      ) : isLoading ? (
-        <p className="status">Loading projects...</p>
-      ) : error ? (
-        <p className="status error">{error}</p>
-      ) : projects.length === 0 ? (
-        <div className="empty">
-          <p>No saved projects yet.</p>
-          <p>Save your current inputs to build a history for this calculator.</p>
-        </div>
-      ) : (
-        <>
-          {loadError ? <p className="status error">{loadError}</p> : null}
-          <ul className="list">
-          {projects.map((project) => (
-            <li
-              key={project.id}
-              className={`item ${activeProjectId === project.id ? 'active' : ''}`}
-            >
-              <button
-                type="button"
-                className="load-btn"
-                onClick={() => handleLoad(project.id)}
-                disabled={loadingProjectId === project.id}
-              >
-                <span className="title">
-                  {loadingProjectId === project.id ? 'Loading...' : project.title}
-                </span>
-                <span className="date">
-                  {formatProjectDate(project.updatedAt)}
-                </span>
-              </button>
+      {showList ? (
+        !user ? (
+          <div className="empty">
+            <p>Log in to save and load your project history.</p>
+            <Link to={routes.LOGIN}>Log in</Link>
+          </div>
+        ) : isLoading ? (
+          <p className="status">Loading projects...</p>
+        ) : error ? (
+          <p className="status error">{error}</p>
+        ) : projects.length === 0 ? (
+          <div className="empty">
+            <p>No saved projects yet.</p>
+            <p>Save your current inputs to build a history for this calculator.</p>
+          </div>
+        ) : (
+          <>
+            {loadError ? <p className="status error">{loadError}</p> : null}
+            <ul className="list">
+              {projects.map((project) => (
+                <li
+                  key={project.id}
+                  className={`item ${activeProjectId === project.id ? 'active' : ''}`}
+                >
+                  <button
+                    type="button"
+                    className="load-btn"
+                    onClick={() => handleLoad(project.id)}
+                    disabled={loadingProjectId === project.id}
+                  >
+                    <span className="title">
+                      {loadingProjectId === project.id ? 'Loading...' : project.title}
+                    </span>
+                    <span className="date">
+                      {formatProjectDate(project.updatedAt)}
+                    </span>
+                  </button>
 
-              <button
-                type="button"
-                className="delete-btn"
-                onClick={() => handleDelete(project.id)}
-                disabled={deletingId === project.id}
-                aria-label={`Delete ${project.title}`}
-              >
-                <Trash2 size={15} aria-hidden />
-              </button>
-            </li>
-          ))}
-          </ul>
-        </>
-      )}
+                  <button
+                    type="button"
+                    className="delete-btn"
+                    onClick={() => handleDelete(project.id)}
+                    disabled={deletingId === project.id}
+                    aria-label={`Delete ${project.title}`}
+                  >
+                    <Trash2 size={15} aria-hidden />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      ) : null}
 
       <SaveProjectDialog
         isOpen={isDialogOpen}

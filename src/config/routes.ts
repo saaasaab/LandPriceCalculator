@@ -14,6 +14,7 @@ export const routes = {
   IRR_CALCULATOR: toolPath("irr-calculator"),
   HARD_MONEY_COST_ESTIMATOR: toolPath("hard-money-calculator"),
   WATERFALL: toolPath("waterfall-generator"),
+  CAPITAL_STACK: toolPath("capital-stack"),
   CONSTRUCTION_BUDGET: toolPath("construction-budget-generator"),
   SITE_PLAN_BUILDER: toolPath("site-plan-builder"),
   CUT_FILL_CALCULATOR: toolPath("cut-fill-calculator"),

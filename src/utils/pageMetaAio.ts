@@ -320,6 +320,23 @@ export const AIO_EXTRAS: Record<string, AioExtras> = {
     relatedLinks: [
       { path: routes.IRR_CALCULATOR, label: "Seller financing IRR calculator" },
       { path: routes.MULTIFAMILY_ANALYSIS, label: "Multifamily investment proforma" },
+      { path: routes.CAPITAL_STACK, label: "Real estate capital stack calculator" },
+    ],
+  },
+  [routes.CAPITAL_STACK]: {
+    keyTakeaways: [
+      "Senior debt sits at the bottom of the stack: it is paid first and usually carries the lowest rate.",
+      "Mezzanine and preferred equity are optional middle layers used when senior debt plus sponsor equity cannot fund the full price.",
+      "Common equity is paid last. It takes the most risk and keeps cash that remains after every claim above it.",
+    ],
+    howToSteps: [
+      { name: "Set total capitalization", text: "Enter the purchase or project cost the stack must fund." },
+      { name: "Allocate each layer", text: "Enter dollars or percents and coupon rates. Turn mezzanine or preferred equity off if the deal does not use them." },
+      { name: "Review leverage and cash", text: "Check LTV, paid-layer cost, and how NOI covers each claim before residual cash reaches common equity." },
+    ],
+    relatedLinks: [
+      { path: routes.WATERFALL, label: "Real estate waterfall distribution calculator" },
+      { path: routes.MULTIFAMILY_ANALYSIS, label: "Multifamily investment proforma" },
       { path: routes.INDUSTRIAL_PROFORMA, label: "Industrial property proforma calculator" },
     ],
   },

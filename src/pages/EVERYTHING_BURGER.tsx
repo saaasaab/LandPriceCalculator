@@ -19,6 +19,7 @@ import MultifamilyDevelopmentCalculator from './MultiFamilyDevelopmentCalculator
 import HomeMortgageCalculator from './HomeMortgageCalculator';
 import ConstructionLoanCalculator from '../futureItems/ConstructionLoanCalculator';
 import LeaseExpiryScheduleCalculator from './LeaseExpiryScheduleCalculator';
+import CapitalStackCalculator from './CapitalStackCalculator';
 import { Info } from 'lucide-react';
 import { HELP_PAGES } from '../utils/constants';
 import SavedProjectsPanel, { SavedProjectsPanelHandle } from '../components/SavedProjects/SavedProjectsPanel';
@@ -113,6 +114,11 @@ const EVERYTHING_BURGER = ({
                 />
             case EPageNames.WATERFALL_GENERATOR:
                 return <WaterfallGenerator
+                    isMobile={isMobile}
+                    page={page}
+                />
+            case EPageNames.CAPITAL_STACK:
+                return <CapitalStackCalculator
                     isMobile={isMobile}
                     page={page}
                 />

@@ -13,6 +13,7 @@ import {
   Home,
   Hotel,
   Landmark,
+  Layers,
   LayoutGrid,
   LineChart,
   Map,
@@ -47,6 +48,7 @@ const ICONS: Record<CalculatorIconName, ComponentType<LucideProps>> = {
   mountain: Mountain,
   layoutGrid: LayoutGrid,
   calculator: Calculator,
+  layers: Layers,
 };
 
 const CalculatorIcon = ({

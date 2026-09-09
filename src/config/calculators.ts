@@ -38,7 +38,8 @@ export type CalculatorIconName =
   | "map"
   | "mountain"
   | "layoutGrid"
-  | "calculator";
+  | "calculator"
+  | "layers";
 
 export type CalculatorTool = {
   id: string;
@@ -348,6 +349,19 @@ export const CALCULATORS: CalculatorTool[] = [
     propertyTypes: ["Multifamily", "Commercial"],
     searchTerms: ["waterfall", "promote", "preferred return", "syndication"],
     icon: "gitFork",
+  },
+  {
+    id: "capital-stack",
+    page: EPageNames.CAPITAL_STACK,
+    route: routes.CAPITAL_STACK,
+    name: EPageTitles.CAPITAL_STACK,
+    description: "Build the debt and equity layers that fund a deal.",
+    primaryAnswer: "Capital stack mix, leverage, and cash to each layer",
+    category: "returns",
+    audiences: ["investor", "developer"],
+    propertyTypes: ["Multifamily", "Commercial", "Industrial"],
+    searchTerms: ["capital stack", "senior debt", "mezzanine", "preferred equity", "common equity", "LTV", "deal structure"],
+    icon: "layers",
   },
   {
     id: "house-flipping",

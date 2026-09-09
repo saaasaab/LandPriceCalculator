@@ -224,6 +224,17 @@ export const DEFAULT_VALUES_ZEROS = {
     generalConditions: "0",
     contractorFee: "0",
 
+    capitalStackTotal: "0",
+    seniorDebtAmount: "0",
+    seniorDebtRate: "0",
+    mezzanineEnabled: "false",
+    mezzanineAmount: "0",
+    mezzanineRate: "0",
+    preferredEnabled: "false",
+    preferredAmount: "0",
+    preferredRate: "0",
+    noi: "0",
+
 }
 
 export const HELP_PAGES ={
@@ -644,6 +655,19 @@ export const DEFAULT_VALUES = {
                 sqft: 2100,
             },
         ],
+    },
+    [EPageNames.CAPITAL_STACK]: {
+        ...DEFAULT_VALUES_ZEROS,
+        capitalStackTotal: "10,000,000",
+        seniorDebtAmount: "5,500,000",
+        seniorDebtRate: "6.5",
+        mezzanineEnabled: "false",
+        mezzanineAmount: "1,000,000",
+        mezzanineRate: "11",
+        preferredEnabled: "true",
+        preferredAmount: "1,500,000",
+        preferredRate: "10",
+        noi: "700,000",
     },
 }
 

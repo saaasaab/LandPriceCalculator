@@ -135,6 +135,7 @@ export function AppRouter() {
               <Route path={routes.HARD_MONEY_COST_ESTIMATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HARD_MONEY_COST_ESTIMATOR} />} />
               <Route path={routes.CONSTRUCTION_BUDGET} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_BUDGET} />} />
               <Route path={routes.WATERFALL} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.WATERFALL_GENERATOR} />} />
+              <Route path={routes.CAPITAL_STACK} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CAPITAL_STACK} />} />
               <Route path={routes.HOUSE_FLIPPING_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.HOUSE_FLIPPING_CALCULATOR} />} />
               <Route path={routes.CONSTRUCTION_LOAN_CALCULATOR} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.CONSTRUCTION_LOAN_CALCULATOR} />} />
               <Route path={routes.LEASE_EXPIRY_SCHEDULE} element={<EVERYTHING_BURGER isMobile={isMobile} page={EPageNames.LEASE_EXPIRY_SCHEDULE} />} />

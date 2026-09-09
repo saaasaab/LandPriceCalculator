@@ -360,6 +360,24 @@ export const PAGE_META: Record<string, PageMetaConfig> = {
       },
     ],
   ),
+  [routes.CAPITAL_STACK]: calculator(
+    routes.CAPITAL_STACK,
+    "How Does a Real Estate Capital Stack Work?",
+    "Allocate senior debt, mezzanine, preferred equity, and common equity. Free capital stack calculator with a visual mix, leverage, and cash to each layer.",
+    "A capital stack is the mix of debt and equity that funds a real estate deal. Senior debt is paid first and takes the least risk; common equity is paid last and keeps residual upside. Enter amounts and rates to see leverage and how NOI walks down the stack.",
+    [
+      {
+        question: "What is a capital stack in real estate?",
+        answer:
+          "The capital stack is the order of capital used to buy or build a property, typically senior debt, optional mezzanine debt, preferred equity, and common equity. Payment priority and risk increase as you move up the stack.",
+      },
+      {
+        question: "How is a capital stack different from a waterfall?",
+        answer:
+          "The capital stack is how the deal is funded. A waterfall is how profits are split between partners after that capital is in place. Use this tool for layer mix and leverage; use the waterfall calculator for GP and LP promotes.",
+      },
+    ],
+  ),
   [routes.CONSTRUCTION_LOAN_CALCULATOR]: calculator(
     routes.CONSTRUCTION_LOAN_CALCULATOR,
     "How Much Does a Construction Loan Cost?",
@@ -527,6 +545,7 @@ const PAGE_META_BY_E_PAGE_NAME: Partial<Record<EPageNames, PageMetaConfig>> = {
   [EPageNames.HARD_MONEY_COST_ESTIMATOR]: PAGE_META[routes.HARD_MONEY_COST_ESTIMATOR],
   [EPageNames.HOUSE_FLIPPING_CALCULATOR]: PAGE_META[routes.HOUSE_FLIPPING_CALCULATOR],
   [EPageNames.WATERFALL_GENERATOR]: PAGE_META[routes.WATERFALL],
+  [EPageNames.CAPITAL_STACK]: PAGE_META[routes.CAPITAL_STACK],
   [EPageNames.CONSTRUCTION_LOAN_CALCULATOR]: PAGE_META[routes.CONSTRUCTION_LOAN_CALCULATOR],
   [EPageNames.SITE_PLAN_BUILDER]: PAGE_META[routes.SITE_PLAN_BUILDER],
   [EPageNames.CUT_FILL_CALCULATOR]: PAGE_META[routes.CUT_FILL_CALCULATOR],

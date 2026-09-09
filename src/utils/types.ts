@@ -83,6 +83,7 @@ export enum EPageNames {
     SUBDIVISION_GENERATOR = "SUBDIVISION_GENERATOR",
     HOME_MORTGAGE_CALCULATOR = "HOME_MORTGAGE_CALCULATOR",
     LEASE_EXPIRY_SCHEDULE = "LEASE_EXPIRY_SCHEDULE",
+    CAPITAL_STACK = "CAPITAL_STACK",
 }
 
 export enum EPageTitles {
@@ -109,6 +110,7 @@ export enum EPageTitles {
     CONSTRUCTION_LOAN_CALCULATOR = "Construction Loan Calculator",
     HOME_MORTGAGE_CALCULATOR = "Home Mortgage Calculator",
     LEASE_EXPIRY_SCHEDULE = "Lease Expiry Schedule",
+    CAPITAL_STACK = "Capital Stack",
 }
 
 
@@ -348,5 +350,17 @@ export enum EAllStates {
     // totalLoanAmount = "totalLoanAmount",
     // totalLoanDuration = "totalLoanDuration",
     investmentDate = 'investmentDate',
-    returnDate = 'returnDate'
+    returnDate = 'returnDate',
+
+    // FOR CAPITAL STACK
+    capitalStackTotal = "capitalStackTotal",
+    seniorDebtAmount = "seniorDebtAmount",
+    seniorDebtRate = "seniorDebtRate",
+    mezzanineEnabled = "mezzanineEnabled",
+    mezzanineAmount = "mezzanineAmount",
+    mezzanineRate = "mezzanineRate",
+    preferredEnabled = "preferredEnabled",
+    preferredAmount = "preferredAmount",
+    preferredRate = "preferredRate",
+    noi = "noi",
 }
