@@ -1,0 +1,287 @@
+.range-simulation {
+  padding: 20px;
+  border-top: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.range-simulation-header {
+  h2 {
+    font-size: 1.125rem;
+    color: #1e293b;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+}
+
+.range-simulation-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(90px, 0.7fr)) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.range-simulation-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #b1b1b1;
+    border-radius: 10px;
+    padding: 0 12px;
+    font-size: 0.9rem;
+    background: #fff;
+  }
+}
+
+.range-simulation-run,
+.range-simulation-print {
+  min-height: 40px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 5px;
+  background-color: #487e4a;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #45a049;
+  }
+}
+
+.range-simulation-error {
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.range-simulation-print-title {
+  display: none;
+}
+
+.range-simulation-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.range-simulation-summary {
+  h3 {
+    font-size: 1rem;
+    color: #0f172a;
+  }
+
+  p {
+    color: #64748b;
+    font-size: 0.8125rem;
+  }
+}
+
+.range-simulation-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  .range-simulation-assumptions {
+    display: grid;
+    gap: 8px;
+    list-style: none;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+
+    li {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      font-size: 0.75rem;
+      color: #64748b;
+
+      span {
+        overflow-wrap: anywhere;
+        line-height: 1.2;
+      }
+
+      strong {
+        color: #0f172a;
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    table-layout: fixed;
+  }
+
+  th,
+  td {
+    padding: 8px 6px;
+    text-align: right;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #334155;
+    text-align: right;
+    white-space: normal;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  td {
+    white-space: nowrap;
+  }
+
+  th:first-child,
+  td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: #fff;
+  }
+
+  th:first-child {
+    background: #f8fafc;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .range-simulation-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .range-simulation-run {
+    grid-column: span 2;
+  }
+}
+
+@media print {
+  html.is-printing-simulation {
+    .navbar,
+    .saved-projects-panel,
+    .app-header,
+    .action-buttons,
+    .input-fields-container,
+    .output-fields-container,
+    .range-simulation-header,
+    .range-simulation-controls,
+    .range-simulation-summary p,
+    .range-simulation-print,
+    .range-simulation-error {
+      display: none !important;
+    }
+
+    .land-calculator,
+    .land-calculator-main,
+    .group-section,
+    .price-per-door-calculator,
+    .range-simulation {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: none !important;
+      border: none !important;
+    }
+
+    .range-simulation-print-title {
+      display: block;
+      font-size: 16pt;
+      font-weight: 700;
+      text-align: center;
+      color: #0f172a;
+    }
+
+    .range-simulation-results {
+      gap: 8px;
+    }
+
+    .range-simulation-summary {
+      h3 {
+        font-size: 11pt;
+        text-align: center;
+      }
+    }
+
+    .range-simulation-assumptions {
+      gap: 4px 6px;
+      padding: 6px 0 8px;
+      border-bottom: 1px solid #cbd5e1;
+      background: transparent;
+
+      li {
+        font-size: 7pt;
+
+        span {
+          white-space: normal;
+          overflow-wrap: anywhere;
+          line-height: 1.15;
+        }
+
+        strong {
+          font-size: 8pt;
+        }
+      }
+    }
+
+    .range-simulation-table-wrap {
+      overflow: visible;
+      border: none;
+      border-radius: 0;
+      width: 100%;
+
+      table {
+        width: 100% !important;
+        table-layout: fixed;
+        font-size: 8pt;
+      }
+
+      th,
+      td {
+        padding: 4px 3px;
+      }
+
+      th {
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.15;
+        font-size: 7pt;
+        font-weight: 600;
+      }
+
+      td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      th:first-child,
+      td:first-child {
+        position: static;
+        width: 9%;
+        background: transparent;
+      }
+    }
+  }
+}

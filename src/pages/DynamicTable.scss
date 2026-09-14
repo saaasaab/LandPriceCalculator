@@ -288,6 +288,19 @@
     .action-buttons {
       display: none !important;
     }
+
+    &:has(.range-simulation-results) {
+      page-break-inside: auto;
+
+      .input-fields-container,
+      .output-fields-container {
+        display: none !important;
+      }
+
+      .range-simulation-results {
+        page-break-before: auto;
+      }
+    }
   }
 }
 

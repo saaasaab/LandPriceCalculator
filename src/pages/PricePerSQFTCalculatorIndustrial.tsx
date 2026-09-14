@@ -1,13 +1,38 @@
 import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
-import { EAllStates, EPageNames } from '../utils/types';
+import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
+import RangeSimulation from '../components/RangeSimulation/RangeSimulation';
+import { calculatePricePerSqft, PricePerSqftInputs } from '../utils/pricePerSqftCalculations';
 import './DynamicTable.scss';
-// import { capitilizationRate, debtServiceCoverageRatio } from '../utils/commonMetrics';
 import { useState } from 'react';
+
+const PRICE_PER_SQFT_VARIABLES = [
+    { id: 'annualLeaseRatesPerSQFT', label: 'Annual lease rates per sqft' },
+    { id: 'leasableSQFT', label: 'Total leasable SQFT' },
+    { id: 'interestRate', label: 'Interest Rate (%)', isPercent: true },
+    { id: 'numberOfYears', label: 'Financing Term (Years)' },
+    { id: 'downPayment', label: 'Down Payment (%)', isPercent: true },
+    { id: 'expensePercentage', label: 'Operating expenses (% of gross income)', isPercent: true },
+    { id: 'cashOnCashReturn', label: 'Cash on cash return (%)', isPercent: true },
+    { id: 'buyersAgentFee', label: 'Buyers agent fee (%)', isPercent: true },
+    { id: 'clostingCostsFee', label: 'Closing cost fee (%)', isPercent: true },
+];
+
+const PRICE_PER_SQFT_COLUMNS = [
+    { id: 'pricePerSQFT', label: 'Building value price per SQFT', format: (value: number) => `$${roundToDecimal(value)}` },
+    { id: 'operatingIncome', label: 'Monthly operating income per SQFT', format: (value: number) => `$${roundToDecimal(value)}` },
+    { id: 'mortgagePayment', label: 'Mortgage Payment per SQFT', format: (value: number) => `$${roundToDecimal(value)}` },
+    { id: 'cashFlowPerSQFT', label: 'Monthly Cash flow per SQFT', format: (value: number) => `$${roundToDecimal(value, 2)}` },
+    { id: 'annualCashFlowPerSQFT', label: 'Annual Cash flow per SQFT', format: (value: number) => `$${roundToDecimal(value, 2)}` },
+    { id: 'dscr', label: 'Debt service coverage ratio (DSCR)', format: (value: number) => `${Math.round(value * 100) / 100}X` },
+    { id: 'capRate', label: 'Cap rate (%)', format: (value: number) => convertToPercent(value) },
+    { id: 'totalPrice', label: 'Total Building Value', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'offerPrice', label: 'Offer to seller', format: (value: number) => `$${roundAndLocalString(value)}` },
+];
 
 
 
@@ -24,6 +49,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
     const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
+    const [showTotalValues, setShowTotalValues] = useState(false);
 
     const params: {
         annualLeaseRatesPerSQFT: string;
@@ -47,38 +73,28 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         buyersAgentFee: buyersAgentFee,
     };
 
-    const monthlyLeaseRatesPerSQFT = removeCommas(annualLeaseRatesPerSQFT) / 12
-    let interestRateMonthly = removeCommas(interestRate) / 100 / 12;
+    const numericInputs: PricePerSqftInputs = {
+        annualLeaseRatesPerSQFT: removeCommas(annualLeaseRatesPerSQFT),
+        leasableSQFT: removeCommas(leasableSQFT),
+        interestRate: removeCommas(interestRate),
+        numberOfYears: removeCommas(numberOfYears),
+        downPayment: removeCommas(downPayment),
+        expensePercentage: removeCommas(expensePercentage),
+        cashOnCashReturn: removeCommas(cashOnCashReturn),
+        buyersAgentFee: removeCommas(buyersAgentFee),
+        clostingCostsFee: removeCommas(clostingCostsFee),
+    };
 
-    interestRateMonthly = interestRateMonthly === 0 ? .0000000000001 : interestRateMonthly;
-    const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
-    const numberOfPayments = removeCommas(numberOfYears) * 12;
-
-
-    const mortTop = interestRateMonthly * Math.pow((1 + interestRateMonthly), numberOfPayments);
-    const mortBottom = Math.pow(1 + interestRateMonthly, numberOfPayments) - 1;
-
-    const mort = mortTop / mortBottom;
-
-    const operatingIncome = monthlyLeaseRatesPerSQFT * (1 - removeCommas(expensePercentage) / 100);
-    const downAsDecimal = removeCommas(downPayment) / 100;
-    const pricePerSQFT = (operatingIncome) / (downAsDecimal * cashOnCashReturnMonthly + ((1 - (downAsDecimal)) * mort));
-
-    const mortgagePayment = (mort * pricePerSQFT * (1 - downAsDecimal));
-    const cashFlowPerSQFT = roundToDecimal(operatingIncome - mortgagePayment, 2);
-
-    const DSCR = operatingIncome / (mort * pricePerSQFT * (1 - downAsDecimal));
-    const capRate = operatingIncome * 12 / pricePerSQFT;
-
-    // const DSCR = debtServiceCoverageRatio (operatingIncome, mort, pricePerSQFT, downAsDecimal);
-
-    // const capRate = capitilizationRate( operatingIncome, pricePerSQFT);
-    const totalPrice = removeCommas(leasableSQFT) * pricePerSQFT;
-    const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
-    const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
-    const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
-
-    const [showTotalValues, setShowTotalValues] = useState(false);
+    const {
+        pricePerSQFT,
+        operatingIncome,
+        mortgagePayment,
+        cashFlowPerSQFT,
+        dscr,
+        capRate,
+        totalPrice,
+        offerPrice,
+    } = calculatePricePerSqft(numericInputs);
 
     const getDisplayValue = (perSqftValue: number) => {
         if (showTotalValues) {
@@ -89,7 +105,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
     return (
 
-        <div className="group-section">
+        <div className="group-section price-per-door-calculator">
             <div className="input-fields-container has-bottom-border">
                 <InputRow
                     isMobile={isMobile}
@@ -201,7 +217,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Debt service coverage ratio (DSCR)", Math.round(DSCR * 100) / 100 + "X"]}
+                    cellValues={["Debt service coverage ratio (DSCR)", Math.round(dscr * 100) / 100 + "X"]}
                     description="A bank normally is looking for 1.25 or greater"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNoMpWgbOK0f32XSoQ2eVfe8-JmhdiCHjTPVP1jb9TYud-plRzGgtsHoAYSQzEExSZQ-Qp0fDJyxVg/pub"}
                 />
@@ -231,6 +247,14 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 params={params} 
                 showTotalValues={showTotalValues}
                 onToggleTotalValues={() => setShowTotalValues(!showTotalValues)}
+            />
+
+            <RangeSimulation
+                pageTitle={EPageTitles[page]}
+                variables={PRICE_PER_SQFT_VARIABLES}
+                columns={PRICE_PER_SQFT_COLUMNS}
+                currentValues={numericInputs}
+                run={(values) => calculatePricePerSqft(values as PricePerSqftInputs)}
             />
         </div>
 

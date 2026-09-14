@@ -1,12 +1,40 @@
 import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
-import { EAllStates, EPageNames } from '../utils/types';
+import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
+import RangeSimulation from '../components/RangeSimulation/RangeSimulation';
+import { calculatePricePerKey, PricePerKeyInputs } from '../utils/pricePerKeyCalculations';
 
 import './DynamicTable.scss';
+
+const PRICE_PER_KEY_VARIABLES = [
+    { id: 'adr', label: 'Average Daily Rate (ADR)' },
+    { id: 'rooms', label: 'Number of rooms (#)' },
+    { id: 'interestRate', label: 'Interest Rate (%)', isPercent: true },
+    { id: 'numberOfYears', label: 'Financing Term (Years)' },
+    { id: 'downPayment', label: 'Down Payment (%)', isPercent: true },
+    { id: 'vacancy', label: 'Vacancy (%)', isPercent: true },
+    { id: 'expensePercentage', label: 'Operating expenses (% of occupied room revenue)', isPercent: true },
+    { id: 'cashOnCashReturn', label: 'Cash on cash return (%)', isPercent: true },
+    { id: 'buyersAgentFee', label: 'Buyers agent fee (%)', isPercent: true },
+    { id: 'clostingCostsFee', label: 'Closing cost fee (%)', isPercent: true },
+];
+
+const PRICE_PER_KEY_COLUMNS = [
+    { id: 'pricePerKey', label: 'Price per key you should pay', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'revPAR', label: 'RevPAR', format: (value: number) => `$${roundToDecimal(value, 2)}` },
+    { id: 'operatingIncome', label: 'Operating income per room', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'mortgagePayment', label: 'Mortgage Payment per room', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'cashFlowPerKey', label: 'Cash flow per room', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'dscr', label: 'Debt service coverage ratio (DSCR)', format: (value: number) => `${Math.round(value * 100) / 100}X` },
+    { id: 'roomRevenueMultiplier', label: 'Room Revenue Multiplier', format: (value: number) => `${roundToDecimal(value, 2)}X` },
+    { id: 'capRate', label: 'Cap rate (%)', format: (value: number) => convertToPercent(value) },
+    { id: 'totalPrice', label: 'Total Hotel Value', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'offerPrice', label: 'Offer to seller', format: (value: number) => `$${roundAndLocalString(value)}` },
+];
 
 
 
@@ -49,35 +77,31 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
         units: rooms,
     };
 
-    const cashOnCashReturnMonthly = removeCommas(cashOnCashReturn) / 100 / 12;
+    const numericInputs: PricePerKeyInputs = {
+        adr: removeCommas(adr),
+        rooms: removeCommas(rooms),
+        interestRate: removeCommas(interestRate),
+        numberOfYears: removeCommas(numberOfYears),
+        downPayment: removeCommas(downPayment),
+        vacancy: removeCommas(vacancy),
+        expensePercentage: removeCommas(expensePercentage),
+        cashOnCashReturn: removeCommas(cashOnCashReturn),
+        buyersAgentFee: removeCommas(buyersAgentFee),
+        clostingCostsFee: removeCommas(clostingCostsFee),
+    };
 
-    const interestRateMonthly = (removeCommas(interestRate) || .0000001) / 100 / 12;
-    const numberOfPayments = removeCommas(numberOfYears) * 12;
-    const mortTop = interestRateMonthly * Math.pow((1 + interestRateMonthly), numberOfPayments);
-    const mortBottom = Math.pow(1 + interestRateMonthly, numberOfPayments) - 1;
-
-    const mort = mortTop / mortBottom;
-
-    const occupancyRate = 1 - (removeCommas(vacancy) / 100);
-    const monthlyPotentialRevenue = removeCommas(adr) * (365 / 12);
-    const effectiveGrossIncome = monthlyPotentialRevenue * occupancyRate;
-    const operatingIncome = effectiveGrossIncome * (1 - removeCommas(expensePercentage) / 100);
-
-    const pricePerKey = operatingIncome / ((removeCommas(downPayment) / 100) * cashOnCashReturnMonthly + ((1 - (removeCommas(downPayment) / 100)) * mort));
-
-    const mortgagePayment = (mort * pricePerKey * (1 - removeCommas(downPayment) / 100));
-    const cashFlowPerKey = operatingIncome - mortgagePayment;
-
-    const DSCR = operatingIncome / (mort * pricePerKey * (1 - removeCommas(downPayment) / 100));
-    const capRate = operatingIncome * 12 / pricePerKey;
-    const revPAR = removeCommas(adr) * occupancyRate;
-
-    const totalPrice = removeCommas(rooms) * pricePerKey;
-    const totalBuyersAgentFee = removeCommas(buyersAgentFee) / 100 * totalPrice;
-    const totalClosingCosts = removeCommas(clostingCostsFee) / 100 * totalPrice;
-
-    const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
-    const roomRevenueMultiplier = offerPrice / (12 * effectiveGrossIncome * removeCommas(rooms));
+    const {
+        pricePerKey,
+        revPAR,
+        operatingIncome,
+        mortgagePayment,
+        cashFlowPerKey,
+        dscr,
+        roomRevenueMultiplier,
+        capRate,
+        totalPrice,
+        offerPrice,
+    } = calculatePricePerKey(numericInputs);
 
     return (
 
@@ -192,7 +216,7 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Debt service coverage ratio (DSCR)", Math.round(DSCR * 100) / 100 + "X"]}
+                    cellValues={["Debt service coverage ratio (DSCR)", Math.round(dscr * 100) / 100 + "X"]}
                     description="A bank normally is looking for 1.25 or greater"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNoMpWgbOK0f32XSoQ2eVfe8-JmhdiCHjTPVP1jb9TYud-plRzGgtsHoAYSQzEExSZQ-Qp0fDJyxVg/pub"}
                 />
@@ -228,6 +252,14 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
             </div>
 
             <ShareButton params={params} />
+
+            <RangeSimulation
+                pageTitle={EPageTitles[page]}
+                variables={PRICE_PER_KEY_VARIABLES}
+                columns={PRICE_PER_KEY_COLUMNS}
+                currentValues={numericInputs}
+                run={(values) => calculatePricePerKey(values as PricePerKeyInputs)}
+            />
         </div>
 
     );
