@@ -1,4 +1,4 @@
-import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal, formatDollar } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
@@ -23,15 +23,15 @@ const PRICE_PER_SQFT_VARIABLES = [
 ];
 
 const PRICE_PER_SQFT_COLUMNS = [
-    { id: 'pricePerSQFT', label: 'Building value price per SQFT', format: (value: number) => `$${roundToDecimal(value)}` },
-    { id: 'operatingIncome', label: 'Monthly operating income per SQFT', format: (value: number) => `$${roundToDecimal(value)}` },
-    { id: 'mortgagePayment', label: 'Mortgage Payment per SQFT', format: (value: number) => `$${roundToDecimal(value)}` },
-    { id: 'cashFlowPerSQFT', label: 'Monthly Cash flow per SQFT', format: (value: number) => `$${roundToDecimal(value, 2)}` },
-    { id: 'annualCashFlowPerSQFT', label: 'Annual Cash flow per SQFT', format: (value: number) => `$${roundToDecimal(value, 2)}` },
+    { id: 'pricePerSQFT', label: 'Building value price per SQFT', format: formatDollar },
+    { id: 'operatingIncome', label: 'Monthly operating income per SQFT', format: formatDollar },
+    { id: 'mortgagePayment', label: 'Mortgage Payment per SQFT', format: formatDollar },
+    { id: 'cashFlowPerSQFT', label: 'Monthly Cash flow per SQFT', format: formatDollar },
+    { id: 'annualCashFlowPerSQFT', label: 'Annual Cash flow per SQFT', format: formatDollar },
     { id: 'dscr', label: 'Debt service coverage ratio (DSCR)', format: (value: number) => `${Math.round(value * 100) / 100}X` },
     { id: 'capRate', label: 'Cap rate (%)', format: (value: number) => convertToPercent(value) },
-    { id: 'totalPrice', label: 'Total Building Value', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'offerPrice', label: 'Offer to seller', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'totalPrice', label: 'Total Building Value', format: formatDollar },
+    { id: 'offerPrice', label: 'Offer to seller', format: formatDollar },
 ];
 
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { roundToDecimal } from '../../utils/utils';
 import './RangeSimulation.scss';
 
@@ -22,7 +22,7 @@ type RangeSimulationProps = {
   run: (values: Record<string, number>) => Record<string, number>;
 };
 
-const MAX_STEPS = 40;
+const MAX_STEPS = 500;
 
 const defaultStep = (value: number, isPercent?: boolean) => {
   if (isPercent) return 0.5;
@@ -46,20 +46,252 @@ const suggestedRange = (value: number, isPercent?: boolean) => {
   };
 };
 
+const stepCount = (min: number, max: number, step: number) =>
+  Math.floor((max - min) / step + 1e-9) + 1;
+
 const buildSteps = (min: number, max: number, step: number): number[] => {
   if (!(step > 0) || max < min) return [];
 
-  const values: number[] = [];
   const decimals = step < 1 ? 4 : 2;
-  for (let value = min; value <= max + step * 0.0001; value += step) {
-    values.push(roundToDecimal(value, decimals));
-    if (values.length >= MAX_STEPS) break;
+  const requested = stepCount(min, max, step);
+
+  if (requested <= MAX_STEPS) {
+    const values: number[] = [];
+    for (let i = 0; i < requested; i++) {
+      values.push(roundToDecimal(min + i * step, decimals));
+    }
+    const last = values[values.length - 1];
+    if (last != null && Math.abs(last - max) > step * 0.01) {
+      values.push(roundToDecimal(max, decimals));
+    }
+    return values;
+  }
+
+  const values: number[] = [];
+  for (let i = 0; i < MAX_STEPS; i++) {
+    values.push(roundToDecimal(min + ((max - min) * i) / (MAX_STEPS - 1), decimals));
   }
   return values;
 };
 
 const printSimulation = () => {
   window.print();
+};
+
+const CHART_WIDTH = 400;
+const CHART_HEIGHT = 200;
+const CHART_PAD = { top: 10, right: 12, bottom: 28, left: 52 };
+
+const compactAxisValue = (value: number) => {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) return `${roundToDecimal(value / 1_000_000, 1)}M`;
+  if (abs >= 10_000) return `${roundToDecimal(value / 1_000, 1)}k`;
+  if (abs >= 100) return String(Math.round(value));
+  return String(roundToDecimal(value, 2));
+};
+
+const CONSTANT_RELATIVE_SPAN = 0.0005;
+
+const stabilizeSeries = (values: number[]) => {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const magnitude = Math.max(Math.abs(min), Math.abs(max), 1e-9);
+  const isConstant =
+    compactAxisValue(min) === compactAxisValue(max) ||
+    (max - min) / magnitude < CONSTANT_RELATIVE_SPAN;
+
+  if (!isConstant) {
+    return { min, max, values };
+  }
+
+  return {
+    min: mean,
+    max: mean,
+    values: values.map(() => mean),
+  };
+};
+
+const OutputLineChart = ({
+  title,
+  points,
+  formatX,
+  formatY,
+}: {
+  title: string;
+  points: { x: number; y: number }[];
+  formatX: (value: number) => string;
+  formatY: (value: number) => string;
+}) => {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [hover, setHover] = useState<{
+    displayX: string;
+    displayY: string;
+    svgX: number;
+    svgY: number;
+  } | null>(null);
+
+  const xs = points.map((point) => point.x);
+  const finitePoints = points.filter((point) => Number.isFinite(point.y));
+
+  if (finitePoints.length < 2) {
+    return (
+      <article className="range-simulation-chart">
+        <h4>{title}</h4>
+        <p>No graphable values for this output.</p>
+      </article>
+    );
+  }
+
+  const stabilized = stabilizeSeries(finitePoints.map((point) => point.y));
+  const xMin = Math.min(...xs);
+  const xMax = Math.max(...xs);
+  const dataMin = stabilized.min;
+  const dataMax = stabilized.max;
+  const plotPoints = finitePoints.map((point, index) => ({
+    x: point.x,
+    plotY: stabilized.values[index],
+    valueY: point.y,
+  }));
+
+  const innerWidth = CHART_WIDTH - CHART_PAD.left - CHART_PAD.right;
+  const innerHeight = CHART_HEIGHT - CHART_PAD.top - CHART_PAD.bottom;
+  let padAmount = (dataMax - dataMin) * 0.08;
+  if (dataMin === dataMax) {
+    padAmount = Math.abs(dataMin) * 0.08 || 1;
+  }
+  const yMin = dataMin - padAmount;
+  const yMax = dataMax + padAmount;
+  const xRange = xMax - xMin || 1;
+  const yRange = yMax - yMin || 1;
+  const xScale = (value: number) => CHART_PAD.left + ((value - xMin) / xRange) * innerWidth;
+  const yScale = (value: number) => CHART_PAD.top + innerHeight - ((value - yMin) / yRange) * innerHeight;
+  const line = plotPoints
+    .map((point, index) => `${index === 0 ? 'M' : 'L'}${xScale(point.x)} ${yScale(point.plotY)}`)
+    .join(' ');
+  const firstPoint = plotPoints[0];
+  const lastPoint = plotPoints[plotPoints.length - 1];
+  const area = `${line} L${xScale(lastPoint.x)} ${yScale(yMin)} L${xScale(firstPoint.x)} ${yScale(yMin)} Z`;
+  const yTicks = Array.from(new Set([dataMin, (dataMin + dataMax) / 2, dataMax]));
+  const showZero = yMin < 0 && yMax > 0;
+
+  const handleMouseMove = (event: { clientX: number }) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const rect = svg.getBoundingClientRect();
+    if (!(rect.width > 0)) return;
+
+    const viewX = ((event.clientX - rect.left) / rect.width) * CHART_WIDTH;
+    const dataX = xMin + ((viewX - CHART_PAD.left) / innerWidth) * xRange;
+    let nearest = plotPoints[0];
+    let nearestDistance = Infinity;
+    for (const point of plotPoints) {
+      const distance = Math.abs(point.x - dataX);
+      if (distance >= nearestDistance) continue;
+      nearest = point;
+      nearestDistance = distance;
+    }
+
+    setHover({
+      displayX: formatX(nearest.x),
+      displayY: formatY(nearest.valueY),
+      svgX: xScale(nearest.x),
+      svgY: yScale(nearest.plotY),
+    });
+  };
+
+  let tooltipTransform = 'translate(-50%, calc(-100% - 8px))';
+  if (hover && hover.svgY < 36) {
+    tooltipTransform = 'translate(-50%, 12px)';
+  }
+
+  return (
+    <article className="range-simulation-chart">
+      <h4>{title}</h4>
+      <div className="range-simulation-chart-plot">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+          role="img"
+          aria-label={title}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setHover(null)}
+        >
+          <line
+            x1={CHART_PAD.left}
+            y1={CHART_PAD.top}
+            x2={CHART_PAD.left}
+            y2={CHART_PAD.top + innerHeight}
+            className="range-simulation-chart-axis"
+          />
+          <line
+            x1={CHART_PAD.left}
+            y1={CHART_PAD.top + innerHeight}
+            x2={CHART_PAD.left + innerWidth}
+            y2={CHART_PAD.top + innerHeight}
+            className="range-simulation-chart-axis"
+          />
+          {yTicks.map((tick) => (
+            <g key={tick}>
+              <line
+                x1={CHART_PAD.left}
+                y1={yScale(tick)}
+                x2={CHART_PAD.left + innerWidth}
+                y2={yScale(tick)}
+                className="range-simulation-chart-grid"
+              />
+              <text x={CHART_PAD.left - 6} y={yScale(tick)} dy="0.35em" textAnchor="end" className="range-simulation-chart-label">
+                {compactAxisValue(tick)}
+              </text>
+            </g>
+          ))}
+          {showZero ? (
+            <line
+              x1={CHART_PAD.left}
+              y1={yScale(0)}
+              x2={CHART_PAD.left + innerWidth}
+              y2={yScale(0)}
+              className="range-simulation-chart-zero"
+            />
+          ) : null}
+          <path d={area} className="range-simulation-chart-area" />
+          <path d={line} className="range-simulation-chart-line" />
+          {hover ? (
+            <g className="range-simulation-chart-hover">
+              <line
+                x1={hover.svgX}
+                y1={CHART_PAD.top}
+                x2={hover.svgX}
+                y2={CHART_PAD.top + innerHeight}
+                className="range-simulation-chart-crosshair"
+              />
+              <circle cx={hover.svgX} cy={hover.svgY} r="4" className="range-simulation-chart-dot" />
+            </g>
+          ) : null}
+          <text x={CHART_PAD.left} y={CHART_HEIGHT - 6} className="range-simulation-chart-label">
+            {formatX(xMin)}
+          </text>
+          <text x={CHART_PAD.left + innerWidth} y={CHART_HEIGHT - 6} textAnchor="end" className="range-simulation-chart-label">
+            {formatX(xMax)}
+          </text>
+        </svg>
+        {hover ? (
+          <div
+            className="range-simulation-chart-tooltip"
+            style={{
+              left: `${(hover.svgX / CHART_WIDTH) * 100}%`,
+              top: `${(hover.svgY / CHART_HEIGHT) * 100}%`,
+              transform: tooltipTransform,
+            }}
+          >
+            <span>{hover.displayX}</span>
+            <strong>{hover.displayY}</strong>
+          </div>
+        ) : null}
+      </div>
+    </article>
+  );
 };
 
 const RangeSimulation = ({ pageTitle, variables, columns, currentValues, run }: RangeSimulationProps) => {
@@ -208,7 +440,7 @@ const RangeSimulation = ({ pageTitle, variables, columns, currentValues, run }: 
             </h3>
             <p>
               {resultCount} scenario{resultCount === 1 ? '' : 's'}
-              {resultCount >= MAX_STEPS ? ` (capped at ${MAX_STEPS})` : ''}
+              {resultCount >= MAX_STEPS ? ` (showing ${MAX_STEPS} evenly spaced values from min to max)` : ''}
             </p>
           </div>
 
@@ -244,6 +476,18 @@ const RangeSimulation = ({ pageTitle, variables, columns, currentValues, run }: 
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="range-simulation-charts">
+            {columns.map((column) => (
+              <OutputLineChart
+                key={column.id}
+                title={column.label}
+                formatX={formatInput}
+                formatY={column.format}
+                points={rows.map((row) => ({ x: row.input, y: row.outputs[column.id] }))}
+              />
+            ))}
           </div>
 
           <button type="button" className="range-simulation-print" onClick={printSimulation}>

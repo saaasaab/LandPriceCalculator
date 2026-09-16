@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { deleteRequest, getRequest, postRequest, putRequest } from '../utils/api';
+import { deleteRequest, getRequest, isUnauthorizedError, postRequest, putRequest } from '../utils/api';
 import {
   readProjectsCache,
   SavedProject,
@@ -45,7 +45,12 @@ export const useSavedProjects = (page: EPageNames, enabled = true) => {
         `/land-price-calculator/projects?page=${encodeURIComponent(page)}`,
       );
       setProjectsAndCache(response.data ?? []);
-    } catch {
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        setProjects([]);
+        setError(null);
+        return;
+      }
       setError('Could not load saved projects.');
       setProjects([]);
     } finally {

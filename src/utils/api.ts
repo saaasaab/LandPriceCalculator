@@ -1,9 +1,21 @@
 export const BASE_URL = () => {
-
   return window.location.hostname.includes("localhost")
     ? "http://localhost:8080"
     : "https://landpricecalculatorapi.onrender.com";
+};
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
 }
+
+export const isUnauthorizedError = (error: unknown) =>
+  error instanceof ApiError && error.status === 401;
 
 const getAuthHeaders = (): Record<string, string> => {
   const headers: Record<string, string> = {
@@ -25,85 +37,57 @@ const getAuthHeaders = (): Record<string, string> => {
   return headers;
 };
 
-export const postRequest = async <T>(endpoint: string, body: object): Promise<T> => {
+const parseResponseBody = async (response: Response) => {
+  const text = await response.text();
+  if (!text) return {};
+
   try {
-    const response = await fetch(`${BASE_URL()}${endpoint}`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(body),
-    });
-
-    const data: T = await response.json();
-
-    console.log(`data`, data)
-    if (!response.ok) {
-      throw new Error(data as any);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('❌ API Request Error:', error);
-    throw error;
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
   }
+};
+
+const request = async <T>(endpoint: string, init: RequestInit): Promise<T> => {
+  const response = await fetch(`${BASE_URL()}${endpoint}`, {
+    ...init,
+    headers: {
+      ...getAuthHeaders(),
+      ...(init.headers ?? {}),
+    },
+  });
+
+  const data = await parseResponseBody(response);
+  if (response.ok) {
+    return data as T;
+  }
+
+  const message = typeof data?.message === 'string' ? data.message : response.statusText;
+  const error = new ApiError(message, response.status);
+  if (response.status !== 401) {
+    console.error('❌ API Request Error:', error);
+  }
+  throw error;
+};
+
+export const postRequest = async <T>(endpoint: string, body: object): Promise<T> => {
+  return request<T>(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 };
 
 export const getRequest = async <T>(endpoint: string): Promise<T> => {
-  try {
-    const response = await fetch(`${BASE_URL()}${endpoint}`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    const data: T = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data as any);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('❌ API Request Error:', error);
-    throw error;
-  }
+  return request<T>(endpoint, { method: 'GET' });
 };
 
 export const putRequest = async <T>(endpoint: string, body: object): Promise<T> => {
-  try {
-    const response = await fetch(`${BASE_URL()}${endpoint}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(body),
-    });
-
-    const data: T = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data as any);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('❌ API Request Error:', error);
-    throw error;
-  }
+  return request<T>(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
 };
 
 export const deleteRequest = async <T>(endpoint: string): Promise<T> => {
-  try {
-    const response = await fetch(`${BASE_URL()}${endpoint}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
-
-    const data: T = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data as any);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('❌ API Request Error:', error);
-    throw error;
-  }
+  return request<T>(endpoint, { method: 'DELETE' });
 };

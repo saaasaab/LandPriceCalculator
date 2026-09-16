@@ -22,13 +22,13 @@ const NARROW_LAYOUT_QUERY = '(max-width: 1024px)';
 
 const SavedProjectsPanel = forwardRef<SavedProjectsPanelHandle, SavedProjectsPanelProps>(
   ({ page, onProjectLoad }, ref) => {
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth();
   const [isNarrowLayout, setIsNarrowLayout] = useState(
     () => typeof window !== 'undefined' && window.matchMedia(NARROW_LAYOUT_QUERY).matches
   );
   const [isExpanded, setIsExpanded] = useState(() => !isNarrowLayout);
   const { projects, isLoading, error, saveProject, updateProject, deleteProject, loadProject } =
-    useSavedProjects(page, !!user);
+    useSavedProjects(page, !!user && !authLoading);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);

@@ -1,4 +1,4 @@
-import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal, formatDollar } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
@@ -23,15 +23,15 @@ const PRICE_PER_DOOR_VARIABLES = [
 ];
 
 const PRICE_PER_DOOR_COLUMNS = [
-    { id: 'pricePerUnit', label: 'Price per unit you should pay', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'operatingIncome', label: 'Operating income per unit', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'mortgagePayment', label: 'Mortgage Payment per unit', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'cashFlowPerUnit', label: 'Cash flow per unit', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'pricePerUnit', label: 'Price per unit you should pay', format: formatDollar },
+    { id: 'operatingIncome', label: 'Operating income per unit', format: formatDollar },
+    { id: 'mortgagePayment', label: 'Mortgage Payment per unit', format: formatDollar },
+    { id: 'cashFlowPerUnit', label: 'Cash flow per unit', format: formatDollar },
     { id: 'dscr', label: 'Debt service coverage ratio (DSCR)', format: (value: number) => `${Math.round(value * 100) / 100}X` },
     { id: 'grossRentMultiplier', label: 'Gross Rent Multiplier', format: (value: number) => `${roundToDecimal(value, 2)}X` },
     { id: 'capRate', label: 'Cap rate (%)', format: (value: number) => convertToPercent(value) },
-    { id: 'totalPrice', label: 'Total Building Value', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'offerPrice', label: 'Offer to seller', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'totalPrice', label: 'Total Building Value', format: formatDollar },
+    { id: 'offerPrice', label: 'Offer to seller', format: formatDollar },
 ];
 
 const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPageNames; }) => {

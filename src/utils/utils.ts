@@ -33,6 +33,19 @@ export const roundAndLocalString = (value: number) => {
   return Math.round(numeric).toLocaleString();
 };
 
+export const formatDollar = (value: number) => {
+  if (!Number.isFinite(value)) return "-";
+
+  const abs = Math.abs(value);
+  const showCents = abs > 0 && abs < 10;
+  const formatted = showCents
+    ? abs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : Math.round(abs).toLocaleString();
+
+  if (value < 0) return `-$${formatted}`;
+  return `$${formatted}`;
+};
+
 export const convertToPercent = (value: number, decimals = 1) => {
   return (value * 100).toFixed(decimals) + "%"
 }

@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getRequest } from '../utils/api';
+import { getRequest, isUnauthorizedError } from '../utils/api';
 
 export interface User {
   email: string;
@@ -75,10 +75,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       const parsedUser = JSON.parse(storedUser) as User;
-      setUser(parsedUser);
       removeQueryParam('token');
 
       if (!parsedUser.token) {
+        localStorage.removeItem('user');
         setAuthLoading(false);
         return;
       }
@@ -89,11 +89,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           data: Omit<User, 'token'>;
         }>('/land-price-calculator/me');
 
-        const updatedUser = { ...parsedUser, ...response.data };
+        const updatedUser = { ...parsedUser, ...response.data, token: parsedUser.token };
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
-      } catch {
-        // Keep stored user if refresh fails.
+      } catch (error) {
+        if (isUnauthorizedError(error)) {
+          localStorage.removeItem('user');
+          setUser(null);
+        } else {
+          setUser(parsedUser);
+        }
       } finally {
         setAuthLoading(false);
       }

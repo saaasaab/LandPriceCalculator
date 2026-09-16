@@ -1,4 +1,4 @@
-import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal } from '../utils/utils';
+import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal, formatDollar } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
 import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
@@ -24,16 +24,16 @@ const PRICE_PER_KEY_VARIABLES = [
 ];
 
 const PRICE_PER_KEY_COLUMNS = [
-    { id: 'pricePerKey', label: 'Price per key you should pay', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'revPAR', label: 'RevPAR', format: (value: number) => `$${roundToDecimal(value, 2)}` },
-    { id: 'operatingIncome', label: 'Operating income per room', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'mortgagePayment', label: 'Mortgage Payment per room', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'cashFlowPerKey', label: 'Cash flow per room', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'pricePerKey', label: 'Price per key you should pay', format: formatDollar },
+    { id: 'revPAR', label: 'RevPAR', format: formatDollar },
+    { id: 'operatingIncome', label: 'Operating income per room', format: formatDollar },
+    { id: 'mortgagePayment', label: 'Mortgage Payment per room', format: formatDollar },
+    { id: 'cashFlowPerKey', label: 'Cash flow per room', format: formatDollar },
     { id: 'dscr', label: 'Debt service coverage ratio (DSCR)', format: (value: number) => `${Math.round(value * 100) / 100}X` },
     { id: 'roomRevenueMultiplier', label: 'Room Revenue Multiplier', format: (value: number) => `${roundToDecimal(value, 2)}X` },
     { id: 'capRate', label: 'Cap rate (%)', format: (value: number) => convertToPercent(value) },
-    { id: 'totalPrice', label: 'Total Hotel Value', format: (value: number) => `$${roundAndLocalString(value)}` },
-    { id: 'offerPrice', label: 'Offer to seller', format: (value: number) => `$${roundAndLocalString(value)}` },
+    { id: 'totalPrice', label: 'Total Hotel Value', format: formatDollar },
+    { id: 'offerPrice', label: 'Offer to seller', format: formatDollar },
 ];
 
 
