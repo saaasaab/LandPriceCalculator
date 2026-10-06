@@ -44,7 +44,7 @@ const DynamicRow = ({
     }) => {
     //  ${inputUnits?inputUnits:""}
 
-    const [cell, setCell] = useState((`${cellValues[inputCellIndex || -1]}`) as (string | number | readonly string[] | undefined));
+    const [cell, setCell] = useState(formatNumberWithCommas(`${cellValues[inputCellIndex || -1] ?? ''}`));
     const [isClicked, setIsClicked] = useState(false);
 
 

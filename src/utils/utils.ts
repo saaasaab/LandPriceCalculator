@@ -360,12 +360,31 @@ export const removeCommas = (str: string) => {
 }
 
 // Helper function to format numbers with commas
-export const formatNumberWithCommas = (value: string | number) => {
-  // if (value.toString().includes('.')) {
-  //   return value.toString();
-  // }
-  const numValue = value.toString().replace(/,/g, ''); // Remove existing commas
-  return numValue.replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Add commas
+export const formatNumberWithCommas = (value: string | number, maxDecimals = 4) => {
+  const raw = value.toString().replace(/,/g, '').trim();
+  if (raw === '' || raw === '-' || raw === '.') return raw;
+
+  const negative = raw.startsWith('-');
+  const unsigned = negative ? raw.slice(1) : raw;
+  const trailingDot = unsigned.endsWith('.') && unsigned.indexOf('.') === unsigned.length - 1;
+  const numeric = Number(unsigned);
+  if (!Number.isFinite(numeric)) return raw;
+
+  const hasDecimal = unsigned.includes('.');
+  let display = unsigned;
+  if (hasDecimal && !trailingDot) {
+    const fraction = unsigned.split('.')[1] ?? '';
+    if (fraction.length > maxDecimals) {
+      display = String(roundToDecimal(numeric, maxDecimals));
+    }
+  }
+
+  const [whole = '0', fraction] = display.split('.');
+  const formattedWhole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const sign = negative ? '-' : '';
+  if (trailingDot) return `${sign}${formattedWhole}.`;
+  if (fraction === undefined) return `${sign}${formattedWhole}`;
+  return `${sign}${formattedWhole}.${fraction}`;
 };
 
 export const convertInputsToNumbers = (inputs: Record<string, string | number>): Record<string, number> => {
