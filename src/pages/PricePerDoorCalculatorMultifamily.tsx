@@ -50,6 +50,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
     const params: {
         rents: string;
+        units: string;
         downPayment: string;
         interestRate: string;
         numberOfYears: string;
@@ -59,6 +60,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         buyersAgentFee: string;
     } = {
         rents: rents,
+        units: units,
         downPayment: downPayment,
         interestRate: interestRate,
         numberOfYears: numberOfYears,
