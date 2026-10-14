@@ -2,7 +2,6 @@ import { FormEvent, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./LandingPage.scss";
 import { routes } from "../../config/routes";
-import SummerSpecialBanner from "../../components/SummerSpecialBanner/SummerSpecialBanner";
 import CalculatorCard from "../../components/CalculatorCard";
 import { useAuth } from "../../context/AuthContext";
 import {

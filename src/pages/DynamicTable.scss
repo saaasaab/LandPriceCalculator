@@ -225,14 +225,19 @@
         padding: 3px 4px !important;
         gap: 8px !important;
 
+        .description-cell,
+        .input-error {
+          display: none !important;
+        }
+
         .info-cell h4 {
-          font-size: 0.7rem !important;
-          line-height: 1.2 !important;
-          font-weight: 500 !important;
+          font-size: 11pt !important;
+          line-height: 1.25 !important;
+          font-weight: 600 !important;
         }
 
         .input-cell input {
-          font-size: 0.7rem !important;
+          font-size: 11pt !important;
           min-height: unset !important;
           width: 56px !important;
           max-width: 56px !important;
