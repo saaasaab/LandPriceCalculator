@@ -46,7 +46,7 @@ const LandingPage = () => {
 
   return (
     <div className="landing-page">
-      <SummerSpecialBanner />
+      {/* <SummerSpecialBanner /> */}
       <section className="landing-intro" aria-labelledby="landing-intro-heading">
         <div className="landing-intro-inner">
           <div className="landing-intro-copy">
