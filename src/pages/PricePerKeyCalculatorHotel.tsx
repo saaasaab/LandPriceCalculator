@@ -1,12 +1,19 @@
 import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal, formatDollar } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
+import { useIncomeMode } from '../hooks/useIncomeMode';
 import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
+import IncomeModeToggle from '../components/IncomeModeToggle';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
 import RangeSimulation from '../components/RangeSimulation/RangeSimulation';
 import { calculatePricePerKey, PricePerKeyInputs } from '../utils/pricePerKeyCalculations';
+import {
+    annualNoiFromHotel,
+    applyNoiToPricePerKey,
+    incomeVariablesForMode,
+} from '../utils/incomeMode';
 
 import './DynamicTable.scss';
 
@@ -53,6 +60,18 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
     const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
 
+    const derivedAnnualNoi = annualNoiFromHotel(
+        removeCommas(adr),
+        removeCommas(rooms),
+        removeCommas(vacancy),
+        removeCommas(expensePercentage)
+    );
+    const { incomeMode, noiMode, annualNoi, setAnnualNoi, setMode } = useIncomeMode(
+        page,
+        queryParams,
+        derivedAnnualNoi
+    );
+
     const params: {
         rents: string;
         downPayment: string;
@@ -64,6 +83,8 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
         clostingCostsFee: string;
         buyersAgentFee: string;
         units: string;
+        incomeMode: string;
+        noi: string;
     } = {
         rents: adr,
         downPayment: downPayment,
@@ -75,6 +96,8 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
         clostingCostsFee: clostingCostsFee,
         buyersAgentFee: buyersAgentFee,
         units: rooms,
+        incomeMode,
+        noi: annualNoi,
     };
 
     const numericInputs: PricePerKeyInputs = {
@@ -89,6 +112,9 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
         buyersAgentFee: removeCommas(buyersAgentFee),
         clostingCostsFee: removeCommas(clostingCostsFee),
     };
+    const calcInputs = noiMode
+        ? applyNoiToPricePerKey(numericInputs, removeCommas(annualNoi))
+        : numericInputs;
 
     const {
         pricePerKey,
@@ -101,25 +127,76 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
         capRate,
         totalPrice,
         offerPrice,
-    } = calculatePricePerKey(numericInputs);
+    } = calculatePricePerKey(calcInputs);
+
+    const simulationVariables = incomeVariablesForMode(PRICE_PER_KEY_VARIABLES, noiMode);
+
+    const simulationColumns = noiMode
+        ? PRICE_PER_KEY_COLUMNS.filter((column) => column.id !== 'revPAR' && column.id !== 'pricePerKey')
+            .map((column) => {
+                if (column.id === 'operatingIncome') {
+                    return { ...column, label: 'Monthly NOI' };
+                }
+                if (column.id === 'mortgagePayment') {
+                    return { ...column, label: 'Monthly mortgage payment' };
+                }
+                if (column.id === 'cashFlowPerKey') {
+                    return { ...column, label: 'Monthly cash flow' };
+                }
+                if (column.id === 'roomRevenueMultiplier') {
+                    return { ...column, label: 'NOI multiple' };
+                }
+                return column;
+            })
+        : PRICE_PER_KEY_COLUMNS;
 
     return (
 
-        <div className="group-section price-per-door-calculator">
+        <div className="group-section price-per-door-calculator" data-income-mode={noiMode ? 'noi' : 'gross'}>
             <div className="input-fields-container has-bottom-border">
-
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setAdr(value)}
-                    cellValues={["Average Daily Rate (ADR)", adr]}
-                    description="The average room rate charged per occupied night"
-                />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setRooms(value)}
-                    cellValues={["Number of rooms (#)", rooms]}
-                    description="How many guest rooms are in the hotel"
-                />
+                <IncomeModeToggle value={incomeMode} onChange={setMode} />
+                {noiMode ? (
+                    <InputRow
+                        key="annual-noi"
+                        isMobile={isMobile}
+                        setInput={value => setAnnualNoi(value)}
+                        cellValues={["Annual NOI ($)", annualNoi]}
+                        description="Net operating income for the whole hotel. Room count, vacancy, and expenses are not used."
+                    />
+                ) : (
+                    <>
+                        <InputRow
+                            key="adr"
+                            isMobile={isMobile}
+                            setInput={value => setAdr(value)}
+                            cellValues={["Average Daily Rate (ADR)", adr]}
+                            description="The average room rate charged per occupied night"
+                        />
+                        <InputRow
+                            key="room-count"
+                            isMobile={isMobile}
+                            setInput={value => setRooms(value)}
+                            cellValues={["Number of rooms (#)", rooms]}
+                            description="How many guest rooms are in the hotel"
+                        />
+                        <InputRow
+                            key="vacancy"
+                            isMobile={isMobile}
+                            setInput={value => setVacancy(value)}
+                            cellValues={["Vacancy (%)", vacancy]}
+                            description="The percentage of room-nights that are unoccupied. Occupancy is 100% minus vacancy. A 30% vacancy equals 70% occupancy."
+                            isPercent={true}
+                        />
+                        <InputRow
+                            key="expense-percentage"
+                            isMobile={isMobile}
+                            setInput={value => setExpensePercentage(value)}
+                            cellValues={["Operating expenses (% of occupied room revenue)", expensePercentage]}
+                            description="Operating expenses as a percentage of occupied room revenue. Vacancy is entered separately. Limited-service hotels often run 60-70% expense ratios."
+                            isPercent={true}
+                        />
+                    </>
+                )}
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setInterestRate(value)}
@@ -138,20 +215,6 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
                     setInput={value => setDownPayment(value)}
                     cellValues={["Down Payment (%)", downPayment]}
                     description="The down payment needed from the bank for the loan."
-                    isPercent={true}
-                />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setVacancy(value)}
-                    cellValues={["Vacancy (%)", vacancy]}
-                    description="The percentage of room-nights that are unoccupied. Occupancy is 100% minus vacancy. A 30% vacancy equals 70% occupancy."
-                    isPercent={true}
-                />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setExpensePercentage(value)}
-                    cellValues={["Operating expenses (% of occupied room revenue)", expensePercentage]}
-                    description="Operating expenses as a percentage of occupied room revenue. Vacancy is entered separately. Limited-service hotels often run 60-70% expense ratios."
                     isPercent={true}
                 />
                 <InputRow
@@ -180,36 +243,40 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
 
             <div className="output-fields-container">
 
+                {noiMode ? null : (
+                    <>
+                        <OutputRow
+                            isMobile={isMobile}
+                            cellValues={["Price per key you should pay", "$" + roundAndLocalString(pricePerKey)]}
+                            description={`This is the max you should pay per room to achieve the desired returns`}
+                            helpLink="https://docs.google.com/document/d/e/2PACX-1vTD8sk8fWqj0tRdPhqENwbbR8TZmuBxJES4a5xTmQ69r9n3bHtSqlgcJK2AFPa-kYmZlqykmZhhAkJF/pub"
+                        />
+                        <OutputRow
+                            isMobile={isMobile}
+                            cellValues={["RevPAR", "$" + roundToDecimal(revPAR, 2)]}
+                            description="Revenue per available room: ADR multiplied by occupancy (100% minus vacancy)"
+                        />
+                    </>
+                )}
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Price per key you should pay", "$" + roundAndLocalString(pricePerKey)]}
-                    description={`This is the max you should pay per room to achieve the desired returns`}
-                    helpLink="https://docs.google.com/document/d/e/2PACX-1vTD8sk8fWqj0tRdPhqENwbbR8TZmuBxJES4a5xTmQ69r9n3bHtSqlgcJK2AFPa-kYmZlqykmZhhAkJF/pub"
-                />
-                <OutputRow
-                    isMobile={isMobile}
-                    cellValues={["RevPAR", "$" + roundToDecimal(revPAR, 2)]}
-                    description="Revenue per available room: ADR multiplied by occupancy (100% minus vacancy)"
-                />
-                <OutputRow
-                    isMobile={isMobile}
-                    cellValues={["Operating income per room", "$" + roundAndLocalString(operatingIncome)]}
-                    description="Monthly NOI per room after vacancy and operating expenses"
+                    cellValues={[noiMode ? "Monthly NOI" : "Operating income per room", "$" + roundAndLocalString(operatingIncome)]}
+                    description={noiMode ? "Annual NOI divided by 12" : "Monthly NOI per room after vacancy and operating expenses"}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTfgj_1vPDOl_cr3VD5beGl4kcMDstWAcPownovQ71hQhTgPCcoETEZg0a69Z5y42ds9PDirE0vscWl/pub"}
                 />
 
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Mortgage Payment per room", "$" + roundAndLocalString(mortgagePayment)]}
-                    description="The payment for the mortgage per room"
+                    cellValues={[noiMode ? "Monthly mortgage payment" : "Mortgage Payment per room", "$" + roundAndLocalString(mortgagePayment)]}
+                    description={noiMode ? "The payment for the mortgage" : "The payment for the mortgage per room"}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vSqIxRzLoXKwnS9ZqPx_i6O3RE8netRC3KeBNPfbe-KMMlfFVExpuO4WOBgKX0M2M0j96SrmSrPzwmF/pub"}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Cash flow per room", "$" + roundAndLocalString(cashFlowPerKey)]}
-                    description="The cash flow per room"
+                    cellValues={[noiMode ? "Monthly cash flow" : "Cash flow per room", "$" + roundAndLocalString(cashFlowPerKey)]}
+                    description={noiMode ? "Monthly NOI minus the mortgage payment" : "The cash flow per room"}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTP6gEErgaXV_5Z1JDvgAT-ZGldWq5675VWWVVojQyyZ0zRya7dGUCvLVcydkMTTDG5j5UadJt9psQk/pub"}
                 />
 
@@ -223,8 +290,10 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Room Revenue Multiplier", roundToDecimal(roomRevenueMultiplier, 2) + "X"]}
-                    description="The room revenue multiplier is the offer price divided by annual occupied room revenue."
+                    cellValues={[noiMode ? "NOI multiple" : "Room Revenue Multiplier", roundToDecimal(roomRevenueMultiplier, 2) + "X"]}
+                    description={noiMode
+                        ? "The offer price divided by annual NOI."
+                        : "The room revenue multiplier is the offer price divided by annual occupied room revenue."}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNOZB6PpTBa-0JePEknv2nrFYtA-sK4Yz_yrUD1kRVTC9DNplG1o5iQdzpN6-1ZpUyds0waI83EHPx/pub"}
                 />
 
@@ -255,10 +324,17 @@ const HotelPriceCalculator = ({ isMobile, page }: { isMobile: boolean; page: EPa
 
             <RangeSimulation
                 pageTitle={EPageTitles[page]}
-                variables={PRICE_PER_KEY_VARIABLES}
-                columns={PRICE_PER_KEY_COLUMNS}
-                currentValues={numericInputs}
-                run={(values) => calculatePricePerKey(values as PricePerKeyInputs)}
+                variables={simulationVariables}
+                columns={simulationColumns}
+                currentValues={noiMode ? { ...calcInputs, annualNoi: removeCommas(annualNoi) } : numericInputs}
+                run={(values) => {
+                    if (!noiMode) {
+                        return calculatePricePerKey(values as PricePerKeyInputs);
+                    }
+                    return calculatePricePerKey(
+                        applyNoiToPricePerKey(values as PricePerKeyInputs, values.annualNoi)
+                    );
+                }}
             />
         </div>
 

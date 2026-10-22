@@ -158,6 +158,7 @@ export enum EAllStates {
     downPayment = "downPayment",
     buyersAgentFee = "buyersAgentFee",
     clostingCostsFee = "clostingCostsFee",
+    incomeMode = "incomeMode",
 
     // FOR THE MULTI FAMILY ANALYSIS
     purchasePrice = "purchasePrice",

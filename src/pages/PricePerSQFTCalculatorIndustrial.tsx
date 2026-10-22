@@ -1,12 +1,19 @@
 import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal, formatDollar } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
+import { useIncomeMode } from '../hooks/useIncomeMode';
 import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
+import IncomeModeToggle from '../components/IncomeModeToggle';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
 import RangeSimulation from '../components/RangeSimulation/RangeSimulation';
 import { calculatePricePerSqft, PricePerSqftInputs } from '../utils/pricePerSqftCalculations';
+import {
+    annualNoiFromAnnualLease,
+    applyNoiToPricePerSqft,
+    incomeVariablesForMode,
+} from '../utils/incomeMode';
 import './DynamicTable.scss';
 import { useState } from 'react';
 
@@ -51,6 +58,18 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
     const [showTotalValues, setShowTotalValues] = useState(false);
 
+    const derivedAnnualNoi = annualNoiFromAnnualLease(
+        removeCommas(annualLeaseRatesPerSQFT),
+        removeCommas(leasableSQFT),
+        removeCommas(expensePercentage)
+    );
+    const { incomeMode, noiMode, annualNoi, setAnnualNoi, setMode } = useIncomeMode(
+        page,
+        queryParams,
+        derivedAnnualNoi
+    );
+    const showPropertyTotals = noiMode || showTotalValues;
+
     const params: {
         annualLeaseRatesPerSQFT: string;
         leasableSQFT: string;
@@ -61,6 +80,8 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         cashOnCashReturn: string;
         clostingCostsFee: string;
         buyersAgentFee: string;
+        incomeMode: string;
+        noi: string;
     } = {
         annualLeaseRatesPerSQFT: annualLeaseRatesPerSQFT,
         leasableSQFT: leasableSQFT,
@@ -71,6 +92,8 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         cashOnCashReturn: cashOnCashReturn,
         clostingCostsFee: clostingCostsFee,
         buyersAgentFee: buyersAgentFee,
+        incomeMode,
+        noi: annualNoi,
     };
 
     const numericInputs: PricePerSqftInputs = {
@@ -84,6 +107,9 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         buyersAgentFee: removeCommas(buyersAgentFee),
         clostingCostsFee: removeCommas(clostingCostsFee),
     };
+    const calcInputs = noiMode
+        ? applyNoiToPricePerSqft(numericInputs, removeCommas(annualNoi))
+        : numericInputs;
 
     const {
         pricePerSQFT,
@@ -94,29 +120,96 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         capRate,
         totalPrice,
         offerPrice,
-    } = calculatePricePerSqft(numericInputs);
+    } = calculatePricePerSqft(calcInputs);
 
     const getDisplayValue = (perSqftValue: number) => {
-        if (showTotalValues) {
-            return "$" + roundAndLocalString(perSqftValue * removeCommas(leasableSQFT));
+        if (showPropertyTotals) {
+            const area = noiMode ? 1 : removeCommas(leasableSQFT);
+            return "$" + roundAndLocalString(perSqftValue * area);
         }
         return "$" + roundToDecimal(perSqftValue);
     };
 
+    const sqftScopeLabel = (base: string, noiLabel: string, perUnitSuffix = 'per SQFT') => {
+        if (noiMode) {
+            return noiLabel;
+        }
+        if (showPropertyTotals) {
+            return `${base} total`;
+        }
+        return `${base} ${perUnitSuffix}`;
+    };
+
+    const sqftScopeDescription = (noiDescription: string, grossBase: string) => {
+        if (noiMode) {
+            return noiDescription;
+        }
+        if (showPropertyTotals) {
+            return `${grossBase} total`;
+        }
+        return `${grossBase} per SQFT`;
+    };
+
+    const simulationVariables = incomeVariablesForMode(PRICE_PER_SQFT_VARIABLES, noiMode);
+
+    const simulationColumns = noiMode
+        ? PRICE_PER_SQFT_COLUMNS.map((column) => {
+            if (column.id === 'pricePerSQFT') {
+                return { ...column, label: 'Building value' };
+            }
+            if (column.id === 'operatingIncome') {
+                return { ...column, label: 'Monthly NOI' };
+            }
+            if (column.id === 'mortgagePayment') {
+                return { ...column, label: 'Monthly mortgage payment' };
+            }
+            if (column.id === 'cashFlowPerSQFT') {
+                return { ...column, label: 'Monthly cash flow' };
+            }
+            if (column.id === 'annualCashFlowPerSQFT') {
+                return { ...column, label: 'Annual cash flow' };
+            }
+            return column;
+        })
+        : PRICE_PER_SQFT_COLUMNS;
+
     return (
 
-        <div className="group-section price-per-door-calculator">
+        <div className="group-section price-per-door-calculator" data-income-mode={noiMode ? 'noi' : 'gross'}>
             <div className="input-fields-container has-bottom-border">
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setAnnualLeaseRatesPerSQFT(value)}
-                    cellValues={["Annual lease rates per sqft", annualLeaseRatesPerSQFT]}
-                />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setLeasableSQFT(value)}
-                    cellValues={["Total leasable SQFT", leasableSQFT]}
-                />
+                <IncomeModeToggle value={incomeMode} onChange={setMode} />
+                {noiMode ? (
+                    <InputRow
+                        key="annual-noi"
+                        isMobile={isMobile}
+                        setInput={value => setAnnualNoi(value)}
+                        cellValues={["Annual NOI ($)", annualNoi]}
+                        description="Net operating income for the whole property. Expenses and leasable square footage are not used."
+                    />
+                ) : (
+                    <>
+                        <InputRow
+                            key="lease-rate"
+                            isMobile={isMobile}
+                            setInput={value => setAnnualLeaseRatesPerSQFT(value)}
+                            cellValues={["Annual lease rates per sqft", annualLeaseRatesPerSQFT]}
+                        />
+                        <InputRow
+                            key="leasable-sqft"
+                            isMobile={isMobile}
+                            setInput={value => setLeasableSQFT(value)}
+                            cellValues={["Total leasable SQFT", leasableSQFT]}
+                        />
+                        <InputRow
+                            key="expense-percentage"
+                            isMobile={isMobile}
+                            setInput={value => setExpensePercentage(value)}
+                            cellValues={["Operating expenses (% of gross income)", expensePercentage]}
+                            description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
+                            isPercent={true}
+                        />
+                    </>
+                )}
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setInterestRate(value)}
@@ -135,13 +228,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     setInput={value => setDownPayment(value)}
                     cellValues={["Down Payment (%)", downPayment]}
                     description="The down payment needed from the bank for the loan."
-                    isPercent={true}
-                />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setExpensePercentage(value)}
-                    cellValues={["Operating expenses (% of gross income)", expensePercentage]}
-                    description="This is the percentage of income that will go to operating expenses. A good heuristic is 50% of rental income goes to operating expenses."
                     isPercent={true}
                 />
                 <InputRow
@@ -167,51 +253,53 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
 
             <div className="output-fields-container">
 
+                {noiMode ? null : (
+                    <OutputRow
+                        isMobile={isMobile}
+                        cellValues={[
+                            sqftScopeLabel('Building value', 'Building value', 'price per SQFT'),
+                            getDisplayValue(pricePerSQFT)
+                        ]}
+                        description="This is the max you should pay per sqft to achive the desired returns"
+                        helpLink={"https://docs.google.com/document/d/e/2PACX-1vS8YsmrbZaugpEsC5jwMyYxLuCaznTDfN1IasxjJjyOKPyWKFPJONfWXBAXdkQvTn5aWKZDSk0-ehmz/pub"}
+                    />
+                )}
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={[
-                        `Building value ${showTotalValues ? 'total' : 'price per SQFT'}`,
-                        getDisplayValue(pricePerSQFT)
-                    ]}
-                    description="This is the max you should pay per sqft to achive the desired returns"
-                    helpLink={"https://docs.google.com/document/d/e/2PACX-1vS8YsmrbZaugpEsC5jwMyYxLuCaznTDfN1IasxjJjyOKPyWKFPJONfWXBAXdkQvTn5aWKZDSk0-ehmz/pub"}
-                />
-                <OutputRow
-                    isMobile={isMobile}
-                    cellValues={[
-                        `Monthly operating income ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        sqftScopeLabel('Monthly operating income', 'Monthly NOI'),
                         getDisplayValue(operatingIncome)
                     ]}
-                    description={`The operating income ${showTotalValues ? 'total' : 'per SQFT'} per month`}
+                    description={sqftScopeDescription('Annual NOI divided by 12', 'The operating income')}
                 />
 
 
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={[
-                        `Mortgage Payment ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        sqftScopeLabel('Mortgage Payment', 'Monthly mortgage payment'),
                         getDisplayValue(mortgagePayment)
                     ]}
-                    description={`The payment for the mortgage ${showTotalValues ? 'total' : 'per SQFT'}`}
+                    description={sqftScopeDescription('The payment for the mortgage', 'The payment for the mortgage')}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vSqIxRzLoXKwnS9ZqPx_i6O3RE8netRC3KeBNPfbe-KMMlfFVExpuO4WOBgKX0M2M0j96SrmSrPzwmF/pub"}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={[
-                        `Monthly Cash flow ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        sqftScopeLabel('Monthly Cash flow', 'Monthly cash flow'),
                         getDisplayValue(cashFlowPerSQFT)
                     ]}
-                    description={`The cash flow ${showTotalValues ? 'total' : 'per SQFT'}`}
+                    description={sqftScopeDescription('Monthly NOI minus the mortgage payment', 'The cash flow')}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={[
-                        `Annual Cash flow ${showTotalValues ? 'total' : 'per SQFT'}`,
+                        sqftScopeLabel('Annual Cash flow', 'Annual cash flow'),
                         getDisplayValue(cashFlowPerSQFT * 12)
                     ]}
-                    description={`The cash flow ${showTotalValues ? 'total' : 'per SQFT'}`}
+                    description={sqftScopeDescription('Monthly cash flow times 12', 'The cash flow')}
                 />
 
 
@@ -246,15 +334,22 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
             <ShareButton 
                 params={params} 
                 showTotalValues={showTotalValues}
-                onToggleTotalValues={() => setShowTotalValues(!showTotalValues)}
+                onToggleTotalValues={noiMode ? undefined : () => setShowTotalValues(!showTotalValues)}
             />
 
             <RangeSimulation
                 pageTitle={EPageTitles[page]}
-                variables={PRICE_PER_SQFT_VARIABLES}
-                columns={PRICE_PER_SQFT_COLUMNS}
-                currentValues={numericInputs}
-                run={(values) => calculatePricePerSqft(values as PricePerSqftInputs)}
+                variables={simulationVariables}
+                columns={simulationColumns}
+                currentValues={noiMode ? { ...calcInputs, annualNoi: removeCommas(annualNoi) } : numericInputs}
+                run={(values) => {
+                    if (!noiMode) {
+                        return calculatePricePerSqft(values as PricePerSqftInputs);
+                    }
+                    return calculatePricePerSqft(
+                        applyNoiToPricePerSqft(values as PricePerSqftInputs, values.annualNoi)
+                    );
+                }}
             />
         </div>
 

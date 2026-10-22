@@ -297,6 +297,18 @@ const OutputLineChart = ({
 const RangeSimulation = ({ pageTitle, variables, columns, currentValues, run }: RangeSimulationProps) => {
   const [variableId, setVariableId] = useState(variables[0]?.id ?? '');
   const selectedVariable = variables.find((variable) => variable.id === variableId) ?? variables[0];
+
+  useEffect(() => {
+    const stillAvailable = variables.some((variable) => variable.id === variableId);
+    if (stillAvailable) {
+      return;
+    }
+    const firstId = variables[0]?.id ?? '';
+    if (firstId === variableId) {
+      return;
+    }
+    setVariableId(firstId);
+  }, [variables, variableId]);
   const currentValue = selectedVariable ? currentValues[selectedVariable.id] ?? 0 : 0;
   const initialRange = suggestedRange(currentValue, selectedVariable?.isPercent);
 

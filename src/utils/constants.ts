@@ -234,6 +234,7 @@ export const DEFAULT_VALUES_ZEROS = {
     preferredAmount: "0",
     preferredRate: "0",
     noi: "0",
+    incomeMode: "gross",
 
 }
 

@@ -1,12 +1,19 @@
 import { convertToPercent, removeCommas, roundAndLocalString, roundToDecimal, formatDollar } from '../utils/utils';
 import { usePersistedState2 } from '../hooks/usePersistedState';
+import { useIncomeMode } from '../hooks/useIncomeMode';
 import { EAllStates, EPageNames, EPageTitles } from '../utils/types';
 import { DEFAULT_VALUES } from '../utils/constants';
 import ShareButton from '../components/ShareButton';
+import IncomeModeToggle from '../components/IncomeModeToggle';
 import InputRow from '../components/RowTypes/InputRow';
 import OutputRow from '../components/RowTypes/OutputRow';
 import RangeSimulation from '../components/RangeSimulation/RangeSimulation';
 import { calculatePricePerDoor, PricePerDoorInputs } from '../utils/pricePerDoorCalculations';
+import {
+    annualNoiFromMonthlyRent,
+    applyNoiToPricePerDoor,
+    incomeVariablesForMode,
+} from '../utils/incomeMode';
 
 import './DynamicTable.scss';
 
@@ -48,6 +55,17 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
     const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
 
+    const derivedAnnualNoi = annualNoiFromMonthlyRent(
+        removeCommas(rents),
+        removeCommas(units),
+        removeCommas(expensePercentage)
+    );
+    const { incomeMode, noiMode, annualNoi, setAnnualNoi, setMode } = useIncomeMode(
+        page,
+        queryParams,
+        derivedAnnualNoi
+    );
+
     const params: {
         rents: string;
         units: string;
@@ -58,6 +76,8 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         cashOnCashReturn: string;
         clostingCostsFee: string;
         buyersAgentFee: string;
+        incomeMode: string;
+        noi: string;
     } = {
         rents: rents,
         units: units,
@@ -67,7 +87,9 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         expensePercentage: expensePercentage,
         cashOnCashReturn: cashOnCashReturn,
         clostingCostsFee: clostingCostsFee,
-        buyersAgentFee: buyersAgentFee
+        buyersAgentFee: buyersAgentFee,
+        incomeMode,
+        noi: annualNoi,
     };
 
     const numericInputs: PricePerDoorInputs = {
@@ -81,6 +103,9 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         buyersAgentFee: removeCommas(buyersAgentFee),
         clostingCostsFee: removeCommas(clostingCostsFee),
     };
+    const calcInputs = noiMode
+        ? applyNoiToPricePerDoor(numericInputs, removeCommas(annualNoi))
+        : numericInputs;
 
     const {
         pricePerUnit,
@@ -92,25 +117,70 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         capRate,
         totalPrice,
         offerPrice,
-    } = calculatePricePerDoor(numericInputs);
+    } = calculatePricePerDoor(calcInputs);
+
+    const simulationVariables = incomeVariablesForMode(PRICE_PER_DOOR_VARIABLES, noiMode);
+
+    const simulationColumns = noiMode
+        ? PRICE_PER_DOOR_COLUMNS.map((column) => {
+            if (column.id === 'pricePerUnit') {
+                return { ...column, label: 'Building value' };
+            }
+            if (column.id === 'operatingIncome') {
+                return { ...column, label: 'Monthly NOI' };
+            }
+            if (column.id === 'mortgagePayment') {
+                return { ...column, label: 'Monthly mortgage payment' };
+            }
+            if (column.id === 'cashFlowPerUnit') {
+                return { ...column, label: 'Monthly cash flow' };
+            }
+            if (column.id === 'grossRentMultiplier') {
+                return { ...column, label: 'NOI multiple' };
+            }
+            return column;
+        })
+        : PRICE_PER_DOOR_COLUMNS;
 
     return (
 
-        <div className="group-section price-per-door-calculator">
+        <div className="group-section price-per-door-calculator" data-income-mode={noiMode ? 'noi' : 'gross'}>
             <div className="input-fields-container has-bottom-border">
-
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setRents(value)}
-                    cellValues={["Monthly rent per unit", rents]}
-                    description="Monthly rent collected for one unit"
-                />
-                 <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setUnits(value)}
-                    cellValues={["Number of units (#)", units]}
-                    description="How many units are in the building"
-                />
+                <IncomeModeToggle value={incomeMode} onChange={setMode} />
+                {noiMode ? (
+                    <InputRow
+                        key="annual-noi"
+                        isMobile={isMobile}
+                        setInput={value => setAnnualNoi(value)}
+                        cellValues={["Annual NOI ($)", annualNoi]}
+                        description="Net operating income for the whole property. Expenses and unit count are not used."
+                    />
+                ) : (
+                    <>
+                        <InputRow
+                            key="monthly-rent"
+                            isMobile={isMobile}
+                            setInput={value => setRents(value)}
+                            cellValues={["Monthly rent per unit", rents]}
+                            description="Monthly rent collected for one unit"
+                        />
+                        <InputRow
+                            key="unit-count"
+                            isMobile={isMobile}
+                            setInput={value => setUnits(value)}
+                            cellValues={["Number of units (#)", units]}
+                            description="How many units are in the building"
+                        />
+                        <InputRow
+                            key="expense-percentage"
+                            isMobile={isMobile}
+                            setInput={value => setExpensePercentage(value)}
+                            cellValues={["Operating expenses (% of gross income)", expensePercentage]}
+                            description="Share of gross rental income that goes to operating expenses. A common starting point is 50%. Vacancy is included in this percentage."
+                            isPercent={true}
+                        />
+                    </>
+                )}
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setInterestRate(value)}
@@ -129,13 +199,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     setInput={value => setDownPayment(value)}
                     cellValues={["Down Payment (%)", downPayment]}
                     description="The down payment needed from the bank for the loan."
-                    isPercent={true}
-                />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setExpensePercentage(value)}
-                    cellValues={["Operating expenses (% of gross income)", expensePercentage]}
-                    description="Share of gross rental income that goes to operating expenses. A common starting point is 50%. Vacancy is included in this percentage."
                     isPercent={true}
                 />
                 <InputRow
@@ -164,31 +227,33 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
             <div className="output-fields-container">
 
+                {noiMode ? null : (
+                    <OutputRow
+                        isMobile={isMobile}
+                        cellValues={["Price per unit you should pay", "$" + roundAndLocalString(pricePerUnit)]}
+                        description={`This is the max you should pay per unit to achive the desired returns`}
+                        helpLink="https://docs.google.com/document/d/e/2PACX-1vTD8sk8fWqj0tRdPhqENwbbR8TZmuBxJES4a5xTmQ69r9n3bHtSqlgcJK2AFPa-kYmZlqykmZhhAkJF/pub"
+                    />
+                )}
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Price per unit you should pay", "$" + roundAndLocalString(pricePerUnit)]}
-                    description={`This is the max you should pay per unit to achive the desired returns`}
-                    helpLink="https://docs.google.com/document/d/e/2PACX-1vTD8sk8fWqj0tRdPhqENwbbR8TZmuBxJES4a5xTmQ69r9n3bHtSqlgcJK2AFPa-kYmZlqykmZhhAkJF/pub"
-                />
-                <OutputRow
-                    isMobile={isMobile}
-                    cellValues={["Operating income per unit", "$" + roundAndLocalString(operatingIncome)]}
-                    description="The operating income per unit"
+                    cellValues={[noiMode ? "Monthly NOI" : "Operating income per unit", "$" + roundAndLocalString(operatingIncome)]}
+                    description={noiMode ? "Annual NOI divided by 12" : "The operating income per unit"}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTfgj_1vPDOl_cr3VD5beGl4kcMDstWAcPownovQ71hQhTgPCcoETEZg0a69Z5y42ds9PDirE0vscWl/pub"}
                 />
 
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Mortgage Payment per unit", "$" + roundAndLocalString(mortgagePayment)]}
-                    description="The payment for the mortgage per unit"
+                    cellValues={[noiMode ? "Monthly mortgage payment" : "Mortgage Payment per unit", "$" + roundAndLocalString(mortgagePayment)]}
+                    description={noiMode ? "The payment for the mortgage" : "The payment for the mortgage per unit"}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vSqIxRzLoXKwnS9ZqPx_i6O3RE8netRC3KeBNPfbe-KMMlfFVExpuO4WOBgKX0M2M0j96SrmSrPzwmF/pub"}
                 />
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Cash flow per unit", "$" + roundAndLocalString(cashFlowPerUnit)]}
-                    description="The cash flow per unit"
+                    cellValues={[noiMode ? "Monthly cash flow" : "Cash flow per unit", "$" + roundAndLocalString(cashFlowPerUnit)]}
+                    description={noiMode ? "Monthly NOI minus the mortgage payment" : "The cash flow per unit"}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTP6gEErgaXV_5Z1JDvgAT-ZGldWq5675VWWVVojQyyZ0zRya7dGUCvLVcydkMTTDG5j5UadJt9psQk/pub"}
                 />
 
@@ -202,8 +267,10 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
                 <OutputRow
                     isMobile={isMobile}
-                    cellValues={["Gross Rent Multiplier", roundToDecimal(grossRentMultiplier, 2) + "X"]}
-                    description="The GRM is calculated by dividing the value of the property by the annual gross rents."
+                    cellValues={[noiMode ? "NOI multiple" : "Gross Rent Multiplier", roundToDecimal(grossRentMultiplier, 2) + "X"]}
+                    description={noiMode
+                        ? "The offer price divided by annual NOI."
+                        : "The GRM is calculated by dividing the value of the property by the annual gross rents."}
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTNOZB6PpTBa-0JePEknv2nrFYtA-sK4Yz_yrUD1kRVTC9DNplG1o5iQdzpN6-1ZpUyds0waI83EHPx/pub"}
                 />
 
@@ -234,10 +301,17 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
 
             <RangeSimulation
                 pageTitle={EPageTitles[page]}
-                variables={PRICE_PER_DOOR_VARIABLES}
-                columns={PRICE_PER_DOOR_COLUMNS}
-                currentValues={numericInputs}
-                run={(values) => calculatePricePerDoor(values as PricePerDoorInputs)}
+                variables={simulationVariables}
+                columns={simulationColumns}
+                currentValues={noiMode ? { ...calcInputs, annualNoi: removeCommas(annualNoi) } : numericInputs}
+                run={(values) => {
+                    if (!noiMode) {
+                        return calculatePricePerDoor(values as PricePerDoorInputs);
+                    }
+                    return calculatePricePerDoor(
+                        applyNoiToPricePerDoor(values as PricePerDoorInputs, values.annualNoi)
+                    );
+                }}
             />
         </div>
 
