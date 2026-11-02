@@ -7,7 +7,6 @@ export type PricePerDoorInputs = {
   expensePercentage: number;
   cashOnCashReturn: number;
   buyersAgentFee: number;
-  clostingCostsFee: number;
 };
 
 export type PricePerDoorOutputs = {
@@ -41,8 +40,7 @@ export function calculatePricePerDoor(inputs: PricePerDoorInputs): PricePerDoorO
   const capRate = (operatingIncome * 12) / pricePerUnit;
   const totalPrice = inputs.units * pricePerUnit;
   const totalBuyersAgentFee = (inputs.buyersAgentFee / 100) * totalPrice;
-  const totalClosingCosts = (inputs.clostingCostsFee / 100) * totalPrice;
-  const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
+  const offerPrice = totalPrice - totalBuyersAgentFee;
   const grossRentMultiplier = offerPrice / (12 * inputs.rents * inputs.units);
 
   return {

@@ -72,7 +72,6 @@ export const DEFAULT_VALUES_ZEROS = {
     expensePercentage: "0",
     downPayment: "0",
     buyersAgentFee: "0",
-    clostingCostsFee: "0",
 
     purchasePrice: "0",
     units: "0",
@@ -362,7 +361,6 @@ export const DEFAULT_VALUES = {
         downPayment: "30",
         units: "80",
         buyersAgentFee: "2.5",
-        clostingCostsFee: "1.5",
     },
     [EPageNames.MULTIFAMILY_ANALYSIS]: {
         ...DEFAULT_VALUES_ZEROS,

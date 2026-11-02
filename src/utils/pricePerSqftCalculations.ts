@@ -7,7 +7,6 @@ export type PricePerSqftInputs = {
   expensePercentage: number;
   cashOnCashReturn: number;
   buyersAgentFee: number;
-  clostingCostsFee: number;
 };
 
 export type PricePerSqftOutputs = {
@@ -42,8 +41,7 @@ export function calculatePricePerSqft(inputs: PricePerSqftInputs): PricePerSqftO
   const capRate = (operatingIncome * 12) / pricePerSQFT;
   const totalPrice = inputs.leasableSQFT * pricePerSQFT;
   const totalBuyersAgentFee = (inputs.buyersAgentFee / 100) * totalPrice;
-  const totalClosingCosts = (inputs.clostingCostsFee / 100) * totalPrice;
-  const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
+  const offerPrice = totalPrice - totalBuyersAgentFee;
 
   return {
     pricePerSQFT,

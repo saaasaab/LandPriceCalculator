@@ -26,7 +26,6 @@ const PRICE_PER_DOOR_VARIABLES = [
     { id: 'expensePercentage', label: 'Operating expenses (% of gross income)', isPercent: true },
     { id: 'cashOnCashReturn', label: 'Cash on cash return (%)', isPercent: true },
     { id: 'buyersAgentFee', label: 'Buyers agent fee (%)', isPercent: true },
-    { id: 'clostingCostsFee', label: 'Closing cost fee (%)', isPercent: true },
 ];
 
 const PRICE_PER_DOOR_COLUMNS = [
@@ -53,7 +52,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
     const [units, setUnits] = usePersistedState2(page, EAllStates.units, DEFAULT_VALUES[page].units, queryParams);
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
-    const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
 
     const derivedAnnualNoi = annualNoiFromMonthlyRent(
         removeCommas(rents),
@@ -74,7 +72,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         numberOfYears: string;
         expensePercentage: string;
         cashOnCashReturn: string;
-        clostingCostsFee: string;
         buyersAgentFee: string;
         incomeMode: string;
         noi: string;
@@ -86,7 +83,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         numberOfYears: numberOfYears,
         expensePercentage: expensePercentage,
         cashOnCashReturn: cashOnCashReturn,
-        clostingCostsFee: clostingCostsFee,
         buyersAgentFee: buyersAgentFee,
         incomeMode,
         noi: annualNoi,
@@ -101,7 +97,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
         expensePercentage: removeCommas(expensePercentage),
         cashOnCashReturn: removeCommas(cashOnCashReturn),
         buyersAgentFee: removeCommas(buyersAgentFee),
-        clostingCostsFee: removeCommas(clostingCostsFee),
     };
     const calcInputs = noiMode
         ? applyNoiToPricePerDoor(numericInputs, removeCommas(annualNoi))
@@ -215,12 +210,6 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                     cellValues={["Buyers agent fee (%)", buyersAgentFee]}
                     description="The percentage for the buyers agent of the total building value"
                 />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setClostingCostsFee(value)}
-                    cellValues={["Closing cost fee(%)", clostingCostsFee]}
-                    description="The percentage for the closing costs of the total building value"
-                />
 
             </div>
 
@@ -291,7 +280,7 @@ const ResidentialPriceCalculator = ({ isMobile, page }: { isMobile: boolean; pag
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
-                    description="This is the total you will offer to the seller including closing costs"
+                    description="This is the total you will offer to the seller after subtracting the buyers agent fee"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTTnUs2pOKas85TqnynslZWKFLTaPyx7jiGnKexqv87tCcJvrdYRHgN1WyeIkP-T8sooUTCT1Sc1_6V/pub"}
                 />
 

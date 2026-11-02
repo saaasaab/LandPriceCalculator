@@ -26,7 +26,6 @@ const PRICE_PER_SQFT_VARIABLES = [
     { id: 'expensePercentage', label: 'Operating expenses (% of gross income)', isPercent: true },
     { id: 'cashOnCashReturn', label: 'Cash on cash return (%)', isPercent: true },
     { id: 'buyersAgentFee', label: 'Buyers agent fee (%)', isPercent: true },
-    { id: 'clostingCostsFee', label: 'Closing cost fee (%)', isPercent: true },
 ];
 
 const PRICE_PER_SQFT_COLUMNS = [
@@ -55,7 +54,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
     const [expensePercentage, setExpensePercentage] = usePersistedState2(page, EAllStates.expensePercentage, DEFAULT_VALUES[page].expensePercentage, queryParams);
     const [downPayment, setDownPayment] = usePersistedState2(page, EAllStates.downPayment, DEFAULT_VALUES[page].downPayment, queryParams);
     const [buyersAgentFee, setBuyersAgentFee] = usePersistedState2(page, EAllStates.buyersAgentFee, DEFAULT_VALUES[page].buyersAgentFee, queryParams);
-    const [clostingCostsFee, setClostingCostsFee] = usePersistedState2(page, EAllStates.clostingCostsFee, DEFAULT_VALUES[page].clostingCostsFee, queryParams);
     const [showTotalValues, setShowTotalValues] = useState(false);
 
     const derivedAnnualNoi = annualNoiFromAnnualLease(
@@ -78,7 +76,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         numberOfYears: string;
         expensePercentage: string;
         cashOnCashReturn: string;
-        clostingCostsFee: string;
         buyersAgentFee: string;
         incomeMode: string;
         noi: string;
@@ -90,7 +87,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         numberOfYears: numberOfYears,
         expensePercentage: expensePercentage,
         cashOnCashReturn: cashOnCashReturn,
-        clostingCostsFee: clostingCostsFee,
         buyersAgentFee: buyersAgentFee,
         incomeMode,
         noi: annualNoi,
@@ -105,7 +101,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
         expensePercentage: removeCommas(expensePercentage),
         cashOnCashReturn: removeCommas(cashOnCashReturn),
         buyersAgentFee: removeCommas(buyersAgentFee),
-        clostingCostsFee: removeCommas(clostingCostsFee),
     };
     const calcInputs = noiMode
         ? applyNoiToPricePerSqft(numericInputs, removeCommas(annualNoi))
@@ -243,12 +238,6 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                     cellValues={["Buyers agent fee (%)", buyersAgentFee]}
                     description="The percentage for the buyers agent of the total building value"
                 />
-                <InputRow
-                    isMobile={isMobile}
-                    setInput={value => setClostingCostsFee(value)}
-                    cellValues={["Closing cost fee(%)", clostingCostsFee]}
-                    description="The percentage for the closing costs of the total building value"
-                />
             </div>
 
             <div className="output-fields-container">
@@ -326,7 +315,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
-                    description="This is the total you will offer to the seller including closing costs"
+                    description="This is the total you will offer to the seller after subtracting the buyers agent fee"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTTnUs2pOKas85TqnynslZWKFLTaPyx7jiGnKexqv87tCcJvrdYRHgN1WyeIkP-T8sooUTCT1Sc1_6V/pub"}
                 />
             </div>

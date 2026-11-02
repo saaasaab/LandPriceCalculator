@@ -8,7 +8,6 @@ export type PricePerKeyInputs = {
   expensePercentage: number;
   cashOnCashReturn: number;
   buyersAgentFee: number;
-  clostingCostsFee: number;
 };
 
 export type PricePerKeyOutputs = {
@@ -47,8 +46,7 @@ export function calculatePricePerKey(inputs: PricePerKeyInputs): PricePerKeyOutp
   const revPAR = inputs.adr * occupancyRate;
   const totalPrice = inputs.rooms * pricePerKey;
   const totalBuyersAgentFee = (inputs.buyersAgentFee / 100) * totalPrice;
-  const totalClosingCosts = (inputs.clostingCostsFee / 100) * totalPrice;
-  const offerPrice = totalPrice - totalBuyersAgentFee - totalClosingCosts;
+  const offerPrice = totalPrice - totalBuyersAgentFee;
   const roomRevenueMultiplier = offerPrice / (12 * effectiveGrossIncome * inputs.rooms);
 
   return {
