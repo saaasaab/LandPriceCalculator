@@ -25,7 +25,7 @@ const PRICE_PER_SQFT_VARIABLES = [
     { id: 'downPayment', label: 'Down Payment (%)', isPercent: true },
     { id: 'expensePercentage', label: 'Operating expenses (% of gross income)', isPercent: true },
     { id: 'cashOnCashReturn', label: 'Cash on cash return (%)', isPercent: true },
-    { id: 'buyersAgentFee', label: 'Buyers agent fee (%)', isPercent: true },
+    { id: 'buyersAgentFee', label: 'Closing Costs (%)', isPercent: true },
 ];
 
 const PRICE_PER_SQFT_COLUMNS = [
@@ -235,8 +235,8 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 <InputRow
                     isMobile={isMobile}
                     setInput={value => setBuyersAgentFee(value)}
-                    cellValues={["Buyers agent fee (%)", buyersAgentFee]}
-                    description="The percentage for the buyers agent of the total building value"
+                    cellValues={["Closing Costs (%)", buyersAgentFee]}
+                    description="The percentage of the total building value for closing costs"
                 />
             </div>
 
@@ -315,7 +315,7 @@ const PricePerSQFTCalculatorIndustrial = ({ isMobile, page }: { isMobile: boolea
                 <OutputRow
                     isMobile={isMobile}
                     cellValues={["Offer to seller", "$" + roundAndLocalString(offerPrice)]}
-                    description="This is the total you will offer to the seller after subtracting the buyers agent fee"
+                    description="This is the total you will offer to the seller after subtracting closing costs"
                     helpLink={"https://docs.google.com/document/d/e/2PACX-1vTTnUs2pOKas85TqnynslZWKFLTaPyx7jiGnKexqv87tCcJvrdYRHgN1WyeIkP-T8sooUTCT1Sc1_6V/pub"}
                 />
             </div>
